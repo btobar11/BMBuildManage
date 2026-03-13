@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import api from '../../lib/api';
 import { useBudget } from '../../hooks/useBudget';
 import { ProjectHeader } from './components/ProjectHeader';
 import { BudgetTable } from './components/BudgetTable';
@@ -11,19 +14,106 @@ import { applyTemplate } from './templates';
 import type { Template } from './templates';
 import { Layers, FileText, Receipt, HardHat, FolderOpen, Download, Plus } from 'lucide-react';
 
-const TABS: { id: BudgetTab; label: string; icon: React.ReactNode }[] = [
+const TABS: { id: BudgetTab; label: string; icon: ReactNode }[] = [
   { id: 'presupuesto', label: 'Presupuesto', icon: <FileText size={14} /> },
   { id: 'gastos', label: 'Gastos', icon: <Receipt size={14} /> },
   { id: 'trabajadores', label: 'Trabajadores', icon: <HardHat size={14} /> },
   { id: 'documentos', label: 'Documentos', icon: <FolderOpen size={14} /> },
 ];
 
-export function BudgetEditor() {
+interface ServerBudget {
+  id: string;
+  status: string;
+  total_estimated_price: string | number;
+  project?: {
+    name: string;
+    client?: {
+      name: string;
+    }
+  };
+  stages?: Array<{
+    id: string;
+    name: string;
+    progress?: number;
+    items?: Array<{
+      id: string;
+      name: string;
+      quantity: string | number;
+      unit: string;
+      unit_cost: string | number;
+    }>;
+  }>;
+}
+
+export default function BudgetEditor() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  
+  const { data: serverBudget, isLoading, error } = useQuery<ServerBudget>({
+    queryKey: ['budget', id],
+    queryFn: async () => {
+      const response = await api.get(`/budgets/${id}`);
+      return response.data;
+    },
+    enabled: !!id,
+  });
+
   const budgetCtx = useBudget();
   const { budget, financials } = budgetCtx;
 
+  // Sync server data to local state once LOADED
+  useEffect(() => {
+    if (serverBudget) {
+      budgetCtx.setBudget({
+        id: serverBudget.id,
+        projectName: serverBudget.project?.name || 'Cargando...',
+        clientName: serverBudget.project?.client?.name || 'Cliente',
+        status: (serverBudget.status as 'draft' | 'editing' | 'sent' | 'approved') || 'editing',
+        clientPrice: Number(serverBudget.total_estimated_price) || 0,
+        stages: serverBudget.stages?.map((s) => ({
+          id: s.id,
+          name: s.name,
+          progress: s.progress || 0,
+          items: s.items?.map((i) => ({
+            id: i.id,
+            name: i.name,
+            quantity: Number(i.quantity) || 0,
+            unit: i.unit || 'glb',
+            unitPrice: Number(i.unit_cost) || 0,
+            total: (Number(i.quantity) || 0) * (Number(i.unit_cost) || 0)
+          })) || []
+        })) || [],
+        expenses: [], 
+        workers: [],
+      });
+    }
+  }, [serverBudget, budgetCtx.setBudget]);
+
   const [activeTab, setActiveTab] = useState<BudgetTab>('presupuesto');
-  const [showTemplates, setShowTemplates] = useState(budget.stages.length === 0);
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0d0f14] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (error || !id) {
+    return (
+      <div className="min-h-screen bg-[#0d0f14] flex flex-col items-center justify-center p-6 text-center">
+        <h2 className="text-2xl font-bold text-white mb-4">Error al cargar el presupuesto</h2>
+        <p className="text-gray-400 mb-8">No pudimos encontrar el presupuesto solicitado o hubo un problema de conexión.</p>
+        <button 
+          onClick={() => navigate('/dashboard')}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl transition-all"
+        >
+          Volver al Dashboard
+        </button>
+      </div>
+    );
+  }
 
   const handleTemplateSelect = (t: Template) => {
     budgetCtx.setStages(applyTemplate(t));

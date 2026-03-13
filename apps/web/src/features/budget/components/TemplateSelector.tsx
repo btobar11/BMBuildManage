@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TEMPLATES } from '../templates';
 import { X, Layers } from 'lucide-react';
 import type { Template } from '../templates';

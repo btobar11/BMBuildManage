@@ -1,31 +1,35 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Construction } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+
+import { supabase } from '../../lib/supabase';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     
-    // Simulate login for now - will integrate Supabase later
-    setTimeout(() => {
-      setLoading(false);
-      // Setting a dummy token and user for development
-      login('dev-token', { 
-        id: '1', 
-        email, 
-        name: 'Usuario Demo',
-        companyId: '550e8400-e29b-41d4-a716-446655440000' 
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
+
+      if (authError) throw authError;
+      
       navigate('/dashboard');
-    }, 800);
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,6 +51,12 @@ export function LoginPage() {
               Control total de tus obras y presupuestos
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm text-center">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">

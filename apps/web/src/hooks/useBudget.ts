@@ -158,5 +158,6 @@ export function useBudget(initial?: Partial<Budget>) {
     addWorker,
     deleteWorker,
     setStages,
+    setBudget,
   };
 }

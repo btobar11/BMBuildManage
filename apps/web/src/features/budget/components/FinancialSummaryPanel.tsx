@@ -1,7 +1,6 @@
-import React from 'react';
 import type { FinancialSummary } from '../types';
 import { formatCLP } from '../helpers';
-import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
+import { TrendingUp, AlertTriangle } from 'lucide-react';
 
 interface Props {
   financials: FinancialSummary;

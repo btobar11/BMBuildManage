@@ -17,7 +17,8 @@ CREATE TABLE users (
   email TEXT NOT NULL,
   name TEXT,
   role TEXT DEFAULT 'manager',
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 3. Clients
@@ -29,7 +30,8 @@ CREATE TABLE clients (
   phone TEXT,
   address TEXT,
   notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 4. Projects
@@ -108,7 +110,8 @@ CREATE TABLE workers (
   daily_rate NUMERIC(15, 2) DEFAULT 0,
   phone TEXT,
   notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 10. Worker Assignments
@@ -118,7 +121,9 @@ CREATE TABLE worker_assignments (
   project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
   daily_rate NUMERIC(15, 2),
   start_date DATE,
-  end_date DATE
+  end_date DATE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 11. Worker Payments
@@ -130,7 +135,8 @@ CREATE TABLE worker_payments (
   payment_type TEXT,
   date DATE NOT NULL,
   notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 12. Templates
@@ -148,7 +154,9 @@ CREATE TABLE template_stages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   template_id UUID REFERENCES templates(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  position INTEGER DEFAULT 0
+  position INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 14. Template Items
@@ -158,7 +166,9 @@ CREATE TABLE template_items (
   name TEXT NOT NULL,
   unit TEXT,
   default_quantity NUMERIC(10, 2) DEFAULT 1,
-  default_cost NUMERIC(15, 2) DEFAULT 0
+  default_cost NUMERIC(15, 2) DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 15. Documents

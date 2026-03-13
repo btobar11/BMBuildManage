@@ -20,6 +20,7 @@ export class ProjectsService {
   async findAll(companyId: string): Promise<Project[]> {
     return await this.projectRepository.find({
       where: { company_id: companyId },
+      relations: ['budgets'],
       order: { created_at: 'DESC' },
     });
   }

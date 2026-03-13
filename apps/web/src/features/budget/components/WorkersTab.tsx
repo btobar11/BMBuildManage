@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { Worker } from '../types';
 import { formatCLP } from '../helpers';
-import { nanoid } from '../utils';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface Props {

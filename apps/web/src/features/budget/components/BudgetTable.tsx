@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import type { Stage, LineItem } from '../types';
 import { formatCLP } from '../helpers';
 import { calcStageTotal } from '../helpers';
@@ -150,7 +150,7 @@ function StageSection({
           {formatCLP(stageTotal)}
         </span>
 
-        {isOver && <AlertTriangle size={14} className="text-amber-400" title="Supera el costo estimado" />}
+        {isOver && <AlertTriangle size={14} className="text-amber-400" />}
 
         {/* Stage actions */}
         <div className="flex items-center gap-1 ml-2">
