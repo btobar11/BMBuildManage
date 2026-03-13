@@ -1,0 +1,11 @@
+### Projects
+GET http://localhost:3000/projects?company_id=550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Project Details
+GET http://localhost:3000/projects/990e8400-e29b-41d4-a716-446655440000?company_id=550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Budgets
+GET http://localhost:3000/budgets?project_id=990e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer YOUR_TOKEN_HERE

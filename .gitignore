@@ -1,0 +1,8 @@
+node_modules
+dist
+.turbo
+*.log
+.env
+build_errors.txt
+build_output.txt
+.DS_Store

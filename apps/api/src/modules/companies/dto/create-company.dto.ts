@@ -1,0 +1,25 @@
+import { IsString, IsOptional, MaxLength } from 'class-validator';
+
+export class CreateCompanyDto {
+  @IsString()
+  @MaxLength(200)
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  currency?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+}
