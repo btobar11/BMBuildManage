@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -16,7 +16,6 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
-  AlertCircle,
   DollarSign,
   BarChart3,
   Trash2,
@@ -106,7 +105,7 @@ export const DashboardPage = () => {
     
     toast.promise(deletePromise, {
       loading: 'Eliminando proyectos...',
-      success: (response) => {
+      success: () => {
         queryClient.invalidateQueries({ queryKey: ['projects'] });
         setSelectedIds([]);
         return `${selectedIds.length} proyectos eliminados correctamente`;
@@ -127,7 +126,7 @@ export const DashboardPage = () => {
       // Artificial delay to show the animation as requested by user
       await new Promise(resolve => setTimeout(resolve, 800));
       toast.success('Datos actualizados');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error al actualizar datos');
     } finally {
       setIsRefreshing(false);
@@ -140,8 +139,8 @@ export const DashboardPage = () => {
       await api.patch('/projects/bulk-update-folder', { ids: selectedIds, folder });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setSelectedIds([]);
-    } catch (error) {
-      console.error('Error in bulk move:', error);
+    } catch (_error) {
+      console.error('Error in bulk move:', _error);
       alert('Error al mover proyectos');
     }
   };
