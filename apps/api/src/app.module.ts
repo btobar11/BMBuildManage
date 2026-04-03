@@ -17,6 +17,16 @@ import { WorkerAssignmentsModule } from './modules/worker-assignments/worker-ass
 import { WorkerPaymentsModule } from './modules/worker-payments/worker-payments.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { MachineryModule } from './modules/machinery/machinery.module';
+import { MaterialsModule } from './modules/materials/materials.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
+import { ResourcesModule } from './modules/resources/resources.module';
+import { ApuModule } from './modules/apu/apu.module';
+import { ExecutionModule } from './modules/execution/execution.module';
+import { ContingenciesModule } from './modules/contingencies/contingencies.module';
+import { UnitsModule } from './modules/units/units.module';
+import { SeedModule } from './modules/seed/seed.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 
 @Module({
   imports: [
@@ -30,7 +40,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: false, // Use migrations for schema changes
+        synchronize: false, // Set to false to avoid issues with Supabase Pooler and permissions
         logging: true,
       }),
       inject: [ConfigService],
@@ -49,6 +59,16 @@ import { DocumentsModule } from './modules/documents/documents.module';
     WorkerPaymentsModule,
     TemplatesModule,
     DocumentsModule,
+    MachineryModule,
+    MaterialsModule,
+    InvoicesModule,
+    ResourcesModule,
+    ApuModule,
+    ExecutionModule,
+    ContingenciesModule,
+    UnitsModule,
+    SeedModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

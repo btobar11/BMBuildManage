@@ -1,4 +1,4 @@
-import type { Budget, Stage, LineItem } from './types';
+import type { Budget, LineItem } from './types';
 import { nanoid } from './utils';
 import { newStage, newLineItem } from './helpers';
 
@@ -18,23 +18,23 @@ export const TEMPLATES: Template[] = [
       {
         name: 'Demolición',
         items: [
-          { name: 'Demolición cerámica', quantity: 12, unit: 'm2', unitPrice: 15000, costCode: 'DEM-01' },
-          { name: 'Retiro de escombros', quantity: 1, unit: 'viaje', unitPrice: 80000, costCode: 'DEM-02' },
+          { name: 'Demolición cerámica', quantity: 12, unit: 'm2', unit_price: 15000, cost_code: 'DEM-01' },
+          { name: 'Retiro de escombros', quantity: 1, unit: 'viaje', unit_price: 80000, cost_code: 'DEM-02' },
         ],
       },
       {
         name: 'Instalaciones',
         items: [
-          { name: 'Gasfitería baño completo', quantity: 1, unit: 'gl', unitPrice: 350000, costCode: 'INS-01' },
-          { name: 'Instalación eléctrica', quantity: 1, unit: 'gl', unitPrice: 150000, costCode: 'INS-02' },
+          { name: 'Gasfitería baño completo', quantity: 1, unit: 'gl', unit_price: 350000, cost_code: 'INS-01' },
+          { name: 'Instalación eléctrica', quantity: 1, unit: 'gl', unit_price: 150000, cost_code: 'INS-02' },
         ],
       },
       {
         name: 'Terminaciones',
         items: [
-          { name: 'Enchape muro cerámico', quantity: 18, unit: 'm2', unitPrice: 22000, costCode: 'TER-01' },
-          { name: 'Enchape piso', quantity: 5, unit: 'm2', unitPrice: 20000, costCode: 'TER-02' },
-          { name: 'Instalación sanitarios', quantity: 1, unit: 'gl', unitPrice: 200000, costCode: 'TER-03' },
+          { name: 'Enchape muro cerámico', quantity: 18, unit: 'm2', unit_price: 22000, cost_code: 'TER-01' },
+          { name: 'Enchape piso', quantity: 5, unit: 'm2', unit_price: 20000, cost_code: 'TER-02' },
+          { name: 'Instalación sanitarios', quantity: 1, unit: 'gl', unit_price: 200000, cost_code: 'TER-03' },
         ],
       },
     ],
@@ -46,22 +46,22 @@ export const TEMPLATES: Template[] = [
       {
         name: 'Fundaciones',
         items: [
-          { name: 'Excavación', quantity: 80, unit: 'm2', unitPrice: 12000, costCode: 'FUN-01' },
-          { name: 'Hormigón radier', quantity: 80, unit: 'm2', unitPrice: 45000, costCode: 'FUN-02' },
+          { name: 'Excavación', quantity: 80, unit: 'm2', unit_price: 12000, cost_code: 'FUN-01' },
+          { name: 'Hormigón radier', quantity: 80, unit: 'm2', unit_price: 45000, cost_code: 'FUN-02' },
         ],
       },
       {
         name: 'Estructura',
         items: [
-          { name: 'Muro tabiquería', quantity: 120, unit: 'm2', unitPrice: 35000, costCode: 'EST-01' },
-          { name: 'Cubierta techo', quantity: 90, unit: 'm2', unitPrice: 28000, costCode: 'EST-02' },
+          { name: 'Muro tabiquería', quantity: 120, unit: 'm2', unit_price: 35000, cost_code: 'EST-01' },
+          { name: 'Cubierta techo', quantity: 90, unit: 'm2', unit_price: 28000, cost_code: 'EST-02' },
         ],
       },
       {
         name: 'Terminaciones',
         items: [
-          { name: 'Piso flotante', quantity: 60, unit: 'm2', unitPrice: 18000, costCode: 'TER-01' },
-          { name: 'Pintura interior', quantity: 200, unit: 'm2', unitPrice: 8000, costCode: 'TER-02' },
+          { name: 'Piso flotante', quantity: 60, unit: 'm2', unit_price: 18000, cost_code: 'TER-01' },
+          { name: 'Pintura interior', quantity: 200, unit: 'm2', unit_price: 8000, cost_code: 'TER-02' },
         ],
       },
     ],
@@ -73,16 +73,16 @@ export const TEMPLATES: Template[] = [
       {
         name: 'Estructura',
         items: [
-          { name: 'Muro nuevo', quantity: 30, unit: 'm2', unitPrice: 35000, costCode: 'EST-01' },
-          { name: 'Losa o cubierta', quantity: 15, unit: 'm2', unitPrice: 55000, costCode: 'EST-02' },
+          { name: 'Muro nuevo', quantity: 30, unit: 'm2', unit_price: 35000, cost_code: 'EST-01' },
+          { name: 'Losa o cubierta', quantity: 15, unit: 'm2', unit_price: 55000, cost_code: 'EST-02' },
         ],
       },
       {
         name: 'Terminaciones',
         items: [
-          { name: 'Ventana aluminio', quantity: 2, unit: 'un', unitPrice: 120000, costCode: 'TER-01' },
-          { name: 'Piso flotante', quantity: 15, unit: 'm2', unitPrice: 18000, costCode: 'TER-02' },
-          { name: 'Pintura', quantity: 60, unit: 'm2', unitPrice: 8000, costCode: 'TER-03' },
+          { name: 'Ventana aluminio', quantity: 2, unit: 'un', unit_price: 120000, cost_code: 'TER-01' },
+          { name: 'Piso flotante', quantity: 15, unit: 'm2', unit_price: 18000, cost_code: 'TER-02' },
+          { name: 'Pintura', quantity: 60, unit: 'm2', unit_price: 8000, cost_code: 'TER-03' },
         ],
       },
     ],
@@ -94,23 +94,23 @@ export const TEMPLATES: Template[] = [
       {
         name: 'Demolición',
         items: [
-          { name: 'Retiro muebles viejos', quantity: 1, unit: 'gl', unitPrice: 60000, costCode: 'DEM-01' },
+          { name: 'Retiro muebles viejos', quantity: 1, unit: 'gl', unit_price: 60000, cost_code: 'DEM-01' },
         ],
       },
       {
         name: 'Instalaciones',
         items: [
-          { name: 'Gasfitería cocina', quantity: 1, unit: 'gl', unitPrice: 180000, costCode: 'INS-01' },
-          { name: 'Instalación eléctrica', quantity: 1, unit: 'gl', unitPrice: 120000, costCode: 'INS-02' },
+          { name: 'Gasfitería cocina', quantity: 1, unit: 'gl', unit_price: 180000, cost_code: 'INS-01' },
+          { name: 'Instalación eléctrica', quantity: 1, unit: 'gl', unit_price: 120000, cost_code: 'INS-02' },
         ],
       },
       {
         name: 'Muebles y Terminaciones',
         items: [
-          { name: 'Muebles bajos cocina', quantity: 4, unit: 'ml', unitPrice: 185000, costCode: 'TER-01' },
-          { name: 'Muebles altos cocina', quantity: 3, unit: 'ml', unitPrice: 155000, costCode: 'TER-02' },
-          { name: 'Mesón cuarzo', quantity: 3, unit: 'ml', unitPrice: 220000, costCode: 'TER-03' },
-          { name: 'Enchape muros', quantity: 10, unit: 'm2', unitPrice: 22000, costCode: 'TER-04' },
+          { name: 'Muebles bajos cocina', quantity: 4, unit: 'ml', unit_price: 185000, cost_code: 'TER-01' },
+          { name: 'Muebles altos cocina', quantity: 3, unit: 'ml', unit_price: 155000, cost_code: 'TER-02' },
+          { name: 'Mesón cuarzo', quantity: 3, unit: 'ml', unit_price: 220000, cost_code: 'TER-03' },
+          { name: 'Enchape muros', quantity: 10, unit: 'm2', unit_price: 22000, cost_code: 'TER-04' },
         ],
       },
     ],
@@ -124,7 +124,7 @@ export function applyTemplate(template: Template): Budget['stages'] {
       ...newLineItem(),
       ...i,
       id: nanoid(),
-      total: i.quantity * i.unitPrice,
+      total: (i.quantity || 0) * (i.unit_price || 0),
     }));
     return stage;
   });

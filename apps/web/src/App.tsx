@@ -1,37 +1,92 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { LoginPage } from './features/auth/LoginPage';
+import { RegisterPage } from './features/auth/RegisterPage';
+import { OnboardingPage } from './features/onboarding/OnboardingPage';
 import { DashboardPage } from './features/dashboard/DashboardPage';
 import BudgetEditor from './features/budget/BudgetEditor';
+import { FieldViewPage } from './features/field/FieldViewPage';
+import { LandingPage } from './features/landing/LandingPage';
+import { ApuLibraryPage } from './features/apu/ApuLibraryPage';
+import { ResourcesPage } from './features/resources/ResourcesPage';
+import { WorkersPage } from './features/workers/WorkersPage';
+import { InvoicesPage } from './features/invoices/InvoicesPage';
+import { CompanySettingsPage } from './features/company/CompanySettingsPage';
+import { MainLayout } from './components/layout/MainLayout';
 
+import { Toaster } from 'react-hot-toast';
+
+console.log('APP COMPONENT STARTING');
 function App() {
+
   const { token, isLoading } = useAuth();
   const isAuthenticated = !!token;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <Routes>
-      <Route 
-        path="/login" 
-        element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />} 
-      />
-      <Route 
-        path="/dashboard" 
-        element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="/budget/:id" 
-        element={isAuthenticated ? <BudgetEditor /> : <Navigate to="/login" />} 
-      />
-      <Route path="/" element={<Navigate to="/dashboard" />} />
-    </Routes>
+    <>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route 
+          path="/login" 
+          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />} 
+        />
+        <Route 
+          path="/register" 
+          element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />} 
+        />
+        <Route 
+          path="/onboarding" 
+          element={isAuthenticated ? <OnboardingPage /> : <Navigate to="/login" />} 
+        />
+        
+        {/* Protected routes with MainLayout */}
+        <Route
+          path="/dashboard"
+          element={isAuthenticated ? <MainLayout><DashboardPage /></MainLayout> : <Navigate to="/login" />}
+        />
+        <Route 
+          path="/budget/:id" 
+          element={isAuthenticated ? <MainLayout><BudgetEditor /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/budget/:id/field" 
+          element={isAuthenticated ? <FieldViewPage /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/apu-library" 
+          element={isAuthenticated ? <MainLayout><ApuLibraryPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/resources" 
+          element={isAuthenticated ? <MainLayout><ResourcesPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/workers" 
+          element={isAuthenticated ? <MainLayout><WorkersPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/invoices" 
+          element={isAuthenticated ? <MainLayout><InvoicesPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/company-settings" 
+          element={isAuthenticated ? <MainLayout><CompanySettingsPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        
+        <Route 
+          path="/" 
+          element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" />} 
+        />
+      </Routes>
+    </>
   );
 }
 

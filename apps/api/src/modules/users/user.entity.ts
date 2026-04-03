@@ -1,6 +1,6 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
@@ -12,14 +12,17 @@ import { Company } from '../companies/company.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
-  MANAGER = 'manager',
-  VIEWER = 'viewer',
+  ENGINEER = 'engineer',
+  ARCHITECT = 'architect',
+  SITESUPERVISOR = 'site_supervisor',
+  FOREMAN = 'foreman',
+  ACCOUNTING = 'accounting',
 }
 
 @Entity('users')
 @Index(['company_id'])
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('uuid')
   id: string;
 
   @Column({ unique: true })
@@ -28,7 +31,7 @@ export class User {
   @Column({ length: 200 })
   name: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.MANAGER })
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.ENGINEER })
   role: UserRole;
 
   @Column({ nullable: true })

@@ -1,0 +1,94 @@
+﻿
+> @bm-build-manage/web@0.0.0 lint
+> eslint .
+
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\apu\ApuLibraryPage.tsx
+   72:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  506:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  511:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\BudgetEditor.tsx
+   87:49  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  164:34  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  165:35  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  166:37  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  167:36  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  168:37  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  169:40  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  170:44  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  171:36  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+  178:6   warning  React Hook useEffect has a missing dependency: 'budgetCtx'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\BudgetTable.tsx
+  130:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  333:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\CADViewer.tsx
+   75:37  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+   89:25  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  102:25  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  117:25  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+  127:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\CADViewer.tsx:127:7
+  125 |       });
+  126 |
+> 127 |       setLayers(['all', ...Array.from(foundLayers)]);
+      |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  128 |
+  129 |       if (objects.length > 0) {
+  130 |         const group = new fabric.Group(objects);  react-hooks/set-state-in-effect
+  146:42  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\ContingenciesTab.tsx
+  36:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\CubicacionModal.tsx
+   19:19  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   21:17  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   59:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\CubicacionModal.tsx:59:5
+  57 |   useEffect(() => {
+  58 |     const val = evaluateFormula(params.formula, params);
+> 59 |     setResult(val);
+     |     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  60 |   }, [params]);
+  61 |
+  62 |   const selectTemplate = (t: { name: string; formula: string; icon: any }) => {  react-hooks/set-state-in-effect
+   62:69  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  118:53  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\ExpensesTab.tsx
+  187:90  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\WorkersTab.tsx
+   79:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  144:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\helpers.ts
+  26:91  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\types.ts
+  17:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\invoices\components\UploadInvoiceModal.tsx
+  167:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Ô£û 35 problems (34 errors, 1 warning)
+

@@ -1,0 +1,134 @@
+﻿
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\components\SyncIndicator.tsx
+  122:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\components\SyncIndicator.tsx:122:9
+  120 |       try {
+  121 |         const mutations = JSON.parse(stored);
+> 122 |         setPendingCount(mutations.length);
+      |         ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  123 |       } catch {
+  124 |         // Invalid data, clear it
+  125 |         localStorage.removeItem('bm-pending-mutations');  react-hooks/set-state-in-effect
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\bim\hooks\useBimEngine.ts
+   17:59  error    'IFC_CATEGORY_UNITS' is defined but never used                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   48:27  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+   49:31  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+   55:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+   59:56  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+   72:14  error    'e' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  156:20  error    'e' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  179:9   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                                                                                                                                                            @typescript-eslint/ban-ts-comment
+  181:9   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                                                                                                                                                            @typescript-eslint/ban-ts-comment
+  246:64  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  277:89  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  295:9   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                                                                                                                                                            @typescript-eslint/ban-ts-comment
+  316:17  error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                                                                                                                                                            @typescript-eslint/ban-ts-comment
+  352:6   warning  React Hook useCallback has a missing dependency: 'checkWebGL'. Either include it or remove the dependency array                                                                                                                                                                react-hooks/exhaustive-deps
+  459:9   error    'highlightLinkedElements' is assigned a value but never used                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  471:26  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  567:56  warning  The ref value 'loadedModelsRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'loadedModelsRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  592:22  warning  The ref value 'globalIdMapRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'globalIdMapRef.current' to a variable inside the effect, and use that variable in the cleanup function    react-hooks/exhaustive-deps
+  615:54  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  651:30  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  651:51  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                       @typescript-eslint/no-explicit-any
+  690:22  warning  The ref value 'containerRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'containerRef.current' to a variable inside the effect, and use that variable in the cleanup function        react-hooks/exhaustive-deps
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\bim\hooks\useIfcQuantifier.ts
+   69:34  error  '_componentsRef' is defined but never used   @typescript-eslint/no-unused-vars
+   76:54  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  124:12  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  157:22  error  '_relId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  157:63  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  161:23  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  193:12  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  248:34  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  273:62  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  274:34  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  292:12  error  Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\BudgetEditor.tsx
+   92:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  220:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  222:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  223:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  225:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  226:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  240:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\AuditLogSidebar.tsx
+  11:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  12:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\BudgetTable.tsx
+  164:50  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  329:6   warning  React Hook useMemo has a missing dependency: 'toggleExpand'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+  331:17  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\BudgetTable.tsx:331:17
+  329 |   ], [expandedItems, onUpdateItem, onDuplicateItem, onDeleteItem]);
+  330 |
+> 331 |   const table = useReactTable({
+      |                 ^^^^^^^^^^^^^ TanStack Table's `useReactTable()` API returns functions that cannot be memoized safely
+  332 |     data: stage.items,
+  333 |     columns,
+  334 |     getCoreRowModel: getCoreRowModel(),  react-hooks/incompatible-library
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\CashflowTab.tsx
+  58:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\components\DocumentsTab.tsx
+   27:3   error  'CheckCircle' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+   28:17  error  'CalcIcon' is defined but never used                                                                                            @typescript-eslint/no-unused-vars
+   29:3   error  'Info' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+  117:10  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  129:11  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  357:48  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  358:40  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  361:31  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  365:32  error  Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\budget\helpers.ts
+  47:125  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\company\CompanySettingsPage.tsx
+  58:15  error  'id' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  58:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\features\onboarding\onboarding.mutations.ts
+  94:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\hooks\useOfflineMutation.ts
+  32:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\hooks\useOfflineMutation.ts:32:9
+  30 |     if (stored) {
+  31 |       try {
+> 32 |         setPendingMutations(JSON.parse(stored));
+     |         ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  33 |       } catch {
+  34 |         localStorage.removeItem(STORAGE_KEY);
+  35 |       }  react-hooks/set-state-in-effect
+
+C:\Users\benja\OneDrive\Escritorio\BMBuildManage\apps\web\src\sw.ts
+   12:1   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  108:18  error  'e' is defined but never used                                                                                        @typescript-eslint/no-unused-vars
+
+Ô£û 64 problems (58 errors, 6 warnings)
+

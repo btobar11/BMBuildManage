@@ -1,8 +1,90 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
-})
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+      },
+      manifest: {
+        name: 'BM Build Manage',
+        short_name: 'BMBuild',
+        description: 'Gestión Integral de Obras y Presupuestos',
+        theme_color: '#0f172a',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: '/pwa-512x512-maskable.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ]
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      }
+    })
+  ],
+
+  build: {
+    // Generate source maps for debugging
+    sourcemap: true,
+
+    // Chunk splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: (id: string) => {
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) {
+            return 'react-vendor';
+          }
+          if (id.includes('node_modules/@tanstack/react-query') || id.includes('node_modules/@tanstack/query-')) {
+            return 'query-vendor';
+          }
+          if (id.includes('node_modules/@tanstack/react-table/')) {
+            return 'table-vendor';
+          }
+          if (id.includes('node_modules/lucide-react/') || id.includes('node_modules/clsx/') || id.includes('node_modules/tailwind-merge/')) {
+            return 'ui-vendor';
+          }
+          if (id.includes('node_modules/three/') || id.includes('node_modules/@thatopen/') || id.includes('node_modules/web-ifc/')) {
+            return 'bim-vendor';
+          }
+          if (id.includes('node_modules/pdfjs-dist/')) {
+            return 'pdf-vendor';
+          }
+          return undefined;
+        },
+      },
+    },
+  },
+
+  // Optimize dependencies
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@tanstack/react-query'],
+    exclude: ['@thatopen/components', '@thatopen/fragments', 'three'],
+  },
+});

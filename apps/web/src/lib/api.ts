@@ -1,11 +1,24 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
+import { supabase } from './supabase';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : 'http://localhost:3000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : 'http://localhost:3001/api/v1',
+  timeout: 10000, 
 });
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('auth_token');
+api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  // Check for specialized dev token first for easy testing
+  const devToken = localStorage.getItem('DEV_TOKEN');
+  if (devToken) {
+    if (config.headers) {
+      config.headers.Authorization = `Bearer ${devToken}`;
+    }
+    return config;
+  }
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  
   if (token) {
     if (config.headers) {
       config.headers.Authorization = `Bearer ${token}`;

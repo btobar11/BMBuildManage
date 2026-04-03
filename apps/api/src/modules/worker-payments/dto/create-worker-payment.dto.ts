@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsEnum,
   IsDateString,
+  Min,
 } from 'class-validator';
 import { PaymentType } from '../worker-payment.entity';
 
@@ -15,6 +16,7 @@ export class CreateWorkerPaymentDto {
   project_id: string;
 
   @IsNumber()
+  @Min(0)
   amount: number;
 
   @IsOptional()

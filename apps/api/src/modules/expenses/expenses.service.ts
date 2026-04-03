@@ -17,8 +17,13 @@ export class ExpensesService {
     return this.expenseRepository.save(expense);
   }
 
-  findAllByProject(projectId: string) {
-    return this.expenseRepository.find({ where: { project_id: projectId } });
+  findAllByProject(projectId: string, companyId: string) {
+    return this.expenseRepository.find({ 
+      where: { 
+        project_id: projectId,
+        company_id: companyId 
+      } 
+    });
   }
 
   async findOne(id: string) {
@@ -39,5 +44,14 @@ export class ExpensesService {
     const expense = await this.findOne(id);
     await this.expenseRepository.remove(expense);
     return { deleted: true };
+  }
+
+  async getSummaryByProject(projectId: string) {
+    const result = await this.expenseRepository
+      .createQueryBuilder('expense')
+      .select('SUM(expense.amount)', 'total')
+      .where('expense.project_id = :projectId', { projectId })
+      .getRawOne();
+    return { total: Number(result?.total || 0) };
   }
 }

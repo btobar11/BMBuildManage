@@ -8,15 +8,18 @@ import {
   OneToMany,
   JoinColumn,
   Index,
+  VersionColumn,
 } from 'typeorm';
 import { Project } from '../projects/project.entity';
 import { Stage } from '../stages/stage.entity';
 
 export enum BudgetStatus {
   DRAFT = 'draft',
+  EDITING = 'editing',
   SENT = 'sent',
   APPROVED = 'approved',
   REJECTED = 'rejected',
+  COUNTER_OFFER = 'counter_offer',
 }
 
 @Entity('budgets')
@@ -32,14 +35,20 @@ export class Budget {
   @JoinColumn({ name: 'project_id' })
   project: Project;
 
-  @Column({ default: 1 })
+  @VersionColumn()
   version: number;
 
   @Column({ type: 'enum', enum: BudgetStatus, default: BudgetStatus.DRAFT })
   status: BudgetStatus;
 
+  @Column({ default: true })
+  is_active: boolean;
+
   @Column({ type: 'text', nullable: true })
   notes: string;
+
+  @Column({ type: 'text', nullable: true })
+  rejection_reason: string;
 
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   total_estimated_cost: number;
@@ -47,7 +56,13 @@ export class Budget {
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   total_estimated_price: number;
 
-  @OneToMany(() => Stage, (stage) => stage.budget)
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 10 })
+  professional_fee_percentage: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  estimated_utility: number;
+
+  @OneToMany(() => Stage, (stage) => stage.budget, { cascade: true, orphanedRowAction: 'delete' })
   stages: Stage[];
 
   @CreateDateColumn()

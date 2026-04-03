@@ -6,13 +6,17 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Project } from '../projects/project.entity';
 
 export enum DocumentType {
+  PLAN = 'plan',
+  QUANTITY_TAKEOFF = 'quantity_takeoff',
   CONTRACT = 'contract',
   INVOICE = 'invoice',
-  PLAN = 'plan',
+  RECEIPT = 'receipt',
+  PURCHASE_ORDER = 'purchase_order',
   PERMIT = 'permit',
   PHOTO = 'photo',
   OTHER = 'other',
@@ -40,6 +44,9 @@ export class Document {
   @Column({ type: 'enum', enum: DocumentType, default: DocumentType.OTHER })
   type: DocumentType;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'uploaded_at' })
+  uploaded_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
 }

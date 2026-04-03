@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString, Min } from 'class-validator';
 
 export class CreateWorkerAssignmentDto {
   @IsString()
@@ -8,6 +8,7 @@ export class CreateWorkerAssignmentDto {
   project_id: string;
 
   @IsNumber()
+  @Min(0)
   daily_rate: number;
 
   @IsOptional()
@@ -17,4 +18,9 @@ export class CreateWorkerAssignmentDto {
   @IsOptional()
   @IsDateString()
   end_date?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  total_paid?: number;
 }

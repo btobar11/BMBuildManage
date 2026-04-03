@@ -2,6 +2,10 @@ import { IsString, IsOptional, IsEmail, MaxLength, IsEnum } from 'class-validato
 import { UserRole } from '../user.entity';
 
 export class CreateUserDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
   @IsEmail()
   email: string;
 

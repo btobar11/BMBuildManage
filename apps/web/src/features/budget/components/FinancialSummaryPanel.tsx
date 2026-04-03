@@ -14,9 +14,9 @@ function Row({ label, value, highlight }: { label: string; value: string; highli
     blue: 'text-blue-400',
   };
   return (
-    <div className="flex items-center justify-between py-2 border-b border-white/5">
-      <span className="text-xs text-gray-400 font-medium">{label}</span>
-      <span className={`text-sm font-bold tabular-nums ${highlight ? colors[highlight] : 'text-white'}`}>
+    <div className="flex items-center justify-between py-2 border-b border-border">
+      <span className="text-xs text-muted-foreground font-medium">{label}</span>
+      <span className={`text-sm font-bold tabular-nums ${highlight ? colors[highlight] : 'text-foreground'}`}>
         {value}
       </span>
     </div>
@@ -30,8 +30,8 @@ export function FinancialSummaryPanel({ financials, clientPrice }: Props) {
     : 0;
 
   return (
-    <aside className="w-64 shrink-0 sticky top-4 self-start bg-gray-900 rounded-2xl p-5 shadow-2xl border border-white/10 flex flex-col gap-1">
-      <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+    <aside className="w-64 shrink-0 sticky top-4 self-start bg-card rounded-2xl p-5 shadow-2xl border border-border/50 flex flex-col gap-1">
+      <h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-1.5">
         <TrendingUp size={15} className="text-blue-400" />
         Resumen Financiero
       </h3>
@@ -39,8 +39,8 @@ export function FinancialSummaryPanel({ financials, clientPrice }: Props) {
       {/* Budget progress */}
       <div className="mb-3">
         <div className="flex justify-between text-xs mb-1">
-          <span className="text-gray-400">Costo real vs estimado</span>
-          <span className={isOverBudget ? 'text-rose-400 font-bold' : 'text-gray-300'}>{pctReal}%</span>
+          <span className="text-muted-foreground">Costo real vs estimado</span>
+          <span className={isOverBudget ? 'text-rose-400 font-bold' : 'text-muted-foreground'}>{pctReal}%</span>
         </div>
         <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
           <div
@@ -54,13 +54,14 @@ export function FinancialSummaryPanel({ financials, clientPrice }: Props) {
       <Row label="Costo estimado" value={formatCLP(financials.estimatedCost)} />
       <Row label="Gastos reales" value={formatCLP(financials.realExpenses)} />
       <Row label="Pagos trabajadores" value={formatCLP(financials.workerPayments)} />
+      <Row label="Contingencias" value={formatCLP(financials.contingenciesTotal)} />
       <Row
         label="Costo total real"
         value={formatCLP(financials.totalRealCost)}
         highlight={isOverBudget ? 'red' : undefined}
       />
 
-      <div className="mt-3 pt-3 border-t border-white/10 space-y-1">
+      <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
         <Row
           label="Ganancia proyectada"
           value={formatCLP(financials.projectedProfit)}
@@ -75,7 +76,7 @@ export function FinancialSummaryPanel({ financials, clientPrice }: Props) {
 
       {/* Margin badge */}
       <div className={`mt-3 rounded-xl p-3 text-center ${financials.margin >= 15 ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-rose-500/20 border border-rose-500/30'}`}>
-        <p className="text-xs text-gray-400 mb-0.5">Margen</p>
+        <p className="text-xs text-muted-foreground mb-0.5">Margen</p>
         <p className={`text-2xl font-black ${financials.margin >= 15 ? 'text-emerald-400' : 'text-rose-400'}`}>
           {financials.margin}%
         </p>

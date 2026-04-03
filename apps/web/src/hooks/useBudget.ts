@@ -14,13 +14,13 @@ const DEFAULT_BUDGET: Budget = {
   workers: [],
 };
 
-export function useBudget(initial?: Partial<Budget>) {
+export function useBudget(initial?: Partial<Budget>, apiRealExpenses: number = 0, apiWorkerPayments: number = 0, apiContingencies: number = 0) {
   const [budget, setBudget] = useState<Budget>(() => ({ ...DEFAULT_BUDGET, ...initial, id: nanoid() }));
 
-  const financials = calcFinancials(budget);
+  const financials = calcFinancials(budget, apiRealExpenses, apiWorkerPayments, apiContingencies);
 
   // ─ Project header ────────────────────────────────────────────────
-  const updateHeader = useCallback((patch: Partial<Pick<Budget, 'projectName' | 'clientName' | 'clientPrice' | 'status'>>) => {
+  const updateHeader = useCallback((patch: Partial<Pick<Budget, 'projectName' | 'clientName' | 'clientPrice' | 'status' | 'professionalFeePercentage' | 'estimatedUtility'>>) => {
     setBudget((b) => ({ ...b, ...patch }));
   }, []);
 

@@ -9,6 +9,7 @@ import {
   Index,
 } from 'typeorm';
 import { Project } from '../projects/project.entity';
+import { Company } from '../companies/company.entity';
 
 export enum ExpenseType {
   MATERIAL = 'material',
@@ -30,6 +31,13 @@ export class Expense {
   @JoinColumn({ name: 'project_id' })
   project: Project;
 
+  @Column()
+  company_id: string;
+
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
+
   @Column({ nullable: true })
   item_id: string;
 
@@ -44,6 +52,16 @@ export class Expense {
 
   @Column({ type: 'date' })
   date: Date;
+
+  @Column({ nullable: true })
+  document_url: string;
+
+  @Column({ nullable: true })
+  document_id: string;
+
+  @ManyToOne('Document', { nullable: true })
+  @JoinColumn({ name: 'document_id' })
+  document: any;
 
   @CreateDateColumn()
   created_at: Date;

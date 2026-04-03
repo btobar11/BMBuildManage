@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -35,8 +36,8 @@ export class ItemsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto) {
-    return this.itemsService.update(id, updateItemDto);
+  update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto, @Req() req: any) {
+    return this.itemsService.update(id, updateItemDto, req.user?.id, req.user?.company_id);
   }
 
   @Delete(':id')

@@ -1,12 +1,14 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { SupabaseAuthGuard } from './guards/supabase-auth.guard';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, forwardRef(() => UsersModule)],
   controllers: [AuthController],
   providers: [SupabaseAuthGuard],
   exports: [SupabaseAuthGuard],
 })
 export class AuthModule {}
+

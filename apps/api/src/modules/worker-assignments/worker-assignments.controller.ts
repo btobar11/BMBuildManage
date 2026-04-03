@@ -29,6 +29,11 @@ export class WorkerAssignmentsController {
     return this.service.findAllByProject(projectId);
   }
 
+  @Get('summary/:projectId')
+  getSummary(@Param('projectId') projectId: string) {
+    return this.service.getSummaryByProject(projectId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);

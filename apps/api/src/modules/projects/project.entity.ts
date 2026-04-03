@@ -16,13 +16,14 @@ import { Expense } from '../expenses/expense.entity';
 import { WorkerAssignment } from '../worker-assignments/worker-assignment.entity';
 import { WorkerPayment } from '../worker-payments/worker-payment.entity';
 import { Document } from '../documents/document.entity';
+import { ProjectPayment } from './project-payment.entity';
 
 export enum ProjectStatus {
   DRAFT = 'draft',
+  SENT = 'sent',
+  APPROVED = 'approved',
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
-  ON_HOLD = 'on_hold',
-  CANCELLED = 'cancelled',
 }
 
 @Entity('projects')
@@ -55,7 +56,13 @@ export class Project {
   @Column({ nullable: true })
   location: string;
 
-  @Column({ type: 'enum', enum: ProjectStatus, default: ProjectStatus.DRAFT })
+  @Column({ nullable: true })
+  type: string;
+
+  @Column({ nullable: true })
+  folder: string;
+
+  @Column({ type: 'varchar', default: ProjectStatus.DRAFT })
   status: ProjectStatus;
 
   @Column({ type: 'date', nullable: true })
@@ -66,6 +73,9 @@ export class Project {
 
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   estimated_budget: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
+  estimated_price: number;
 
   @OneToMany(() => Budget, (budget) => budget.project)
   budgets: Budget[];
@@ -81,6 +91,9 @@ export class Project {
 
   @OneToMany(() => Document, (doc) => doc.project)
   documents: Document[];
+
+  @OneToMany(() => ProjectPayment, (pp) => pp.project)
+  project_payments: ProjectPayment[];
 
   @CreateDateColumn()
   created_at: Date;

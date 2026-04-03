@@ -1,16 +1,107 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="theme-color" content="#1e40af" />
+    <meta name="description" content="BM Build Manage - Editor de Presupuestos de Construcción. Funciona sin conexión." />
+
+    <!-- iOS PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BM Build" />
+
+    <!-- Android PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="BM Build Manage" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="/logo-icon.png" />
+
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Preconnect for fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- Preload critical assets -->
+    <link rel="preload" as="image" href="/logo-icon.png" />
+
+    <!-- Inline critical CSS for instant load -->
+    <style>
+      /* Prevent flash of unstyled content */
+      html { background: #0a0a0a; }
+      body { margin: 0; font-family: 'Outfit', system-ui, sans-serif; }
+
+      /* Offline indicator */
+      .offline-indicator {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        background: #fef3c7;
+        color: #92400e;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        display: none;
+        z-index: 9999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      html.offline .offline-indicator { display: block; }
+
+      /* Loading skeleton */
+      #loading-skeleton {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0a0a0a;
+        z-index: 10000;
+      }
+      #loading-skeleton .spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid #1e40af;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      #loading-skeleton.hidden { display: none; }
+    </style>
+
     <title>BMBuildManage | Editor de Presupuestos</title>
   </head>
   <body>
+    <!-- Loading skeleton -->
+    <div id="loading-skeleton">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- React root -->
     <div id="root"></div>
+
+    <!-- Offline indicator (shown by CSS when offline) -->
+    <div class="offline-indicator" role="status" aria-live="polite">
+      Sin conexion - Datos guardados localmente
+    </div>
+
+    <!-- Main script -->
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Hide loading skeleton when app loads -->
+    <script>
+      window.addEventListener('load', () => {
+        document.getElementById('loading-skeleton')?.classList.add('hidden');
+      });
+    </script>
   </body>
 </html>

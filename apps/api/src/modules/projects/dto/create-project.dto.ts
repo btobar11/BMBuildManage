@@ -5,12 +5,14 @@ import {
   IsDateString,
   IsNumber,
   MaxLength,
+  Min,
 } from 'class-validator';
 import { ProjectStatus } from '../project.entity';
 
 export class CreateProjectDto {
+  @IsOptional()
   @IsString()
-  company_id: string;
+  company_id?: string;
 
   @IsOptional()
   @IsString()
@@ -29,6 +31,10 @@ export class CreateProjectDto {
   location?: string;
 
   @IsOptional()
+  @IsString()
+  type?: string;
+
+  @IsOptional()
   @IsEnum(ProjectStatus)
   status?: ProjectStatus;
 
@@ -42,5 +48,11 @@ export class CreateProjectDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   estimated_budget?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  estimated_price?: number;
 }

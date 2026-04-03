@@ -589,12 +589,48 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUnexpected = [];
             currentFiles = [];
             currentContracts = [];
-            currentBudgetWorkers = [];
         }
 
         updateEditorStatusUI();
         renderPhasesList();
         calculateSummary();
+    }
+
+    function openCubicador(pid, iid) {
+        alert('Asistente de Cubicación (Quantity Takeoff):\n\nEsta herramienta permitirá calcular cantidades ingresando Largo, Ancho, Alto y Factor.\n\n[PROTOTIPO]: Se integrará en un modal próximamente.');
+        // En implementación real, abriría un modal UI
+    }
+
+    function generatePurchaseList() {
+        const materials = [];
+        currentPhases.forEach(p => {
+            p.items.forEach(i => {
+                if (i.type === 'material') {
+                    materials.push(`${i.name}: ${i.quantity} ${i.unit}`);
+                }
+            });
+        });
+        
+        if (materials.length === 0) {
+            alert('No hay materiales en este presupuesto.');
+            return;
+        }
+
+        alert('LISTA DE COMPRA AUTOMÁTICA:\n\n' + materials.join('\n'));
+    }
+
+    function checkSmartSuggestions(item, input) {
+        const text = item.name.toLowerCase();
+        let suggestion = '';
+        if (text.includes('muro')) suggestion = 'Sugerencia: ¿Añadir Ladrillos y Cemento?';
+        if (text.includes('piso') || text.includes('ceramica')) suggestion = 'Sugerencia: ¿Añadir Adhesivo y Frague?';
+        if (text.includes('pintura')) suggestion = 'Sugerencia: ¿Añadir Rodillos y Cinta?';
+
+        // Show suggestion as a small tooltip or badge below input (simple for prototype)
+        if (suggestion) {
+            console.log('AI Suggestion:', suggestion);
+            // This could trigger a dropdown or highlight
+        }
     }
 
     function updateEditorStatusUI() {
@@ -644,11 +680,20 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPhasesList();
     });
 
+    const btnPurchaseList = document.createElement('button');
+    btnPurchaseList.className = 'btn-secondary btn-sm';
+    btnPurchaseList.innerText = '📦 Lista de Materiales';
+    btnPurchaseList.style.marginLeft = '10px';
+    document.querySelector('.phase-actions-main')?.appendChild(btnPurchaseList);
+    
+    btnPurchaseList.addEventListener('click', generatePurchaseList);
+
     function createPhaseItemRow(phaseId) {
         const phase = currentPhases.find(p => p.id === phaseId);
         if (!phase) return;
         phase.items.push({
             id: 'it_' + Date.now().toString() + Math.random().toString(36).substr(2, 5),
+            type: 'material',
             name: '',
             unit: 'm2',
             quantity: 1,
@@ -700,11 +745,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const colsHeader = document.createElement('div');
                 colsHeader.className = 'phase-cols-header';
                 colsHeader.innerHTML = `
+                    <div class="col-type">Tipo</div>
                     <div class="col-desc">Descripción</div>
-                    <div class="col-unit">Unidad</div>
+                    <div class="col-unit">Unid.</div>
                     <div class="col-qty">Cant.</div>
-                    <div class="col-price">Precio Un.</div>
+                    <div class="col-price">Unitario</div>
                     <div class="col-total">Total</div>
+                    <div class="col-calc"></div>
                     <div class="col-del"></div>
                 `;
                 itemsCont.appendChild(colsHeader);
@@ -714,11 +761,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     row.className = 'item-row';
 
                     row.innerHTML = `
+                        <select class="form-control item-type col-type" data-pid="${phase.id}" data-iid="${item.id}">
+                            <option value="material" ${item.type === 'material' ? 'selected' : ''}>Material</option>
+                            <option value="labor" ${item.type === 'labor' ? 'selected' : ''}>Mano de Obra</option>
+                            <option value="machinery" ${item.type === 'machinery' ? 'selected' : ''}>Maquinaria</option>
+                            <option value="subcontract" ${item.type === 'subcontract' ? 'selected' : ''}>Subcontrato</option>
+                        </select>
                         <input type="text" class="form-control item-name col-desc" placeholder="Ej: Demolición cerámica" value="${item.name}" data-pid="${phase.id}" data-iid="${item.id}">
                         <input type="text" class="form-control item-unit col-unit" placeholder="m2" value="${item.unit || 'm2'}" data-pid="${phase.id}" data-iid="${item.id}">
                         <input type="number" class="form-control item-qty col-qty" placeholder="1" value="${item.quantity}" min="0" data-pid="${phase.id}" data-iid="${item.id}">
                         <input type="number" class="form-control item-price col-price" placeholder="0" value="${item.unitPrice}" min="0" data-pid="${phase.id}" data-iid="${item.id}">
                         <div class="item-total-read col-total">${formatMoney(item.quantity * item.unitPrice)}</div>
+                        <button class="btn-icon btn-open-cubicator col-calc" data-pid="${phase.id}" data-iid="${item.id}" title="Abrir Cubicador" style="color:var(--accent-color); font-size:16px;">📏</button>
                         <button class="btn-icon btn-delete-pitem col-del" data-pid="${phase.id}" data-iid="${item.id}" title="Eliminar">&times;</button>
                     `;
                     itemsCont.appendChild(row);
@@ -753,8 +807,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Re-bind item inputs
-        phasesListContainer.querySelectorAll('.item-name, .item-unit, .item-qty, .item-price').forEach(input => {
+        phasesListContainer.querySelectorAll('.item-name, .item-unit, .item-qty, .item-price, .item-type').forEach(input => {
             input.addEventListener('input', handlePhaseItemChange);
+        });
+
+        phasesListContainer.querySelectorAll('.btn-open-cubicator').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const pid = e.target.getAttribute('data-pid');
+                const iid = e.target.getAttribute('data-iid');
+                openCubicador(pid, iid);
+            });
         });
 
         phasesListContainer.querySelectorAll('.btn-delete-pitem').forEach(btn => {
@@ -779,10 +841,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = p.items.find(x => x.id === iid);
         if (!item) return;
 
-        if (e.target.classList.contains('item-name'))  item.name = e.target.value;
+        if (e.target.classList.contains('item-name')) {
+            item.name = e.target.value;
+            checkSmartSuggestions(item, e.target);
+        }
         if (e.target.classList.contains('item-unit'))  item.unit = e.target.value;
         if (e.target.classList.contains('item-qty'))   item.quantity = parseFloat(e.target.value) || 0;
         if (e.target.classList.contains('item-price')) item.unitPrice = parseFloat(e.target.value) || 0;
+        if (e.target.classList.contains('item-type'))  item.type = e.target.value;
 
         item.total = item.quantity * item.unitPrice;
 

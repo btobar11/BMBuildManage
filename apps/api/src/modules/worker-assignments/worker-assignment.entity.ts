@@ -40,6 +40,18 @@ export class WorkerAssignment {
   @Column({ type: 'date', nullable: true })
   end_date: Date;
 
+  @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true })
+  performance_rating: number;
+
+  @Column({ type: 'text', nullable: true })
+  performance_notes: string;
+
+  @Column({ type: 'text', nullable: true })
+  task_description: string;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  total_paid: number;
+
   @CreateDateColumn()
   created_at: Date;
 }

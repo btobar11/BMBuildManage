@@ -4,12 +4,15 @@ import { Repository } from 'typeorm';
 import { Item } from './item.entity';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { AuditAction } from '../audit-logs/audit-log.entity';
 
 @Injectable()
 export class ItemsService {
   constructor(
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   create(createItemDto: CreateItemDto) {
@@ -29,10 +32,24 @@ export class ItemsService {
     return item;
   }
 
-  async update(id: string, updateItemDto: UpdateItemDto) {
+  async update(id: string, updateItemDto: UpdateItemDto, userId?: string, companyId?: string) {
     const item = await this.findOne(id);
+    const oldValue = { ...item };
     this.itemRepository.merge(item, updateItemDto);
-    return this.itemRepository.save(item);
+    const saved = await this.itemRepository.save(item);
+
+    await this.auditLogsService.logEvent({
+      company_id: companyId,
+      entity_name: 'Item',
+      entity_id: saved.id,
+      action: AuditAction.UPDATE,
+      old_value: oldValue,
+      new_value: saved,
+      user_id: userId,
+      description: `Item actualizado: ${saved.name}`,
+    });
+
+    return saved;
   }
 
   async remove(id: string) {

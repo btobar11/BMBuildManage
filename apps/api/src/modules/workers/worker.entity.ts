@@ -38,6 +38,15 @@ export class Worker {
   @Column({ nullable: true })
   phone: string;
 
+  @Column({ type: 'text', nullable: true })
+  skills: string;
+
+  @Column({ type: 'decimal', precision: 3, scale: 1, default: 0 })
+  rating: number;
+
+  @Column({ type: 'text', nullable: true })
+  notes: string;
+
   @OneToMany(() => WorkerAssignment, (wa) => wa.worker)
   assignments: WorkerAssignment[];
 

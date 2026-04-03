@@ -1,0 +1,50 @@
+{
+  "name": "BM Build Manage",
+  "short_name": "BM Build",
+  "description": "Editor de Presupuestos de Construcción - Offline Ready",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Nuevo Presupuesto",
+      "short_name": "Nuevo",
+      "description": "Crear un nuevo presupuesto",
+      "url": "/dashboard",
+      "icons": [{ "src": "/logo-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "APU Library",
+      "short_name": "APU",
+      "description": "Biblioteca de Análisis de Precios Unitarios",
+      "url": "/apu-library",
+      "icons": [{ "src": "/logo-icon.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
