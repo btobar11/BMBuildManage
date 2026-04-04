@@ -19,13 +19,8 @@ export function LoginPage() {
     setError(null);
     
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) throw authError;
-      
       localStorage.removeItem('DEV_TOKEN');
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -42,143 +37,97 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#0a0a12] relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-violet-600/20 blur-[150px] rounded-full animate-float" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-fuchsia-600/15 blur-[120px] rounded-full animate-float-delayed" />
-        <div className="absolute inset-0 grid-pattern opacity-20" />
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+      <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <div className="bg-white/95 backdrop-blur-sm px-5 py-3 rounded-2xl border border-white/20 shadow-lg shadow-violet-500/10 transform hover:scale-[1.02] transition-transform">
-            <img src="/logo-full.png" alt="BMBuildManage" className="h-10 object-contain" />
-          </div>
+          <img src="/logo-full.png" alt="BMBuildManage" className="h-8 object-contain" />
         </div>
 
         {/* Card */}
-        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl shadow-violet-900/20">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-black text-white mb-2">¡Bienvenido de vuelta!</h1>
-            <p className="text-white/50 text-sm">Ingresa tus credenciales para continuar</p>
-          </div>
+        <div className="bg-card rounded-xl border border-border p-8 shadow-sm">
+          <h1 className="text-xl font-bold text-foreground text-center mb-2">¡Bienvenido!</h1>
+          <p className="text-sm text-muted-foreground text-center mb-8">Ingresa tus credenciales</p>
 
           {error && (
-            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-sm text-center">
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-600 text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-white/60 uppercase tracking-wider ml-1">
-                Correo Electrónico
-              </label>
-              <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-xl blur opacity-0 group-focus-within:opacity-30 transition-opacity" />
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-violet-400 transition-colors">
-                    <Mail size={18} />
-                  </div>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-11 pr-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 transition-all"
-                    placeholder="nombre@empresa.com"
-                  />
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Correo</label>
+              <div className="relative">
+                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                  placeholder="nombre@empresa.com"
+                />
               </div>
             </div>
 
-            {/* Password */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center ml-1">
-                <label className="text-xs font-bold text-white/60 uppercase tracking-wider">
-                  Contraseña
-                </label>
-                <button type="button" className="text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors">
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-sm font-medium text-foreground">Contraseña</label>
+                <button type="button" className="text-xs text-emerald-600 hover:text-emerald-700 font-medium">
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
-              <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-xl blur opacity-0 group-focus-within:opacity-30 transition-opacity" />
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-violet-400 transition-colors">
-                    <Lock size={18} />
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-11 pr-12 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 transition-all"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white/60 transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
+              <div className="relative">
+                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg shadow-violet-500/30 flex items-center justify-center gap-2 group transition-all transform active:scale-[0.98]"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <>
-                  Iniciar Sesión
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </>
+                <>Iniciar Sesión <ArrowRight size={18} /></>
               )}
             </button>
           </form>
 
-          {/* Demo Button */}
-          <div className="mt-8 space-y-4">
+          <div className="mt-6">
             <button
               onClick={handleDemoLogin}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/70 hover:text-white font-medium transition-all"
+              className="w-full flex items-center justify-center gap-2 py-2.5 border border-border rounded-lg text-foreground hover:bg-muted font-medium transition-colors"
             >
-              <LayoutDashboard size={18} className="text-violet-400" />
-              <span>Acceso Demo (Desarrollo)</span>
+              <LayoutDashboard size={18} className="text-emerald-600" />
+              <span>Acceso Demo</span>
             </button>
-            
-            <p className="text-center text-white/50 text-sm">
-              ¿No tienes cuenta?{' '}
-              <button 
-                onClick={() => navigate('/register')}
-                className="text-violet-400 font-bold hover:text-violet-300 transition-colors"
-                type="button"
-              >
-                Regístrate aquí
-              </button>
-            </p>
           </div>
-        </div>
 
-        {/* Footer */}
-        <p className="text-center text-white/30 text-xs mt-6">
-          Al iniciar sesión, aceptas nuestros{' '}
-          <a href="#" className="text-violet-400 hover:text-violet-300">Términos</a> y{' '}
-          <a href="#" className="text-violet-400 hover:text-violet-300">Privacidad</a>
-        </p>
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            ¿No tienes cuenta?{' '}
+            <button onClick={() => navigate('/register')} className="text-emerald-600 font-medium hover:text-emerald-700">
+              Regístrate aquí
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );
