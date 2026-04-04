@@ -15,6 +15,7 @@ import { CompanySettingsPage } from './features/company/CompanySettingsPage';
 import { MainLayout } from './components/layout/MainLayout';
 import { ConfigWarning } from './components/ConfigWarning';
 import { Toaster } from 'react-hot-toast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
   const { token, isLoading, isConfigured } = useAuth();
@@ -34,7 +35,7 @@ function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <Toaster position="top-right" />
       <Routes>
         <Route 
@@ -89,7 +90,7 @@ function App() {
           element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" />} 
         />
       </Routes>
-    </>
+    </ErrorBoundary>
   );
 }
 

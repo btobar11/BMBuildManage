@@ -74,7 +74,16 @@ const localStoragePersister = createAsyncStoragePersister({
 
   // Compression for large datasets (budgets with many items)
   serialize: (data) => compress(JSON.stringify(data)) ?? '',
-  deserialize: (data) => JSON.parse(decompress(data as string) ?? '{}'),
+  deserialize: (data) => {
+    try {
+      if (!data || typeof data !== 'string') return {};
+      const decompressed = decompress(data);
+      return decompressed ? JSON.parse(decompressed) : {};
+    } catch (e) {
+      console.error('[Persistence] Deserialization failed:', e);
+      return {};
+    }
+  },
 });
 
 // ============================================
@@ -137,41 +146,49 @@ function setupNetworkTracking() {
 // ============================================
 // INITIALIZE APP
 // ============================================
-setupNetworkTracking();
+try {
+  setupNetworkTracking();
 
-// Register Service Worker
-registerServiceWorker();
+  // Register Service Worker
+  registerServiceWorker();
 
-// Render app with persistence
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{
-        persister: localStoragePersister,
+  // Render app with persistence
+  const container = document.getElementById('root');
+  if (!container) throw new Error('Root element not found');
 
-        // Debounce persistence to avoid excessive writes
-        dehydrateOptions: {
-          shouldDehydrateQuery: (query) => {
-            // Only persist successful queries
-            return query.state.status === 'success';
+  const root = createRoot(container);
+  root.render(
+    <StrictMode>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: localStoragePersister,
+          dehydrateOptions: {
+            shouldDehydrateQuery: (query) => query.state.status === 'success',
           },
-        },
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        }}
+      >
+        <AuthProvider>
+          <ThemeProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </ThemeProvider>
+        </AuthProvider>
+      </PersistQueryClientProvider>
+    </StrictMode>
+  );
 
-        // Max age for persisted data: 7 days
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      }}
-    >
-      <AuthProvider>
-        <ThemeProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </ThemeProvider>
-      </AuthProvider>
-    </PersistQueryClientProvider>
-  </StrictMode>
-);
+  // Signal that app is ready to hide skeleton
+  window.dispatchEvent(new CustomEvent('app-ready'));
+  console.log('[Main] App initialization complete');
+
+} catch (error) {
+  console.error('[Main] CRITICAL INITIALIZATION ERROR:', error);
+  // Emergency: Hide skeleton so user can see ErrorBoundary (if it loaded) or console
+  window.dispatchEvent(new CustomEvent('app-ready'));
+}
 
 // Export for testing
 export { queryClient };

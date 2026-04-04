@@ -87,11 +87,15 @@
     <!-- Theme initialization script - runs before React -->
     <script>
       (function() {
-        const saved = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
+        try {
+          const saved = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = saved || (prefersDark ? 'dark' : 'light');
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          console.warn('Theme initialization failed:', e);
         }
       })();
     </script>
@@ -117,9 +121,22 @@
 
     <!-- Hide loading skeleton when app loads -->
     <script>
-      window.addEventListener('load', () => {
-        document.getElementById('loading-skeleton')?.classList.add('hidden');
-      });
+      const hideSkeleton = () => {
+        const skeleton = document.getElementById('loading-skeleton');
+        if (skeleton && !skeleton.classList.contains('hidden')) {
+          skeleton.classList.add('hidden');
+          console.log('Skeleton hidden');
+        }
+      };
+
+      // Hide on load
+      window.addEventListener('load', hideSkeleton);
+      
+      // Safety timeout: 10 seconds max if something fails to load
+      setTimeout(hideSkeleton, 10000);
+
+      // Listen for custom event from React if ready earlier
+      window.addEventListener('app-ready', hideSkeleton);
     </script>
   </body>
 </html>
