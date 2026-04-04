@@ -8,14 +8,14 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
-import { UsersService } from '../../users/users.service';
+import { UsersService } from '../../modules/users/users.service';
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
   constructor(
     private configService: ConfigService,
-    // @Inject(forwardRef(() => UsersService))
-    // private usersService: UsersService,
+    @Inject(forwardRef(() => UsersService))
+    private usersService: UsersService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,8 +28,7 @@ export class SupabaseAuthGuard implements CanActivate {
 
     const token = authHeader.replace('Bearer ', '');
 
-    // Development bypass
-    if (token === 'dev-token') {
+    if (process.env.NODE_ENV !== 'production' && token === 'dev-token') {
       request.user = {
         id: '11111111-1111-1111-1111-111111111111',
         email: 'demo@bmbuild.com',
@@ -50,18 +49,25 @@ export class SupabaseAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    // Fetch user role from DB - TEMPORARILY BYPASSED for DI debugging
-    const role = 'admin'; // Hardcoded for diagnostic run
-    /*
+    let role = 'admin';
+    let companyId: string | undefined;
+
     try {
       const dbUser = await this.usersService.findOne(data.user.id);
-      if (dbUser) role = dbUser.role;
+      if (dbUser) {
+        role = dbUser.role || 'admin';
+        companyId = dbUser.company_id;
+      }
     } catch {
       // User not yet in DB, use default role
     }
-    */
 
-    request.user = { ...data.user, company_id: data.user.user_metadata?.company_id, role };
+    request.user = { 
+      id: data.user.id,
+      email: data.user.email,
+      company_id: companyId || data.user.user_metadata?.company_id, 
+      role 
+    };
     request.token = token;
     return true;
   }

@@ -6,6 +6,7 @@ import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { CreateProjectModal } from './components/CreateProjectModal';
 import { FolderSidebar } from './components/FolderSidebar';
+import { ConfirmModal, PromptModal } from '../../components/Modal';
 import { 
   Plus, 
   Search, 
@@ -69,6 +70,8 @@ export const DashboardPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showFolderPrompt, setShowFolderPrompt] = useState(false);
 
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ['projects'],
@@ -94,11 +97,11 @@ export const DashboardPage = () => {
 
   const handleBulkDelete = async () => {
     if (!selectedIds.length) return;
-    
-    // Custom prettier confirmation logic can be added later, for now we improve the process feedback
-    const ok = window.confirm(`¿Estás seguro de que deseas eliminar ${selectedIds.length} proyectos? Esta acción eliminará permanentemente todos los presupuestos, gastos y documentos asociados.`);
-    if (!ok) return;
+    setShowDeleteConfirm(true);
+  };
 
+  const confirmBulkDelete = async () => {
+    setShowDeleteConfirm(false);
     setIsProcessing(true);
     
     const deletePromise = api.post('/projects/bulk-delete', { ids: selectedIds });
@@ -123,7 +126,6 @@ export const DashboardPage = () => {
     setIsRefreshing(true);
     try {
       await queryClient.invalidateQueries({ queryKey: ['projects'] });
-      // Artificial delay to show the animation as requested by user
       await new Promise(resolve => setTimeout(resolve, 800));
       toast.success('Datos actualizados');
     } catch (_error) {
@@ -133,15 +135,16 @@ export const DashboardPage = () => {
     }
   };
 
-  const handleBulkMove = async (folder: string | null) => {
-    if (!selectedIds.length) return;
+  const confirmBulkMove = async (folderName: string) => {
+    setShowFolderPrompt(false);
     try {
-      await api.patch('/projects/bulk-update-folder', { ids: selectedIds, folder });
+      await api.patch('/projects/bulk-update-folder', { ids: selectedIds, folder: folderName });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setSelectedIds([]);
+      toast.success(`Proyectos movidos a "${folderName}"`);
     } catch (_error) {
       console.error('Error in bulk move:', _error);
-      alert('Error al mover proyectos');
+      toast.error('Error al mover proyectos');
     }
   };
 
@@ -203,7 +206,7 @@ export const DashboardPage = () => {
               ${new Intl.NumberFormat('es-CL').format(projects?.reduce((acc: number, p: Project) => acc + (p.estimated_budget || 0), 0) || 0)}
             </h3>
             <p className="text-[10px] text-emerald-500 font-bold mt-2 flex items-center gap-1">
-              <TrendingUp size={12} /> Capital gestionado activo
+              <TrendingUp size={12} /> {projects?.length || 0} proyectos activos
             </p>
           </div>
 
@@ -211,9 +214,11 @@ export const DashboardPage = () => {
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
               <BarChart3 size={48} className="text-blue-500" />
             </div>
-            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Margen Promedio</p>
-            <h3 className="text-2xl font-bold mt-2 text-blue-400">15.2%</h3>
-            <p className="text-[10px] text-blue-500/70 font-medium mt-2">Proyectado según presupuestos</p>
+            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Proyectos Enviados</p>
+            <h3 className="text-2xl font-bold mt-2 text-blue-400">
+              {projects?.filter(p => p.status === 'sent').length || 0}
+            </h3>
+            <p className="text-[10px] text-blue-500/70 font-medium mt-2">Pendientes de aprobación</p>
           </div>
 
           <div className="glass p-6 rounded-2xl relative overflow-hidden group">
@@ -231,9 +236,11 @@ export const DashboardPage = () => {
             <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
               <CheckCircle2 size={48} className="text-indigo-500" />
             </div>
-            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Efectividad Entrega</p>
-            <h3 className="text-2xl font-bold mt-2 text-indigo-400">98%</h3>
-            <p className="text-[10px] text-indigo-500/70 font-medium mt-2">KPI de cumplimiento histórico</p>
+            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Proyectos Completados</p>
+            <h3 className="text-2xl font-bold mt-2 text-indigo-400">
+              {projects?.filter(p => p.status === 'completed').length || 0}
+            </h3>
+            <p className="text-[10px] text-indigo-500/70 font-medium mt-2">Histórico total</p>
           </div>
         </div>
 
@@ -382,12 +389,8 @@ export const DashboardPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Create new folder trigger */}
             <button 
-              onClick={() => {
-                const name = prompt('Nombre de la nueva carpeta:');
-                if (name) handleBulkMove(name);
-              }}
+              onClick={() => setShowFolderPrompt(true)}
               className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm font-semibold transition-colors"
             >
               <FolderOpen size={18} />
@@ -421,6 +424,32 @@ export const DashboardPage = () => {
           queryClient.invalidateQueries({ queryKey: ['projects'] });
           navigate(`/budget/${budgetId}`);
         }}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={confirmBulkDelete}
+        title="Eliminar proyectos"
+        message={
+          <>
+            ¿Estás seguro de que deseas eliminar <strong>{selectedIds.length}</strong> proyecto{selectedIds.length > 1 ? 's' : ''}? Esta acción eliminará permanentemente todos los presupuestos, gastos y documentos asociados.
+          </>
+        }
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={isProcessing}
+      />
+
+      <PromptModal
+        isOpen={showFolderPrompt}
+        onClose={() => setShowFolderPrompt(false)}
+        onSubmit={confirmBulkMove}
+        title="Organizar en carpeta"
+        message="Ingresa el nombre de la carpeta donde quieres mover los proyectos seleccionados."
+        placeholder="Nombre de la carpeta"
+        submitText="Mover"
       />
     </div>
   );

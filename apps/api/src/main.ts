@@ -2,6 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import { HttpExceptionFilter, AllExceptionsFilter } from './common/filters';
+import { LoggingInterceptor } from './common/interceptors';
+import { appCorsConfig, validationPipeConfig } from './config';
 import express from 'express';
 
 const server = express();
@@ -12,37 +15,27 @@ export const createApp = async (expressInstance: any) => {
     new ExpressAdapter(expressInstance),
   );
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-
-  app.enableCors({
-    origin: process.env.FRONTEND_URL || '*',
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
-
+  app.useGlobalPipes(new ValidationPipe(validationPipeConfig));
+  app.enableCors(appCorsConfig);
+  app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
+  app.useGlobalInterceptors(new LoggingInterceptor());
   app.setGlobalPrefix('api/v1');
   await app.init();
   return app;
 };
 
-// Vercel Serverless Function handler
 export default async (req: any, res: any) => {
   await createApp(server);
   server(req, res);
 };
 
-// For local development
 if (process.env.NODE_ENV !== 'production') {
   const bootstrap = async () => {
     const app = await NestFactory.create(AppModule);
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-    app.enableCors();
+    app.useGlobalPipes(new ValidationPipe(validationPipeConfig));
+    app.enableCors(appCorsConfig);
+    app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
+    app.useGlobalInterceptors(new LoggingInterceptor());
     app.setGlobalPrefix('api/v1');
     const port = process.env.PORT || 3001;
     await app.listen(port);

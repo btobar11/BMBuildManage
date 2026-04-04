@@ -35,8 +35,13 @@
     <!-- Inline critical CSS for instant load -->
     <style>
       /* Prevent flash of unstyled content */
-      html { background: #0a0a0a; }
+      html { background: #f8fafc; }
+      html.dark { background: #0d0f14; }
       body { margin: 0; font-family: 'Outfit', system-ui, sans-serif; }
+
+      /* Theme initialization - prevent FOUC */
+      html { color-scheme: light; }
+      html.dark { color-scheme: dark; }
 
       /* Offline indicator */
       .offline-indicator {
@@ -61,9 +66,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #0a0a0a;
+        background: #f8fafc;
         z-index: 10000;
       }
+      html.dark #loading-skeleton { background: #0d0f14; }
       #loading-skeleton .spinner {
         width: 48px;
         height: 48px;
@@ -77,6 +83,18 @@
       }
       #loading-skeleton.hidden { display: none; }
     </style>
+
+    <!-- Theme initialization script - runs before React -->
+    <script>
+      (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved || (prefersDark ? 'dark' : 'light');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
 
     <title>BMBuildManage | Editor de Presupuestos</title>
   </head>

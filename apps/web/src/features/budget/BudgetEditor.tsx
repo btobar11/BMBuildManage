@@ -21,6 +21,8 @@ import { AuditLogSidebar } from './components/AuditLogSidebar';
 import { DocumentsTab } from './components/DocumentsTab';
 import { BimTab } from './components/BimTab';
 import { CashflowTab } from './components/CashflowTab';
+import { ConfirmModal } from '../../components/Modal';
+import toast from 'react-hot-toast';
 
 const TABS: { id: BudgetTab; label: string; icon: ReactNode }[] = [
   { id: 'presupuesto', label: 'Presupuesto', icon: <FileText size={14} /> },
@@ -171,18 +173,16 @@ export default function BudgetEditor() {
       setTimeout(() => setSaveStatus('idle'), 3000);
     },
     onError: (err: any) => {
-      // If error is network-related and we are offline, it's actually "pending" thanks to SW
       if (!navigator.onLine || err.message === 'Network Error' || err.code === 'ERR_NETWORK') {
-        setSaveStatus('saved'); // Show as saved/pending to avoid alarming the user
+        setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 3000);
-        // We could show a toast here too
         console.log('Offline: Mutation queued by Service Worker');
         return;
       }
 
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 5000);
-      alert('Error al guardar el presupuesto. Por favor, intente de nuevo.');
+      toast.error('Error al guardar el presupuesto. Por favor, intente de nuevo.');
     }
   });
 
@@ -192,19 +192,31 @@ export default function BudgetEditor() {
 
   const { mutate: createRevision, isPending: isCreatingRevision } = useMutation({
     mutationFn: async () => {
-      // Save current state first to ensure revision is based on latest edits
       await performSave(); 
       return api.post(`/budgets/${id}/revision`);
     },
     onSuccess: (response) => {
       const newBudget = response.data;
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      if (confirm(`Nueva versión v${newBudget.version} creada. ¿Ir a la nueva versión?`)) {
-        navigate(`/budget/${newBudget.id}`);
-      }
+      queryClient.invalidateQueries({ queryKey: ['budget', id] });
+      toast.success(
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 font-bold">✓</div>
+          <div>
+            <p className="font-bold">Nueva versión v{newBudget.version} creada</p>
+            <button 
+              onClick={() => navigate(`/budget/${newBudget.id}`)}
+              className="text-blue-300 underline text-sm"
+            >
+              Ir a la nueva versión →
+            </button>
+          </div>
+        </div>,
+        { duration: 5000 }
+      );
     },
     onError: () => {
-      alert('Error al crear revisión del presupuesto.');
+      toast.error('Error al crear revisión del presupuesto.');
     },
   });
 
@@ -258,6 +270,7 @@ export default function BudgetEditor() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showAuditLog, setShowAuditLog] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [showRevisionConfirm, setShowRevisionConfirm] = useState(false);
 
   if (isLoading) {
     return (
@@ -302,8 +315,9 @@ export default function BudgetEditor() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      toast.success('Excel exportado correctamente');
     } catch {
-      alert('Error al exportar el presupuesto. Guarda los cambios primero e intenta de nuevo.');
+      toast.error('Error al exportar. Guarda los cambios primero.');
     } finally {
       setExporting(false);
     }
@@ -325,8 +339,9 @@ export default function BudgetEditor() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      toast.success('PDF exportado correctamente');
     } catch {
-      alert('Error al exportar el PDF. Guarda los cambios primero e intenta de nuevo.');
+      toast.error('Error al exportar PDF. Guarda los cambios primero.');
     } finally {
       setExporting(false);
     }
@@ -398,18 +413,14 @@ export default function BudgetEditor() {
              >
                <Plus size={13} /> Etapa
              </button>
-             <button
-               onClick={() => {
-                 if (confirm('¿Crear una nueva versión del presupuesto? Se guardará una copia independiente del estado actual.')) {
-                   createRevision();
-                 }
-               }}
-               disabled={isCreatingRevision}
-               title={`Crear nueva versión (actual: v${serverBudget?.version || 1})`}
-               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:bg-muted px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-             >
-               <GitBranch size={13} /> v{serverBudget?.version || 1}
-             </button>
+              <button
+                onClick={() => setShowRevisionConfirm(true)}
+                disabled={isCreatingRevision}
+                title={`Crear nueva versión (actual: v${serverBudget?.version || 1})`}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:bg-muted px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <GitBranch size={13} /> v{serverBudget?.version || 1}
+              </button>
             <div className="w-px h-4 bg-border mx-1" />
             <button
               id="save-budget-button"
@@ -562,6 +573,21 @@ export default function BudgetEditor() {
           onClose={() => setShowTemplates(false)} 
         />
       )}
+
+      <ConfirmModal
+        isOpen={showRevisionConfirm}
+        onClose={() => setShowRevisionConfirm(false)}
+        onConfirm={() => {
+          setShowRevisionConfirm(false);
+          createRevision();
+        }}
+        title="Crear nueva versión"
+        message="¿Crear una nueva versión del presupuesto? Se guardará una copia independiente del estado actual."
+        confirmText="Crear Versión"
+        cancelText="Cancelar"
+        variant="info"
+        isLoading={isCreatingRevision}
+      />
 
       {/* Print styles */}
       <style>{`

@@ -12,7 +12,7 @@ import {
 import { WorkerAssignmentsService } from './worker-assignments.service';
 import { CreateWorkerAssignmentDto } from './dto/create-worker-assignment.dto';
 import { UpdateWorkerAssignmentDto } from './dto/update-worker-assignment.dto';
-import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 @Controller('worker-assignments')
 @UseGuards(SupabaseAuthGuard)

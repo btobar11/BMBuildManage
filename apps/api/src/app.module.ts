@@ -27,6 +27,7 @@ import { ContingenciesModule } from './modules/contingencies/contingencies.modul
 import { UnitsModule } from './modules/units/units.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { databaseConfig } from './config';
 
 @Module({
   imports: [
@@ -40,14 +41,16 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: false, // Set to false to avoid issues with Supabase Pooler and permissions
-        logging: true,
+        synchronize: process.env.NODE_ENV !== 'production',
+        logging: process.env.NODE_ENV !== 'production',
+        ssl: process.env.NODE_ENV === 'production' 
+          ? { rejectUnauthorized: false } 
+          : false,
       }),
       inject: [ConfigService],
     }),
     AuthModule,
     CompaniesModule,
-    UsersModule,
     ClientsModule,
     ProjectsModule,
     BudgetsModule,
@@ -69,6 +72,7 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
     UnitsModule,
     SeedModule,
     AuditLogsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

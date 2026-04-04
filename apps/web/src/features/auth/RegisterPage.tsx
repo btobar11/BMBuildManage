@@ -20,7 +20,6 @@ export function RegisterPage() {
     setError(null);
     
     try {
-      // 1. Sign up user in Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -37,23 +36,17 @@ export function RegisterPage() {
         throw new Error('No se pudo crear la sesión. Verifica tu correo si requiere confirmación.');
       }
 
-      // 2. Set the Authorization header for api calls manually since AuthContext might not have picked it up yet
       api.defaults.headers.common['Authorization'] = `Bearer ${authData.session.access_token}`;
 
-      // 3. Create Company in Backend
-      console.log('Creando empresa...');
       const companyResponse = await api.post('/companies', {
         name: companyName,
       });
       const newCompany = companyResponse.data;
 
-      // 4. Update Supabase User Metadata with company_id
       await supabase.auth.updateUser({
         data: { company_id: newCompany.id }
       });
 
-      // 5. Create User profile in Backend
-      console.log('Creando perfil de usuario...');
       await api.post('/users', {
         id: authData.user.id,
         email,
@@ -62,7 +55,6 @@ export function RegisterPage() {
         company_id: newCompany.id,
       });
       
-      // Clear dev token if it exists
       localStorage.removeItem('DEV_TOKEN');
       navigate('/onboarding');
     } catch (err: unknown) {
@@ -75,11 +67,10 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground font-sans flex overflow-hidden">
       
       {/* Left Panel - Feature Showcase (Hidden on Mobile) */}
       <div className="hidden lg:flex w-1/2 relative bg-gradient-to-br from-indigo-900/40 via-[#06080a] to-blue-900/20 border-r border-white/5 overflow-hidden">
-        {/* Abstract shapes */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[100px] rounded-full mix-blend-screen pointer-events-none" />
         <div className="absolute bottom-[20%] right-[-20%] w-[60%] h-[60%] bg-indigo-500/10 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
         
@@ -116,7 +107,7 @@ export function RegisterPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white mb-1">Historial Inmutable</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">Con nuestro *Audit Log* nunca perderás de vista qué cantidad se modificó, quién la modificó y cuándo.</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">Con nuestro Audit Log nunca perderás de vista qué cantidad se modificó, quién la modificó y cuándo.</p>
               </div>
             </div>
 
@@ -136,7 +127,7 @@ export function RegisterPage() {
       {/* Right Panel - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative z-10">
         
-        {/* Mobile Header (Shows only on small screens) */}
+        {/* Mobile Header */}
         <div className="absolute top-8 left-6 sm:left-12 flex lg:hidden items-center gap-3 cursor-pointer z-20" onClick={() => navigate('/')}>
           <img 
             src="/logo-full.png" 
@@ -146,16 +137,16 @@ export function RegisterPage() {
         </div>
 
         <div className="w-full max-w-md">
-          <div className="bg-white sm:bg-transparent sm:border-0 p-8 sm:p-0 rounded-3xl shadow-xl sm:shadow-none border border-slate-200 sm:border-transparent">
+          <div className="bg-card/80 backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl">
             <div className="flex flex-col mb-8">
-              <h2 className="text-3xl font-bold text-slate-900 mb-2">Crear Cuenta</h2>
-              <p className="text-slate-500 text-sm">
-                Rellena estos pocos datos para configurar tu entorno corporativo
+              <h2 className="text-3xl font-bold text-foreground mb-2">Crear Cuenta</h2>
+              <p className="text-muted-foreground text-sm">
+                Rellena estos datos para configurar tu entorno corporativo
               </p>
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm flex items-start gap-3">
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-start gap-3">
                 <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
@@ -163,11 +154,11 @@ export function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                   Nombre Completo
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-blue-500 transition-colors">
                     <User size={18} />
                   </div>
                   <input
@@ -175,18 +166,18 @@ export function RegisterPage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                    className="block w-full pl-11 pr-4 py-3.5 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-card transition-all"
                     placeholder="Juan Pérez"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                   Nombre de la Empresa
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-blue-500 transition-colors">
                     <Building2 size={18} />
                   </div>
                   <input
@@ -194,18 +185,18 @@ export function RegisterPage() {
                     required
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                    className="block w-full pl-11 pr-4 py-3.5 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-card transition-all"
                     placeholder="Constructora ABC"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                   Correo Electrónico
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-blue-500 transition-colors">
                     <Mail size={18} />
                   </div>
                   <input
@@ -213,18 +204,18 @@ export function RegisterPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                    className="block w-full pl-11 pr-4 py-3.5 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-card transition-all"
                     placeholder="nombre@empresa.com"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">
                   Contraseña
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-blue-500 transition-colors">
                     <Lock size={18} />
                   </div>
                   <input
@@ -233,7 +224,7 @@ export function RegisterPage() {
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                    className="block w-full pl-11 pr-4 py-3.5 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-card transition-all"
                     placeholder="••••••••"
                   />
                 </div>
@@ -257,12 +248,12 @@ export function RegisterPage() {
               </div>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-slate-200 text-center">
-              <p className="text-slate-500 text-sm">
+            <div className="mt-8 pt-6 border-t border-border text-center">
+              <p className="text-muted-foreground text-sm">
                 ¿Ya eres miembro?{' '}
                 <button 
                   onClick={() => navigate('/login')}
-                  className="text-blue-600 font-semibold hover:text-blue-700 transition-colors focus:outline-none focus:underline"
+                  className="text-blue-600 font-semibold hover:text-blue-500 transition-colors focus:outline-none focus:underline"
                   type="button"
                 >
                   Inicia sesión aquí
@@ -272,7 +263,6 @@ export function RegisterPage() {
           </div>
         </div>
       </div>
-      
     </div>
   );
 }

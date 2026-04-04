@@ -12,7 +12,7 @@ import {
 import { WorkerPaymentsService } from './worker-payments.service';
 import { CreateWorkerPaymentDto } from './dto/create-worker-payment.dto';
 import { UpdateWorkerPaymentDto } from './dto/update-worker-payment.dto';
-import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 @Controller('worker-payments')
 @UseGuards(SupabaseAuthGuard)

@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UseGuards, Req, Param } from '@nestjs/common';
 import { AuditLogsService } from './audit-logs.service';
-import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
