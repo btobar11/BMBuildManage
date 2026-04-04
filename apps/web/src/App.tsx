@@ -13,19 +13,22 @@ import { WorkersPage } from './features/workers/WorkersPage';
 import { InvoicesPage } from './features/invoices/InvoicesPage';
 import { CompanySettingsPage } from './features/company/CompanySettingsPage';
 import { MainLayout } from './components/layout/MainLayout';
-
+import { ConfigWarning } from './components/ConfigWarning';
 import { Toaster } from 'react-hot-toast';
 
-console.log('APP COMPONENT STARTING');
 function App() {
-
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, isConfigured } = useAuth();
   const isAuthenticated = !!token;
+
+  // Si Supabase no está configurado, mostrar warning
+  if (!isConfigured && !isLoading) {
+    return <ConfigWarning />;
+  }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
