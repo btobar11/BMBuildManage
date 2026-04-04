@@ -25,7 +25,6 @@ export const ThemeToggle: React.FC = () => {
     { id: 'system', label: 'Sistema', icon: Monitor, description: `Seguir al sistema (${systemTheme === 'dark' ? 'oscuro' : 'claro'})` },
   ] as const;
 
-  const currentTheme = theme;
   const Icon = theme === 'dark' ? Moon : Sun;
 
   const handleSelect = (id: 'light' | 'dark' | 'system') => {
@@ -33,65 +32,57 @@ export const ThemeToggle: React.FC = () => {
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
         localStorage.removeItem('theme');
-        setTheme(getSystemTheme());
-      } else {
-        setTheme(systemTheme);
       }
-    } else {
-      setTheme(id);
     }
+    setTheme(id);
     setIsOpen(false);
   };
-
-  function getSystemTheme(): 'light' | 'dark' {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-xl border border-border bg-card text-foreground hover:bg-accent transition-all duration-300 shadow-sm group"
+        className="p-2 rounded-xl border border-white/10 bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 group"
         aria-label="Cambiar tema"
         aria-expanded={isOpen}
       >
-        <Icon className="w-5 h-5 text-indigo-600 group-hover:rotate-12 transition-transform duration-300" />
+        <Icon className="w-5 h-5 text-violet-400 group-hover:rotate-12 transition-transform duration-300" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-56 bg-[#12121a] border border-white/10 rounded-xl shadow-2xl shadow-violet-500/10 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-xl">
           <div className="p-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
+            <p className="text-xs font-bold text-white/40 uppercase tracking-wider px-3 py-2">
               Tema
             </p>
             {themeOptions.map((option) => {
               const IconComponent = option.icon;
               const isActive = option.id === 'system' 
-                ? theme === systemTheme && !localStorage.getItem('theme')
-                : option.id === currentTheme;
+                ? theme === 'system'
+                : option.id === theme;
 
               return (
                 <button
                   key={option.id}
                   onClick={() => handleSelect(option.id)}
                   className={cn(
-                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left',
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left',
                     isActive 
-                      ? 'bg-indigo-600/10 text-indigo-600' 
-                      : 'hover:bg-muted text-foreground'
+                      ? 'bg-gradient-to-r from-violet-500/20 to-fuchsia-500/10 text-violet-300 border border-violet-500/30' 
+                      : 'hover:bg-white/5 text-white/60 border border-transparent'
                   )}
                 >
-                  <IconComponent size={18} className={isActive ? 'text-indigo-600' : 'text-muted-foreground'} />
+                  <IconComponent size={18} className={isActive ? 'text-violet-400' : 'text-white/40'} />
                   <div className="flex-1">
-                    <p className={cn('text-sm font-medium', isActive && 'text-indigo-600')}>
+                    <p className={cn('text-sm font-semibold', isActive && 'text-white')}>
                       {option.label}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-white/40">
                       {option.description}
                     </p>
                   </div>
                   {isActive && (
-                    <div className="w-2 h-2 rounded-full bg-indigo-600" />
+                    <div className="w-2 h-2 rounded-full bg-violet-500 shadow-lg shadow-violet-500/50" />
                   )}
                 </button>
               );

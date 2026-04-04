@@ -1,17 +1,18 @@
 import React, { createContext, useContext, useEffect, useState, useSyncExternalStore } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
-  systemTheme: Theme;
+  systemTheme: 'light' | 'dark';
+  resolvedTheme: 'light' | 'dark';
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-function getSystemTheme(): Theme {
+function getSystemTheme(): 'light' | 'dark' {
   if (typeof window !== 'undefined' && window.matchMedia) {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
@@ -27,7 +28,7 @@ function subscribeToSystemTheme(callback: () => void) {
   return () => {};
 }
 
-function getSnapshot(): Theme {
+function getSnapshot(): 'light' | 'dark' {
   return getSystemTheme();
 }
 
@@ -35,9 +36,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
-      if (saved === 'light' || saved === 'dark') return saved;
+      if (saved === 'light' || saved === 'dark' || saved === 'system') return saved as Theme;
     }
-    return getSystemTheme();
+    return 'system';
   });
 
   const systemTheme = useSyncExternalStore(
@@ -46,23 +47,28 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     getSnapshot
   );
 
+  const resolvedTheme = theme === 'system' ? systemTheme : theme;
+
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
-    root.classList.add(theme);
+    root.classList.add(resolvedTheme);
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [theme, resolvedTheme]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
   };
 
   const toggleTheme = () => {
-    setThemeState(prev => prev === 'light' ? 'dark' : 'light');
+    setThemeState(prev => {
+      const currentResolved = prev === 'system' ? systemTheme : prev;
+      return currentResolved === 'light' ? 'dark' : 'light';
+    });
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, systemTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, systemTheme, resolvedTheme }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -9,12 +9,9 @@ import { FolderSidebar } from './components/FolderSidebar';
 import { ConfirmModal, PromptModal } from '../../components/Modal';
 import { 
   Plus, 
-  Search, 
-  Filter, 
+  Search,
   MapPin, 
   Calendar, 
-  ArrowRight,
-  TrendingUp,
   Clock,
   CheckCircle2,
   DollarSign,
@@ -22,7 +19,10 @@ import {
   Trash2,
   FolderOpen,
   X,
-  RefreshCcw
+  RefreshCcw,
+  Building2,
+  Sparkles,
+  ChevronRight
 } from 'lucide-react';
 
 interface Project {
@@ -42,10 +42,10 @@ interface Project {
 const ProjectStatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
     draft: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-    sent: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    sent: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
     approved: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     in_progress: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    completed: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    completed: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20',
   };
 
   const labels: Record<string, string> = {
@@ -57,7 +57,7 @@ const ProjectStatusBadge = ({ status }: { status: string }) => {
   };
 
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${styles[status] || styles.draft}`}>
+    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${styles[status] || styles.draft}`}>
       {labels[status] || status}
     </span>
   );
@@ -111,10 +111,10 @@ export const DashboardPage = () => {
       success: () => {
         queryClient.invalidateQueries({ queryKey: ['projects'] });
         setSelectedIds([]);
-        return `${selectedIds.length} proyectos eliminados correctamente`;
+        return `${selectedIds.length} proyectos eliminados`;
       },
       error: (err) => {
-        const errorMsg = err.response?.data?.message || 'Error al eliminar proyectos';
+        const errorMsg = err.response?.data?.message || 'Error al eliminar';
         return errorMsg;
       }
     }).finally(() => {
@@ -128,8 +128,8 @@ export const DashboardPage = () => {
       await queryClient.invalidateQueries({ queryKey: ['projects'] });
       await new Promise(resolve => setTimeout(resolve, 800));
       toast.success('Datos actualizados');
-    } catch (_error) {
-      toast.error('Error al actualizar datos');
+    } catch {
+      toast.error('Error al actualizar');
     } finally {
       setIsRefreshing(false);
     }
@@ -142,8 +142,7 @@ export const DashboardPage = () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setSelectedIds([]);
       toast.success(`Proyectos movidos a "${folderName}"`);
-    } catch (_error) {
-      console.error('Error in bulk move:', _error);
+    } catch {
       toast.error('Error al mover proyectos');
     }
   };
@@ -163,31 +162,40 @@ export const DashboardPage = () => {
     return matchesSearch && matchesFolder;
   });
 
+  const totalBudget = projects?.reduce((acc: number, p: Project) => acc + (p.estimated_budget || 0), 0) || 0;
+
   return (
-    <div className="h-full bg-background text-foreground p-6 md:p-10">
-      {/* Header */}
+    <div className="h-full bg-background text-foreground p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Panel de Proyectos
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Bienvenido de nuevo, <span className="text-indigo-400 font-medium">{user?.name}</span>.
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                <Building2 size={20} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-foreground">
+                  Panel de Proyectos
+                </h1>
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              Bienvenido, <span className="text-violet-400 font-bold">{user?.name}</span>. Tienes <span className="font-bold text-foreground">{projects?.length || 0}</span> proyectos activos.
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button 
               onClick={handleRefresh}
-              className="p-2.5 rounded-xl bg-secondary/50 hover:bg-secondary border border-border group transition-all"
-              title="Sincronizar cambios"
+              className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+              title="Sincronizar"
             >
-              <RefreshCcw size={18} className={`text-muted-foreground group-hover:text-primary transition-all ${isRefreshing ? 'animate-spin text-primary' : ''}`} />
+              <RefreshCcw size={18} className={`text-muted-foreground group-hover:text-violet-400 transition-all ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
             <button 
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/25 active:scale-95"
+              className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 active:scale-95"
             >
               <Plus size={20} />
               <span className="hidden sm:inline">Nuevo Proyecto</span>
@@ -195,57 +203,51 @@ export const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Stats Summary - Executive View */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="glass p-6 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <DollarSign size={48} className="text-emerald-500" />
-            </div>
-            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Valor Total Cartera</p>
-            <h3 className="text-2xl font-bold mt-2 text-foreground">
-              ${new Intl.NumberFormat('es-CL').format(projects?.reduce((acc: number, p: Project) => acc + (p.estimated_budget || 0), 0) || 0)}
-            </h3>
-            <p className="text-[10px] text-emerald-500 font-bold mt-2 flex items-center gap-1">
-              <TrendingUp size={12} /> {projects?.length || 0} proyectos activos
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-600/5 border border-violet-500/20 p-5 hover:border-violet-500/40 transition-all hover:shadow-xl hover:shadow-violet-500/10">
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all" />
+            <DollarSign size={24} className="text-violet-400 mb-3" />
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Valor Total</p>
+            <p className="text-2xl font-black text-foreground mt-1">
+              ${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(totalBudget)}
             </p>
+            <p className="text-xs text-violet-400 font-medium mt-2">{projects?.length || 0} proyectos</p>
           </div>
 
-          <div className="glass p-6 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <BarChart3 size={48} className="text-blue-500" />
-            </div>
-            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Proyectos Enviados</p>
-            <h3 className="text-2xl font-bold mt-2 text-blue-400">
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 p-5 hover:border-amber-500/40 transition-all hover:shadow-xl hover:shadow-amber-500/10">
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
+            <Clock size={24} className="text-amber-400 mb-3" />
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Enviados</p>
+            <p className="text-2xl font-black text-foreground mt-1">
               {projects?.filter(p => p.status === 'sent').length || 0}
-            </h3>
-            <p className="text-[10px] text-blue-500/70 font-medium mt-2">Pendientes de aprobación</p>
+            </p>
+            <p className="text-xs text-amber-400 font-medium mt-2">Pendientes</p>
           </div>
 
-          <div className="glass p-6 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Clock size={48} className="text-amber-500" />
-            </div>
-            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Obras en Curso</p>
-            <h3 className="text-2xl font-bold mt-2 text-foreground">
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 p-5 hover:border-emerald-500/40 transition-all hover:shadow-xl hover:shadow-emerald-500/10">
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all" />
+            <BarChart3 size={24} className="text-emerald-400 mb-3" />
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">En Obra</p>
+            <p className="text-2xl font-black text-foreground mt-1">
               {projects?.filter(p => p.status === 'in_progress').length || 0}
-            </h3>
-            <p className="text-[10px] text-amber-500 font-bold mt-2">Requieren supervisión activa</p>
+            </p>
+            <p className="text-xs text-emerald-400 font-medium mt-2">Activos</p>
           </div>
 
-          <div className="glass p-6 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-              <CheckCircle2 size={48} className="text-indigo-500" />
-            </div>
-            <p className="text-muted-foreground text-xs uppercase font-black tracking-widest">Proyectos Completados</p>
-            <h3 className="text-2xl font-bold mt-2 text-indigo-400">
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-fuchsia-500/10 to-fuchsia-600/5 border border-fuchsia-500/20 p-5 hover:border-fuchsia-500/40 transition-all hover:shadow-xl hover:shadow-fuchsia-500/10">
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-fuchsia-500/10 rounded-full blur-2xl group-hover:bg-fuchsia-500/20 transition-all" />
+            <CheckCircle2 size={24} className="text-fuchsia-400 mb-3" />
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Completados</p>
+            <p className="text-2xl font-black text-foreground mt-1">
               {projects?.filter(p => p.status === 'completed').length || 0}
-            </h3>
-            <p className="text-[10px] text-indigo-500/70 font-medium mt-2">Histórico total</p>
+            </p>
+            <p className="text-xs text-fuchsia-400 font-medium mt-2">Histórico</p>
           </div>
         </div>
 
         {/* Dashboard Content with Sidebar */}
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-6">
           <FolderSidebar 
             folders={folders}
             selectedFolder={selectedFolderFilter}
@@ -255,42 +257,57 @@ export const DashboardPage = () => {
           />
 
           <div className="flex-1 space-y-6">
-            {/* Search and Filter */}
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar por nombre o ubicación..."
-                  className="w-full bg-card/50 border border-border rounded-xl py-2.5 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-foreground placeholder:text-muted-foreground"
-                />
+            {/* Search */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1 group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-xl blur opacity-20 group-focus-within:opacity-40 transition-opacity" />
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar proyectos..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+                  />
+                </div>
               </div>
-              <button className="flex items-center gap-2 bg-card/50 border border-border px-4 py-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
-                <Filter size={18} />
-                <span>Filtros</span>
-              </button>
+              {selectedFolderFilter && (
+                <button 
+                  onClick={() => setSelectedFolderFilter(null)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20 hover:bg-violet-500/20 transition-all text-sm font-medium"
+                >
+                  <FolderOpen size={16} />
+                  {selectedFolderFilter}
+                  <X size={14} />
+                </button>
+              )}
             </div>
 
             {/* Projects Grid */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-500 ${isRefreshing ? 'opacity-50 blur-[1px] scale-[0.99]' : 'opacity-100'}`}>
+            <div className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 transition-all duration-500 ${isRefreshing ? 'opacity-50' : 'opacity-100'}`}>
               {isLoading && !projects ? (
                 [1, 2, 3].map(i => (
-                  <div key={i} className="glass h-64 rounded-2xl animate-pulse"></div>
+                  <div key={i} className="h-64 rounded-2xl bg-white/5 animate-pulse" />
                 ))
               ) : filteredProjects?.length === 0 ? (
-                <div className="col-span-full py-20 text-center space-y-4 bg-secondary/10 rounded-3xl border border-dashed border-border">
-                  <div className="bg-secondary/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-muted-foreground">
+                <div className="col-span-full py-20 text-center space-y-4 bg-gradient-to-br from-white/[0.03] to-transparent rounded-3xl border border-dashed border-white/10">
+                  <div className="w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto text-violet-400">
                     <Search size={32} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold">No se encontraron proyectos</h3>
-                    <p className="text-muted-foreground">Intenta ajustar tus filtros o búsqueda</p>
+                    <h3 className="text-lg font-bold text-foreground">Sin proyectos</h3>
+                    <p className="text-muted-foreground mt-1">Crea tu primer proyecto para comenzar</p>
                   </div>
+                  <button 
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white rounded-xl font-bold hover:bg-violet-500 transition-all"
+                  >
+                    <Sparkles size={16} /> Crear Proyecto
+                  </button>
                 </div>
               ) : (
-                filteredProjects?.map((project, index) => (
+                filteredProjects?.map((project) => (
                   <div 
                     key={project.id}
                     onClick={() => {
@@ -301,78 +318,88 @@ export const DashboardPage = () => {
                         if (budgetId) {
                           navigate(`/budget/${budgetId}`);
                         } else {
-                          // If no budget exists, we can still navigate to a placeholder or show a message
-                          toast.error('Este proyecto no tiene un presupuesto asociado.');
+                          toast.error('Este proyecto no tiene presupuesto asociado');
                         }
                       }
                     }}
-                    className={`group bg-card hover:bg-secondary/30 border border-border hover:border-indigo-500/30 p-6 rounded-3xl transition-all duration-300 cursor-pointer relative overflow-hidden shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-1.5 animate-in fade-in slide-in-from-top-4 fill-mode-both select-none ${selectedIds.includes(project.id) ? 'ring-2 ring-indigo-500 bg-indigo-500/5' : ''}`}
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    className={`
+                      group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/[0.05] to-white/[0.02] 
+                      border border-white/10 hover:border-violet-500/40 
+                      transition-all duration-300 cursor-pointer 
+                      hover:shadow-xl hover:shadow-violet-500/10 hover:-translate-y-1
+                      ${selectedIds.includes(project.id) ? 'ring-2 ring-violet-500 bg-violet-500/5' : ''}
+                    `}
                   >
-                    {/* Selection Indicator */}
+                    {/* Selection Checkbox */}
                     <div 
                       onClick={(e) => toggleSelect(project.id, e)}
-                      className={`absolute top-4 left-4 z-20 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedIds.includes(project.id) 
-                          ? 'bg-indigo-600 border-indigo-600 scale-110 shadow-lg shadow-indigo-600/40' 
-                          : 'bg-black/20 border-white/20 opacity-0 group-hover:opacity-100 hover:scale-105'
-                      }`}
+                      className={`
+                        absolute top-4 left-4 z-20 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all
+                        ${selectedIds.includes(project.id) 
+                          ? 'bg-violet-600 border-violet-600 shadow-lg shadow-violet-600/40 scale-110' 
+                          : 'bg-black/20 border-white/30 opacity-0 group-hover:opacity-100 hover:scale-105'
+                        }
+                      `}
                     >
                       {selectedIds.includes(project.id) && <CheckCircle2 size={14} className="text-white" />}
                     </div>
 
-                    {/* Background Decoration */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-600/10 transition-all"></div>
+                    {/* Background Glow */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-violet-500/10 transition-all" />
 
-                <div className="space-y-4 relative z-10">
-                  <div className="flex justify-between items-start">
-                    <ProjectStatusBadge status={project.status} />
-                    <span className="text-indigo-500 dark:text-indigo-400 font-bold">
-                      ${new Intl.NumberFormat().format(project.estimated_budget || 0)}
-                    </span>
-                  </div>
+                    <div className="p-5 space-y-4 relative z-10">
+                      {/* Header */}
+                      <div className="flex justify-between items-start">
+                        <ProjectStatusBadge status={project.status} />
+                        <span className="text-lg font-black text-violet-400">
+                          ${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(project.estimated_budget || 0)}
+                        </span>
+                      </div>
 
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors truncate">
-                      {project.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-sm mt-1">
-                      <MapPin size={14} className="opacity-70" />
-                      <span className="truncate">{project.location || 'Sin ubicación'}</span>
+                      {/* Project Info */}
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground group-hover:text-violet-300 transition-colors truncate">
+                          {project.name}
+                        </h3>
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm mt-1">
+                          <MapPin size={14} className="opacity-60" />
+                          <span className="truncate">{project.location || 'Sin ubicación'}</span>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-muted-foreground text-sm line-clamp-2">
+                        {project.description || 'Sin descripción'}
+                      </p>
+
+                      {/* Progress */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground font-medium">Progreso</span>
+                          <span className="text-violet-400 font-bold">{project.progress || 0}%</span>
+                        </div>
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full transition-all duration-1000"
+                            style={{ width: `${project.progress || 0}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar size={12} />
+                          <span>{project.start_date ? new Date(project.start_date).toLocaleDateString('es-CL') : 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs font-semibold text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Abrir <ChevronRight size={14} />
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <p className="text-muted-foreground text-sm line-clamp-2 min-h-[2.5rem]">
-                    {project.description || 'Sin descripción disponible para este proyecto.'}
-                  </p>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground font-medium">Progreso Real</span>
-                      <span className="text-indigo-500 dark:text-indigo-400 font-bold">{project.progress || 0}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-secondary/20 dark:bg-white/5 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-500"
-                        style={{ width: `${project.progress || 0}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-border flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Calendar size={12} />
-                      <span>{project.start_date ? new Date(project.start_date).toLocaleDateString() : 'N/A'}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 text-xs font-semibold text-indigo-500 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Ver detalles <ArrowRight size={14} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -380,18 +407,18 @@ export const DashboardPage = () => {
 
       {/* Bulk Actions Bar */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-card border border-indigo-500/30 shadow-2xl rounded-2xl px-6 py-4 flex items-center gap-8 animate-in slide-in-from-bottom-10 fade-in duration-300 backdrop-blur-xl">
-          <div className="flex items-center gap-3 pr-8 border-r border-border">
-            <div className="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-lg shadow-indigo-600/30">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#12121a] border border-violet-500/30 shadow-2xl shadow-violet-500/20 rounded-2xl px-6 py-4 flex items-center gap-6 animate-slide-up backdrop-blur-xl">
+          <div className="flex items-center gap-3 pr-6 border-r border-white/10">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-bold shadow-lg shadow-violet-500/30">
               {selectedIds.length}
             </div>
-            <span className="text-sm font-medium text-foreground">Proyectos seleccionados</span>
+            <span className="text-sm font-medium text-foreground">Seleccionados</span>
           </div>
 
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setShowFolderPrompt(true)}
-              className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 text-violet-400 hover:text-violet-300 text-sm font-semibold transition-colors"
             >
               <FolderOpen size={18} />
               Organizar
@@ -400,15 +427,15 @@ export const DashboardPage = () => {
             <button 
               onClick={handleBulkDelete}
               disabled={isProcessing}
-              className={`flex items-center gap-2 text-rose-500 hover:text-rose-400 text-sm font-semibold transition-colors ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex items-center gap-2 text-rose-400 hover:text-rose-300 text-sm font-semibold transition-colors ${isProcessing ? 'opacity-50' : ''}`}
             >
-              <Trash2 size={18} className={isProcessing ? 'animate-pulse' : ''} />
-              {isProcessing ? 'Eliminando...' : 'Eliminar'}
+              <Trash2 size={18} />
+              Eliminar
             </button>
 
             <button 
               onClick={() => setSelectedIds([])}
-              className="p-1 hover:bg-muted rounded-lg transition-colors ml-4 text-muted-foreground"
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-muted-foreground"
             >
               <X size={20} />
             </button>
@@ -432,9 +459,7 @@ export const DashboardPage = () => {
         onConfirm={confirmBulkDelete}
         title="Eliminar proyectos"
         message={
-          <>
-            ¿Estás seguro de que deseas eliminar <strong>{selectedIds.length}</strong> proyecto{selectedIds.length > 1 ? 's' : ''}? Esta acción eliminará permanentemente todos los presupuestos, gastos y documentos asociados.
-          </>
+          <>¿Eliminar <strong>{selectedIds.length}</strong> proyecto{selectedIds.length > 1 ? 's' : ''}? Esta acción no se puede deshacer.</>
         }
         confirmText="Eliminar"
         cancelText="Cancelar"
@@ -447,8 +472,8 @@ export const DashboardPage = () => {
         onClose={() => setShowFolderPrompt(false)}
         onSubmit={confirmBulkMove}
         title="Organizar en carpeta"
-        message="Ingresa el nombre de la carpeta donde quieres mover los proyectos seleccionados."
-        placeholder="Nombre de la carpeta"
+        message="Nombre de la carpeta destino:"
+        placeholder="Mi Carpeta"
         submitText="Mover"
       />
     </div>
