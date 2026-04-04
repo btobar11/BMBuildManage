@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" fill="none">
+  <!-- Isotipo Cubo Isométrico B/M (mini) -->
+  <g transform="translate(2, 2)">
+    <!-- Cara superior -->
+    <path d="M14 0 L28 8.66 L14 17.32 L0 8.66 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
+    
+    <!-- Cara izquierda -->
+    <path d="M0 8.66 L14 17.32 L14 34.64 L0 25.98 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
+    
+    <!-- Cara derecha -->
+    <path d="M14 17.32 L28 8.66 L28 25.98 L14 34.64 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
+    
+    <!-- Líneas internas B/M -->
+    <path d="M14 8.66 L14 34.64" stroke="#10B981" stroke-width="1"/>
+    <path d="M7 12.99 L7 21.65" stroke="#10B981" stroke-width="1"/>
+    <path d="M21 12.99 L21 21.65" stroke="#10B981" stroke-width="1"/>
+  </g>
+  
+  <!-- Texto BM -->
+  <text x="38" y="22" font-family="Inter, sans-serif" font-weight="700" font-size="16" fill="#020617">BM</text>
+</svg>

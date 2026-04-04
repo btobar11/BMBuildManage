@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- Fondo con bordes redondeados -->
+  <rect x="4" y="4" width="72" height="72" rx="12" fill="#020617"/>
+  
+  <!-- Isotipo Cubo Isométrico B/M -->
+  <g transform="translate(10, 10)">
+    <!-- Cara superior (Y-Z) -->
+    <path d="M30 0 L60 17.32 L30 34.64 L0 17.32 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+    
+    <!-- Cara izquierda (X-Y) -->
+    <path d="M0 17.32 L30 34.64 L30 69.28 L0 51.96 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+    
+    <!-- Cara derecha (X-Z) -->
+    <path d="M30 34.64 L60 17.32 L60 51.96 L30 69.28 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+    
+    <!-- Línea central vertical -->
+    <path d="M30 17.32 L30 69.28" stroke="#10B981" stroke-width="1.5"/>
+    
+    <!-- Líneas horizontales que forman B y M -->
+    <path d="M15 25.98 L15 43.3" stroke="#10B981" stroke-width="1.5"/>
+    <path d="M45 25.98 L45 43.3" stroke="#10B981" stroke-width="1.5"/>
+    
+    <!-- Líneas horizontales superiores -->
+    <path d="M15 25.98 L30 17.32" stroke="#10B981" stroke-width="1"/>
+    <path d="M45 25.98 L30 17.32" stroke="#10B981" stroke-width="1"/>
+    
+    <!-- Líneas horizontales inferiores -->
+    <path d="M15 43.3 L30 51.96" stroke="#10B981" stroke-width="1"/>
+    <path d="M45 43.3 L30 51.96" stroke="#10B981" stroke-width="1"/>
+    
+    <!-- Blueprint grid -->
+    <defs>
+      <pattern id="grid-icon" width="8" height="8" patternUnits="userSpaceOnUse">
+        <path d="M 8 0 L 0 0 0 8" fill="none" stroke="#10B981" stroke-width="0.3" opacity="0.15"/>
+      </pattern>
+    </defs>
+    <rect width="60" height="69.28" fill="url(#grid-icon)" opacity="0.3"/>
+  </g>
+</svg>

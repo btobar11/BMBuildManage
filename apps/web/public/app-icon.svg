@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- App Icon 256x256 para alta resolución -->
+  <rect width="256" height="256" rx="40" fill="#020617"/>
+  
+  <!-- Isotipo Cubo Isométrico B/M -->
+  <g transform="translate(28, 28)">
+    <!-- Cara superior (Y-Z) -->
+    <path d="M100 0 L200 57.74 L100 115.48 L0 57.74 Z" stroke="#10B981" stroke-width="6" fill="none"/>
+    
+    <!-- Cara izquierda (X-Y) -->
+    <path d="M0 57.74 L100 115.48 L100 231 L0 173.26 Z" stroke="#10B981" stroke-width="6" fill="none"/>
+    
+    <!-- Cara derecha (X-Z) -->
+    <path d="M100 115.48 L200 57.74 L200 173.26 L100 231 Z" stroke="#10B981" stroke-width="6" fill="none"/>
+    
+    <!-- Línea central vertical -->
+    <path d="M100 57.74 L100 231" stroke="#10B981" stroke-width="4"/>
+    
+    <!-- Líneas horizontales B -->
+    <path d="M50 86.61 L50 144.35" stroke="#10B981" stroke-width="4"/>
+    <path d="M50 86.61 L100 57.74" stroke="#10B981" stroke-width="3"/>
+    <path d="M50 144.35 L100 173.26" stroke="#10B981" stroke-width="3"/>
+    
+    <!-- Líneas horizontales M -->
+    <path d="M150 86.61 L150 144.35" stroke="#10B981" stroke-width="4"/>
+    <path d="M150 86.61 L100 57.74" stroke="#10B981" stroke-width="3"/>
+    <path d="M150 144.35 L100 173.26" stroke="#10B981" stroke-width="3"/>
+    
+    <!-- Blueprint grid de fondo -->
+    <defs>
+      <pattern id="grid-app" width="20" height="20" patternUnits="userSpaceOnUse">
+        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#10B981" stroke-width="0.5" opacity="0.1"/>
+      </pattern>
+    </defs>
+    <rect width="200" height="231" fill="url(#grid-app)" opacity="0.2"/>
+  </g>
+</svg>

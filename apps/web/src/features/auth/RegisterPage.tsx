@@ -61,7 +61,7 @@ export function RegisterPage() {
       {/* Left Panel - Info (Hidden on mobile) */}
       <div className="hidden lg:flex w-1/2 bg-slate-950 text-white p-12 flex-col justify-center">
         <div className="max-w-md">
-          <img src="/logo-full.png" alt="BMBuildManage" className="h-8 mb-12 object-contain brightness-0 invert" />
+          <img src="/logo-full.svg" alt="BMBuildManage" className="h-8 mb-12 object-contain" style={{filter: 'brightness(0) invert(1)'}} />
           
           <h1 className="text-3xl font-bold mb-4">
             Construye sin límites, <span className="text-emerald-400">controla todo</span>
@@ -102,7 +102,7 @@ export function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
-            <img src="/logo-full.png" alt="BMBuildManage" className="h-7 object-contain" />
+            <img src="/logo-full.svg" alt="BMBuildManage" className="h-7 object-contain" />
           </div>
 
           <div className="bg-card rounded-xl border border-border p-8 shadow-sm">

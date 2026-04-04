@@ -41,7 +41,7 @@ export function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img src="/logo-full.png" alt="BMBuildManage" className="h-8 object-contain" />
+          <img src="/logo-full.svg" alt="BMBuildManage" className="h-8 object-contain" />
         </div>
 
         {/* Card */}

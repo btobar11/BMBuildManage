@@ -92,7 +92,7 @@ export function OnboardingPage() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <img src="/logo-full.png" alt="BMBuildManage" className="h-8 object-contain" />
+          <img src="/logo-full.svg" alt="BMBuildManage" className="h-8 object-contain" />
         </div>
 
         {/* Progress */}

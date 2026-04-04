@@ -65,7 +65,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {/* Logo */}
         <div className="h-14 flex items-center justify-center border-b border-border px-4">
           {sidebarExpanded ? (
-            <img src="/logo-full.png" alt="BMBuildManage" className="h-6 object-contain" />
+            <img src="/logo-full.svg" alt="BMBuildManage" className="h-6 object-contain" />
           ) : (
             <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm">BM</span>
