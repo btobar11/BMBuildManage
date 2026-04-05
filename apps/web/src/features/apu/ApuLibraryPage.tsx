@@ -5,13 +5,12 @@ import api from '../../lib/api';
 import {
   Plus, Search, X, Copy, Trash2, Pencil, Calculator,
   Package, HardHat, Wrench, Check, ChevronDown, ChevronRight,
-  TrendingUp, Layers, DollarSign
+  TrendingUp, Layers, DollarSign, RefreshCw, Sparkles, ClipboardList
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
+import { LoadingScreen, EmptyState } from '../../components/common/LoadingStates';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 type ResourceType = 'material' | 'labor' | 'equipment';
-// ApuUnit type is deprecated in favor of standardized units
 
 interface Resource {
   id: string;
@@ -49,12 +48,9 @@ interface ApuTemplate {
   apu_resources: ApuResourceEntry[];
 }
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
 function formatCLP(v: number) {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(v);
 }
-
-// APU_UNITS is now fetched from API
 
 const RES_TYPE_ICONS: Record<ResourceType, ReactNode> = {
   material: <Package size={12} />,
@@ -63,17 +59,15 @@ const RES_TYPE_ICONS: Record<ResourceType, ReactNode> = {
 };
 
 const RES_TYPE_COLORS: Record<ResourceType, string> = {
-  material: 'text-blue-400 bg-blue-500/10',
-  labor: 'text-violet-400 bg-violet-500/10',
-  equipment: 'text-amber-400 bg-amber-500/10',
+  material: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  labor: 'text-violet-400 bg-violet-500/10 border-violet-500/30',
+  equipment: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
 };
 
-// ─── APU Editor Modal ─────────────────────────────────────────────────────────
 interface ApuEditorProps {
   initial?: Partial<ApuTemplate>;
   resources: Resource[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSave: (data: any) => void;
+  onSave: (data: unknown) => void;
   onCancel: () => void;
   isLoading?: boolean;
   units: Unit[];
@@ -137,27 +131,26 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onCancel} />
       <form
         onSubmit={handleSubmit}
-        className="relative bg-card border border-border/50 rounded-3xl w-full max-w-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] z-10 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+        className="relative bg-card border border-border/50 rounded-3xl w-full max-w-3xl shadow-2xl z-10 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up"
       >
-        {/* Header */}
-        <div className="px-8 pt-8 pb-6 border-b border-border relative bg-card/20">
+        <div className="px-8 pt-8 pb-6 border-b border-border bg-card/20">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                <Calculator size={20} className="text-blue-400" />
+              <div className="w-12 h-12 bg-emerald-500/20 border border-emerald-500/30 rounded-2xl flex items-center justify-center">
+                <Calculator size={24} className="text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-foreground font-bold text-xl">{initial?.id ? 'Editar Partida APU' : 'Crear Nueva Partida'}</h3>
-                <p className="text-muted-foreground text-xs">Configure los recursos y rendimientos para su análisis</p>
+                <h3 className="text-foreground font-bold text-xl">{initial?.id ? 'Editar Partida APU' : 'Nueva Partida APU'}</h3>
+                <p className="text-muted-foreground text-xs">Configure recursos y rendimientos</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onCancel}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground transition-all"
             >
               <X size={18} />
             </button>
@@ -165,34 +158,34 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1 space-y-1.5">
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Nombre de la partida</label>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Nombre</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                placeholder="Ej: Radier..."
-                className="w-full bg-card/50 border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                placeholder="Ej: Radier H20..."
+                className="w-full bg-muted border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-emerald-500/50 transition-all"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Unidad base</label>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Unidad</label>
               <select
                 value={unitId}
                 onChange={(e) => setUnitId(e.target.value)}
                 required
-                className="w-full bg-card/50 border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all appearance-none cursor-pointer"
+                className="w-full bg-muted border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
               >
                 <option value="" disabled>Seleccionar...</option>
                 {units.map((u) => <option key={u.id} value={u.id}>{u.symbol} - {u.name}</option>)}
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Etapa / Categoría</label>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Categoría</label>
               <input
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 placeholder="Ej: Hormigón..."
-                className="w-full bg-card/50 border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                className="w-full bg-muted border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-emerald-500/50 transition-all"
               />
             </div>
           </div>
@@ -202,41 +195,40 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descripción opcional de la partida..."
-              className="w-full bg-card/50 border border-border/50 rounded-xl px-4 py-2 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all resize-none h-20"
+              placeholder="Descripción opcional..."
+              className="w-full bg-muted border border-border/50 rounded-xl px-4 py-2 text-foreground text-sm outline-none focus:border-emerald-500/50 transition-all resize-none h-16"
             />
           </div>
         </div>
 
-        {/* Resources Section */}
-        <div className="px-8 py-6 flex-1 overflow-y-auto">
+        <div className="px-8 py-6 flex-1 overflow-y-auto custom-scrollbar">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h4 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
-                <Layers size={16} className="text-blue-400" />
-                Matriz de Recursos
+                <Layers size={16} className="text-emerald-400" />
+                Recursos de la Partida
               </h4>
-              <p className="text-muted-foreground text-[10px] mt-0.5">Defina materiales, mano de obra y equipos necesarios</p>
+              <p className="text-muted-foreground text-[10px] mt-0.5">Agregue materiales, mano de obra y equipos</p>
             </div>
-            <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-2xl">
-              <span className="text-[10px] text-emerald-400/80 uppercase font-bold tracking-wider">Costo Unit. Estimado</span>
-              <div className="text-emerald-400 font-black text-lg tabular-nums">
-                {formatCLP(unitCost)}<span className="text-xs opacity-60 ml-1">/ {units.find(u => u.id === unitId)?.symbol || '?'}</span>
+            <div className="bg-emerald-500/10 border border-emerald-500/20 px-5 py-3 rounded-2xl">
+              <span className="text-[10px] text-emerald-400/80 uppercase font-bold tracking-wider block">Costo Unitario</span>
+              <div className="text-emerald-400 font-black text-xl tabular-nums">
+                {formatCLP(unitCost)}
+                <span className="text-xs opacity-60 ml-1">/ {units.find(u => u.id === unitId)?.symbol || '?'}</span>
               </div>
             </div>
           </div>
 
-          {/* New Resource Search */}
           <div className="relative mb-6">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               value={resourceSearch}
               onChange={(e) => setResourceSearch(e.target.value)}
-              placeholder="Escriba para buscar y agregar recursos..."
-              className="w-full bg-card border border-border rounded-2xl pl-12 pr-4 py-3.5 text-foreground text-sm outline-none focus:border-blue-500/30 transition-all placeholder:text-muted-foreground"
+              placeholder="Buscar recursos para agregar..."
+              className="w-full bg-muted border border-border rounded-2xl pl-12 pr-4 py-3.5 text-foreground text-sm outline-none focus:border-emerald-500/30 transition-all placeholder:text-muted-foreground"
             />
             {resourceSearch && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/50 rounded-2xl overflow-hidden z-20 shadow-2xl overflow-y-auto max-h-[250px] animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/50 rounded-2xl overflow-hidden z-20 shadow-2xl overflow-y-auto max-h-[250px] animate-fade-in">
                 {filteredResources.slice(0, 15).map((r) => (
                   <button
                     key={r.id}
@@ -245,16 +237,16 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
                     disabled={entries.some((e) => e.resource_id === r.id)}
                     className="w-full flex items-center gap-4 px-4 py-3 hover:bg-muted transition-colors text-left disabled:opacity-40 group"
                   >
-                    <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${RES_TYPE_COLORS[r.type]} group-hover:scale-110 transition-transform`}>
+                    <div className={`w-8 h-8 flex items-center justify-center rounded-lg border ${RES_TYPE_COLORS[r.type]} group-hover:scale-110 transition-transform`}>
                       {RES_TYPE_ICONS[r.type]}
                     </div>
                     <div className="flex-1">
                       <p className="text-foreground text-sm font-medium">{r.name}</p>
-                      <p className="text-muted-foreground text-[10px] tracking-wide uppercase">{r.type} · {r.unit?.symbol || '-'}</p>
+                      <p className="text-muted-foreground text-[10px] uppercase">{r.type} · {r.unit?.symbol || '-'}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-foreground text-sm font-bold tabular-nums">{formatCLP(Number(r.base_price))}</p>
-                      <p className="text-muted-foreground text-[10px]">Precio base</p>
+                      <p className="text-emerald-400 text-sm font-bold tabular-nums">{formatCLP(Number(r.base_price))}</p>
+                      <p className="text-muted-foreground text-[10px]">base</p>
                     </div>
                   </button>
                 ))}
@@ -268,24 +260,22 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
             )}
           </div>
 
-          {/* Resources List */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {entries.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 bg-card/20 border border-dashed border-border rounded-3xl">
-                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
-                  <Package size={20} className="text-muted-foreground" />
+              <div className="flex flex-col items-center justify-center py-12 bg-muted/30 border-2 border-dashed border-border/50 rounded-3xl">
+                <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4">
+                  <Layers size={28} className="text-emerald-500/50" />
                 </div>
-                <p className="text-muted-foreground text-sm">Agregue recursos para calcular el costo</p>
+                <p className="text-muted-foreground text-sm">Busque y agregue recursos para calcular el costo</p>
               </div>
             ) : (
               <div className="space-y-2">
-                {/* Custom Table Component */}
                 {entries.map((entry) => (
                   <div
                     key={entry.resource_id}
-                    className="flex items-center gap-4 bg-card/40 hover:bg-card/60 border border-border rounded-2xl p-4 transition-all group"
+                    className="flex items-center gap-4 bg-card/50 hover:bg-card/70 border border-border/50 rounded-2xl p-4 transition-all group"
                   >
-                    <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${RES_TYPE_COLORS[entry.resource_type]} shrink-0`}>
+                    <div className={`w-10 h-10 flex items-center justify-center rounded-xl border ${RES_TYPE_COLORS[entry.resource_type]} shrink-0`}>
                       {RES_TYPE_ICONS[entry.resource_type]}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -293,22 +283,22 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
                       <p className="text-muted-foreground text-[10px] uppercase font-semibold">{entry.resource?.unit?.symbol || '-'}</p>
                     </div>
                     <div className="text-right min-w-[100px]">
-                      <p className="text-muted-foreground text-xs font-medium uppercase tracking-tighter opacity-50 mb-0.5 whitespace-nowrap">Precio Unit.</p>
+                      <p className="text-muted-foreground text-[10px] uppercase opacity-50 mb-0.5">Precio</p>
                       <p className="text-foreground text-sm font-bold tabular-nums">{formatCLP(Number(entry.resource?.base_price ?? 0))}</p>
                     </div>
-                    <div className="w-24">
-                      <p className="text-muted-foreground text-xs font-medium uppercase tracking-tighter opacity-50 mb-0.5 whitespace-nowrap text-right pr-2">Rendimiento</p>
+                    <div className="w-28">
+                      <p className="text-muted-foreground text-[10px] uppercase opacity-50 mb-0.5 text-right">Rendimiento</p>
                       <input
                         type="number"
                         value={entry.coefficient}
                         onChange={(e) => updateCoeff(entry.resource_id, parseFloat(e.target.value) || 0)}
                         min={0}
                         step={0.001}
-                        className="bg-card border border-border/50 rounded-xl px-3 py-1.5 text-foreground text-sm text-right outline-none focus:border-blue-500/50 w-full tabular-nums transition-all"
+                        className="bg-muted border border-border/50 rounded-xl px-3 py-1.5 text-foreground text-sm text-right outline-none focus:border-emerald-500/50 w-full tabular-nums transition-all"
                       />
                     </div>
                     <div className="text-right min-w-[100px]">
-                      <p className="text-muted-foreground text-xs font-medium uppercase tracking-tighter opacity-50 mb-0.5 whitespace-nowrap">Subtotal</p>
+                      <p className="text-muted-foreground text-[10px] uppercase opacity-50 mb-0.5">Subtotal</p>
                       <p className="text-emerald-400 text-sm font-bold tabular-nums">
                         {formatCLP(Number(entry.resource?.base_price ?? 0) * entry.coefficient)}
                       </p>
@@ -327,7 +317,6 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-8 py-6 border-t border-border bg-card/40 flex items-center justify-between">
           <button
             type="button"
@@ -339,14 +328,14 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
           <button
             type="submit"
             disabled={isLoading || !name || entries.length === 0}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-muted disabled:text-muted-foreground text-white px-8 py-3 rounded-xl transition-all font-bold shadow-lg shadow-blue-600/20 active:scale-95"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-muted disabled:text-muted-foreground text-white px-8 py-3 rounded-xl transition-all font-bold shadow-lg shadow-emerald-600/20 active:scale-95"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <Check size={18} />
             )}
-            <span>{initial?.id ? 'Guardar Cambios' : 'Crear Partida APU'}</span>
+            <span>{initial?.id ? 'Guardar' : 'Crear Partida'}</span>
           </button>
         </div>
       </form>
@@ -354,7 +343,6 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
   );
 }
 
-// ─── APU Card ─────────────────────────────────────────────────────────────────
 function ApuCard({
   apu,
   onEdit,
@@ -380,18 +368,23 @@ function ApuCard({
     .filter((r) => r.resource_type === 'equipment')
     .reduce((s, r) => s + Number(r.resource?.base_price ?? 0) * Number(r.coefficient), 0);
 
+  const totalCost = materialCost + laborCost + equipCost;
+  const matPct = totalCost > 0 ? (materialCost / totalCost) * 100 : 0;
+  const laborPct = totalCost > 0 ? (laborCost / totalCost) * 100 : 0;
+  const equipPct = totalCost > 0 ? (equipCost / totalCost) * 100 : 0;
+
   return (
-    <div className="group bg-card/40 border border-border rounded-2xl overflow-hidden hover:border-blue-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/5 flex flex-col h-full">
+    <div className="group bg-card/50 border border-border/50 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 flex flex-col h-full">
       <div className="p-6 flex-1">
         <div className="flex items-start justify-between mb-4">
-          <div className="w-12 h-12 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-            <Calculator size={22} className="text-blue-400" />
+          <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
+            <Calculator size={22} className="text-emerald-400" />
           </div>
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={onDuplicate}
               className="p-2 text-muted-foreground hover:text-emerald-400 bg-white/5 hover:bg-emerald-400/10 rounded-xl transition-all"
-              title={isGlobal ? "Importar a mi biblioteca" : "Duplicar"}
+              title={isGlobal ? "Importar" : "Duplicar"}
             >
               {isGlobal ? <Plus size={16} /> : <Copy size={16} />}
             </button>
@@ -406,7 +399,7 @@ function ApuCard({
                 </button>
                 <button
                   onClick={onDelete}
-                  className="p-2 text-muted-foreground hover:text-rose-400 bg-white/5 hover:bg-rose-500/10 rounded-xl transition-all"
+                  className="p-2 text-muted-foreground hover:text-rose-400 bg-white/5 hover:bg-rose-400/10 rounded-xl transition-all"
                   title="Eliminar"
                 >
                   <Trash2 size={16} />
@@ -418,83 +411,90 @@ function ApuCard({
 
         <div className="space-y-3">
           <div>
-            <h3 className="text-foreground font-bold text-lg group-hover:text-blue-400 transition-colors duration-300 line-clamp-2 leading-tight">
+            <h3 className="text-foreground font-bold text-base group-hover:text-emerald-400 transition-colors duration-300 line-clamp-2 leading-tight">
               {apu.name}
             </h3>
             <p className="text-muted-foreground text-xs mt-1.5 flex items-center gap-1.5">
               <Layers size={12} />
               <span>Unidad: {apu.unit?.symbol ?? '-'}</span>
+              {apu.category && <span className="text-emerald-500/60">· {apu.category}</span>}
             </p>
           </div>
 
-          <div className="bg-muted rounded-xl p-3 border border-border">
-            <div className="flex items-baseline justify-between mb-1">
+          <div className="bg-muted/50 rounded-xl p-4 border border-border/50">
+            <div className="flex items-baseline justify-between mb-2">
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Costo Unitario</span>
-              <span className="text-emerald-400 font-black text-xl tabular-nums">
+              <span className="text-emerald-400 font-black text-2xl tabular-nums">
                 {formatCLP(Number(apu.unit_cost))}
               </span>
             </div>
-            <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden mt-2">
-              <div
-                className="bg-emerald-500 h-full rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                style={{ width: '100%' }}
-              />
+            <div className="flex h-2 rounded-full overflow-hidden bg-slate-700/50">
+              {matPct > 0 && (
+                <div className="bg-blue-500 transition-all" style={{ width: `${matPct}%` }} title={`Material: ${matPct.toFixed(0)}%`} />
+              )}
+              {laborPct > 0 && (
+                <div className="bg-violet-500 transition-all" style={{ width: `${laborPct}%` }} title={`Mano obra: ${laborPct.toFixed(0)}%`} />
+              )}
+              {equipPct > 0 && (
+                <div className="bg-amber-500 transition-all" style={{ width: `${equipPct}%` }} title={`Equipos: ${equipPct.toFixed(0)}%`} />
+              )}
             </div>
           </div>
 
-          {/* Expanded detail toggle */}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="w-full flex items-center justify-between py-2 text-xs text-muted-foreground hover:text-foreground transition-colors border-t border-border mt-4"
+            className="w-full flex items-center justify-between py-2 text-xs text-muted-foreground hover:text-foreground transition-colors border-t border-border/50 mt-3 pt-3"
           >
-            <span className="font-medium">{expanded ? 'Ocultar detalles' : 'Ver desglose de recursos'}</span>
+            <span className="font-medium">{expanded ? 'Ocultar' : 'Ver'} desglose ({apu.apu_resources.length} recursos)</span>
             {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </button>
         </div>
 
-        {/* Breakdown section */}
         {expanded && (
-          <div className="mt-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="mt-3 space-y-1.5 animate-fade-in">
             {apu.apu_resources.length === 0 ? (
-              <p className="text-[10px] text-center text-muted-foreground py-2">Sin recursos asignados</p>
+              <p className="text-[10px] text-center text-muted-foreground py-3">Sin recursos</p>
             ) : (
-              apu.apu_resources.map((r, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg border border-border">
-                  <span className={`w-6 h-6 flex items-center justify-center rounded-md ${RES_TYPE_COLORS[r.resource_type]} shrink-0`}>
+              apu.apu_resources.slice(0, 10).map((r, i) => (
+                <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg border border-border/30">
+                  <span className={`w-6 h-6 flex items-center justify-center rounded-md border ${RES_TYPE_COLORS[r.resource_type]} shrink-0`}>
                     {RES_TYPE_ICONS[r.resource_type]}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-muted-foreground font-medium truncate">{r.resource?.name}</p>
-                    <p className="text-[10px] text-muted-foreground">×{Number(r.coefficient).toFixed(3)}</p>
+                    <p className="text-[11px] text-foreground font-medium truncate">{r.resource?.name}</p>
+                    <p className="text-[9px] text-muted-foreground">×{Number(r.coefficient).toFixed(3)}</p>
                   </div>
-                  <span className="text-[11px] text-foreground font-bold tabular-nums">
+                  <span className="text-[11px] text-emerald-400 font-bold tabular-nums shrink-0">
                     {formatCLP(Number(r.resource?.base_price ?? 0) * Number(r.coefficient))}
                   </span>
                 </div>
               ))
             )}
+            {apu.apu_resources.length > 10 && (
+              <p className="text-[10px] text-center text-muted-foreground py-1">+{apu.apu_resources.length - 10} más...</p>
+            )}
           </div>
         )}
       </div>
 
-      <div className="px-6 py-3 bg-muted border-t border-border flex items-center justify-between overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-4">
+      <div className="px-5 py-3 bg-muted/30 border-t border-border/50 flex items-center justify-between">
+        <div className="flex items-center gap-3 text-[10px]">
           {materialCost > 0 && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              <span className="text-[10px] text-muted-foreground">Mat: <span className="text-foreground">{formatCLP(materialCost)}</span></span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-muted-foreground">Mat: <span className="text-foreground font-semibold">{formatCLP(materialCost)}</span></span>
             </div>
           )}
           {laborCost > 0 && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-              <span className="text-[10px] text-muted-foreground">M.O: <span className="text-foreground">{formatCLP(laborCost)}</span></span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-violet-500" />
+              <span className="text-muted-foreground">MO: <span className="text-foreground font-semibold">{formatCLP(laborCost)}</span></span>
             </div>
           )}
           {equipCost > 0 && (
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-              <span className="text-[10px] text-muted-foreground">Eqp: <span className="text-foreground">{formatCLP(equipCost)}</span></span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-muted-foreground">Eq: <span className="text-foreground font-semibold">{formatCLP(equipCost)}</span></span>
             </div>
           )}
         </div>
@@ -508,7 +508,6 @@ function ApuCard({
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export function ApuLibraryPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -517,14 +516,14 @@ export function ApuLibraryPage() {
   const [showEditor, setShowEditor] = useState(false);
   const [editing, setEditing] = useState<ApuTemplate | null>(null);
 
-  const { data: apus = [], isLoading } = useQuery<ApuTemplate[]>({
-    queryKey: ['apu-templates', search, activeTab],
-    queryFn: () => api.get('/apu', { params: { search: search || undefined, tab: activeTab } }).then((r) => r.data),
+  const { data: apus = [], isLoading, refetch } = useQuery<ApuTemplate[]>({
+    queryKey: ['apu-templates', activeTab],
+    queryFn: () => api.get('/apu', { params: { tab: activeTab } }).then((r) => r.data),
   });
 
   const { data: resources = [] } = useQuery<Resource[]>({
     queryKey: ['resources'],
-    queryFn: () => api.get('/resources').then((r) => r.data),
+    queryFn: () => api.get('/resources', { params: { tab: 'global' } }).then((r) => r.data),
   });
 
   const { data: units = [] } = useQuery<Unit[]>({
@@ -533,20 +532,21 @@ export function ApuLibraryPage() {
   });
 
   const createMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: (data: any) => api.post('/apu', data),
+    mutationFn: (data: unknown) => api.post('/apu', data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['apu-templates'] }); setShowEditor(false); },
   });
 
   const updateMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: ({ id, ...data }: any) => api.patch(`/apu/${id}`, data),
+    mutationFn: ({ id, ...data }: { id: string; data: unknown }) => api.patch(`/apu/${id}`, data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['apu-templates'] }); setEditing(null); },
   });
 
   const duplicateMutation = useMutation({
     mutationFn: (id: string) => api.post(`/apu/${id}/duplicate`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['apu-templates'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apu-templates'] });
+      setActiveTab('personal');
+    },
   });
 
   const deleteMutation = useMutation({
@@ -554,10 +554,10 @@ export function ApuLibraryPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['apu-templates'] }),
   });
 
-  // Calculate categories from apus
   const categories = Array.from(new Set(apus.map(a => a.category).filter(Boolean))) as string[];
 
   const filteredApus = apus.filter(a => {
+    if (search && !a.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (selectedCategory && a.category !== selectedCategory) return false;
     return true;
   });
@@ -577,76 +577,82 @@ export function ApuLibraryPage() {
           ]}
           actions={
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => refetch()}
+                className="p-2.5 rounded-xl border border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                title="Actualizar"
+              >
+                <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
+              </button>
               <div className="flex bg-card/60 backdrop-blur-md border border-border/50 p-1 rounded-2xl overflow-hidden shadow-inner">
                 <button
-                  onClick={() => { setActiveTab('personal'); setSelectedCategory(null); }}
-                  className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'personal' ? 'bg-blue-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                  onClick={() => { setActiveTab('personal'); setSelectedCategory(null); setSearch(''); }}
+                  className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'personal' ? 'bg-blue-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
                 >
                   Mi Biblioteca
                 </button>
                 <button
-                  onClick={() => { setActiveTab('global'); setSelectedCategory(null); }}
-                  className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'global' ? 'bg-emerald-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                  onClick={() => { setActiveTab('global'); setSelectedCategory(null); setSearch(''); }}
+                  className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'global' ? 'bg-emerald-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
                 >
+                  <Sparkles size={12} className="inline mr-1" />
                   Catálogo Global
                 </button>
               </div>
               <button
                 onClick={() => setShowEditor(true)}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl transition-all font-semibold shadow-lg shadow-blue-600/20 active:scale-95"
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl transition-all font-bold text-sm shadow-lg shadow-emerald-600/20 active:scale-95"
               >
                 <Plus size={18} />
-                <span>Nuevo APU</span>
+                <span>Nueva Partida</span>
               </button>
             </div>
           }
         />
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 space-y-8 mt-2">
-        {/* Statistics Cards */}
+      <div className="max-w-[1600px] mx-auto px-6 space-y-8 mt-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-card/40 border border-border/50 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Layers size={64} className="text-blue-500" />
+          <div className="bg-card/50 border border-border/50 rounded-2xl p-6 backdrop-blur-sm relative overflow-hidden group hover:border-emerald-500/20 transition-all">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <ClipboardList size={64} className="text-emerald-500" />
             </div>
             <p className="text-muted-foreground text-sm font-medium mb-1">Total Partidas</p>
-            <h3 className="text-3xl font-bold text-foreground mb-2">{totalItems}</h3>
-            <div className="flex items-center gap-1.5 text-xs text-blue-400 bg-blue-500/10 w-fit px-2 py-1 rounded-full border border-blue-500/20">
-              <TrendingUp size={12} />
-              <span>Actualizado recientemente</span>
+            <h3 className="text-4xl font-bold text-foreground mb-3">{totalItems}</h3>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-emerald-400">{activeTab === 'global' ? 'Catálogo global' : 'Mi biblioteca'}</span>
             </div>
           </div>
 
-          <div className="bg-card/40 border border-border/50 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+          <div className="bg-card/50 border border-border/50 rounded-2xl p-6 backdrop-blur-sm relative overflow-hidden group hover:border-emerald-500/20 transition-all">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <DollarSign size={64} className="text-emerald-500" />
             </div>
-            <p className="text-muted-foreground text-sm font-medium mb-1">Costo Unit. Promedio</p>
-            <h3 className="text-3xl font-bold text-foreground mb-2">{formatCLP(avgCost)}</h3>
-            <p className="text-xs text-emerald-400">Promedio de las partidas actuales</p>
+            <p className="text-muted-foreground text-sm font-medium mb-1">Costo Promedio</p>
+            <h3 className="text-3xl font-bold text-emerald-400 mb-3 tabular-nums">{formatCLP(avgCost)}</h3>
+            <p className="text-xs text-muted-foreground">Promedio de todas las partidas</p>
           </div>
 
-          <div className="bg-card/40 border border-border/50 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <TrendingUp size={64} className="text-amber-500" />
+          <div className="bg-card/50 border border-border/50 rounded-2xl p-6 backdrop-blur-sm relative overflow-hidden group hover:border-emerald-500/20 transition-all">
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Layers size={64} className="text-emerald-500" />
             </div>
             <p className="text-muted-foreground text-sm font-medium mb-1">Categorías</p>
-            <h3 className="text-3xl font-bold text-foreground mb-2">{categories.length}</h3>
-            <p className="text-xs text-muted-foreground">Etapas de construcción activas</p>
+            <h3 className="text-4xl font-bold text-foreground mb-3">{categories.length}</h3>
+            <p className="text-xs text-muted-foreground">Etapas de construcción</p>
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-[450px]">
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <div className="relative flex-1 w-full">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={activeTab === 'global' ? "Buscar en el catálogo global..." : "Buscar en mi biblioteca..."}
-              className="w-full bg-card border border-border/50 rounded-2xl pl-12 pr-4 py-3.5 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all"
+              className="w-full bg-card/40 border border-border rounded-xl pl-12 pr-4 py-3.5 text-foreground text-sm outline-none focus:border-emerald-500/50 transition-all shadow-inner"
             />
             {search && (
               <button
@@ -658,81 +664,63 @@ export function ApuLibraryPage() {
             )}
           </div>
           {activeTab === 'global' && (
-            <div className="bg-emerald-500/5 border border-emerald-500/10 px-4 py-2 rounded-2xl flex items-center gap-2">
-              <Package size={14} className="text-emerald-400" />
+            <div className="bg-emerald-500/5 border border-emerald-500/10 px-4 py-2 rounded-xl flex items-center gap-2 shrink-0">
+              <Sparkles size={14} className="text-emerald-400" />
               <p className="text-[10px] text-emerald-400/80 font-bold uppercase tracking-widest">
-                Mostrando Recursos Estándar
+                Recursos Estándar
               </p>
             </div>
           )}
         </div>
 
-        {/* Content Layout with Sidebar */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
           <aside className="w-full lg:w-64 space-y-6">
-            <div>
-              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 ml-2">Etapas / Categorías</h4>
-              <div className="space-y-1">
+            <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl p-4 shadow-xl sticky top-4">
+              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 px-2">Categorías</h4>
+              <div className="space-y-1 max-h-[350px] overflow-y-auto custom-scrollbar pr-1">
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${!selectedCategory ? 'bg-white/10 text-foreground' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
+                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${!selectedCategory ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
                 >
-                  Todas las etapas
+                  Todas ({apus.length})
                 </button>
                 {categories.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedCategory === cat ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedCategory === cat ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
                   >
-                    {cat}
+                    {cat} ({apus.filter(a => a.category === cat).length})
                   </button>
                 ))}
               </div>
             </div>
             
-            <div className="p-6 rounded-3xl bg-blue-600/5 border border-blue-500/10">
-              <h5 className="text-xs font-bold text-blue-400 mb-2 flex items-center gap-2">
+            <div className="p-5 rounded-3xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+              <h5 className="text-xs font-bold text-emerald-400 mb-2 flex items-center gap-2">
                 <TrendingUp size={14} />
-                Tip de Pro
+                Tip
               </h5>
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Utilice el catálogo global para basear sus presupuestos. Puede importar cualquier partida y ajustarla según su obra.
+                Use el catálogo global para basear sus presupuestos. Importe y ajuste según su obra.
               </p>
             </div>
           </aside>
 
-          {/* Main Grid */}
           <div className="flex-1">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-32 space-y-4">
-                <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-                <p className="text-muted-foreground animate-pulse font-medium">Cargando base de datos APU...</p>
-              </div>
+              <LoadingScreen message="Cargando partidas APU..." />
             ) : filteredApus.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-border rounded-3xl bg-card/10">
-                <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6">
-                  <Calculator size={40} className="text-muted-foreground" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">No se encontraron partidas</h3>
-                <p className="text-muted-foreground max-w-sm text-center mb-8">
-                  {search || selectedCategory
-                    ? `No hay resultados para sus filtros actuales.`
-                    : 'Aún no has creado ninguna partida APU. Comienza agregando una ahora.'}
-                </p>
-                {!search && !selectedCategory && (
-                  <button
-                    onClick={() => setShowEditor(true)}
-                    className="flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold px-6 py-3 rounded-xl border border-blue-400/20 hover:bg-blue-400/5 transition-all"
-                  >
-                    <Plus size={20} />
-                    <span>Crear mi primer APU</span>
-                  </button>
-                )}
-              </div>
+              <EmptyState
+                icon={Calculator}
+                title="No se encontraron partidas"
+                description={search || selectedCategory ? 'Ajuste sus filtros de búsqueda.' : 'Cree su primera partida APU para comenzar.'}
+                actionLabel={!search && !selectedCategory ? 'Crear partida' : undefined}
+                onAction={!search && !selectedCategory ? () => setShowEditor(true) : undefined}
+                variant="full"
+              />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredApus.map((apu) => (
                   <ApuCard
                     key={apu.id}
@@ -741,7 +729,7 @@ export function ApuLibraryPage() {
                     onEdit={() => setEditing(apu)}
                     onDuplicate={() => duplicateMutation.mutate(apu.id)}
                     onDelete={() => {
-                      if (window.confirm(`¿Estás seguro de eliminar la partida "${apu.name}"? Esta acción no se puede deshacer.`)) {
+                      if (confirm(`¿Eliminar "${apu.name}"?`)) {
                         deleteMutation.mutate(apu.id);
                       }
                     }}
@@ -753,7 +741,6 @@ export function ApuLibraryPage() {
         </div>
       </div>
 
-      {/* Modals */}
       {showEditor && (
         <ApuEditor
           resources={resources}
@@ -768,7 +755,7 @@ export function ApuLibraryPage() {
           initial={editing}
           resources={resources}
           units={units}
-          onSave={(data) => updateMutation.mutate({ id: editing.id, ...data })}
+          onSave={(data) => updateMutation.mutate({ id: editing.id, data })}
           onCancel={() => setEditing(null)}
           isLoading={updateMutation.isPending}
         />
