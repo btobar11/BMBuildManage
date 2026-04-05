@@ -3,7 +3,8 @@ import { supabase } from './supabase';
 
 const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) {
-    return `${import.meta.env.VITE_API_URL}/api/v1`;
+    const baseUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, '');
+    return `${baseUrl}/api/v1`;
   }
   if (import.meta.env.PROD) {
     return '/api/v1';

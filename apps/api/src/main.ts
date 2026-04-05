@@ -9,19 +9,24 @@ import express from 'express';
 
 const server = express();
 
-export const createApp = async (expressInstance: any) => {
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(expressInstance),
-  );
+let cachedServer: any;
 
-  app.useGlobalPipes(new ValidationPipe(validationPipeConfig));
-  app.enableCors(appCorsConfig);
-  app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
-  app.useGlobalInterceptors(new LoggingInterceptor());
-  app.setGlobalPrefix('api/v1');
-  await app.init();
-  return app;
+export const createApp = async (expressInstance: any) => {
+  if (!cachedServer) {
+    const app = await NestFactory.create(
+      AppModule,
+      new ExpressAdapter(expressInstance),
+    );
+
+    app.useGlobalPipes(new ValidationPipe(validationPipeConfig));
+    app.enableCors(appCorsConfig);
+    app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
+    app.useGlobalInterceptors(new LoggingInterceptor());
+    app.setGlobalPrefix('api/v1');
+    await app.init();
+    cachedServer = app;
+  }
+  return cachedServer;
 };
 
 export default async (req: any, res: any) => {
