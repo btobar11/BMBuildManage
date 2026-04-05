@@ -7,7 +7,7 @@ import {
   RefreshCw, Sparkles
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
-import { LoadingScreen, EmptyState } from '../../components/common/LoadingStates';
+import { LoadingScreen, EmptyState, ConnectionError } from '../../components/common/LoadingStates';
 
 type ResourceType = 'material' | 'labor' | 'equipment';
 
@@ -289,9 +289,11 @@ export function ResourcesPage() {
   const [editing, setEditing] = useState<Resource | null>(null);
   const [showHistory, setShowHistory] = useState<Resource | null>(null);
 
-  const { data: resources = [], isLoading, refetch } = useQuery<Resource[]>({
+  const { data: resources = [], isLoading, isError, refetch } = useQuery<Resource[]>({
     queryKey: ['resources', activeTab],
     queryFn: () => api.get('/resources', { params: { tab: activeTab } }).then((r) => r.data),
+    retry: 2,
+    staleTime: 30000,
   });
   
   const { data: units = [] } = useQuery<Unit[]>({
@@ -429,7 +431,9 @@ export function ResourcesPage() {
       </div>
 
       {isLoading ? (
-        <LoadingScreen message="Cargando recursos..." />
+        <LoadingScreen message="Cargando recursos..." submessage="Conectando con el servidor..." />
+      ) : isError ? (
+        <ConnectionError onRetry={refetch} />
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={Package}
