@@ -1,9 +1,19 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { supabase } from './supabase';
 
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL}/api/v1`;
+  }
+  if (import.meta.env.PROD) {
+    return '/api/v1';
+  }
+  return 'http://localhost:3001/api/v1';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : 'http://localhost:3001/api/v1',
-  timeout: 10000, 
+  baseURL: getApiBaseUrl(),
+  timeout: 15000, 
 });
 
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
