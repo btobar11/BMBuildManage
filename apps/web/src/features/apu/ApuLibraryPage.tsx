@@ -20,6 +20,7 @@ interface Resource {
   unit_id: string;
   unit?: { symbol: string; name: string };
   base_price: number;
+  category?: string;
 }
 
 interface Unit {
@@ -43,6 +44,8 @@ interface ApuTemplate {
   unit?: Unit;
   description?: string;
   unit_cost: number;
+  category?: string;
+  company_id?: string | null;
   apu_resources: ApuResourceEntry[];
 }
 
@@ -80,6 +83,7 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
   const [name, setName] = useState(initial?.name ?? '');
   const [unitId, setUnitId] = useState(initial?.unit_id ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
+  const [category, setCategory] = useState(initial?.category ?? '');
   const [entries, setEntries] = useState<ApuResourceEntry[]>(
     initial?.apu_resources?.map((r) => ({
       resource_id: r.resource_id,
@@ -122,6 +126,7 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
       name,
       unit_id: unitId,
       description,
+      category: category || undefined,
       apu_resources: entries.map((e) => ({
         resource_id: e.resource_id,
         resource_type: e.resource_type,
@@ -158,14 +163,14 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-1 space-y-1.5">
               <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Nombre de la partida</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                placeholder="Ej: Radier hormigón G25 e=10cm"
+                placeholder="Ej: Radier..."
                 className="w-full bg-card/50 border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all"
               />
             </div>
@@ -177,9 +182,18 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
                 required
                 className="w-full bg-card/50 border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all appearance-none cursor-pointer"
               >
-                <option value="" disabled>Seleccionar unidad...</option>
+                <option value="" disabled>Seleccionar...</option>
                 {units.map((u) => <option key={u.id} value={u.id}>{u.symbol} - {u.name}</option>)}
               </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Etapa / Categoría</label>
+              <input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="Ej: Hormigón..."
+                className="w-full bg-card/50 border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all"
+              />
             </div>
           </div>
           
@@ -346,11 +360,13 @@ function ApuCard({
   onEdit,
   onDuplicate,
   onDelete,
+  isGlobal,
 }: {
   apu: ApuTemplate;
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  isGlobal?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -371,28 +387,32 @@ function ApuCard({
           <div className="w-12 h-12 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
             <Calculator size={22} className="text-blue-400" />
           </div>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={onDuplicate}
-              className="p-2 text-muted-foreground hover:text-foreground bg-white/5 hover:bg-muted rounded-xl transition-all"
-              title="Duplicar"
+              className="p-2 text-muted-foreground hover:text-emerald-400 bg-white/5 hover:bg-emerald-400/10 rounded-xl transition-all"
+              title={isGlobal ? "Importar a mi biblioteca" : "Duplicar"}
             >
-              <Copy size={16} />
+              {isGlobal ? <Plus size={16} /> : <Copy size={16} />}
             </button>
-            <button
-              onClick={onEdit}
-              className="p-2 text-muted-foreground hover:text-blue-400 bg-white/5 hover:bg-blue-400/10 rounded-xl transition-all"
-              title="Editar"
-            >
-              <Pencil size={16} />
-            </button>
-            <button
-              onClick={onDelete}
-              className="p-2 text-muted-foreground hover:text-rose-400 bg-white/5 hover:bg-rose-500/10 rounded-xl transition-all"
-              title="Eliminar"
-            >
-              <Trash2 size={16} />
-            </button>
+            {!isGlobal && (
+              <>
+                <button
+                  onClick={onEdit}
+                  className="p-2 text-muted-foreground hover:text-blue-400 bg-white/5 hover:bg-blue-400/10 rounded-xl transition-all"
+                  title="Editar"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="p-2 text-muted-foreground hover:text-rose-400 bg-white/5 hover:bg-rose-500/10 rounded-xl transition-all"
+                  title="Eliminar"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -457,23 +477,30 @@ function ApuCard({
         )}
       </div>
 
-      <div className="px-6 py-3 bg-muted border-t border-border flex items-center gap-4 overflow-x-auto scrollbar-hide">
-        {materialCost > 0 && (
-          <div className="flex items-center gap-1.5 shrink-0">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-            <span className="text-[10px] text-muted-foreground">Mat: <span className="text-foreground">{formatCLP(materialCost)}</span></span>
-          </div>
-        )}
-        {laborCost > 0 && (
-          <div className="flex items-center gap-1.5 shrink-0">
-            <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-            <span className="text-[10px] text-muted-foreground">M.O: <span className="text-foreground">{formatCLP(laborCost)}</span></span>
-          </div>
-        )}
-        {equipCost > 0 && (
-          <div className="flex items-center gap-1.5 shrink-0">
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            <span className="text-[10px] text-muted-foreground">Eqp: <span className="text-foreground">{formatCLP(equipCost)}</span></span>
+      <div className="px-6 py-3 bg-muted border-t border-border flex items-center justify-between overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-4">
+          {materialCost > 0 && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span className="text-[10px] text-muted-foreground">Mat: <span className="text-foreground">{formatCLP(materialCost)}</span></span>
+            </div>
+          )}
+          {laborCost > 0 && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+              <span className="text-[10px] text-muted-foreground">M.O: <span className="text-foreground">{formatCLP(laborCost)}</span></span>
+            </div>
+          )}
+          {equipCost > 0 && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span className="text-[10px] text-muted-foreground">Eqp: <span className="text-foreground">{formatCLP(equipCost)}</span></span>
+            </div>
+          )}
+        </div>
+        {isGlobal && (
+          <div className="bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+            <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">Global</span>
           </div>
         )}
       </div>
@@ -485,12 +512,14 @@ function ApuCard({
 export function ApuLibraryPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'personal' | 'global'>('global');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [editing, setEditing] = useState<ApuTemplate | null>(null);
 
   const { data: apus = [], isLoading } = useQuery<ApuTemplate[]>({
-    queryKey: ['apu-templates', search],
-    queryFn: () => api.get('/apu', { params: { search: search || undefined } }).then((r) => r.data),
+    queryKey: ['apu-templates', search, activeTab],
+    queryFn: () => api.get('/apu', { params: { search: search || undefined, tab: activeTab } }).then((r) => r.data),
   });
 
   const { data: resources = [] } = useQuery<Resource[]>({
@@ -525,9 +554,16 @@ export function ApuLibraryPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['apu-templates'] }),
   });
 
-  // Calculate some stats for the header
-  const totalItems = apus.length;
-  const avgCost = totalItems > 0 ? apus.reduce((acc, cur) => acc + Number(cur.unit_cost), 0) / totalItems : 0;
+  // Calculate categories from apus
+  const categories = Array.from(new Set(apus.map(a => a.category).filter(Boolean))) as string[];
+
+  const filteredApus = apus.filter(a => {
+    if (selectedCategory && a.category !== selectedCategory) return false;
+    return true;
+  });
+
+  const totalItems = filteredApus.length;
+  const avgCost = totalItems > 0 ? filteredApus.reduce((acc, cur) => acc + Number(cur.unit_cost), 0) / totalItems : 0;
 
   return (
     <div className="pb-12">
@@ -540,13 +576,29 @@ export function ApuLibraryPage() {
             { label: 'Biblioteca APU', active: true }
           ]}
           actions={
-            <button
-              onClick={() => setShowEditor(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl transition-all font-semibold shadow-lg shadow-blue-600/20 active:scale-95"
-            >
-              <Plus size={18} />
-              <span>Nueva Partida APU</span>
-            </button>
+            <div className="flex items-center gap-4">
+              <div className="flex bg-card/60 backdrop-blur-md border border-border/50 p-1 rounded-2xl overflow-hidden shadow-inner">
+                <button
+                  onClick={() => { setActiveTab('personal'); setSelectedCategory(null); }}
+                  className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'personal' ? 'bg-blue-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Mi Biblioteca
+                </button>
+                <button
+                  onClick={() => { setActiveTab('global'); setSelectedCategory(null); }}
+                  className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'global' ? 'bg-emerald-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Catálogo Global
+                </button>
+              </div>
+              <button
+                onClick={() => setShowEditor(true)}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl transition-all font-semibold shadow-lg shadow-blue-600/20 active:scale-95"
+              >
+                <Plus size={18} />
+                <span>Nuevo APU</span>
+              </button>
+            </div>
           }
         />
       </div>
@@ -572,16 +624,16 @@ export function ApuLibraryPage() {
             </div>
             <p className="text-muted-foreground text-sm font-medium mb-1">Costo Unit. Promedio</p>
             <h3 className="text-3xl font-bold text-foreground mb-2">{formatCLP(avgCost)}</h3>
-            <p className="text-xs text-emerald-400">Promedio de base de datos</p>
+            <p className="text-xs text-emerald-400">Promedio de las partidas actuales</p>
           </div>
 
           <div className="bg-card/40 border border-border/50 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Package size={64} className="text-amber-500" />
+              <TrendingUp size={64} className="text-amber-500" />
             </div>
-            <p className="text-muted-foreground text-sm font-medium mb-1">Recursos Vinculados</p>
-            <h3 className="text-3xl font-bold text-foreground mb-2">{resources.length}</h3>
-            <p className="text-xs text-amber-400">Disponibles en el catálogo</p>
+            <p className="text-muted-foreground text-sm font-medium mb-1">Categorías</p>
+            <h3 className="text-3xl font-bold text-foreground mb-2">{categories.length}</h3>
+            <p className="text-xs text-muted-foreground">Etapas de construcción activas</p>
           </div>
         </div>
 
@@ -593,7 +645,7 @@ export function ApuLibraryPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nombre, código o descripción de partida..."
+              placeholder={activeTab === 'global' ? "Buscar en el catálogo global..." : "Buscar en mi biblioteca..."}
               className="w-full bg-card border border-border/50 rounded-2xl pl-12 pr-4 py-3.5 text-foreground text-sm outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all"
             />
             {search && (
@@ -605,52 +657,100 @@ export function ApuLibraryPage() {
               </button>
             )}
           </div>
+          {activeTab === 'global' && (
+            <div className="bg-emerald-500/5 border border-emerald-500/10 px-4 py-2 rounded-2xl flex items-center gap-2">
+              <Package size={14} className="text-emerald-400" />
+              <p className="text-[10px] text-emerald-400/80 font-bold uppercase tracking-widest">
+                Mostrando Recursos Estándar
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Content */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-32 space-y-4">
-            <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-            <p className="text-muted-foreground animate-pulse font-medium">Cargando base de datos APU...</p>
-          </div>
-        ) : apus.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-border rounded-3xl bg-card/10">
-            <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6">
-              <Calculator size={40} className="text-muted-foreground" />
+        {/* Content Layout with Sidebar */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <aside className="w-full lg:w-64 space-y-6">
+            <div>
+              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 ml-2">Etapas / Categorías</h4>
+              <div className="space-y-1">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${!selectedCategory ? 'bg-white/10 text-foreground' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
+                >
+                  Todas las etapas
+                </button>
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedCategory === cat ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">No se encontraron partidas</h3>
-            <p className="text-muted-foreground max-w-sm text-center mb-8">
-              {search
-                ? `No hay resultados para "${search}". Intenta con otra búsqueda.`
-                : 'Aún no has creado ninguna partida APU. Comienza agregando una ahora.'}
-            </p>
-            {!search && (
-              <button
-                onClick={() => setShowEditor(true)}
-                className="flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold px-6 py-3 rounded-xl border border-blue-400/20 hover:bg-blue-400/5 transition-all"
-              >
-                <Plus size={20} />
-                <span>Crear mi primer APU</span>
-              </button>
+            
+            <div className="p-6 rounded-3xl bg-blue-600/5 border border-blue-500/10">
+              <h5 className="text-xs font-bold text-blue-400 mb-2 flex items-center gap-2">
+                <TrendingUp size={14} />
+                Tip de Pro
+              </h5>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Utilice el catálogo global para basear sus presupuestos. Puede importar cualquier partida y ajustarla según su obra.
+              </p>
+            </div>
+          </aside>
+
+          {/* Main Grid */}
+          <div className="flex-1">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-32 space-y-4">
+                <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                <p className="text-muted-foreground animate-pulse font-medium">Cargando base de datos APU...</p>
+              </div>
+            ) : filteredApus.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-32 border-2 border-dashed border-border rounded-3xl bg-card/10">
+                <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mb-6">
+                  <Calculator size={40} className="text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">No se encontraron partidas</h3>
+                <p className="text-muted-foreground max-w-sm text-center mb-8">
+                  {search || selectedCategory
+                    ? `No hay resultados para sus filtros actuales.`
+                    : 'Aún no has creado ninguna partida APU. Comienza agregando una ahora.'}
+                </p>
+                {!search && !selectedCategory && (
+                  <button
+                    onClick={() => setShowEditor(true)}
+                    className="flex items-center gap-2 text-blue-400 hover:text-blue-300 font-semibold px-6 py-3 rounded-xl border border-blue-400/20 hover:bg-blue-400/5 transition-all"
+                  >
+                    <Plus size={20} />
+                    <span>Crear mi primer APU</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredApus.map((apu) => (
+                  <ApuCard
+                    key={apu.id}
+                    apu={apu}
+                    isGlobal={!apu.company_id}
+                    onEdit={() => setEditing(apu)}
+                    onDuplicate={() => duplicateMutation.mutate(apu.id)}
+                    onDelete={() => {
+                      if (window.confirm(`¿Estás seguro de eliminar la partida "${apu.name}"? Esta acción no se puede deshacer.`)) {
+                        deleteMutation.mutate(apu.id);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
             )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {apus.map((apu) => (
-              <ApuCard
-                key={apu.id}
-                apu={apu}
-                onEdit={() => setEditing(apu)}
-                onDuplicate={() => duplicateMutation.mutate(apu.id)}
-                onDelete={() => {
-                  if (window.confirm(`¿Estás seguro de eliminar la partida "${apu.name}"? Esta acción no se puede deshacer.`)) {
-                    deleteMutation.mutate(apu.id);
-                  }
-                }}
-              />
-            ))}
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Modals */}

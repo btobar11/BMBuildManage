@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../lib/api';
 import {
   Package, HardHat, Wrench, Plus, Trash2,
-  Search, X, Check, History
+  Search, X, Check, History, LayoutGrid
 } from 'lucide-react';
 
 type ResourceType = 'material' | 'labor' | 'equipment';
@@ -16,6 +16,8 @@ interface Resource {
   unit?: { symbol: string; name: string };
   base_price: number;
   description?: string;
+  category?: string;
+  company_id?: string | null;
   created_at: string;
 }
 
@@ -55,11 +57,11 @@ interface EditableCellProps {
   bold?: boolean;
 }
 
-function EditableCell({ value, type = 'text', className = '', onChange, placeholder, align = 'left', bold }: EditableCellProps) {
+function EditableCell({ value, type = 'text', className = '', onChange, placeholder, align = 'left', bold, readOnly }: EditableCellProps & { readOnly?: boolean }) {
   const [editing, setEditing] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
 
-  const start = () => { setEditing(true); setTimeout(() => ref.current?.select(), 0); };
+  const start = () => { if (!readOnly) { setEditing(true); setTimeout(() => ref.current?.select(), 0); } };
   const stop = (e: React.FocusEvent<HTMLInputElement>) => { setEditing(false); if (String(e.target.value) !== String(value)) onChange(e.target.value); };
 
   return editing ? (
@@ -76,7 +78,7 @@ function EditableCell({ value, type = 'text', className = '', onChange, placehol
   ) : (
     <div
       onClick={start}
-      className={`px-2 py-1 rounded hover:bg-white/5 cursor-text transition-colors text-sm text-${align} ${bold ? 'font-bold text-foreground' : 'text-muted-foreground'} ${!value && value !== 0 ? 'italic' : ''} ${className}`}
+      className={`px-2 py-1 rounded transition-colors text-sm text-${align} ${bold ? 'font-bold text-foreground' : 'text-muted-foreground'} ${!value && value !== 0 ? 'italic' : ''} ${!readOnly ? 'hover:bg-white/5 cursor-text' : ''} ${className}`}
     >
       {value !== '' && value !== 0 ? (type === 'number' ? Number(value).toLocaleString('es-CL') : value) : (
         <span className="text-muted-foreground/60 text-xs">{placeholder}</span>
@@ -113,6 +115,7 @@ function ResourceForm({ initial, onSave, onCancel, isLoading, units }: ResourceF
     unit_id: initial?.unit_id ?? '',
     base_price: initial?.base_price ?? 0,
     description: initial?.description ?? '',
+    category: initial?.category ?? '',
   });
 
   return (
@@ -143,6 +146,16 @@ function ResourceForm({ initial, onSave, onCancel, isLoading, units }: ResourceF
             placeholder="Detalles adicionales..."
             rows={2}
             className="w-full bg-muted border border-border/50 rounded-xl px-3 py-2 text-foreground text-sm outline-none focus:border-blue-500 transition-colors resize-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Etapa / Categoría</label>
+          <input
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            placeholder="Ej: Obra Gruesa, Terminaciones..."
+            className="w-full bg-muted border border-border/50 rounded-xl px-3 py-2 text-foreground text-sm outline-none focus:border-blue-500 transition-colors"
           />
         </div>
 
@@ -258,13 +271,15 @@ export function ResourcesPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<ResourceType | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<'personal' | 'global'>('global');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Resource | null>(null);
   const [showHistory, setShowHistory] = useState<Resource | null>(null);
 
   const { data: resources = [], isLoading } = useQuery<Resource[]>({
-    queryKey: ['resources'],
-    queryFn: () => api.get('/resources').then((r) => r.data),
+    queryKey: ['resources', activeTab],
+    queryFn: () => api.get('/resources', { params: { tab: activeTab } }).then((r) => r.data),
   });
   
   const { data: units = [] } = useQuery<Unit[]>({
@@ -287,10 +302,21 @@ export function ResourcesPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['resources'] }),
   });
 
+  const duplicateMutation = useMutation({
+    mutationFn: (id: string) => api.post(`/resources/${id}/duplicate`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resources'] });
+      setActiveTab('personal');
+    },
+  });
+
+  const categories = Array.from(new Set(resources.map(r => r.category).filter(Boolean))) as string[];
+
   const filtered = resources.filter((r) => {
     const matchSearch = r.name.toLowerCase().includes(search.toLowerCase());
     const matchType = typeFilter === 'all' || r.type === typeFilter;
-    return matchSearch && matchType;
+    const matchCategory = !selectedCategory || r.category === selectedCategory;
+    return matchSearch && matchType && matchCategory;
   });
 
   const counts = {
@@ -307,12 +333,28 @@ export function ResourcesPage() {
         icon={<Package size={22} />} 
         breadcrumbs={[{ label: 'Gestión de Costos' }, { label: 'Recursos', active: true }]}
         actions={
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl transition-all font-bold text-sm shadow-lg shadow-indigo-600/20 active:scale-95"
-          >
-            <Plus size={18} /> Nuevo Recurso
-          </button>
+          <div className="flex items-center gap-4">
+            <div className="flex bg-card/60 backdrop-blur-md border border-border/50 p-1 rounded-2xl overflow-hidden shadow-inner">
+              <button
+                onClick={() => { setActiveTab('personal'); setSelectedCategory(null); }}
+                className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'personal' ? 'bg-indigo-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Mi Base
+              </button>
+              <button
+                onClick={() => { setActiveTab('global'); setSelectedCategory(null); }}
+                className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'global' ? 'bg-emerald-600 text-white shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                Catálogo Global
+              </button>
+            </div>
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl transition-all font-bold text-sm shadow-lg shadow-indigo-600/20 active:scale-95"
+            >
+              <Plus size={18} /> Nuevo Recurso
+            </button>
+          </div>
         }
       />
 
@@ -392,97 +434,156 @@ export function ResourcesPage() {
           </button>
         </div>
       ) : (
-        <div className="bg-muted rounded-3xl border border-border overflow-hidden shadow-2xl">
-          <div className="grid grid-cols-[1fr_150px_100px_140px_120px] gap-4 px-8 py-4 border-b border-border text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] bg-card/20">
-            <span>Identificación y Descripción</span>
-            <span className="text-center">Categoría</span>
-            <span className="text-center">Unidad</span>
-            <span className="text-right">Precio Base</span>
-            <span className="text-right pr-4">Acciones</span>
-          </div>
-
-          <div className="divide-y divide-white/5">
-            {filtered.map((r) => {
-              const cfg = TYPE_CONFIG[r.type];
-              return (
-                <div
-                  key={r.id}
-                  className="group grid grid-cols-[1fr_150px_100px_140px_120px] gap-4 items-center px-8 py-4 hover:bg-white/[0.02] transition-colors relative"
+        <div className="flex flex-col lg:flex-row gap-8">
+          <aside className="w-full lg:w-64 space-y-6">
+            <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-3xl p-4 shadow-xl">
+              <div className="flex items-center gap-2 mb-4 px-2">
+                <LayoutGrid size={14} className="text-muted-foreground" />
+                <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Categorías</h4>
+              </div>
+              <div className="space-y-1 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${!selectedCategory ? 'bg-white/10 text-foreground shadow-lg' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
                 >
-                  <div className="flex flex-col min-w-0">
-                    <EditableCell
-                      value={r.name}
-                      onChange={(v) => updateMutation.mutate({ id: r.id, name: v })}
-                      placeholder="Nombre del recurso"
-                      bold
-                      className="uppercase tracking-tight !px-0"
-                    />
-                    <EditableCell
-                      value={r.description || ''}
-                      onChange={(v) => updateMutation.mutate({ id: r.id, description: v })}
-                      placeholder="Sin descripción adicional..."
-                      className="text-[11px] !px-0 opacity-70"
-                    />
-                  </div>
+                  Todas las categorías
+                </button>
+                {categories.sort().map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedCategory === cat ? 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 shadow-lg' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
 
-                  <div className="flex justify-center">
-                    <select
-                      value={r.type}
-                      onChange={(e) => updateMutation.mutate({ id: r.id, type: e.target.value as ResourceType })}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${cfg.bg} ${cfg.color} border border-current/10 outline-none cursor-pointer appearance-none text-center`}
-                    >
-                      {(Object.keys(TYPE_CONFIG) as ResourceType[]).map(t => (
-                        <option key={t} value={t} className="bg-card">{TYPE_CONFIG[t].label}</option>
-                      ))}
-                    </select>
-                  </div>
+          <div className="flex-1 bg-muted rounded-3xl border border-border overflow-hidden shadow-2xl">
+            <div className="grid grid-cols-[1fr_150px_100px_140px_120px] gap-4 px-8 py-4 border-b border-border text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] bg-card/20">
+              <span>Identificación y Descripción</span>
+              <span className="text-center">Tipo</span>
+              <span className="text-center">Unidad</span>
+              <span className="text-right">Precio Base</span>
+              <span className="text-right pr-4">Acciones</span>
+            </div>
 
-                  <div className="text-center flex justify-center">
-                    <div className="bg-white/5 px-2 py-1 rounded-lg border border-border/50 group-hover:border-indigo-500/30 transition-colors">
-                      <UnitCell
-                        value={r.unit_id}
-                        units={units}
-                        onChange={(v) => updateMutation.mutate({ id: r.id, unit_id: v })}
+            <div className="divide-y divide-white/5">
+              {filtered.map((r) => {
+                const cfg = TYPE_CONFIG[r.type];
+                const isGlobal = !r.company_id;
+                return (
+                  <div
+                    key={r.id}
+                    className="group grid grid-cols-[1fr_150px_100px_140px_120px] gap-4 items-center px-8 py-4 hover:bg-white/[0.02] transition-colors relative"
+                  >
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-2">
+                        <EditableCell
+                          value={r.name}
+                          onChange={(v) => updateMutation.mutate({ id: r.id, name: v })}
+                          placeholder="Nombre del recurso"
+                          bold
+                          readOnly={isGlobal}
+                          className="uppercase tracking-tight !px-0 flex-1"
+                        />
+                        {isGlobal && (
+                          <span className="text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider">Global</span>
+                        )}
+                      </div>
+                      <EditableCell
+                        value={r.description || ''}
+                        onChange={(v) => updateMutation.mutate({ id: r.id, description: v })}
+                        placeholder="Sin descripción adicional..."
+                        readOnly={isGlobal}
+                        className="text-[11px] !px-0 opacity-70"
                       />
                     </div>
-                  </div>
 
-                  <div className="text-right">
-                    <div className="flex flex-col items-end">
-                      <div className="flex items-center justify-end gap-1">
-                        <span className="text-muted-foreground text-[10px] font-bold tracking-tighter uppercase">$</span>
-                        <EditableCell
-                          value={r.base_price}
-                          type="number"
-                          onChange={(v) => updateMutation.mutate({ id: r.id, base_price: parseFloat(v) || 0 })}
-                          align="right"
-                          bold
-                          className="!text-foreground !px-0"
-                        />
+                    <div className="flex justify-center">
+                      {isGlobal ? (
+                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${cfg.bg} ${cfg.color} border border-current/10`}>
+                          {cfg.label}
+                        </div>
+                      ) : (
+                        <select
+                          value={r.type}
+                          onChange={(e) => updateMutation.mutate({ id: r.id, type: e.target.value as ResourceType })}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${cfg.bg} ${cfg.color} border border-current/10 outline-none cursor-pointer appearance-none text-center`}
+                        >
+                          {(Object.keys(TYPE_CONFIG) as ResourceType[]).map(t => (
+                            <option key={t} value={t} className="bg-card">{TYPE_CONFIG[t].label}</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+
+                    <div className="text-center flex justify-center">
+                      <div className={`bg-white/5 px-2 py-1 rounded-lg border border-border/50 group-hover:border-indigo-500/30 transition-colors ${isGlobal ? 'opacity-50' : ''}`}>
+                        {isGlobal ? (
+                          <span className="text-xs font-bold text-muted-foreground uppercase">{r.unit?.symbol || '-'}</span>
+                        ) : (
+                          <UnitCell
+                            value={r.unit_id}
+                            units={units}
+                            onChange={(v) => updateMutation.mutate({ id: r.id, unit_id: v })}
+                          />
+                        )}
                       </div>
-                      <span className="text-[10px] opacity-40 font-bold uppercase tracking-[0.1em]">por {r.unit?.symbol || 'un'}</span>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="flex flex-col items-end">
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-muted-foreground text-[10px] font-bold tracking-tighter uppercase">$</span>
+                          <EditableCell
+                            value={r.base_price}
+                            type="number"
+                            onChange={(v) => updateMutation.mutate({ id: r.id, base_price: parseFloat(v) || 0 })}
+                            align="right"
+                            bold
+                            readOnly={isGlobal}
+                            className="!text-foreground !px-0"
+                          />
+                        </div>
+                        <span className="text-[10px] opacity-40 font-bold uppercase tracking-[0.1em]">por {r.unit?.symbol || 'un'}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1 opacity-10 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
+                      {isGlobal ? (
+                        <button
+                          onClick={() => duplicateMutation.mutate(r.id)}
+                          title="Importar a mi base"
+                          className="p-2.5 rounded-xl text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 transition-all active:scale-90"
+                        >
+                          <Plus size={15} />
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setShowHistory(r)}
+                            title="Ver Historial"
+                            className="p-2.5 rounded-xl text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10 transition-all active:scale-90"
+                          >
+                            <History size={15} />
+                          </button>
+                          <button
+                            onClick={() => { if (confirm('¿Deseas eliminar permanentemente este recurso?')) deleteMutation.mutate(r.id); }}
+                            title="Eliminar"
+                            className="p-2.5 rounded-xl text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-all active:scale-90"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-end gap-1 opacity-10 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
-                    <button
-                      onClick={() => setShowHistory(r)}
-                      title="Ver Historial"
-                      className="p-2.5 rounded-xl text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10 transition-all active:scale-90"
-                    >
-                      <History size={15} />
-                    </button>
-                    <button
-                      onClick={() => { if (confirm('¿Deseas eliminar permanentemente este recurso?')) deleteMutation.mutate(r.id); }}
-                      title="Eliminar"
-                      className="p-2.5 rounded-xl text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-all active:scale-90"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

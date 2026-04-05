@@ -25,6 +25,8 @@ export interface ApuTemplate {
   unit?: { id: string; name: string; symbol: string };
   description?: string;
   unit_cost: number;
+  category?: string;
+  company_id?: string | null;
   apu_resources: ApuResourceEntry[];
 }
 
@@ -34,11 +36,19 @@ interface ApuPickerModalProps {
 }
 
 export function ApuPickerModal({ onSelect, onClose }: ApuPickerModalProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
   const { data: apus = [], isLoading } = useQuery<ApuTemplate[]>({
     queryKey: ['apu-templates', search],
     queryFn: () => api.get('/apu', { params: { search: search || undefined } }).then((r) => r.data),
+  });
+
+  const categories = Array.from(new Set(apus.map(a => a.category).filter(Boolean))) as string[];
+
+  const filteredApus = apus.filter(a => {
+    if (selectedCategory && a.category !== selectedCategory) return false;
+    return true;
   });
 
   const formatCLP = (v: number) =>
@@ -65,8 +75,8 @@ export function ApuPickerModal({ onSelect, onClose }: ApuPickerModalProps) {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="px-6 py-4 border-b border-border">
+        {/* Filters */}
+        <div className="px-6 py-4 border-b border-border space-y-4 bg-muted/30">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -77,6 +87,24 @@ export function ApuPickerModal({ onSelect, onClose }: ApuPickerModalProps) {
               className="w-full bg-card border border-border/50 rounded-xl pl-10 pr-4 py-2.5 text-foreground text-sm outline-none focus:border-blue-500 transition-all font-medium"
             />
           </div>
+          
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all ${!selectedCategory ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-card text-muted-foreground hover:text-foreground'}`}
+            >
+              Todos
+            </button>
+            {categories.sort().map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-card text-muted-foreground hover:text-foreground'}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* List */}
@@ -86,56 +114,70 @@ export function ApuPickerModal({ onSelect, onClose }: ApuPickerModalProps) {
               <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
               <p className="text-muted-foreground text-xs">Cargando biblioteca...</p>
             </div>
-          ) : apus.length === 0 ? (
+          ) : filteredApus.length === 0 ? (
             <div className="text-center py-20">
-              <Package size={40} className="text-gray-800 mx-auto mb-4" />
+              <Package size={40} className="text-gray-800 opacity-20 mx-auto mb-4" />
               <p className="text-muted-foreground text-sm">No se encontraron análisis de precios</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-2">
-              {apus.map((apu) => (
-                <button
-                  key={apu.id}
-                  onClick={() => onSelect(apu)}
-                  className="w-full p-4 rounded-xl bg-white/5 hover:bg-muted border border-border hover:border-blue-500/30 transition-all text-left group flex items-center justify-between"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-foreground font-bold text-sm tracking-tight">{apu.name}</span>
-                      <span className="text-[10px] bg-muted border border-border/50 px-1.5 py-0.5 rounded text-muted-foreground font-mono">
-                        {apu.unit?.symbol ?? '-'}
-                      </span>
-                    </div>
-                    {apu.description && (
-                      <p className="text-muted-foreground text-xs line-clamp-1 mb-2">{apu.description}</p>
-                    )}
-                    <div className="flex gap-2">
-                      {apu.apu_resources?.slice(0, 3).map((r, i) => (
-                        <div key={i} className="flex items-center gap-1 text-[10px] text-muted-foreground bg-black/50 px-1.5 py-0.5 rounded">
-                           {r.resource_type === 'material' && <Package size={10} className="text-blue-400" />}
-                           {r.resource_type === 'labor' && <HardHat size={10} className="text-violet-400" />}
-                           {r.resource_type === 'equipment' && <Wrench size={10} className="text-amber-400" />}
-                           <span className="truncate max-w-[80px]">{r.resource?.name}</span>
-                        </div>
-                      ))}
-                      {apu.apu_resources?.length > 3 && (
-                        <span className="text-[10px] text-muted-foreground flex items-center">+{apu.apu_resources.length - 3}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right ml-4">
-                    <div className="text-xs text-muted-foreground mb-1">Costo Unit.</div>
-                    <div className="text-emerald-400 font-black text-sm tracking-tighter">
-                      {formatCLP(apu.unit_cost)}
-                    </div>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 flex justify-end">
-                      <div className="bg-blue-600 rounded-full p-1 text-white">
-                        <Check size={12} />
+              {filteredApus.map((apu) => {
+                const isGlobal = !apu.company_id;
+                return (
+                  <button
+                    key={apu.id}
+                    onClick={() => onSelect(apu)}
+                    className="w-full p-4 rounded-xl bg-white/5 hover:bg-muted border border-border hover:border-blue-500/30 transition-all text-left group flex items-center justify-between"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-foreground font-bold text-sm tracking-tight">{apu.name}</span>
+                        <span className="text-[10px] bg-muted border border-border/50 px-1.5 py-0.5 rounded text-muted-foreground font-mono">
+                          {apu.unit?.symbol ?? '-'}
+                        </span>
+                        {isGlobal && (
+                          <span className="text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider">Global</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        {apu.category && (
+                          <span className="text-[9px] text-blue-400 font-bold uppercase opacity-80">{apu.category}</span>
+                        )}
+                        {apu.description && (
+                          <>
+                            <span className="text-muted-foreground/30 text-xs">•</span>
+                            <p className="text-muted-foreground text-xs line-clamp-1">{apu.description}</p>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {apu.apu_resources?.slice(0, 3).map((r, i) => (
+                          <div key={i} className="flex items-center gap-1 text-[10px] text-muted-foreground bg-black/50 px-1.5 py-0.5 rounded">
+                             {r.resource_type === 'material' && <Package size={10} className="text-blue-400" />}
+                             {r.resource_type === 'labor' && <HardHat size={10} className="text-violet-400" />}
+                             {r.resource_type === 'equipment' && <Wrench size={10} className="text-amber-400" />}
+                             <span className="truncate max-w-[80px]">{r.resource?.name}</span>
+                          </div>
+                        ))}
+                        {apu.apu_resources?.length > 3 && (
+                          <span className="text-[10px] text-muted-foreground flex items-center">+{apu.apu_resources.length - 3}</span>
+                        )}
                       </div>
                     </div>
-                  </div>
-                </button>
-              ))}
+                    <div className="text-right ml-4">
+                      <div className="text-xs text-muted-foreground mb-1">Costo Unit.</div>
+                      <div className="text-emerald-400 font-black text-sm tracking-tighter">
+                        {formatCLP(apu.unit_cost)}
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 flex justify-end">
+                        <div className="bg-blue-600 rounded-full p-1 text-white">
+                          <Check size={12} />
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

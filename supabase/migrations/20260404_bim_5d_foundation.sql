@@ -18,18 +18,35 @@
 -- PART 0: HELPER FUNCTIONS (required for RLS)
 -- ============================================================
 
--- Create function to safely extract company_id from JWT claims (in public schema)
+-- Create function to safely extract company_id from JWT claims
 CREATE OR REPLACE FUNCTION public.get_user_company_id()
 RETURNS UUID
-LANGUAGE sql
+LANGUAGE plpgsql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
-  SELECT COALESCE(
-    current_setting('request.jwt.claims', true)::json->>'company_id',
-    current_setting('request.jwt.claims', true)::json->>'user_metadata'::json->>'company_id',
-    NULL
+DECLARE
+  jwt_claims text;
+  company_uuid UUID;
+BEGIN
+  jwt_claims := current_setting('request.jwt.claims', true);
+  
+  IF jwt_claims IS NULL OR jwt_claims = '' THEN
+    RETURN NULL;
+  END IF;
+  
+  company_uuid := COALESCE(
+    (jwt_claims::jsonb)->>'company_id',
+    (jwt_claims::jsonb)->'user_metadata'->>'company_id'
   )::UUID;
+  
+  RETURN company_uuid;
+END;
 $$;
+
+COMMENT ON FUNCTION public.get_user_company_id() IS 
+'Extracts company_id from JWT claims for RLS policies';
 
 -- ============================================================
 -- PART 1: CORE BIM TABLES
