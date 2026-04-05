@@ -33,8 +33,9 @@ export class ApuController {
   findAll(
     @Query('company_id') companyId?: string,
     @Query('search') search?: string,
+    @Query('tab') tab?: 'personal' | 'global',
   ) {
-    return this.apuService.findAll(companyId, search);
+    return this.apuService.findAll(companyId, search, tab);
   }
 
   @Get(':id')

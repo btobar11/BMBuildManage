@@ -43,7 +43,7 @@ export class ApuService {
     return this.findOne(saved.id);
   }
 
-  async findAll(companyId?: string, search?: string) {
+  async findAll(companyId?: string, search?: string, tab?: 'personal' | 'global') {
     const qb = this.apuRepo
       .createQueryBuilder('apu')
       .leftJoinAndSelect('apu.apu_resources', 'ar')
@@ -51,11 +51,23 @@ export class ApuService {
       .leftJoinAndSelect('apu.unit', 'u')
       .orderBy('apu.name', 'ASC');
 
-    if (companyId && search) {
-      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL) AND apu.name ILIKE :search', { companyId, search: `%${search}%` });
-    } else if (companyId) {
+    // 1. Strict Tab Filtering
+    if (tab === 'global') {
+      // Global tab ALWAYS shows ONLY global items
+      qb.andWhere('apu.company_id IS NULL');
+    } else if (tab === 'personal' && companyId) {
+      // Personal tab shows MY items + Globals (per requirement)
       qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', { companyId });
-    } else if (search) {
+    } else if (companyId) {
+      // Default fallback if tab is missing but company is known
+      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', { companyId });
+    } else {
+      // Safety landing: if no company and no tab, ONLY globals are safe
+      qb.andWhere('apu.company_id IS NULL');
+    }
+
+    // 2. Search
+    if (search) {
       qb.andWhere('apu.name ILIKE :search', { search: `%${search}%` });
     }
 

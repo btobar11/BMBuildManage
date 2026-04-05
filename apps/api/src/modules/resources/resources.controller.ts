@@ -17,7 +17,7 @@ import { UpdateResourceDto } from './dto/update-resource.dto';
 
 @Controller('resources')
 export class ResourcesController {
-  constructor(private readonly resourcesService: ResourcesService) {}
+  constructor(private readonly resourcesService: ResourcesService) { }
 
   @Post()
   create(@Body() dto: CreateResourceDto) {
