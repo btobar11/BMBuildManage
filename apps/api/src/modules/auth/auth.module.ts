@@ -8,7 +8,7 @@ import { UsersModule } from '../users/users.module';
   imports: [ConfigModule, forwardRef(() => UsersModule)],
   controllers: [AuthController],
   providers: [SupabaseAuthGuard],
-  exports: [SupabaseAuthGuard, ConfigModule],
+  exports: [SupabaseAuthGuard, ConfigModule, UsersModule],
 })
 export class AuthModule {}
 
