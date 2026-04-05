@@ -24,7 +24,7 @@ export class Resource {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   company_id: string;
 
   @Column({ length: 300 })

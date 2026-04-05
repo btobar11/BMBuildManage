@@ -21,11 +21,24 @@ export class ResourcesService {
     return this.resourceRepo.save(resource);
   }
 
-  findAll(companyId?: string) {
-    // Return resources that belong to the company OR global ones (company_id is null)
-    const where = companyId 
-      ? [{ company_id: companyId }, { company_id: IsNull() }] 
-      : { company_id: IsNull() };
+  findAll(params: { companyId?: string; tab?: string }) {
+    const { companyId, tab } = params;
+    
+    // tab = 'global' → solo recursos globales (company_id IS NULL)
+    // tab = 'personal' → recursos de la empresa + globales
+    // sin params → recursos de la empresa + globales
+    let where: any;
+    
+    if (tab === 'global') {
+      // Solo recursos globales
+      where = { company_id: IsNull() };
+    } else if (companyId) {
+      // Recursos de la empresa + globales
+      where = [{ company_id: companyId }, { company_id: IsNull() }];
+    } else {
+      // Solo globales si no hay companyId
+      where = { company_id: IsNull() };
+    }
       
     return this.resourceRepo.find({ 
       where, 

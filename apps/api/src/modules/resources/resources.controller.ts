@@ -30,8 +30,11 @@ export class ResourcesController {
   }
 
   @Get()
-  findAll(@Query('company_id') companyId?: string) {
-    return this.resourcesService.findAll(companyId);
+  findAll(
+    @Query('company_id') companyId?: string,
+    @Query('tab') tab?: string,
+  ) {
+    return this.resourcesService.findAll({ companyId, tab });
   }
 
   @Get(':id')
