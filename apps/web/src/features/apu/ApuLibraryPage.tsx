@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { LoadingScreen, EmptyState } from '../../components/common/LoadingStates';
+import { useAuth } from '../../context/AuthContext';
 
 type ResourceType = 'material' | 'labor' | 'equipment';
 
@@ -510,6 +511,7 @@ function ApuCard({
 
 export function ApuLibraryPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'personal' | 'global'>('global');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -563,7 +565,11 @@ export function ApuLibraryPage() {
   });
 
   const handleImportGlobal = () => {
-    const companyId = 'demo-company';
+    const companyId = user?.company_id;
+    if (!companyId) {
+      alert('No se encontró el ID de empresa. Por favor, inicia sesión nuevamente.');
+      return;
+    }
     if (confirm('¿Importar toda la biblioteca global a tu cuenta? Esto copiará todas las partidas disponibles.')) {
       importGlobalMutation.mutate(companyId);
     }
