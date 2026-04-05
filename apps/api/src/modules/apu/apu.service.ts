@@ -51,8 +51,13 @@ export class ApuService {
       .leftJoinAndSelect('apu.unit', 'u')
       .orderBy('apu.name', 'ASC');
 
-    if (companyId) qb.andWhere('apu.company_id = :companyId', { companyId });
-    if (search) qb.andWhere('apu.name ILIKE :search', { search: `%${search}%` });
+    if (companyId && search) {
+      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL) AND apu.name ILIKE :search', { companyId, search: `%${search}%` });
+    } else if (companyId) {
+      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', { companyId });
+    } else if (search) {
+      qb.andWhere('apu.name ILIKE :search', { search: `%${search}%` });
+    }
 
     const templates = await qb.getMany();
     return templates.map((t) => ({ ...t, unit_cost: this.calculateUnitCost(t) }));

@@ -1,40 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" fill="none">
+  <defs>
+    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+      <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#10B981" stroke-width="0.3" opacity="0.12"/>
+    </pattern>
+  </defs>
+  
+  <!-- Logo adaptable (usa fill="currentColor" del padre) -->
+  
   <!-- Isotipo Cubo Isométrico B/M -->
-  <g transform="translate(10, 10)">
+  <g transform="translate(15, 15)">
+    <!-- Grid de fondo -->
+    <rect width="70" height="70" fill="url(#grid)" opacity="0.5" rx="4"/>
+    
     <!-- Cara superior (Y-Z) -->
-    <path d="M30 0 L60 17.32 L30 34.64 L0 17.32 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+    <path d="M35 5 L65 22.32 L35 39.64 L5 22.32 Z" stroke="#10B981" stroke-width="2.5" fill="none"/>
     
     <!-- Cara izquierda (X-Y) -->
-    <path d="M0 17.32 L30 34.64 L30 69.28 L0 51.96 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+    <path d="M5 22.32 L35 39.64 L35 74.64 L5 57.32 Z" stroke="#10B981" stroke-width="2.5" fill="none"/>
     
     <!-- Cara derecha (X-Z) -->
-    <path d="M30 34.64 L60 17.32 L60 51.96 L30 69.28 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+    <path d="M35 39.64 L65 22.32 L65 57.32 L35 74.64 Z" stroke="#10B981" stroke-width="2.5" fill="none"/>
     
     <!-- Línea central vertical -->
-    <path d="M30 17.32 L30 69.28" stroke="#10B981" stroke-width="1.5"/>
+    <path d="M35 22.32 L35 74.64" stroke="#10B981" stroke-width="2"/>
     
     <!-- Líneas B -->
-    <path d="M15 25.98 L15 43.3" stroke="#10B981" stroke-width="1.5"/>
-    <path d="M15 25.98 L30 17.32" stroke="#10B981" stroke-width="1"/>
-    <path d="M15 43.3 L30 51.96" stroke="#10B981" stroke-width="1"/>
+    <path d="M20 30.99 L20 48.32" stroke="#10B981" stroke-width="2"/>
+    <path d="M20 30.99 L35 22.32" stroke="#10B981" stroke-width="1.5"/>
+    <path d="M20 48.32 L35 57.32" stroke="#10B981" stroke-width="1.5"/>
     
     <!-- Líneas M -->
-    <path d="M45 25.98 L45 43.3" stroke="#10B981" stroke-width="1.5"/>
-    <path d="M45 25.98 L30 17.32" stroke="#10B981" stroke-width="1"/>
-    <path d="M45 43.3 L30 51.96" stroke="#10B981" stroke-width="1"/>
-    
-    <!-- Blueprint grid -->
-    <defs>
-      <pattern id="grid-main" width="10" height="10" patternUnits="userSpaceOnUse">
-        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#10B981" stroke-width="0.3" opacity="0.1"/>
-      </pattern>
-    </defs>
-    <rect width="60" height="69.28" fill="url(#grid-main)" opacity="0.3"/>
+    <path d="M50 30.99 L50 48.32" stroke="#10B981" stroke-width="2"/>
+    <path d="M50 30.99 L35 22.32" stroke="#10B981" stroke-width="1.5"/>
+    <path d="M50 48.32 L35 57.32" stroke="#10B981" stroke-width="1.5"/>
   </g>
   
-  <!-- Texto BM -->
-  <text x="90" y="45" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="42" fill="currentColor">BM</text>
+  <!-- Texto BM (usa color del contexto para adaptabilidad) -->
+  <text x="110" y="58" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="700" font-size="52" fill="#0f172a" letter-spacing="-1">BM</text>
   
-  <!-- Texto BUILD MANAGE -->
-  <text x="90" y="62" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="11" fill="currentColor" letter-spacing="3" opacity="0.6">BUILD MANAGE</text>
+  <!-- Texto BUILD MANAGE (más sutil) -->
+  <text x="112" y="78" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="500" font-size="13" fill="#64748b" letter-spacing="2.5">BUILD MANAGE</text>
 </svg>

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, IsNull } from 'typeorm';
 import { Resource } from './resource.entity';
 import { ResourcePriceHistory } from './resource-price-history.entity';
 import { CreateResourceDto } from './dto/create-resource.dto';
@@ -22,7 +22,11 @@ export class ResourcesService {
   }
 
   findAll(companyId?: string) {
-    const where = companyId ? { company_id: companyId } : {};
+    // Return resources that belong to the company OR global ones (company_id is null)
+    const where = companyId 
+      ? [{ company_id: companyId }, { company_id: IsNull() }] 
+      : { company_id: IsNull() };
+      
     return this.resourceRepo.find({ 
       where, 
       relations: ['unit'],

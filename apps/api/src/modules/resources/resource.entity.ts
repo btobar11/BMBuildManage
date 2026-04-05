@@ -40,6 +40,9 @@ export class Resource {
   @Column({ nullable: true })
   unit_id: string;
 
+  @Column({ length: 150, nullable: true })
+  category: string;
+
   @Column({ type: 'text', nullable: true })
   description: string;
 
