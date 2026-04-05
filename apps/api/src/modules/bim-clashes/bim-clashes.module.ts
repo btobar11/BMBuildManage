@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { BimClashesService } from './bim-clashes.service';
 import { BimClashesController } from './bim-clashes.controller';
-import { UsersModule } from '../users/users.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [AuthModule],
   controllers: [BimClashesController],
   providers: [BimClashesService],
   exports: [BimClashesService],
