@@ -29,6 +29,11 @@ export class ApuController {
     return Promise.all(dtos.map(dto => this.apuService.create(dto)));
   }
 
+  @Post('seed')
+  importGlobalLibrary(@Body('companyId') companyId: string) {
+    return this.apuService.importGlobalLibrary(companyId);
+  }
+
   @Get()
   findAll(
     @Query('company_id') companyId?: string,

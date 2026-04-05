@@ -5,7 +5,7 @@ import api from '../../lib/api';
 import {
   Plus, Search, X, Copy, Trash2, Pencil, Calculator,
   Package, HardHat, Wrench, Check, ChevronDown, ChevronRight,
-  TrendingUp, Layers, DollarSign, RefreshCw, Sparkles, ClipboardList
+  TrendingUp, Layers, DollarSign, RefreshCw, Sparkles, ClipboardList, Download
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { LoadingScreen, EmptyState } from '../../components/common/LoadingStates';
@@ -554,6 +554,21 @@ export function ApuLibraryPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['apu-templates'] }),
   });
 
+  const importGlobalMutation = useMutation({
+    mutationFn: (companyId: string) => api.post('/apu/seed', { companyId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apu-templates'] });
+      setActiveTab('personal');
+    },
+  });
+
+  const handleImportGlobal = () => {
+    const companyId = 'demo-company';
+    if (confirm('¿Importar toda la biblioteca global a tu cuenta? Esto copiará todas las partidas disponibles.')) {
+      importGlobalMutation.mutate(companyId);
+    }
+  };
+
   const categories = Array.from(new Set(apus.map(a => a.category).filter(Boolean))) as string[];
 
   const filteredApus = apus.filter(a => {
@@ -599,6 +614,16 @@ export function ApuLibraryPage() {
                   Catálogo Global
                 </button>
               </div>
+              {activeTab === 'global' && (
+                <button
+                  onClick={handleImportGlobal}
+                  disabled={importGlobalMutation.isPending}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white px-4 py-2.5 rounded-xl transition-all font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-95"
+                >
+                  <Download size={16} className={importGlobalMutation.isPending ? 'animate-bounce' : ''} />
+                  <span>{importGlobalMutation.isPending ? 'Importando...' : 'Importar a Mi Biblioteca'}</span>
+                </button>
+              )}
               <button
                 onClick={() => setShowEditor(true)}
                 className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl transition-all font-bold text-sm shadow-lg shadow-emerald-600/20 active:scale-95"

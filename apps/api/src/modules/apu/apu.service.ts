@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, DataSource } from 'typeorm';
+import { Repository, DataSource, IsNull } from 'typeorm';
 import { ApuTemplate } from './apu-template.entity';
 import { ApuResource } from './apu-resource.entity';
 import { CreateApuTemplateDto } from './dto/create-apu-template.dto';
@@ -16,10 +16,6 @@ export class ApuService {
     private readonly dataSource: DataSource,
   ) {}
 
-  /**
-   * Calculate unit cost from APU resources
-   * unit_cost = Σ (resource.base_price × coefficient)
-   */
   private calculateUnitCost(template: ApuTemplate): number {
     if (!template.apu_resources) return 0;
     return template.apu_resources.reduce((sum, ar) => {
@@ -51,22 +47,16 @@ export class ApuService {
       .leftJoinAndSelect('apu.unit', 'u')
       .orderBy('apu.name', 'ASC');
 
-    // 1. Strict Tab Filtering
     if (tab === 'global') {
-      // Global tab ALWAYS shows ONLY global items
       qb.andWhere('apu.company_id IS NULL');
     } else if (tab === 'personal' && companyId) {
-      // Personal tab shows MY items + Globals (per requirement)
       qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', { companyId });
     } else if (companyId) {
-      // Default fallback if tab is missing but company is known
       qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', { companyId });
     } else {
-      // Safety landing: if no company and no tab, ONLY globals are safe
       qb.andWhere('apu.company_id IS NULL');
     }
 
-    // 2. Search
     if (search) {
       qb.andWhere('apu.name ILIKE :search', { search: `%${search}%` });
     }
@@ -91,7 +81,6 @@ export class ApuService {
     const { apu_resources, ...templateData } = dto;
 
     if (apu_resources !== undefined) {
-      // Replace all APU resources
       await this.apuResourceRepo.delete({ apu_id: id });
       template.apu_resources = apu_resources.map((r) =>
         this.apuResourceRepo.create({ ...r, apu_id: id }),
@@ -117,6 +106,55 @@ export class ApuService {
       })),
     };
     return this.create(dto);
+  }
+
+  async importGlobalLibrary(companyId: string) {
+    const globalTemplates = await this.apuRepo.find({
+      where: { company_id: IsNull() },
+      relations: ['apu_resources'],
+    });
+
+    if (globalTemplates.length === 0) {
+      return { imported: 0, message: 'No hay plantillas globales para importar' };
+    }
+
+    let imported = 0;
+    for (const globalTemplate of globalTemplates) {
+      const exists = await this.apuRepo.findOne({
+        where: { 
+          company_id: companyId, 
+          name: globalTemplate.name 
+        },
+      });
+
+      if (!exists) {
+        const newTemplate = this.apuRepo.create({
+          name: globalTemplate.name,
+          unit_id: globalTemplate.unit_id,
+          description: globalTemplate.description,
+          category: globalTemplate.category,
+          company_id: companyId,
+        });
+        const saved = await this.apuRepo.save(newTemplate);
+
+        for (const resource of globalTemplate.apu_resources) {
+          const newResource = this.apuResourceRepo.create({
+            apu_id: saved.id,
+            resource_id: resource.resource_id,
+            resource_type: resource.resource_type,
+            coefficient: resource.coefficient,
+          });
+          await this.apuResourceRepo.save(newResource);
+        }
+        imported++;
+      }
+    }
+
+    return { 
+      imported, 
+      total: globalTemplates.length,
+      message: `Se importaron ${imported} partidas de la biblioteca global` 
+    };
   }
 
   async remove(id: string) {
