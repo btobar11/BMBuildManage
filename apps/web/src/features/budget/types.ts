@@ -73,6 +73,8 @@ export interface Budget {
   clientPrice: number;
   professionalFeePercentage?: number;
   estimatedUtility?: number;
+  markupPercentage?: number;
+  marginThreshold?: number;
   location?: string;
   start_date?: string;
   end_date?: string;
@@ -83,19 +85,21 @@ export interface Budget {
 }
 
 export interface FinancialSummary {
-  estimatedCost: number; // Sum of (quantity * unit_cost)
-  estimatedPrice: number; // Sum of (quantity * unit_price)
+  estimatedCost: number;
+  estimatedPrice: number;
+  autoCalculatedPrice?: number;
   realExpenses: number;
   workerPayments: number;
   contingenciesTotal: number;
-  totalRealCost: number; // expenses + workers + contingencies
-  projectedProfit: number; // estimatedPrice - estimatedCost
-  currentProfit: number; // estimatedPrice - totalRealCost
-  margin: number; // percentage (estimatedMargin)
-  realMargin: number; // percentage based on actual costs
-  variance: number; // estimatedCost - totalRealCost
-  executedValue: number; // Sum of (quantityExecuted * unitPrice)
+  totalRealCost: number;
+  projectedProfit: number;
+  currentProfit: number;
+  margin: number;
+  realMargin: number;
+  variance: number;
+  executedValue: number;
   estimatedUtility?: number;
+  professionalFeePercentage?: number;
 }
 
 export type BudgetTab = 'presupuesto' | 'gastos' | 'trabajadores' | 'documentos' | 'contingencias' | 'analisis' | 'bim' | 'cashflow';

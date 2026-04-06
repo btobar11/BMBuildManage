@@ -125,6 +125,11 @@ export class CreateBudgetDto {
   estimated_utility?: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  markup_percentage?: number;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateStageDto)

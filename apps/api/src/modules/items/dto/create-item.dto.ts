@@ -103,4 +103,7 @@ export class CreateItemDto {
   @IsNumber()
   @Min(0)
   real_cost?: number;
+
+  @IsOptional()
+  is_price_overridden?: boolean;
 }

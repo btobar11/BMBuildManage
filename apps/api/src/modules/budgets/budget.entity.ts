@@ -59,8 +59,11 @@ export class Budget {
   @Column({ type: 'decimal', precision: 5, scale: 2, default: 10 })
   professional_fee_percentage: number;
 
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 15 })
   estimated_utility: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 20 })
+  markup_percentage: number;
 
   @OneToMany(() => Stage, (stage) => stage.budget, {
     cascade: true,

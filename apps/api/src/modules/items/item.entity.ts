@@ -135,6 +135,9 @@ export class Item {
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   real_cost: number;
 
+  @Column({ default: false })
+  is_price_overridden: boolean;
+
   @BeforeInsert()
   @BeforeUpdate()
   calculateTotals() {

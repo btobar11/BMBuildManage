@@ -119,9 +119,10 @@ export default function BudgetEditor() {
     mutationFn: async () => {
       const payload = {
         total_estimated_cost: financials.estimatedCost,
-        total_estimated_price: budget.clientPrice || (financials.estimatedCost * 1.2),
+        total_estimated_price: financials.autoCalculatedPrice || financials.estimatedPrice,
         professional_fee_percentage: budget.professionalFeePercentage ?? 10,
-        estimated_utility: financials.estimatedUtility ?? 0,
+        estimated_utility: financials.estimatedUtility ?? 15,
+        markup_percentage: budget.markupPercentage ?? 20,
         status: budget.status,
         stages: budget.stages.map((s, sIdx) => ({
           id: s.id.length < 30 ? undefined : s.id, 
@@ -132,8 +133,9 @@ export default function BudgetEditor() {
             name: i.name,
             unit: i.unit,
             quantity: i.quantity,
-            unit_cost: i.unit_cost || i.unit_price,
-            unit_price: i.unit_price || (i.unit_cost ? i.unit_cost * 1.2 : 0),
+            unit_cost: i.unit_cost || 0,
+            unit_price: i.unit_price || 0,
+            is_price_overridden: i.is_price_overridden || false,
             position: iIdx,
             apu_template_id: i.apu_template_id,
             cubication_mode: i.cubication_mode,
@@ -237,7 +239,8 @@ export default function BudgetEditor() {
         status: (serverBudget.status as any) || 'editing',
         clientPrice: Number(serverBudget.total_estimated_price) || 0,
         professionalFeePercentage: (serverBudget as any).professional_fee_percentage ?? 10,
-        estimatedUtility: (serverBudget as any).estimated_utility ?? 0,
+        estimatedUtility: (serverBudget as any).estimated_utility ?? 15,
+        markupPercentage: (serverBudget as any).markup_percentage ?? 20,
         location: serverBudget.project?.location || '',
         start_date: (serverBudget as any).project?.start_date || '',
         end_date: (serverBudget as any).project?.end_date || '',
@@ -252,6 +255,7 @@ export default function BudgetEditor() {
             unit: i.unit || 'glb',
             unit_price: Number(i.unit_price) || 0,
             unit_cost: Number(i.unit_cost) || 0,
+            is_price_overridden: (i as any).is_price_overridden || false,
             total: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
             apu_template_id: i.apu_template_id,
             cubication_mode: (i.cubication_mode as any) || 'manual',
@@ -268,7 +272,6 @@ export default function BudgetEditor() {
         workers: [],
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverBudget]);
 
   const [activeTab, setActiveTab] = useState<BudgetTab>('presupuesto');

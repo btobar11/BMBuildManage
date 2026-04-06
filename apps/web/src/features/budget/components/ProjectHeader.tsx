@@ -1,6 +1,6 @@
 import type { Budget, FinancialSummary } from '../types';
 import { formatCLP } from '../helpers';
-import { Building2, User, Tag, ChevronDown, Check, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Building2, User, Tag, ChevronDown, Check, AlertTriangle, TrendingUp, Calculator } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -9,7 +9,7 @@ import api from '../../../lib/api';
 interface Props {
   budget: Budget;
   financials: FinancialSummary;
-  onUpdate: (patch: Partial<Pick<Budget, 'projectName' | 'clientName' | 'clientPrice' | 'status' | 'professionalFeePercentage' | 'location' | 'start_date' | 'end_date'>>) => void;
+  onUpdate: (patch: Partial<Pick<Budget, 'projectName' | 'clientName' | 'clientPrice' | 'status' | 'professionalFeePercentage' | 'estimatedUtility' | 'markupPercentage' | 'location' | 'start_date' | 'end_date'>>) => void;
 }
 
 const STATUS_OPTIONS: { value: Budget['status']; label: string; color: string }[] = [
@@ -33,6 +33,8 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
     queryFn: () => api.get(`/companies/${user?.company_id}`).then(res => res.data),
     enabled: !!user?.company_id,
   });
+
+  const isAutoCalculated = !budget.clientPrice || budget.clientPrice === financials.autoCalculatedPrice;
 
   const commitPrice = () => {
     const val = parseFloat(priceInput.replace(/\D/g, '')) || 0;
@@ -161,7 +163,11 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
       {/* Financial row */}
       <div className="flex flex-wrap gap-8 mt-4 pt-4 border-t border-border">
         <div>
-          <p className="text-xs text-muted-foreground mb-0.5 lowercase font-semibold">Venta (Neto)</p>
+          <p className="text-xs text-muted-foreground mb-0.5 lowercase font-semibold flex items-center gap-1">
+            {isAutoCalculated && <Calculator size={10} className="text-emerald-400" />}
+            Venta (Neto)
+            {isAutoCalculated && <span className="text-[10px] text-emerald-400/70">(auto)</span>}
+          </p>
           {editingPrice ? (
             <input
               value={priceInput}
@@ -200,6 +206,38 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
               max="100"
             />
             <span className="text-xl font-black text-blue-400/80">%</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5 lowercase font-semibold text-purple-400/80 italic">Meta Utilidad</p>
+          <div className="flex items-center gap-1">
+            <input
+              id="utility-meta"
+              type="number"
+              value={budget.estimatedUtility ?? 15}
+              onChange={(e) => onUpdate({ estimatedUtility: Number(e.target.value) })}
+              className="text-xl font-black text-purple-400/80 bg-transparent w-16 outline-none focus:ring-1 focus:ring-purple-400 rounded px-1 transition-all"
+              min="0"
+              max="100"
+            />
+            <span className="text-xl font-black text-purple-400/80">%</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5 lowercase font-semibold text-orange-400/80 italic">Markup Item</p>
+          <div className="flex items-center gap-1">
+            <input
+              id="markup-meta"
+              type="number"
+              value={budget.markupPercentage ?? 20}
+              onChange={(e) => onUpdate({ markupPercentage: Number(e.target.value) })}
+              className="text-xl font-black text-orange-400/80 bg-transparent w-16 outline-none focus:ring-1 focus:ring-orange-400 rounded px-1 transition-all"
+              min="0"
+              max="100"
+            />
+            <span className="text-xl font-black text-orange-400/80">%</span>
           </div>
         </div>
 
