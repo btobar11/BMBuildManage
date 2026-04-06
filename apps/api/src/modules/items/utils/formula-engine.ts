@@ -15,11 +15,11 @@ export interface CubicationParams {
 export class FormulaEngine {
   static evaluate(formula: string, params: CubicationParams): number {
     if (!formula) return 0;
-    
+
     try {
       const parser = new Parser();
       const expr = parser.parse(formula);
-      
+
       const cleanParams = {
         largo: Number(params.largo) || 0,
         ancho: Number(params.ancho) || 0,

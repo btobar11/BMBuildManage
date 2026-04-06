@@ -381,7 +381,7 @@ function ApuCard({
           <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
             <Calculator size={22} className="text-emerald-400" />
           </div>
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center gap-2 opacity-100 sm:opacity-30 group-hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={onDuplicate}
               className="p-2 text-muted-foreground hover:text-emerald-400 bg-white/5 hover:bg-emerald-400/10 rounded-xl transition-all"

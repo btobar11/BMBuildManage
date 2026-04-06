@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsEnum, IsNumber, MaxLength, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { ResourceType } from '../resource.entity';
 
 export class CreateResourceDto {

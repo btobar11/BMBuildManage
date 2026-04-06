@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BudgetExecutionLog } from './budget-execution-log.entity';
@@ -18,19 +22,24 @@ export class ExecutionService {
   ) {}
 
   async create(dto: CreateExecutionLogDto, userId?: string) {
-    const item = await this.itemRepo.findOne({ where: { id: dto.budget_item_id } });
-    if (!item) throw new NotFoundException(`Budget item ${dto.budget_item_id} not found`);
+    const item = await this.itemRepo.findOne({
+      where: { id: dto.budget_item_id },
+    });
+    if (!item)
+      throw new NotFoundException(
+        `Budget item ${dto.budget_item_id} not found`,
+      );
 
     // 1. Threshold Validation (Business Rule #5)
     const currentExecuted = Number(item.quantity_executed) || 0;
     const newExecuted = currentExecuted + Number(dto.quantity_executed);
     const estimatedQty = Number(item.quantity) || 0;
-    
+
     // Configurable threshold (e.g., 1.1 = 10% overage allowed)
-    const threshold = 1.1; 
-    if (newExecuted > (estimatedQty * threshold) && estimatedQty > 0) {
+    const threshold = 1.1;
+    if (newExecuted > estimatedQty * threshold && estimatedQty > 0) {
       throw new BadRequestException(
-        `Error de validación: La cantidad ejecutada (${newExecuted}) supera el límite permitido del 10% sobre lo presupuestado (${estimatedQty}).`
+        `Error de validación: La cantidad ejecutada (${newExecuted}) supera el límite permitido del 10% sobre lo presupuestado (${estimatedQty}).`,
       );
     }
 

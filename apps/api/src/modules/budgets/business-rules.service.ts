@@ -11,15 +11,19 @@ export class BusinessRulesService {
    */
   async validateBudget(budget: Budget): Promise<string[]> {
     const warnings: string[] = [];
-    const items = budget.stages?.flatMap(s => s.items || []) || [];
+    const items = budget.stages?.flatMap((s) => s.items || []) || [];
 
     for (const item of items) {
       // 1. Blocking: Negative values
       if (Number(item.quantity) < 0) {
-        throw new BadRequestException(`El ítem "${item.name}" no puede tener cantidad negativa.`);
+        throw new BadRequestException(
+          `El ítem "${item.name}" no puede tener cantidad negativa.`,
+        );
       }
       if (Number(item.unit_price) < 0 || Number(item.unit_cost) < 0) {
-        throw new BadRequestException(`El ítem "${item.name}" no puede tener precios o costos negativos.`);
+        throw new BadRequestException(
+          `El ítem "${item.name}" no puede tener precios o costos negativos.`,
+        );
       }
 
       // 2. Cubicación Rules (Business rule #4)
@@ -30,15 +34,24 @@ export class BusinessRulesService {
         const t = Number(item.dim_thickness) || 0;
 
         if (l <= 0 && w <= 0 && h <= 0 && t <= 0) {
-          warnings.push(`Aviso: El ítem "${item.name}" está en modo dimensiones pero no tiene dimensiones válidas.`);
+          warnings.push(
+            `Aviso: El ítem "${item.name}" está en modo dimensiones pero no tiene dimensiones válidas.`,
+          );
         }
 
         // Logical checks based on units
         if (item.unit?.toLowerCase() === 'm2' && l > 0 && w === 0 && h === 0) {
-          warnings.push(`Aviso: El ítem "${item.name}" tiene unidad m2 pero solo una dimensión (Largo).`);
+          warnings.push(
+            `Aviso: El ítem "${item.name}" tiene unidad m2 pero solo una dimensión (Largo).`,
+          );
         }
-        if (item.unit?.toLowerCase() === 'm3' && (l === 0 || w === 0 || h === 0)) {
-           warnings.push(`Aviso: El ítem "${item.name}" tiene unidad m3 pero le faltan dimensiones para el cálculo cúbico.`);
+        if (
+          item.unit?.toLowerCase() === 'm3' &&
+          (l === 0 || w === 0 || h === 0)
+        ) {
+          warnings.push(
+            `Aviso: El ítem "${item.name}" tiene unidad m3 pero le faltan dimensiones para el cálculo cúbico.`,
+          );
         }
       }
 
@@ -46,9 +59,12 @@ export class BusinessRulesService {
       const executed = Number(item.quantity_executed) || 0;
       const estimated = Number(item.quantity) || 0;
       if (executed > estimated && estimated > 0) {
-        const overage = (executed / estimated) - 1;
-        if (overage > 0.05) { // 5% warning
-          warnings.push(`Aviso: El ítem "${item.name}" ha superado su cantidad presupuestada por un ${Math.round(overage * 100)}%.`);
+        const overage = executed / estimated - 1;
+        if (overage > 0.05) {
+          // 5% warning
+          warnings.push(
+            `Aviso: El ítem "${item.name}" ha superado su cantidad presupuestada por un ${Math.round(overage * 100)}%.`,
+          );
         }
       }
     }

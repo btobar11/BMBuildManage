@@ -21,20 +21,18 @@ const STORAGE_KEY = 'bm-pending-mutations';
  * Hook para gestionar mutaciones pendientes de sincronización
  */
 export function useOfflineMutations() {
-  const [pendingMutations, setPendingMutations] = useState<PendingMutation[]>([]);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  // Cargar mutaciones pendientes del localStorage
-  useEffect(() => {
+  const [pendingMutations, setPendingMutations] = useState<PendingMutation[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setPendingMutations(JSON.parse(stored));
+        return JSON.parse(stored);
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
     }
-  }, []);
+    return [];
+  });
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   // Escuchar cambios de conexión
   useEffect(() => {

@@ -18,11 +18,11 @@ export class ExpensesService {
   }
 
   findAllByProject(projectId: string, companyId: string) {
-    return this.expenseRepository.find({ 
-      where: { 
+    return this.expenseRepository.find({
+      where: {
         project_id: projectId,
-        company_id: companyId 
-      } 
+        company_id: companyId,
+      },
     });
   }
 

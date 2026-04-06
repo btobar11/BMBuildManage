@@ -11,7 +11,8 @@ import {
   Menu,
   Bell,
   Moon,
-  Sun
+  Sun,
+  Box
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { label: 'Proyectos', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
   { label: 'Recursos', icon: <Package size={20} />, path: '/resources' },
   { label: 'APU', icon: <Calculator size={20} />, path: '/apu-library' },
+  { label: 'Modelos BIM', icon: <Box size={20} />, path: '/bim' },
   { label: 'Trabajadores', icon: <Users size={20} />, path: '/workers' },
   { label: 'Gastos', icon: <DollarSign size={20} />, path: '/invoices' },
   { label: 'Empresa', icon: <Settings size={20} />, path: '/company-settings' },
@@ -67,9 +69,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           {sidebarExpanded ? (
             <img src="/logo-full.svg" alt="BMBuildManage" className="h-6 object-contain" />
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">BM</span>
-            </div>
+            <img src="/logo-icon.svg" alt="BM" className="w-8 h-8 object-contain" />
           )}
         </div>
 

@@ -11,4 +11,3 @@ import { UsersModule } from '../users/users.module';
   exports: [SupabaseAuthGuard, ConfigModule, UsersModule],
 })
 export class AuthModule {}
-

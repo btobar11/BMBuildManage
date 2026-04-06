@@ -31,7 +31,11 @@ export class ClientsService {
     return client;
   }
 
-  async update(id: string, companyId: string, updateClientDto: UpdateClientDto) {
+  async update(
+    id: string,
+    companyId: string,
+    updateClientDto: UpdateClientDto,
+  ) {
     const client = await this.findOne(id, companyId);
     this.clientRepository.merge(client, updateClientDto);
     return this.clientRepository.save(client);

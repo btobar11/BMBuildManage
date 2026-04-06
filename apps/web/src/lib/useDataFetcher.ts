@@ -18,7 +18,7 @@ export function useDataFetcher<T>({
   enabled = true,
 }: UseDataFetcherOptions<T>): UseDataFetcherResult<T> {
   const [data, setData] = useState<T | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!enabled);
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -28,11 +28,6 @@ export function useDataFetcher<T>({
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
-      setIsLoading(false);
-      return;
-    }
-
     let isMounted = true;
 
     const fetchData = async () => {

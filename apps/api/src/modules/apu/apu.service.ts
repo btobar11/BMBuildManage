@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, IsNull } from 'typeorm';
 import { ApuTemplate } from './apu-template.entity';
@@ -39,7 +43,11 @@ export class ApuService {
     return this.findOne(saved.id);
   }
 
-  async findAll(companyId?: string, search?: string, tab?: 'personal' | 'global') {
+  async findAll(
+    companyId?: string,
+    search?: string,
+    tab?: 'personal' | 'global',
+  ) {
     const qb = this.apuRepo
       .createQueryBuilder('apu')
       .leftJoinAndSelect('apu.apu_resources', 'ar')
@@ -50,9 +58,13 @@ export class ApuService {
     if (tab === 'global') {
       qb.andWhere('apu.company_id IS NULL');
     } else if (tab === 'personal' && companyId) {
-      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', { companyId });
+      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', {
+        companyId,
+      });
     } else if (companyId) {
-      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', { companyId });
+      qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', {
+        companyId,
+      });
     } else {
       qb.andWhere('apu.company_id IS NULL');
     }
@@ -62,7 +74,10 @@ export class ApuService {
     }
 
     const templates = await qb.getMany();
-    return templates.map((t) => ({ ...t, unit_cost: this.calculateUnitCost(t) }));
+    return templates.map((t) => ({
+      ...t,
+      unit_cost: this.calculateUnitCost(t),
+    }));
   }
 
   async findOne(id: string) {
@@ -75,7 +90,10 @@ export class ApuService {
   }
 
   async update(id: string, dto: UpdateApuTemplateDto) {
-    const template = await this.apuRepo.findOne({ where: { id }, relations: ['apu_resources'] });
+    const template = await this.apuRepo.findOne({
+      where: { id },
+      relations: ['apu_resources'],
+    });
     if (!template) throw new NotFoundException(`APU Template ${id} not found`);
 
     const { apu_resources, ...templateData } = dto;
@@ -115,15 +133,18 @@ export class ApuService {
     });
 
     if (globalTemplates.length === 0) {
-      return { imported: 0, message: 'No hay plantillas globales para importar' };
+      return {
+        imported: 0,
+        message: 'No hay plantillas globales para importar',
+      };
     }
 
     let imported = 0;
     for (const globalTemplate of globalTemplates) {
       const exists = await this.apuRepo.findOne({
-        where: { 
-          company_id: companyId, 
-          name: globalTemplate.name 
+        where: {
+          company_id: companyId,
+          name: globalTemplate.name,
         },
       });
 
@@ -150,10 +171,10 @@ export class ApuService {
       }
     }
 
-    return { 
-      imported, 
+    return {
+      imported,
       total: globalTemplates.length,
-      message: `Se importaron ${imported} partidas de la biblioteca global` 
+      message: `Se importaron ${imported} partidas de la biblioteca global`,
     };
   }
 
@@ -163,10 +184,12 @@ export class ApuService {
 
     const isUsed = await this.dataSource.query(
       `SELECT id FROM items WHERE apu_template_id = $1 LIMIT 1`,
-      [id]
+      [id],
     );
     if (isUsed.length > 0) {
-      throw new BadRequestException(`No se puede eliminar la APU base porque está en uso en uno o más ítems de presupuesto.`);
+      throw new BadRequestException(
+        `No se puede eliminar la APU base porque está en uso en uno o más ítems de presupuesto.`,
+      );
     }
 
     await this.apuRepo.remove(template);

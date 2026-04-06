@@ -18,7 +18,9 @@ export class ApuResource {
   @Column()
   apu_id: string;
 
-  @ManyToOne(() => ApuTemplate, (apu) => apu.apu_resources, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ApuTemplate, (apu) => apu.apu_resources, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'apu_id' })
   apu_template: ApuTemplate;
 

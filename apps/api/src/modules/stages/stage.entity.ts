@@ -37,7 +37,10 @@ export class Stage {
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   total_price: number;
 
-  @OneToMany(() => Item, (item) => item.stage, { cascade: true, orphanedRowAction: 'delete' })
+  @OneToMany(() => Item, (item) => item.stage, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
   items: Item[];
 
   @CreateDateColumn()

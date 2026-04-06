@@ -41,7 +41,11 @@ export class ProjectsController {
     @Body() updateProjectDto: UpdateProjectDto,
     @Request() req: any,
   ) {
-    return this.projectsService.update(id, req.user.company_id, updateProjectDto);
+    return this.projectsService.update(
+      id,
+      req.user.company_id,
+      updateProjectDto,
+    );
   }
 
   @Delete(':id')
@@ -55,8 +59,15 @@ export class ProjectsController {
   }
 
   @Patch('bulk-update-folder')
-  bulkUpdateFolder(@Body() data: { ids: string[]; folder: string | null }, @Request() req: any) {
-    return this.projectsService.bulkUpdateFolder(data.ids, data.folder, req.user.company_id);
+  bulkUpdateFolder(
+    @Body() data: { ids: string[]; folder: string | null },
+    @Request() req: any,
+  ) {
+    return this.projectsService.bulkUpdateFolder(
+      data.ids,
+      data.folder,
+      req.user.company_id,
+    );
   }
 
   // Payments endpoints
@@ -66,7 +77,11 @@ export class ProjectsController {
     @Body() data: any,
     @Request() req: any,
   ) {
-    return this.projectsService.addPayment(projectId, req.user.company_id, data);
+    return this.projectsService.addPayment(
+      projectId,
+      req.user.company_id,
+      data,
+    );
   }
 
   @Get(':id/payments')

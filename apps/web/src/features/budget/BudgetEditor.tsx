@@ -186,8 +186,12 @@ export default function BudgetEditor() {
     }
   });
 
-  const handleSave = () => {
-    performSave();
+  const handleSave = async () => {
+    try {
+      await performSave();
+    } catch (err) {
+      console.error('Error saving budget:', err);
+    }
   };
 
   const { mutate: createRevision, isPending: isCreatingRevision } = useMutation({

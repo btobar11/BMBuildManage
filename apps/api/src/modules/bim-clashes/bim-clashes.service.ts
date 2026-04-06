@@ -67,12 +67,21 @@ export class BimClashesService {
 
   constructor(private configService: ConfigService) {
     this.supabase = createClient(
-      this.configService.get<string>('supabase.url') || process.env.SUPABASE_URL || '',
-      this.configService.get<string>('supabase.anonKey') || process.env.SUPABASE_ANON_KEY || '',
+      this.configService.get<string>('supabase.url') ||
+        process.env.SUPABASE_URL ||
+        '',
+      this.configService.get<string>('supabase.anonKey') ||
+        process.env.SUPABASE_ANON_KEY ||
+        '',
     );
   }
 
-  async createJob(data: { company_id: string; project_id: string; model_a_id: string; model_b_id: string }): Promise<ClashJob> {
+  async createJob(data: {
+    company_id: string;
+    project_id: string;
+    model_a_id: string;
+    model_b_id: string;
+  }): Promise<ClashJob> {
     const { data: job, error } = await this.supabase
       .from('bim_clash_jobs')
       .insert({
@@ -116,7 +125,10 @@ export class BimClashesService {
     return data as ClashJob | null;
   }
 
-  async getJobStatus(id: string, companyId: string): Promise<{ status: string; progress: number }> {
+  async getJobStatus(
+    id: string,
+    companyId: string,
+  ): Promise<{ status: string; progress: number }> {
     const job = await this.findOneJob(id, companyId);
     if (!job) throw new Error('Job not found');
     return { status: job.status, progress: job.progress };
@@ -130,7 +142,7 @@ export class BimClashesService {
       status?: string;
       severity?: string;
       type?: string;
-    }
+    },
   ): Promise<Clash[]> {
     let query = this.supabase
       .from('bim_clashes')
@@ -147,7 +159,9 @@ export class BimClashesService {
       query = query.eq('clash_type', filters.type);
     }
 
-    const { data, error } = await query.order('detected_at', { ascending: false });
+    const { data, error } = await query.order('detected_at', {
+      ascending: false,
+    });
 
     if (error) throw new Error(`Failed to fetch clashes: ${error.message}`);
 
@@ -155,7 +169,8 @@ export class BimClashesService {
 
     if (filters.modelId) {
       clashes = clashes.filter(
-        (c: Clash) => c.model_a_id === filters.modelId || c.model_b_id === filters.modelId
+        (c: Clash) =>
+          c.model_a_id === filters.modelId || c.model_b_id === filters.modelId,
       );
     }
 
@@ -176,9 +191,13 @@ export class BimClashesService {
     return data as Clash | null;
   }
 
-  async update(id: string, companyId: string, data: Partial<Clash>): Promise<Clash> {
+  async update(
+    id: string,
+    companyId: string,
+    data: Partial<Clash>,
+  ): Promise<Clash> {
     const updateData: Record<string, unknown> = { ...data };
-    
+
     if (data.status === 'resolved' || data.status === 'ignored') {
       updateData.resolved_at = new Date().toISOString();
     }
@@ -212,10 +231,14 @@ export class BimClashesService {
       .eq('model_a_id', jobId)
       .eq('company_id', companyId);
 
-    if (error) throw new Error(`Failed to delete clashes by job: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to delete clashes by job: ${error.message}`);
   }
 
-  async getClashSummary(companyId: string, projectId: string): Promise<{
+  async getClashSummary(
+    companyId: string,
+    projectId: string,
+  ): Promise<{
     totalJobs: number;
     completedJobs: number;
     failedJobs: number;
@@ -240,25 +263,35 @@ export class BimClashesService {
 
     return {
       totalJobs: jobsList.length,
-      completedJobs: jobsList.filter((j: ClashJob) => j.status === 'completed').length,
-      failedJobs: jobsList.filter((j: ClashJob) => j.status === 'failed').length,
+      completedJobs: jobsList.filter((j: ClashJob) => j.status === 'completed')
+        .length,
+      failedJobs: jobsList.filter((j: ClashJob) => j.status === 'failed')
+        .length,
       totalClashes: clashesList.length,
       byStatus: {
-        pending: clashesList.filter((c: Clash) => c.status === 'pending').length,
-        accepted: clashesList.filter((c: Clash) => c.status === 'accepted').length,
-        resolved: clashesList.filter((c: Clash) => c.status === 'resolved').length,
-        ignored: clashesList.filter((c: Clash) => c.status === 'ignored').length,
+        pending: clashesList.filter((c: Clash) => c.status === 'pending')
+          .length,
+        accepted: clashesList.filter((c: Clash) => c.status === 'accepted')
+          .length,
+        resolved: clashesList.filter((c: Clash) => c.status === 'resolved')
+          .length,
+        ignored: clashesList.filter((c: Clash) => c.status === 'ignored')
+          .length,
       },
       bySeverity: {
-        critical: clashesList.filter((c: Clash) => c.severity === 'critical').length,
+        critical: clashesList.filter((c: Clash) => c.severity === 'critical')
+          .length,
         high: clashesList.filter((c: Clash) => c.severity === 'high').length,
-        medium: clashesList.filter((c: Clash) => c.severity === 'medium').length,
+        medium: clashesList.filter((c: Clash) => c.severity === 'medium')
+          .length,
         low: clashesList.filter((c: Clash) => c.severity === 'low').length,
       },
       byType: {
         hard: clashesList.filter((c: Clash) => c.clash_type === 'hard').length,
         soft: clashesList.filter((c: Clash) => c.clash_type === 'soft').length,
-        clearance: clashesList.filter((c: Clash) => c.clash_type === 'clearance').length,
+        clearance: clashesList.filter(
+          (c: Clash) => c.clash_type === 'clearance',
+        ).length,
       },
     };
   }
@@ -277,8 +310,8 @@ export class BimClashesService {
 
       await this.supabase
         .from('bim_clash_jobs')
-        .update({ 
-          status: 'completed', 
+        .update({
+          status: 'completed',
           completed_at: new Date().toISOString(),
           clashes_found: clashes.length,
           progress: 100,
@@ -287,16 +320,19 @@ export class BimClashesService {
     } catch (error) {
       await this.supabase
         .from('bim_clash_jobs')
-        .update({ 
-          status: 'failed', 
-          error_message: error instanceof Error ? error.message : 'Unknown error',
+        .update({
+          status: 'failed',
+          error_message:
+            error instanceof Error ? error.message : 'Unknown error',
           completed_at: new Date().toISOString(),
         })
         .eq('id', jobId);
     }
   }
 
-  private async performClashDetection(job: ClashJob): Promise<ClashJobResult[]> {
+  private async performClashDetection(
+    job: ClashJob,
+  ): Promise<ClashJobResult[]> {
     const clashes: ClashJobResult[] = [];
 
     const { data: elementsA } = await this.supabase
@@ -366,16 +402,35 @@ export class BimClashesService {
 
   private checkBoundingBoxClash(
     elemA: BimElement,
-    elemB: BimElement
-  ): { clashType: 'hard' | 'soft'; severity: 'low' | 'medium' | 'high' | 'critical'; intersectionVolume?: number } | null {
+    elemB: BimElement,
+  ): {
+    clashType: 'hard' | 'soft';
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    intersectionVolume?: number;
+  } | null {
     const boxA = elemA.bounding_box;
     const boxB = elemB.bounding_box;
 
     if (!boxA || !boxB) return null;
 
-    const overlapX = this.getOverlap(boxA.minX, boxA.maxX, boxB.minX, boxB.maxX);
-    const overlapY = this.getOverlap(boxA.minY, boxA.maxY, boxB.minY, boxB.maxY);
-    const overlapZ = this.getOverlap(boxA.minZ, boxA.maxZ, boxB.minZ, boxB.maxZ);
+    const overlapX = this.getOverlap(
+      boxA.minX,
+      boxA.maxX,
+      boxB.minX,
+      boxB.maxX,
+    );
+    const overlapY = this.getOverlap(
+      boxA.minY,
+      boxA.maxY,
+      boxB.minY,
+      boxB.maxY,
+    );
+    const overlapZ = this.getOverlap(
+      boxA.minZ,
+      boxA.maxZ,
+      boxB.minZ,
+      boxB.maxZ,
+    );
 
     if (overlapX > 0 && overlapY > 0 && overlapZ > 0) {
       const volume = overlapX * overlapY * overlapZ;
@@ -389,11 +444,18 @@ export class BimClashesService {
     return null;
   }
 
-  private getOverlap(aMin: number, aMax: number, bMin: number, bMax: number): number {
+  private getOverlap(
+    aMin: number,
+    aMax: number,
+    bMin: number,
+    bMax: number,
+  ): number {
     return Math.max(0, Math.min(aMax, bMax) - Math.max(aMin, bMin));
   }
 
-  private getSeverityFromVolume(volume: number): 'low' | 'medium' | 'high' | 'critical' {
+  private getSeverityFromVolume(
+    volume: number,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (volume > 10) return 'critical';
     if (volume > 1) return 'high';
     if (volume > 0.1) return 'medium';

@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Delete, Body, Param, ParseUUIDPipe, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ExecutionService } from './execution.service';
 import { CreateExecutionLogDto } from './dto/create-execution-log.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
@@ -12,7 +24,13 @@ export class ExecutionController {
   constructor(private readonly executionService: ExecutionService) {}
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+  )
   create(@Body() dto: CreateExecutionLogDto, @Req() req: any) {
     return this.executionService.create(dto, req.user?.id);
   }

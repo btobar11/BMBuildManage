@@ -43,8 +43,16 @@ export class ExportService {
       fgColor: { argb: 'FFCFE2FF' },
     };
 
-    const boldWhite: Partial<ExcelJS.Font> = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-    const boldDark: Partial<ExcelJS.Font> = { bold: true, color: { argb: 'FF1E3A5F' }, size: 10 };
+    const boldWhite: Partial<ExcelJS.Font> = {
+      bold: true,
+      color: { argb: 'FFFFFFFF' },
+      size: 11,
+    };
+    const boldDark: Partial<ExcelJS.Font> = {
+      bold: true,
+      color: { argb: 'FF1E3A5F' },
+      size: 10,
+    };
 
     // ─── Column widths ────────────────────────────────────────────────
     sheet.columns = [
@@ -88,7 +96,14 @@ export class ExportService {
     sheet.getRow(4).height = 8;
 
     // ─── Column headers ───────────────────────────────────────────────
-    const headerRow = sheet.addRow(['Ítem', 'Descripción', 'Cantidad', 'Unidad', 'P. Unitario', 'Total Venta']);
+    const headerRow = sheet.addRow([
+      'Ítem',
+      'Descripción',
+      'Cantidad',
+      'Unidad',
+      'P. Unitario',
+      'Total Venta',
+    ]);
     headerRow.eachCell((cell) => {
       cell.font = boldWhite;
       cell.fill = subHeaderFill;
@@ -144,13 +159,28 @@ export class ExportService {
       }
 
       // Stage subtotal
-      const subtotalRow = sheet.addRow(['', `Subtotal Venta ${stage.name}`, '', '', '', stagePrice]);
+      const subtotalRow = sheet.addRow([
+        '',
+        `Subtotal Venta ${stage.name}`,
+        '',
+        '',
+        '',
+        stagePrice,
+      ]);
       sheet.mergeCells(`B${subtotalRow.number}:E${subtotalRow.number}`);
-      subtotalRow.getCell(2).font = { bold: true, italic: true, color: { argb: 'FF1E3A5F' } };
+      subtotalRow.getCell(2).font = {
+        bold: true,
+        italic: true,
+        color: { argb: 'FF1E3A5F' },
+      };
       subtotalRow.getCell(6).numFmt = '$#,##0';
       subtotalRow.getCell(6).font = { bold: true, color: { argb: 'FF1E3A5F' } };
       subtotalRow.eachCell((cell) => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F5FF' } };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF0F5FF' },
+        };
       });
       subtotalRow.height = 16;
 
@@ -162,29 +192,70 @@ export class ExportService {
     const estPrice = Number(budget.total_estimated_price) || 0;
 
     sheet.addRow([]);
-    const totalRow = sheet.addRow(['', 'TOTAL ESTIMADO DE COSTO (Directo)', '', '', '', estCost]);
+    const totalRow = sheet.addRow([
+      '',
+      'TOTAL ESTIMADO DE COSTO (Directo)',
+      '',
+      '',
+      '',
+      estCost,
+    ]);
     sheet.mergeCells(`A${totalRow.number}:E${totalRow.number}`);
-    totalRow.getCell(1).font = { bold: true, size: 12, color: { argb: 'FF1E3A5F' } };
+    totalRow.getCell(1).font = {
+      bold: true,
+      size: 12,
+      color: { argb: 'FF1E3A5F' },
+    };
     totalRow.getCell(1).alignment = { horizontal: 'right' };
     totalRow.getCell(6).numFmt = '$#,##0';
-    totalRow.getCell(6).font = { bold: true, size: 12, color: { argb: 'FF1E3A5F' } };
-    totalRow.eachCell((cell) => { cell.fill = totalFill; });
+    totalRow.getCell(6).font = {
+      bold: true,
+      size: 12,
+      color: { argb: 'FF1E3A5F' },
+    };
+    totalRow.eachCell((cell) => {
+      cell.fill = totalFill;
+    });
     totalRow.height = 22;
 
     // Client price row
-    const priceRow = sheet.addRow(['', 'PRECIO TOTAL AL CLIENTE (Neto)', '', '', '', estPrice]);
+    const priceRow = sheet.addRow([
+      '',
+      'PRECIO TOTAL AL CLIENTE (Neto)',
+      '',
+      '',
+      '',
+      estPrice,
+    ]);
     sheet.mergeCells(`A${priceRow.number}:E${priceRow.number}`);
-    priceRow.getCell(1).font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    priceRow.getCell(1).font = {
+      bold: true,
+      size: 12,
+      color: { argb: 'FFFFFFFF' },
+    };
     priceRow.getCell(1).alignment = { horizontal: 'right' };
     priceRow.getCell(6).numFmt = '$#,##0';
-    priceRow.getCell(6).font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
-    priceRow.eachCell((cell) => { cell.fill = headerFill; });
+    priceRow.getCell(6).font = {
+      bold: true,
+      size: 12,
+      color: { argb: 'FFFFFFFF' },
+    };
+    priceRow.eachCell((cell) => {
+      cell.fill = headerFill;
+    });
     priceRow.height = 22;
 
     // Margin
     const profit = estPrice - estCost;
     const margin = estPrice > 0 ? Math.round((profit / estPrice) * 100) : 0;
-    const marginRow = sheet.addRow(['', `Margen de utilidad esperado: ${margin}%`, '', '', '', profit]);
+    const marginRow = sheet.addRow([
+      '',
+      `Margen de utilidad esperado: ${margin}%`,
+      '',
+      '',
+      '',
+      profit,
+    ]);
     sheet.mergeCells(`A${marginRow.number}:E${marginRow.number}`);
     marginRow.getCell(1).font = { italic: true, size: 10 };
     marginRow.getCell(6).numFmt = '$#,##0';
@@ -192,9 +263,16 @@ export class ExportService {
 
     // ─── Footer note ─────────────────────────────────────────────────
     sheet.addRow([]);
-    const footerRow = sheet.addRow(['', 'Generado por BMBuildManage · Presupuesto preliminar · Sujeto a modificaciones']);
+    const footerRow = sheet.addRow([
+      '',
+      'Generado por BMBuildManage · Presupuesto preliminar · Sujeto a modificaciones',
+    ]);
     sheet.mergeCells(`B${footerRow.number}:F${footerRow.number}`);
-    footerRow.getCell(2).font = { italic: true, size: 8, color: { argb: 'FF999999' } };
+    footerRow.getCell(2).font = {
+      italic: true,
+      size: 8,
+      color: { argb: 'FF999999' },
+    };
 
     const buffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(buffer);

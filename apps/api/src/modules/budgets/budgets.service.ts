@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, OptimisticLockVersionMismatchError } from 'typeorm';
 import { Budget, BudgetStatus } from './budget.entity';
@@ -29,12 +33,19 @@ export class BudgetsService {
     private readonly auditLogsService: AuditLogsService,
   ) {}
 
-  async create(createBudgetDto: CreateBudgetDto, userId?: string): Promise<Budget> {
-    const budget = this.budgetRepository.create(createBudgetDto as any) as unknown as Budget;
-    const saved = (await this.budgetRepository.save(budget)) as Budget;
-    
+  async create(
+    createBudgetDto: CreateBudgetDto,
+    userId?: string,
+  ): Promise<Budget> {
+    const budget = this.budgetRepository.create(
+      createBudgetDto as any,
+    ) as unknown as Budget;
+    const saved = await this.budgetRepository.save(budget);
+
     // Auto-set as active if it's the first one
-    const count = await this.budgetRepository.count({ where: { project_id: saved.project_id } });
+    const count = await this.budgetRepository.count({
+      where: { project_id: saved.project_id },
+    });
     if (count === 1) {
       await this.budgetRepository.update(saved.id, { is_active: true });
       saved.is_active = true;
@@ -98,10 +109,13 @@ export class BudgetsService {
             position: Number(i.position) || 0,
             apu_template_id: i.apu_template_id ?? null,
             cubication_mode: i.cubication_mode ?? 'manual',
-            dim_length: i.dim_length !== undefined ? Number(i.dim_length) : null,
+            dim_length:
+              i.dim_length !== undefined ? Number(i.dim_length) : null,
             dim_width: i.dim_width !== undefined ? Number(i.dim_width) : null,
-            dim_height: i.dim_height !== undefined ? Number(i.dim_height) : null,
-            dim_thickness: i.dim_thickness !== undefined ? Number(i.dim_thickness) : null,
+            dim_height:
+              i.dim_height !== undefined ? Number(i.dim_height) : null,
+            dim_thickness:
+              i.dim_thickness !== undefined ? Number(i.dim_thickness) : null,
             formula: i.formula ?? null,
             geometry_data: i.geometry_data ?? null,
             quantity_executed: Number(i.quantity_executed) || 0,
@@ -110,7 +124,7 @@ export class BudgetsService {
         return stageEntity;
       });
     }
-    
+
     // 5. RECALCULATE financial totals (Backend Source of Truth)
     await this.financialService.calculateBudgetTotals(budget);
 
@@ -135,7 +149,7 @@ export class BudgetsService {
     } catch (error) {
       if (error instanceof OptimisticLockVersionMismatchError) {
         throw new ConflictException(
-          'El presupuesto ha sido modificado por otro usuario. Por favor, recargue la página para ver los cambios más recientes.'
+          'El presupuesto ha sido modificado por otro usuario. Por favor, recargue la página para ver los cambios más recientes.',
         );
       }
       throw error;
@@ -144,11 +158,11 @@ export class BudgetsService {
 
   async setActiveVersion(id: string, userId?: string) {
     const budget = await this.findOne(id);
-    
+
     // Deactivate others for the same project
     await this.budgetRepository.update(
       { project_id: budget.project_id },
-      { is_active: false }
+      { is_active: false },
     );
 
     // Activate this one
@@ -212,7 +226,7 @@ export class BudgetsService {
       })),
     } as any) as unknown as Budget;
 
-    const saved = (await this.budgetRepository.save(newBudget)) as Budget;
+    const saved = await this.budgetRepository.save(newBudget);
 
     return saved;
   }

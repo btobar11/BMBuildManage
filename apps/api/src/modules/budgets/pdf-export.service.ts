@@ -16,10 +16,10 @@ export class PDFExportService {
       try {
         const fetchRes = await fetch(company.logo_url);
         if (fetchRes.ok) {
-           logoBuffer = Buffer.from(await fetchRes.arrayBuffer());
+          logoBuffer = Buffer.from(await fetchRes.arrayBuffer());
         }
       } catch (error) {
-         console.warn("Could not fetch logo for PDF", error);
+        console.warn('Could not fetch logo for PDF', error);
       }
     }
 
@@ -36,7 +36,7 @@ export class PDFExportService {
 
       // 1. HEADER
       this.generateHeader(doc, company, logoBuffer);
-      
+
       // 2. PROJECT INFO
       this.generateProjectInfo(doc, budget, projectName);
 
@@ -57,17 +57,27 @@ export class PDFExportService {
     });
   }
 
-  private generateHeader(doc: PDFKit.PDFDocument, company: any, logoBuffer: Buffer | null) {
+  private generateHeader(
+    doc: PDFKit.PDFDocument,
+    company: any,
+    logoBuffer: Buffer | null,
+  ) {
     if (logoBuffer) {
       try {
         doc.image(logoBuffer, 50, 45, { height: 50 });
       } catch (e) {
-        doc.fillColor('#444444').fontSize(20).text(company?.name || 'BMBuildManage', 50, 45);
+        doc
+          .fillColor('#444444')
+          .fontSize(20)
+          .text(company?.name || 'BMBuildManage', 50, 45);
       }
     } else {
-      doc.fillColor('#444444').fontSize(20).text(company?.name || 'BMBuildManage', 50, 45);
+      doc
+        .fillColor('#444444')
+        .fontSize(20)
+        .text(company?.name || 'BMBuildManage', 50, 45);
     }
-    
+
     doc
       .fillColor('#444444')
       .fontSize(10)
@@ -76,11 +86,15 @@ export class PDFExportService {
       .text(company?.email || '', 50, 120)
       .text(company?.phone || '', 50, 130)
       .moveDown();
-    
+
     doc.lineCap('butt').moveTo(50, 150).lineTo(550, 150).stroke('#cccccc');
   }
 
-  private generateProjectInfo(doc: PDFKit.PDFDocument, budget: any, projectName: string) {
+  private generateProjectInfo(
+    doc: PDFKit.PDFDocument,
+    budget: any,
+    projectName: string,
+  ) {
     doc
       .fillColor('#1e3a5f')
       .fontSize(16)
@@ -100,10 +114,17 @@ export class PDFExportService {
     let y = 255;
 
     // Table Header
-    doc
-      .fillColor('#1e3a5f')
-      .fontSize(10);
-    this.generateTableRow(doc, y, 'Item', 'Descripción', 'Unid', 'Cant', 'P. Unit', 'Total');
+    doc.fillColor('#1e3a5f').fontSize(10);
+    this.generateTableRow(
+      doc,
+      y,
+      'Item',
+      'Descripción',
+      'Unid',
+      'Cant',
+      'P. Unit',
+      'Total',
+    );
     this.generateHr(doc, y + 15);
     y += 20;
 
@@ -134,14 +155,23 @@ export class PDFExportService {
           item.unit || '-',
           item.quantity?.toString() || '0',
           this.formatCurrency(item.unit_price || 0),
-          this.formatCurrency(total)
+          this.formatCurrency(total),
         );
         y += 15;
       }
 
       // Stage Subtotal
       doc.font('Helvetica-Bold');
-      this.generateTableRow(doc, y, '', `Subtotal ${stage.name}`, '', '', '', this.formatCurrency(stageTotal));
+      this.generateTableRow(
+        doc,
+        y,
+        '',
+        `Subtotal ${stage.name}`,
+        '',
+        '',
+        '',
+        this.formatCurrency(stageTotal),
+      );
       y += 20;
       this.generateHr(doc, y - 5);
       doc.font('Helvetica');
@@ -149,17 +179,20 @@ export class PDFExportService {
 
     // Totals Block
     y += 10;
-    if (y > 700) doc.addPage(), y = 50;
+    if (y > 700) (doc.addPage(), (y = 50));
 
     const totalPrice = Number(budget.total_estimated_price) || 0;
 
     doc.fontSize(12).font('Helvetica-Bold').fillColor('#1e3a5f');
     doc.text('RESUMEN GENERAL', 350, y);
     y += 20;
-    
+
     doc.fillColor('#000000').fontSize(12);
     doc.text('TOTAL NETO CLIENTE:', 350, y);
-    doc.text(this.formatCurrency(totalPrice), 480, y, { align: 'right', width: 70 });
+    doc.text(this.formatCurrency(totalPrice), 480, y, {
+      align: 'right',
+      width: 70,
+    });
     y += 20;
   }
 
@@ -171,7 +204,7 @@ export class PDFExportService {
     unit: string,
     quantity: string,
     price: string,
-    total: string
+    total: string,
   ) {
     doc
       .text(item, 50, y)
@@ -183,7 +216,12 @@ export class PDFExportService {
   }
 
   private generateHr(doc: PDFKit.PDFDocument, y: number) {
-    doc.strokeColor('#eeeeee').lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
+    doc
+      .strokeColor('#eeeeee')
+      .lineWidth(1)
+      .moveTo(50, y)
+      .lineTo(550, y)
+      .stroke();
   }
 
   private formatCurrency(value: number): string {
@@ -202,14 +240,21 @@ export class PDFExportService {
         'Este documento es una representación oficial generada por BMBuildManage. Sujeto a términos y condiciones del contrato.',
         50,
         780,
-        { align: 'center', width: 500 }
+        { align: 'center', width: 500 },
       );
   }
 
   private generateTerms(doc: PDFKit.PDFDocument) {
     let y = (doc as any).y + 30;
-    if (y > 600) { doc.addPage(); y = 50; }
-    doc.fontSize(10).font('Helvetica-Bold').fillColor('#1e3a5f').text('TÉRMINOS Y CONDICIONES', 50, y);
+    if (y > 600) {
+      doc.addPage();
+      y = 50;
+    }
+    doc
+      .fontSize(10)
+      .font('Helvetica-Bold')
+      .fillColor('#1e3a5f')
+      .text('TÉRMINOS Y CONDICIONES', 50, y);
     y += 15;
     doc.fontSize(8).font('Helvetica').fillColor('#444444');
     const terms = [
@@ -217,17 +262,46 @@ export class PDFExportService {
       '2. Forma de pago: 50% anticipo, resto contra avance semanal.',
       '3. Plazos: A convenir tras el primer pago.',
       '4. Exclusiones: Permisos municipales no incluidos.',
-      '5. Modificaciones: Se valorizarán como adicionales.'
+      '5. Modificaciones: Se valorizarán como adicionales.',
     ];
-    terms.forEach(t => { doc.text(t, 50, y); y += 12; });
+    terms.forEach((t) => {
+      doc.text(t, 50, y);
+      y += 12;
+    });
   }
 
-  private generateSignatures(doc: PDFKit.PDFDocument, company: any, clientName: string) {
+  private generateSignatures(
+    doc: PDFKit.PDFDocument,
+    company: any,
+    clientName: string,
+  ) {
     let y = (doc as any).y + 60;
-    if (y > 700) { doc.addPage(); y = 80; }
-    doc.strokeColor('#333333').lineWidth(1).moveTo(70, y).lineTo(230, y).stroke();
-    doc.fontSize(9).font('Helvetica-Bold').text(company?.name || 'CONSTRUCTORA', 70, y + 5, { width: 160, align: 'center' });
-    doc.strokeColor('#333333').lineWidth(1).moveTo(360, y).lineTo(520, y).stroke();
-    doc.fontSize(9).font('Helvetica-Bold').text(clientName, 360, y + 5, { width: 160, align: 'center' });
+    if (y > 700) {
+      doc.addPage();
+      y = 80;
+    }
+    doc
+      .strokeColor('#333333')
+      .lineWidth(1)
+      .moveTo(70, y)
+      .lineTo(230, y)
+      .stroke();
+    doc
+      .fontSize(9)
+      .font('Helvetica-Bold')
+      .text(company?.name || 'CONSTRUCTORA', 70, y + 5, {
+        width: 160,
+        align: 'center',
+      });
+    doc
+      .strokeColor('#333333')
+      .lineWidth(1)
+      .moveTo(360, y)
+      .lineTo(520, y)
+      .stroke();
+    doc
+      .fontSize(9)
+      .font('Helvetica-Bold')
+      .text(clientName, 360, y + 5, { width: 160, align: 'center' });
   }
 }

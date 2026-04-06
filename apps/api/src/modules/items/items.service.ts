@@ -32,7 +32,12 @@ export class ItemsService {
     return item;
   }
 
-  async update(id: string, updateItemDto: UpdateItemDto, userId?: string, companyId?: string) {
+  async update(
+    id: string,
+    updateItemDto: UpdateItemDto,
+    userId?: string,
+    companyId?: string,
+  ) {
     const item = await this.findOne(id);
     const oldValue = { ...item };
     this.itemRepository.merge(item, updateItemDto);

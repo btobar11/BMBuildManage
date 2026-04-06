@@ -14,7 +14,17 @@ import { AuditLog, AuditAction } from './audit-log.entity';
 @EventSubscriber()
 export class AuditSubscriber implements EntitySubscriberInterface {
   // Lista de entidades que queremos auditar
-  private auditedEntities = ['Item', 'Budget', 'Resource', 'ApuTemplate', 'Contingency', 'WorkerPayment', 'Expense', 'WorkerAssignment', 'BudgetExecutionLog'];
+  private auditedEntities = [
+    'Item',
+    'Budget',
+    'Resource',
+    'ApuTemplate',
+    'Contingency',
+    'WorkerPayment',
+    'Expense',
+    'WorkerAssignment',
+    'BudgetExecutionLog',
+  ];
 
   constructor(
     @InjectRepository(AuditLog)
@@ -27,13 +37,14 @@ export class AuditSubscriber implements EntitySubscriberInterface {
   async afterInsert(event: InsertEvent<any>) {
     if (!event.entity || !event.metadata) return;
     const entityName = event.metadata.name;
-    
+
     if (this.auditedEntities.includes(entityName)) {
       const log = this.auditRepo.create({
         entity_name: entityName,
         entity_id: event.entity.id,
         company_id: event.entity.company_id || null,
-        project_id: event.entity.project_id || event.entity.budget?.project_id || null,
+        project_id:
+          event.entity.project_id || event.entity.budget?.project_id || null,
         action: AuditAction.CREATE,
         new_value: event.entity,
         description: `Created new ${entityName}: ${event.entity.name || event.entity.description || event.entity.id}`,
@@ -53,8 +64,10 @@ export class AuditSubscriber implements EntitySubscriberInterface {
       const log = this.auditRepo.create({
         entity_name: entityName,
         entity_id: event.databaseEntity.id,
-        company_id: event.databaseEntity.company_id || event.entity.company_id || null,
-        project_id: event.databaseEntity.project_id || event.entity.project_id || null,
+        company_id:
+          event.databaseEntity.company_id || event.entity.company_id || null,
+        project_id:
+          event.databaseEntity.project_id || event.entity.project_id || null,
         action: AuditAction.UPDATE,
         old_value: event.databaseEntity,
         new_value: event.entity,

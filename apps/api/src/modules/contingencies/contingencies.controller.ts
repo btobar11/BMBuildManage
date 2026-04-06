@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Delete, Body, Param, ParseUUIDPipe, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { ContingenciesService } from './contingencies.service';
 import { CreateContingencyDto } from './dto/create-contingency.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';

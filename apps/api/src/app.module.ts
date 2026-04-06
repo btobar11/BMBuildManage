@@ -28,7 +28,6 @@ import { UnitsModule } from './modules/units/units.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { BimClashesModule } from './modules/bim-clashes/bim-clashes.module';
-import { databaseConfig } from './config';
 
 @Module({
   imports: [
@@ -44,9 +43,10 @@ import { databaseConfig } from './config';
         autoLoadEntities: true,
         synchronize: process.env.NODE_ENV !== 'production',
         logging: process.env.NODE_ENV !== 'production',
-        ssl: process.env.NODE_ENV === 'production' 
-          ? { rejectUnauthorized: false } 
-          : false,
+        ssl:
+          process.env.NODE_ENV === 'production'
+            ? { rejectUnauthorized: false }
+            : false,
       }),
       inject: [ConfigService],
     }),

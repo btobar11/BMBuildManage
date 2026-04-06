@@ -22,14 +22,14 @@ describe('BusinessRulesService', () => {
     const budget: any = {
       stages: [
         {
-          items: [
-            { name: 'Test Item', quantity: -10, unit_price: 100 }
-          ]
-        }
-      ]
+          items: [{ name: 'Test Item', quantity: -10, unit_price: 100 }],
+        },
+      ],
     };
 
-    await expect(service.validateBudget(budget)).rejects.toThrow(BadRequestException);
+    await expect(service.validateBudget(budget)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('should return warnings for missing dimensions in DIMENSIONS mode', async () => {
@@ -37,16 +37,16 @@ describe('BusinessRulesService', () => {
       stages: [
         {
           items: [
-            { 
-              name: 'Test Item', 
-              quantity: 10, 
+            {
+              name: 'Test Item',
+              quantity: 10,
               cubication_mode: CubicationMode.DIMENSIONS,
               dim_length: 0,
-              dim_width: 0
-            }
-          ]
-        }
-      ]
+              dim_width: 0,
+            },
+          ],
+        },
+      ],
     };
 
     const warnings = await service.validateBudget(budget);
@@ -59,15 +59,15 @@ describe('BusinessRulesService', () => {
       stages: [
         {
           items: [
-            { 
-              name: 'Test Item', 
-              quantity: 100, 
+            {
+              name: 'Test Item',
+              quantity: 100,
               quantity_executed: 110,
-              unit_price: 100 
-            }
-          ]
-        }
-      ]
+              unit_price: 100,
+            },
+          ],
+        },
+      ],
     };
 
     const warnings = await service.validateBudget(budget);

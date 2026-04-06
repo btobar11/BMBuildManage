@@ -65,24 +65,27 @@ export class FinancialService {
       order: { created_at: 'DESC' }, // Pick the newest revision
     });
 
-    const [realExpenses, workerPayments, contingenciesTotal] = await Promise.all([
-      this.getTotalExpenses(projectId),
-      this.getTotalWorkerPayments(projectId),
-      this.getTotalContingencies(projectId),
-    ]);
+    const [realExpenses, workerPayments, contingenciesTotal] =
+      await Promise.all([
+        this.getTotalExpenses(projectId),
+        this.getTotalWorkerPayments(projectId),
+        this.getTotalContingencies(projectId),
+      ]);
 
     const estimatedCost = Number(budget?.total_estimated_cost || 0);
     const estimatedPrice = Number(budget?.total_estimated_price || 0);
     const totalRealCost = realExpenses + workerPayments + contingenciesTotal;
 
     // Formulas
-    const estimatedMargin = estimatedPrice > 0 
-      ? ((estimatedPrice - estimatedCost) / estimatedPrice) * 100 
-      : 0;
+    const estimatedMargin =
+      estimatedPrice > 0
+        ? ((estimatedPrice - estimatedCost) / estimatedPrice) * 100
+        : 0;
 
-    const realMargin = estimatedPrice > 0 
-      ? ((estimatedPrice - totalRealCost) / estimatedPrice) * 100 
-      : 0;
+    const realMargin =
+      estimatedPrice > 0
+        ? ((estimatedPrice - totalRealCost) / estimatedPrice) * 100
+        : 0;
 
     const variance = estimatedCost - totalRealCost; // positive = under budget, negative = over budget
 
@@ -100,7 +103,7 @@ export class FinancialService {
         totalRealCost,
         realMargin,
         variance,
-      }
+      },
     };
   }
 

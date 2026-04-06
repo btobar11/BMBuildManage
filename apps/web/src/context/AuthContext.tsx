@@ -21,8 +21,36 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    if (!isSupabaseConfigured) {
+      return {
+        id: 'dev-user-id',
+        email: 'demo@bmbuild.com',
+        name: 'Usuario Demo',
+        role: 'admin',
+        company_id: '77777777-7777-7777-7777-777777777777'
+      };
+    }
+    const devToken = localStorage.getItem('DEV_TOKEN');
+    if (devToken) {
+      return {
+        id: 'dev-user-id',
+        email: 'demo@bmbuild.com',
+        name: 'Usuario Demo',
+        role: 'admin',
+        company_id: '77777777-7777-7777-7777-777777777777'
+      };
+    }
+    return null;
+  });
+  
+  const [token, setToken] = useState<string | null>(() => {
+    if (!isSupabaseConfigured) {
+      return 'dev-token';
+    }
+    return localStorage.getItem('DEV_TOKEN') || null;
+  });
+  
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsEnum, IsNumber, IsArray, ValidateNested, Min, IsPositive } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  Min,
+  IsPositive,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { BudgetStatus } from '../budget.entity';
 

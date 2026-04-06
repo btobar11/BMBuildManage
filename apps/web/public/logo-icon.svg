@@ -1,29 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
-  <!-- Icono para sidebar/app -->
-  <!-- Fondo transparente (para usar sobre fondos oscuros) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="gradTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="gradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="gradRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
   
-  <!-- Isotipo Cubo Isométrico B/M -->
-  <g transform="translate(10, 10)">
-    <!-- Cara superior (Y-Z) -->
-    <path d="M30 0 L60 17.32 L30 34.64 L0 17.32 Z" stroke="#10B981" stroke-width="2" fill="none"/>
+  <!-- Fondo rounded -->
+  <rect width="64" height="64" rx="14" fill="#0F172A"/>
+  
+  <!-- Icono - Cubo isométrico -->
+  <g transform="translate(32, 32)">
+    <path d="M0 -18 L20 -6 L0 6 L-20 -6 Z" fill="url(#gradTop)"/>
+    <path d="M-20 -6 L0 6 L0 22 L-20 10 Z" fill="url(#gradLeft)"/>
+    <path d="M0 6 L20 -6 L20 10 L0 22 Z" fill="url(#gradRight)"/>
     
-    <!-- Cara izquierda (X-Y) -->
-    <path d="M0 17.32 L30 34.64 L30 69.28 L0 51.96 Z" stroke="#10B981" stroke-width="2" fill="none"/>
-    
-    <!-- Cara derecha (X-Z) -->
-    <path d="M30 34.64 L60 17.32 L60 51.96 L30 69.28 Z" stroke="#10B981" stroke-width="2" fill="none"/>
-    
-    <!-- Línea central vertical -->
-    <path d="M30 17.32 L30 69.28" stroke="#10B981" stroke-width="1.5"/>
-    
-    <!-- Líneas B -->
-    <path d="M15 25.98 L15 43.3" stroke="#10B981" stroke-width="1.5"/>
-    <path d="M15 25.98 L30 17.32" stroke="#10B981" stroke-width="1"/>
-    <path d="M15 43.3 L30 51.96" stroke="#10B981" stroke-width="1"/>
-    
-    <!-- Líneas M -->
-    <path d="M45 25.98 L45 43.3" stroke="#10B981" stroke-width="1.5"/>
-    <path d="M45 25.98 L30 17.32" stroke="#10B981" stroke-width="1"/>
-    <path d="M45 43.3 L30 51.96" stroke="#10B981" stroke-width="1"/>
+    <path d="M-8 -2 L-8 8" stroke="#ECFDF5" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M8 -2 L8 8" stroke="#ECFDF5" stroke-width="1.5" stroke-linecap="round"/>
   </g>
 </svg>

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorkerAssignment } from './worker-assignment.entity';
@@ -21,10 +25,13 @@ export class WorkerAssignmentsService {
     if (!startDate) return;
 
     if (endDate && new Date(startDate) > new Date(endDate)) {
-      throw new BadRequestException('La fecha de inicio no puede ser posterior a la fecha de término.');
+      throw new BadRequestException(
+        'La fecha de inicio no puede ser posterior a la fecha de término.',
+      );
     }
 
-    const qb = this.assignmentRepository.createQueryBuilder('wa')
+    const qb = this.assignmentRepository
+      .createQueryBuilder('wa')
       .where('wa.worker_id = :workerId', { workerId });
 
     if (excludeId) {
@@ -32,20 +39,31 @@ export class WorkerAssignmentsService {
     }
 
     if (endDate) {
-      qb.andWhere('(wa.end_date IS NULL OR wa.end_date >= :startDate)', { startDate })
-        .andWhere('(wa.start_date IS NULL OR wa.start_date <= :endDate)', { endDate });
+      qb.andWhere('(wa.end_date IS NULL OR wa.end_date >= :startDate)', {
+        startDate,
+      }).andWhere('(wa.start_date IS NULL OR wa.start_date <= :endDate)', {
+        endDate,
+      });
     } else {
-      qb.andWhere('(wa.end_date IS NULL OR wa.end_date >= :startDate)', { startDate });
+      qb.andWhere('(wa.end_date IS NULL OR wa.end_date >= :startDate)', {
+        startDate,
+      });
     }
 
     const overlap = await qb.getOne();
     if (overlap) {
-      throw new BadRequestException('El trabajador ya tiene una asignación activa en esas fechas o hay un solapamiento.');
+      throw new BadRequestException(
+        'El trabajador ya tiene una asignación activa en esas fechas o hay un solapamiento.',
+      );
     }
   }
 
   async create(createDto: CreateWorkerAssignmentDto) {
-    await this.checkOverlap(createDto.worker_id, createDto.start_date, createDto.end_date);
+    await this.checkOverlap(
+      createDto.worker_id,
+      createDto.start_date,
+      createDto.end_date,
+    );
     const assignment = this.assignmentRepository.create(createDto);
     return this.assignmentRepository.save(assignment);
   }
@@ -70,9 +88,15 @@ export class WorkerAssignmentsService {
 
   async update(id: string, updateDto: UpdateWorkerAssignmentDto) {
     const assignment = await this.findOne(id);
-    const startDate = updateDto.start_date !== undefined ? updateDto.start_date : assignment.start_date;
-    const endDate = updateDto.end_date !== undefined ? updateDto.end_date : assignment.end_date;
-    
+    const startDate =
+      updateDto.start_date !== undefined
+        ? updateDto.start_date
+        : assignment.start_date;
+    const endDate =
+      updateDto.end_date !== undefined
+        ? updateDto.end_date
+        : assignment.end_date;
+
     await this.checkOverlap(assignment.worker_id, startDate, endDate, id);
 
     this.assignmentRepository.merge(assignment, updateDto);

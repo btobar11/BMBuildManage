@@ -39,7 +39,18 @@ export function SyncIndicator({
   onRetry
 }: SyncIndicatorProps) {
   const [status, setStatus] = useState<SyncStatus>('synced');
-  const [pendingCount, setPendingCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(() => {
+    const stored = localStorage.getItem('bm-pending-mutations');
+    if (stored) {
+      try {
+        const mutations = JSON.parse(stored);
+        return mutations.length;
+      } catch {
+        localStorage.removeItem('bm-pending-mutations');
+      }
+    }
+    return 0;
+  });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [lastSync, setLastSync] = useState<Date | null>(null);
 
@@ -80,14 +91,14 @@ export function SyncIndicator({
 
       switch (type) {
         case 'MUTATION_QUEUED':
-          setPendingCount(prev => prev + 1);
+          setPendingCount((prev: number) => prev + 1);
           if (!isOnline) {
             setStatus('pending');
           }
           break;
 
         case 'MUTATION_SYNCED':
-          setPendingCount(prev => Math.max(0, prev - 1));
+          setPendingCount((prev: number) => Math.max(0, prev - 1));
           setLastSync(new Date());
           break;
 
@@ -112,20 +123,6 @@ export function SyncIndicator({
       }
     };
   }, [isOnline]);
-
-  // Check for pending mutations in localStorage (fallback)
-  useEffect(() => {
-    const stored = localStorage.getItem('bm-pending-mutations');
-    if (stored) {
-      try {
-        const mutations = JSON.parse(stored);
-        setPendingCount(mutations.length);
-      } catch {
-        // Invalid data, clear it
-        localStorage.removeItem('bm-pending-mutations');
-      }
-    }
-  }, []);
 
   // Determine display status
   const displayStatus: SyncStatus = !isOnline

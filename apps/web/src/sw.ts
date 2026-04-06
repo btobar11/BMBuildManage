@@ -9,7 +9,6 @@ import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 declare let self: ServiceWorkerGlobalScope;
 
 // 1. PRECACHE STATIC ASSETS
-// @ts-ignore - __WB_MANIFEST is injected by VitePWA
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
@@ -105,7 +104,7 @@ self.addEventListener('message', async (event) => {
               count: countRequest.result
             });
           };
-        } catch (e) {
+        } catch {
           // If store doesn't exist yet, return 0
           event.source?.postMessage({ type: 'MUTATION_QUEUED', count: 0 });
         }

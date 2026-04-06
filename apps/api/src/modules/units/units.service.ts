@@ -34,7 +34,9 @@ export class UnitsService implements OnModuleInit {
   }
 
   findAll() {
-    return this.unitRepository.find({ order: { category: 'ASC', name: 'ASC' } });
+    return this.unitRepository.find({
+      order: { category: 'ASC', name: 'ASC' },
+    });
   }
 
   findOne(id: string) {

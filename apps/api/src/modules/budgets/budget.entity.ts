@@ -62,7 +62,10 @@ export class Budget {
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   estimated_utility: number;
 
-  @OneToMany(() => Stage, (stage) => stage.budget, { cascade: true, orphanedRowAction: 'delete' })
+  @OneToMany(() => Stage, (stage) => stage.budget, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
   stages: Stage[];
 
   @CreateDateColumn()

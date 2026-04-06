@@ -33,9 +33,13 @@ export class AuditLogsController {
     const companyId = req.user?.company_id;
     const take = Math.min(parseInt(limit) || 50, 200);
 
-    const qb = this.auditRepo.createQueryBuilder('log').orderBy('log.created_at', 'DESC').take(take);
+    const qb = this.auditRepo
+      .createQueryBuilder('log')
+      .orderBy('log.created_at', 'DESC')
+      .take(take);
 
-    if (entityName) qb.andWhere('log.entity_name = :entityName', { entityName });
+    if (entityName)
+      qb.andWhere('log.entity_name = :entityName', { entityName });
     if (entityId) qb.andWhere('log.entity_id = :entityId', { entityId });
     if (companyId) qb.andWhere('log.company_id = :companyId', { companyId });
 
@@ -47,7 +51,12 @@ export class AuditLogsController {
    * Simpler endpoint for specific entity history.
    */
   @Get('by-entity')
-  @Roles(UserRole.ADMIN, UserRole.ACCOUNTING, UserRole.ENGINEER, UserRole.ARCHITECT)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ACCOUNTING,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+  )
   async getEntityHistory(
     @Query('entity_name') entityName: string,
     @Query('entity_id') entityId: string,
@@ -61,7 +70,12 @@ export class AuditLogsController {
    * Searches by project_id AND by entity_ids belonging to the project's budgets/stages/items.
    */
   @Get('project/:projectId')
-  @Roles(UserRole.ADMIN, UserRole.ACCOUNTING, UserRole.ENGINEER, UserRole.ARCHITECT)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ACCOUNTING,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+  )
   async getProjectLogs(
     @Param('projectId') projectId: string,
     @Query('limit') limit: string,
@@ -111,7 +125,8 @@ export class AuditLogsController {
       // If any query fails, fall back to project_id filter only
     }
 
-    const qb = this.auditRepo.createQueryBuilder('log')
+    const qb = this.auditRepo
+      .createQueryBuilder('log')
       .where('log.company_id = :companyId', { companyId })
       .orderBy('log.created_at', 'DESC')
       .take(take);

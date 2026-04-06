@@ -26,7 +26,7 @@ export class ApuController {
 
   @Post('import')
   importMany(@Body() dtos: CreateApuTemplateDto[]) {
-    return Promise.all(dtos.map(dto => this.apuService.create(dto)));
+    return Promise.all(dtos.map((dto) => this.apuService.create(dto)));
   }
 
   @Post('seed')

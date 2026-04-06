@@ -43,7 +43,10 @@ export class ApuTemplate {
   @Column({ length: 100, nullable: true })
   default_geometry_layer: string;
 
-  @OneToMany(() => ApuResource, (r) => r.apu_template, { cascade: true, orphanedRowAction: 'delete' })
+  @OneToMany(() => ApuResource, (r) => r.apu_template, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
   apu_resources: ApuResource[];
 
   // Computed field (not stored in DB, calculated on-the-fly)

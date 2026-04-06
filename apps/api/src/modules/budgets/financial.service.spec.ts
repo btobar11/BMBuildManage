@@ -8,7 +8,7 @@ import { ProjectContingency } from '../contingencies/project-contingency.entity'
 
 describe('FinancialService', () => {
   let service: FinancialService;
-  
+
   const mockBudgetRepository = {
     findOne: jest.fn(),
     createQueryBuilder: jest.fn(),
@@ -60,7 +60,7 @@ describe('FinancialService', () => {
 
   it('should calculate project summary correctly', async () => {
     const projectId = 'proj-123';
-    
+
     mockBudgetRepository.findOne.mockResolvedValue({
       id: 'budget-1',
       total_estimated_cost: 500000,
@@ -68,9 +68,15 @@ describe('FinancialService', () => {
       version: 1,
     });
 
-    mockExpenseRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder(150000));
-    mockWorkerAssignmentRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder(350000));
-    mockContingencyRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder(25000));
+    mockExpenseRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder(150000),
+    );
+    mockWorkerAssignmentRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder(350000),
+    );
+    mockContingencyRepository.createQueryBuilder.mockReturnValue(
+      mockQueryBuilder(25000),
+    );
 
     const result = await service.getProjectSummary(projectId);
 

@@ -1,16 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Favicon ultra simple - Cubo isométrico -->
-  <g transform="translate(4, 6)">
-    <!-- Cara superior -->
-    <path d="M12 0 L24 6.93 L12 13.86 L0 6.93 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
-    
-    <!-- Cara izquierda -->
-    <path d="M0 6.93 L12 13.86 L12 27.72 L0 20.79 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
-    
-    <!-- Cara derecha -->
-    <path d="M12 13.86 L24 6.93 L24 20.79 L12 27.72 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
-    
-    <!-- Línea central -->
-    <path d="M12 6.93 L12 27.72" stroke="#10B981" stroke-width="1"/>
+  <rect width="32" height="32" rx="6" fill="#0F172A"/>
+  <g transform="translate(16, 16)">
+    <path d="M0 -9 L10 -3 L0 3 L-10 -3 Z" fill="#10B981"/>
+    <path d="M-10 -3 L0 3 L0 11 L-10 5 Z" fill="#059669"/>
+    <path d="M0 3 L10 -3 L10 5 L0 11 Z" fill="#34D399"/>
+    <path d="M-4 -1 L-4 4" stroke="#ECFDF5" stroke-width="1" stroke-linecap="round"/>
+    <path d="M4 -1 L4 4" stroke="#ECFDF5" stroke-width="1" stroke-linecap="round"/>
   </g>
 </svg>

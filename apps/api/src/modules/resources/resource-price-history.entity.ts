@@ -18,7 +18,9 @@ export class ResourcePriceHistory {
   @Column()
   resource_id: string;
 
-  @ManyToOne(() => Resource, (resource) => resource.price_history, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Resource, (resource) => resource.price_history, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'resource_id' })
   resource: Resource;
 

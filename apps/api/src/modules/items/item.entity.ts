@@ -59,13 +59,27 @@ export class Item {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   unit_cost: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, insert: false, update: false })
+  @Column({
+    type: 'decimal',
+    precision: 14,
+    scale: 2,
+    default: 0,
+    insert: false,
+    update: false,
+  })
   total_cost: number;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   unit_price: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, insert: false, update: false })
+  @Column({
+    type: 'decimal',
+    precision: 14,
+    scale: 2,
+    default: 0,
+    insert: false,
+    update: false,
+  })
   total_price: number;
 
   @Column({ nullable: true, length: 100 })
@@ -79,7 +93,11 @@ export class Item {
   apu_template_id: string;
 
   // --- Cubicación ---
-  @Column({ type: 'enum', enum: CubicationMode, default: CubicationMode.MANUAL })
+  @Column({
+    type: 'enum',
+    enum: CubicationMode,
+    default: CubicationMode.MANUAL,
+  })
   cubication_mode: CubicationMode;
 
   @Column({ type: 'decimal', precision: 12, scale: 3, nullable: true })

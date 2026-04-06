@@ -55,10 +55,12 @@ export function CompanySettingsPage() {
     
     setSaving(true);
     try {
-      const { id, ...updateData } = company as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const updateData: any = { ...company };
       // Also omit any other read-only fields that might come from the db
       delete updateData.created_at;
       delete updateData.updated_at;
+      delete updateData.id;
 
       await api.patch(`/companies/${company.id}`, updateData);
       alert('Configuración guardada exitosamente');

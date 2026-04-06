@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Worker } from './worker.entity';
@@ -46,7 +50,11 @@ export class WorkersService {
     return worker;
   }
 
-  async update(id: string, companyId: string, updateWorkerDto: UpdateWorkerDto) {
+  async update(
+    id: string,
+    companyId: string,
+    updateWorkerDto: UpdateWorkerDto,
+  ) {
     const worker = await this.findOne(id, companyId);
     this.workerRepository.merge(worker, updateWorkerDto);
     return this.workerRepository.save(worker);
@@ -54,10 +62,10 @@ export class WorkersService {
 
   async remove(id: string, companyId: string) {
     const worker = await this.findOne(id, companyId);
-    
+
     if (worker.assignments && worker.assignments.length > 0) {
       throw new BadRequestException(
-        `No se puede eliminar al trabajador "${worker.name}" porque tiene asignaciones de proyecto registradas.`
+        `No se puede eliminar al trabajador "${worker.name}" porque tiene asignaciones de proyecto registradas.`,
       );
     }
 

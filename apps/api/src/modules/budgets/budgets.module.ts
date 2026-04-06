@@ -18,20 +18,29 @@ import { PDFExportService } from './pdf-export.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Budget, 
-      Stage, 
-      Item, 
-      Expense, 
-      WorkerAssignment, 
+      Budget,
+      Stage,
+      Item,
+      Expense,
+      WorkerAssignment,
       ProjectContingency,
-      Project
-    ]), 
-    AuthModule
+      Project,
+    ]),
+    AuthModule,
   ],
   controllers: [BudgetsController],
-  providers: [BudgetsService, ExportService, FinancialService, BusinessRulesService, PDFExportService],
-  exports: [BudgetsService, FinancialService, BusinessRulesService, PDFExportService],
+  providers: [
+    BudgetsService,
+    ExportService,
+    FinancialService,
+    BusinessRulesService,
+    PDFExportService,
+  ],
+  exports: [
+    BudgetsService,
+    FinancialService,
+    BusinessRulesService,
+    PDFExportService,
+  ],
 })
 export class BudgetsModule {}
-
-

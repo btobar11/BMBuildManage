@@ -14,4 +14,3 @@ import { AuthModule } from '../auth/auth.module';
   exports: [AuditLogsService],
 })
 export class AuditLogsModule {}
-

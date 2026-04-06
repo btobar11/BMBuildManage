@@ -32,7 +32,10 @@ export class ExpensesController {
 
   @Get()
   findAll(@Req() req: any, @Query('project_id') projectId: string) {
-    return this.expensesService.findAllByProject(projectId, req.user.company_id);
+    return this.expensesService.findAllByProject(
+      projectId,
+      req.user.company_id,
+    );
   }
 
   @Get('summary/:projectId')

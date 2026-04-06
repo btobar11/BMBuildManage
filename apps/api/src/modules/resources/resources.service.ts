@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, IsNull } from 'typeorm';
 import { Resource } from './resource.entity';
@@ -23,12 +27,12 @@ export class ResourcesService {
 
   findAll(params: { companyId?: string; tab?: string }) {
     const { companyId, tab } = params;
-    
+
     // tab = 'global' → solo recursos globales (company_id IS NULL)
     // tab = 'personal' → recursos de la empresa + globales
     // sin params → recursos de la empresa + globales
     let where: any;
-    
+
     if (tab === 'global') {
       // Solo recursos globales
       where = { company_id: IsNull() };
@@ -39,11 +43,11 @@ export class ResourcesService {
       // Solo globales si no hay companyId
       where = { company_id: IsNull() };
     }
-      
-    return this.resourceRepo.find({ 
-      where, 
+
+    return this.resourceRepo.find({
+      where,
       relations: ['unit'],
-      order: { name: 'ASC' } 
+      order: { name: 'ASC' },
     });
   }
 
@@ -60,7 +64,10 @@ export class ResourcesService {
     const resource = await this.findOne(id);
 
     // If price changed, record it in history
-    if (dto.base_price !== undefined && Number(dto.base_price) !== Number(resource.base_price)) {
+    if (
+      dto.base_price !== undefined &&
+      Number(dto.base_price) !== Number(resource.base_price)
+    ) {
       const entry = this.historyRepo.create({
         resource_id: id,
         price: resource.base_price,
@@ -77,10 +84,12 @@ export class ResourcesService {
 
     const isUsed = await this.dataSource.query(
       `SELECT id FROM apu_resources WHERE resource_id = $1 LIMIT 1`,
-      [id]
+      [id],
     );
     if (isUsed.length > 0) {
-      throw new BadRequestException(`No se puede eliminar este Recurso porque está asignado a uno o más APUs.`);
+      throw new BadRequestException(
+        `No se puede eliminar este Recurso porque está asignado a uno o más APUs.`,
+      );
     }
 
     await this.resourceRepo.remove(resource);

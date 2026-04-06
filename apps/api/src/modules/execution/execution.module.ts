@@ -8,7 +8,10 @@ import { Item } from '../items/item.entity';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BudgetExecutionLog, ResourceConsumption, Item]), AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([BudgetExecutionLog, ResourceConsumption, Item]),
+    AuthModule,
+  ],
   controllers: [ExecutionController],
   providers: [ExecutionService],
   exports: [ExecutionService],

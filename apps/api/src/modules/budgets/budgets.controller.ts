@@ -10,7 +10,7 @@ import {
   Query,
   Res,
   Req,
-  HttpException
+  HttpException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { BudgetsService } from './budgets.service';
@@ -77,7 +77,11 @@ export class BudgetsController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT)
-  update(@Param('id') id: string, @Body() updateBudgetDto: UpdateBudgetDto, @Req() req: any) {
+  update(
+    @Param('id') id: string,
+    @Body() updateBudgetDto: UpdateBudgetDto,
+    @Req() req: any,
+  ) {
     return this.budgetsService.update(id, updateBudgetDto, req.user?.id);
   }
 
@@ -85,9 +89,14 @@ export class BudgetsController {
   @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT)
   async createRevision(@Param('id') id: string, @Req() req: any) {
     try {
-      return await this.budgetsService.createRevision(id, req.user?.id, req.user?.company_id);
+      return await this.budgetsService.createRevision(
+        id,
+        req.user?.id,
+        req.user?.company_id,
+      );
     } catch (e) {
-      const errorMsg = e instanceof Error ? e.message + ' \n ' + e.stack : JSON.stringify(e);
+      const errorMsg =
+        e instanceof Error ? e.message + ' \n ' + e.stack : JSON.stringify(e);
       throw new HttpException({ error: errorMsg }, 500);
     }
   }
@@ -101,7 +110,8 @@ export class BudgetsController {
     const buffer = await this.exportService.exportBudgetToExcel(id);
 
     res.set({
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="Presupuesto_${safeName}_v${budget.version}.xlsx"`,
       'Content-Length': buffer.length,
     });
@@ -114,4 +124,3 @@ export class BudgetsController {
     return this.budgetsService.remove(id);
   }
 }
-

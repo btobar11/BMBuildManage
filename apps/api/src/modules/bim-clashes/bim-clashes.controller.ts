@@ -72,7 +72,11 @@ export class BimClashesController {
     @Body() updateClashDto: UpdateClashDto,
     @Request() req: any,
   ) {
-    return this.bimClashesService.update(id, req.user.company_id, updateClashDto);
+    return this.bimClashesService.update(
+      id,
+      req.user.company_id,
+      updateClashDto,
+    );
   }
 
   @Delete(':id')
@@ -87,6 +91,9 @@ export class BimClashesController {
 
   @Get('stats/summary')
   getClashSummary(@Request() req: any, @Query('projectId') projectId: string) {
-    return this.bimClashesService.getClashSummary(req.user.company_id, projectId);
+    return this.bimClashesService.getClashSummary(
+      req.user.company_id,
+      projectId,
+    );
   }
 }

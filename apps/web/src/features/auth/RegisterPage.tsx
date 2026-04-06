@@ -19,6 +19,7 @@ export function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +34,15 @@ export function RegisterPage() {
       });
 
       if (authError) throw authError;
+      
+      // Handle email confirmation required vs immediate login
+      if (authData.user && !authData.session) {
+        // Email confirmation required - show success message
+        setLoading(false);
+        setSuccessMessage('Revisa tu correo ' + email + ' para confirmar tu cuenta');
+        return;
+      }
+
       if (!authData.user || !authData.session) {
         throw new Error('No se pudo crear la sesión. Verifica tu correo si requiere confirmación.');
       }
@@ -113,6 +123,13 @@ export function RegisterPage() {
               <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-600 text-sm flex items-start gap-3">
                 <ShieldCheck size={18} className="shrink-0 mt-0.5" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-600 text-sm flex items-start gap-3">
+                <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
+                <span>{successMessage}</span>
               </div>
             )}
 

@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileUp, AlertCircle, CheckCircle2, Loader2, X } from 'lucide-react';
-import { uploadModel, downloadModelBuffer } from '../services/bimStorageService';
+import { uploadModel } from '../services/bimStorageService';
 import type { ProjectModel } from '../types';
 
 interface BimModelUploaderProps {
@@ -19,7 +19,6 @@ interface BimModelUploaderProps {
 }
 
 type UploadStatus = 'idle' | 'uploading' | 'extracting' | 'success' | 'error';
-type ProgressCallback = (progress: number, message: string) => void;
 
 export function BimModelUploader({
   projectId,
@@ -32,13 +31,6 @@ export function BimModelUploader({
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
-  const [_progress, setProgress] = useState<number>(0);
-  const [_progressMessage, setProgressMessage] = useState<string>('');
-
-  const handleProgress: ProgressCallback = (prog: number, message: string) => {
-    setProgress(prog);
-    setProgressMessage(message);
-  };
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -48,34 +40,18 @@ export function BimModelUploader({
       setFileName(file.name);
       setStatus('uploading');
       setErrorMessage('');
-      setProgress(0);
-      setProgressMessage('Subiendo archivo...');
 
       try {
         // Step 1: Upload file to storage
         const model = await uploadModel(file, projectId, companyId);
         setStatus('extracting');
-        setProgressMessage('Preparando extracción de datos...');
 
         // Step 2: Extract IFC data (deferred to viewer for heavy processing)
         if (extractData) {
-          handleProgress(20, 'Descargando modelo para extracción...');
-          
-          // Download the model buffer for extraction (placeholder for actual extraction)
-          await downloadModelBuffer(model.storage_path);
-          handleProgress(30, 'Inicializando parser IFC...');
-
-          // Note: Full extraction is deferred to the viewer component
-          // which has access to ThatOpen/FragmentsManager
-          // The extraction and ingestion will happen when the model is loaded
-          handleProgress(40, 'Datos del modelo registrados');
-          
           console.log('[BimModelUploader] IFC data extraction queued for model:', model.id);
         }
 
         setStatus('success');
-        setProgress(100);
-        setProgressMessage('¡Completado!');
         
         setTimeout(() => {
           onUploadSuccess(model);
