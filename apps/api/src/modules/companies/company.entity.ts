@@ -23,9 +23,6 @@ export class Company {
   @Column({ length: 100, nullable: true })
   country: string;
 
-  @Column({ length: 10, default: 'USD' })
-  currency: string;
-
   @Column({ length: 50, nullable: true })
   tax_id: string;
 
