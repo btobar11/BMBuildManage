@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/v1/(.*)", "destination": "https://bm-build-manage-api.vercel.app/api/v1/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
