@@ -34,17 +34,23 @@ export class PDFExportService {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', (err: Error) => reject(err));
 
-      // 1. HEADER
-      this.generateHeader(doc, company, logoBuffer);
+    // 1. HEADER
+    this.generateHeader(doc, company, logoBuffer);
 
-      // 2. PROJECT INFO
-      this.generateProjectInfo(doc, budget, projectName);
+    // 2. PROJECT INFO
+    this.generateProjectInfo(doc, budget, projectName);
 
-      // 3. BUDGET TABLE
-      this.generateBudgetTable(doc, budget);
+    // 3. FINANCIAL SUMMARY
+    this.generateFinancialSummary(doc, budget);
 
-      // 4. TERMS AND CONDITIONS
-      this.generateTerms(doc);
+    // 4. BUDGET TABLE
+    this.generateBudgetTable(doc, budget);
+
+    // 5. BREAKDOWN BY TYPE
+    this.generateBreakdownByType(doc, budget);
+
+    // 6. TERMS AND CONDITIONS
+    this.generateTerms(doc);
 
       // 5. SIGNATURE BLOCKS
       const clientName = (budget as any).project?.client?.name || 'Cliente';
@@ -108,6 +114,111 @@ export class PDFExportService {
       .text(`Fecha: ${new Date().toLocaleDateString('es-CL')}`, 50, 210)
       .text(`Versión: ${budget.version}`, 50, 225, { align: 'right' })
       .moveDown();
+  }
+
+  private generateFinancialSummary(doc: PDFKit.PDFDocument, budget: any) {
+    let y = 260;
+    
+    doc.fillColor('#1e3a5f').fontSize(12).font('Helvetica-Bold');
+    doc.text('RESUMEN FINANCIERO', 50, y);
+    y += 20;
+
+    const totalCost = Number(budget.total_estimated_cost) || 0;
+    const totalPrice = Number(budget.total_estimated_price) || 0;
+    const professionalFee = budget.professional_fee_percentage || 10;
+    const utility = budget.estimated_utility || 15;
+    const profit = totalPrice - totalCost;
+    const margin = totalPrice > 0 ? Math.round((profit / totalPrice) * 100) : 0;
+
+    const summaryData = [
+      { label: 'Costo Total Obra:', value: this.formatCurrency(totalCost) },
+      { label: 'Honorarios Profesionales:', value: `${professionalFee}%` },
+      { label: 'Margen Utilidad:', value: `${utility}%` },
+      { label: '', value: '' },
+      { label: 'PRECIO VENTA NETO:', value: this.formatCurrency(totalPrice), bold: true },
+      { label: 'Utilidad Proyecto:', value: this.formatCurrency(profit), highlight: margin < 20 },
+    ];
+
+    doc.font('Helvetica').fontSize(10).fillColor('#333333');
+    for (const row of summaryData) {
+      if (row.bold) {
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('#1e3a5f');
+      } else if (row.highlight) {
+        doc.font('Helvetica').fontSize(10).fillColor('#e74c3c');
+      } else {
+        doc.font('Helvetica').fontSize(10).fillColor('#333333');
+      }
+      doc.text(row.label, 50, y);
+      const valueX = row.bold ? 450 : 350;
+      doc.text(row.value, valueX, y, { align: 'right', width: 150 });
+      y += 15;
+    }
+
+    doc.font('Helvetica');
+  }
+
+  private generateBreakdownByType(doc: PDFKit.PDFDocument, budget: any) {
+    let y = (doc as any).y + 20;
+    if (y > 650) { doc.addPage(); y = 50; }
+
+    const stages = budget.stages || [];
+    const byType: Record<string, number> = { material: 0, labor: 0, machinery: 0, subcontract: 0 };
+    const costByType: Record<string, number> = { material: 0, labor: 0, machinery: 0, subcontract: 0 };
+
+    for (const stage of stages) {
+      for (const item of stage.items || []) {
+        const total = (item.quantity || 0) * (item.unit_price || 0);
+        const cost = (item.quantity || 0) * (item.unit_cost || item.unit_price || 0);
+        const type = item.item_type || 'material';
+        if (byType[type] !== undefined) {
+          byType[type] = (byType[type] || 0) + total;
+          costByType[type] = (costByType[type] || 0) + cost;
+        }
+      }
+    }
+
+    const typeLabels: Record<string, string> = {
+      material: 'Materiales',
+      labor: 'Mano de Obra',
+      machinery: 'Equipos',
+      subcontract: 'Subcontratos',
+    };
+
+    doc.fillColor('#1e3a5f').fontSize(11).font('Helvetica-Bold');
+    doc.text('RESUMEN POR TIPO', 50, y);
+    y += 20;
+
+    const total = Object.values(byType).reduce((a, b) => a + b, 0) || 1;
+
+    doc.font('Helvetica').fontSize(9).fillColor('#333333');
+    for (const [type, value] of Object.entries(byType)) {
+      const cost = costByType[type] || 0;
+      const profit = value - cost;
+      const percentage = Math.round((value / total) * 100);
+      const typeMargin = value > 0 ? Math.round((profit / value) * 100) : 0;
+
+      doc.fillColor('#1e3a5f').font('Helvetica-Bold');
+      doc.text(typeLabels[type] || type, 50, y);
+      doc.font('Helvetica');
+      doc.text(`${percentage}%`, 180, y, { width: 40, align: 'right' });
+      doc.text(this.formatCurrency(value), 280, y, { width: 80, align: 'right' });
+      doc.text(this.formatCurrency(profit), 380, y, { width: 70, align: 'right' });
+      doc.text(`${typeMargin}%`, 460, y, { width: 40, align: 'right' });
+      y += 14;
+    }
+
+    y += 5;
+    doc.lineCap('butt').moveTo(50, y).lineTo(550, y).stroke('#cccccc');
+    y += 15;
+
+    doc.font('Helvetica-Bold').fillColor('#1e3a5f');
+    doc.text('TOTAL', 50, y);
+    doc.text('100%', 180, y, { width: 40, align: 'right' });
+    doc.text(this.formatCurrency(total), 280, y, { width: 80, align: 'right' });
+    const totalProfit = Object.values(byType).reduce((a, b) => a + b, 0) - Object.values(costByType).reduce((a, b) => a + b, 0);
+    doc.text(this.formatCurrency(totalProfit), 380, y, { width: 70, align: 'right' });
+    const totalMargin = total > 0 ? Math.round((totalProfit / total) * 100) : 0;
+    doc.text(`${totalMargin}%`, 460, y, { width: 40, align: 'right' });
   }
 
   private generateBudgetTable(doc: PDFKit.PDFDocument, budget: any) {
