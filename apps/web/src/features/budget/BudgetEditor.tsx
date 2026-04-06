@@ -241,6 +241,7 @@ export default function BudgetEditor() {
         professionalFeePercentage: (serverBudget as any).professional_fee_percentage ?? 10,
         estimatedUtility: (serverBudget as any).estimated_utility ?? 15,
         markupPercentage: (serverBudget as any).markup_percentage ?? 20,
+        targetMargin: 25,
         location: serverBudget.project?.location || '',
         start_date: (serverBudget as any).project?.start_date || '',
         end_date: (serverBudget as any).project?.end_date || '',

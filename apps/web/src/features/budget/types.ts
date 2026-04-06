@@ -75,6 +75,7 @@ export interface Budget {
   estimatedUtility?: number;
   markupPercentage?: number;
   marginThreshold?: number;
+  targetMargin?: number;
   location?: string;
   start_date?: string;
   end_date?: string;
@@ -100,6 +101,7 @@ export interface FinancialSummary {
   executedValue: number;
   estimatedUtility?: number;
   professionalFeePercentage?: number;
+  targetMargin?: number;
 }
 
 export type BudgetTab = 'presupuesto' | 'gastos' | 'trabajadores' | 'documentos' | 'contingencias' | 'analisis' | 'bim' | 'cashflow';

@@ -9,7 +9,7 @@ import api from '../../../lib/api';
 interface Props {
   budget: Budget;
   financials: FinancialSummary;
-  onUpdate: (patch: Partial<Pick<Budget, 'projectName' | 'clientName' | 'clientPrice' | 'status' | 'professionalFeePercentage' | 'estimatedUtility' | 'markupPercentage' | 'location' | 'start_date' | 'end_date'>>) => void;
+  onUpdate: (patch: Partial<Pick<Budget, 'projectName' | 'clientName' | 'clientPrice' | 'status' | 'professionalFeePercentage' | 'estimatedUtility' | 'markupPercentage' | 'targetMargin' | 'location' | 'start_date' | 'end_date'>>) => void;
 }
 
 const STATUS_OPTIONS: { value: Budget['status']; label: string; color: string }[] = [
@@ -238,6 +238,22 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
               max="100"
             />
             <span className="text-xl font-black text-orange-400/80">%</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5 lowercase font-semibold text-cyan-400/80 italic">Meta Margen</p>
+          <div className="flex items-center gap-1">
+            <input
+              id="target-margin"
+              type="number"
+              value={budget.targetMargin ?? 25}
+              onChange={(e) => onUpdate({ targetMargin: Number(e.target.value) })}
+              className="text-xl font-black text-cyan-400/80 bg-transparent w-16 outline-none focus:ring-1 focus:ring-cyan-400 rounded px-1 transition-all"
+              min="0"
+              max="100"
+            />
+            <span className="text-xl font-black text-cyan-400/80">%</span>
           </div>
         </div>
 

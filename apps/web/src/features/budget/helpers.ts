@@ -51,6 +51,58 @@ export function calculateMarginFromPrice(clientPrice: number, totalCost: number)
   return Math.round(((clientPrice - totalCost) / clientPrice) * 100);
 }
 
+export function calculateMarkupFromMargin(marginPercentage: number): number {
+  if (marginPercentage >= 100) return 0;
+  if (marginPercentage <= 0) return 0;
+  return Math.round((marginPercentage / (100 - marginPercentage)) * 100);
+}
+
+export function calculateTargetMargin(
+  totalCost: number,
+  targetMarginPercentage: number,
+  professionalFeePercentage: number = DEFAULT_PROFESSIONAL_FEE_PERCENTAGE
+): {
+  requiredUtility: number;
+  clientPrice: number;
+  actualMargin: number;
+  breakdown: {
+    baseCost: number;
+    professionalFee: number;
+    targetUtility: number;
+    finalPrice: number;
+  };
+} {
+  const baseCost = totalCost;
+  const professionalFee = baseCost * (professionalFeePercentage / 100);
+  const subtotal = baseCost + professionalFee;
+  
+  const requiredUtility = (subtotal * targetMarginPercentage) / (100 - targetMarginPercentage);
+  const finalPrice = subtotal + requiredUtility;
+  const actualMargin = Math.round(((finalPrice - baseCost) / finalPrice) * 100);
+  
+  return {
+    requiredUtility: Math.round(requiredUtility),
+    clientPrice: Math.round(finalPrice),
+    actualMargin,
+    breakdown: {
+      baseCost: Math.round(baseCost),
+      professionalFee: Math.round(professionalFee),
+      targetUtility: Math.round(requiredUtility),
+      finalPrice: Math.round(finalPrice),
+    },
+  };
+}
+
+export function calculateRequiredMarkupForTargetMargin(
+  targetMarginPercentage: number,
+  professionalFeePercentage: number = DEFAULT_PROFESSIONAL_FEE_PERCENTAGE
+): number {
+  const factor = (100 - targetMarginPercentage) / 100;
+  const markupWithFee = (1 / factor) - 1;
+  const markupWithoutFee = (100 + professionalFeePercentage) / 100;
+  return Math.round((markupWithFee / markupWithoutFee - 1) * 100);
+}
+
 export function getMarkupFromMargin(margin: number): number {
   if (margin >= 100) return 0;
   return Math.round((margin / (100 - margin)) * 100);
@@ -91,6 +143,7 @@ export function calcFinancials(
 ): FinancialSummary {
   const professionalFeePercentage = budget.professionalFeePercentage ?? DEFAULT_PROFESSIONAL_FEE_PERCENTAGE;
   const utilityPercentage = budget.estimatedUtility ?? DEFAULT_UTILITY_PERCENTAGE;
+  const targetMargin = budget.targetMargin ?? 25;
   
   let estimatedCost = 0;
   let estimatedPrice = 0;
@@ -112,8 +165,18 @@ export function calcFinancials(
       executedValue += qe * up;
     });
   });
+
+  let autoClientPrice: number;
+  let calculatedUtility: number;
   
-  const autoClientPrice = calculateClientPrice(estimatedCost, professionalFeePercentage, utilityPercentage);
+  if (budget.targetMargin && budget.targetMargin > 0) {
+    const targetResult = calculateTargetMargin(estimatedCost, targetMargin, professionalFeePercentage);
+    autoClientPrice = targetResult.clientPrice;
+    calculatedUtility = targetResult.requiredUtility;
+  } else {
+    autoClientPrice = calculateClientPrice(estimatedCost, professionalFeePercentage, utilityPercentage);
+    calculatedUtility = utilityPercentage;
+  }
   
   const realExpenses = apiRealExpenses !== undefined ? apiRealExpenses : (budget.expenses?.reduce((s, e) => s + (e.amount || 0), 0) || 0);
   const workerPayments = apiWorkerPayments !== undefined ? apiWorkerPayments : (budget.workers?.reduce((s, w) => s + ((w as any).totalPaid || 0), 0) || 0);
@@ -142,7 +205,8 @@ export function calcFinancials(
     realMargin,
     variance,
     executedValue,
-    estimatedUtility: utilityPercentage,
+    estimatedUtility: calculatedUtility,
+    targetMargin: budget.targetMargin ?? 25,
   };
 }
 
