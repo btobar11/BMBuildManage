@@ -12,10 +12,15 @@ import { ResourcesPage } from './features/resources/ResourcesPage';
 import { WorkersPage } from './features/workers/WorkersPage';
 import { InvoicesPage } from './features/invoices/InvoicesPage';
 import { CompanySettingsPage } from './features/company/CompanySettingsPage';
+import { RfisPage } from './features/rfis/RfisPage';
+import { SubmittalsPage } from './features/submittals/SubmittalsPage';
+import { PunchListPage } from './features/punch-list/PunchListPage';
+import { SchedulePage } from './features/schedule/SchedulePage';
 import { MainLayout } from './components/layout/MainLayout';
 import { ConfigWarning } from './components/ConfigWarning';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AIAssistant } from './components/AIAssistant';
 
 function App() {
   const { token, isLoading, isConfigured } = useAuth();
@@ -61,6 +66,10 @@ function App() {
           element={isAuthenticated ? <MainLayout><BudgetEditor /></MainLayout> : <Navigate to="/login" />} 
         />
         <Route 
+          path="/budget/:id/schedule" 
+          element={isAuthenticated ? <MainLayout><SchedulePage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
           path="/budget/:id/field" 
           element={isAuthenticated ? <FieldViewPage /> : <Navigate to="/login" />} 
         />
@@ -81,6 +90,18 @@ function App() {
           element={isAuthenticated ? <MainLayout><InvoicesPage /></MainLayout> : <Navigate to="/login" />} 
         />
         <Route 
+          path="/rfis" 
+          element={isAuthenticated ? <MainLayout><RfisPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/submittals" 
+          element={isAuthenticated ? <MainLayout><SubmittalsPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/punch-list" 
+          element={isAuthenticated ? <MainLayout><PunchListPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
           path="/company-settings" 
           element={isAuthenticated ? <MainLayout><CompanySettingsPage /></MainLayout> : <Navigate to="/login" />} 
         />
@@ -90,6 +111,7 @@ function App() {
           element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" />} 
         />
       </Routes>
+      <AIAssistant />
     </ErrorBoundary>
   );
 }

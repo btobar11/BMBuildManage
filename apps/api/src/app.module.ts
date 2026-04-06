@@ -28,6 +28,12 @@ import { UnitsModule } from './modules/units/units.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { BimClashesModule } from './modules/bim-clashes/bim-clashes.module';
+import { RfisModule } from './modules/rfis/rfis.module';
+import { SubmittalsModule } from './modules/submittals/submittals.module';
+import { PunchListModule } from './modules/punch-list/punch-list.module';
+import { AIModule } from './modules/ai/ai.module';
+import { ScheduleModule } from './modules/schedule/schedule.module';
+import { SubcontractorsModule } from './modules/subcontractors/subcontractors.module';
 
 @Module({
   imports: [
@@ -74,6 +80,12 @@ import { BimClashesModule } from './modules/bim-clashes/bim-clashes.module';
     SeedModule,
     AuditLogsModule,
     BimClashesModule,
+    RfisModule,
+    SubmittalsModule,
+    PunchListModule,
+    AIModule,
+    ScheduleModule,
+    SubcontractorsModule,
     UsersModule,
   ],
   controllers: [AppController],
