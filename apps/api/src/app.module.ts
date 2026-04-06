@@ -34,6 +34,7 @@ import { PunchListModule } from './modules/punch-list/punch-list.module';
 import { AIModule } from './modules/ai/ai.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
 import { SubcontractorsModule } from './modules/subcontractors/subcontractors.module';
+import { BimModelsModule } from './modules/bim-models/bim-models.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { SubcontractorsModule } from './modules/subcontractors/subcontractors.mo
     AIModule,
     ScheduleModule,
     SubcontractorsModule,
+    BimModelsModule,
     UsersModule,
   ],
   controllers: [AppController],

@@ -16,6 +16,7 @@ import { RfisPage } from './features/rfis/RfisPage';
 import { SubmittalsPage } from './features/submittals/SubmittalsPage';
 import { PunchListPage } from './features/punch-list/PunchListPage';
 import { SchedulePage } from './features/schedule/SchedulePage';
+import { BimLibraryPage } from './features/bim/BimLibraryPage';
 import { MainLayout } from './components/layout/MainLayout';
 import { ConfigWarning } from './components/ConfigWarning';
 import { Toaster } from 'react-hot-toast';
@@ -100,6 +101,10 @@ function App() {
         <Route 
           path="/punch-list" 
           element={isAuthenticated ? <MainLayout><PunchListPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/bim" 
+          element={isAuthenticated ? <MainLayout><BimLibraryPage /></MainLayout> : <Navigate to="/login" />} 
         />
         <Route 
           path="/company-settings" 
