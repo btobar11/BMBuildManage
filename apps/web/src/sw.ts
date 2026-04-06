@@ -85,6 +85,25 @@ registerRoute(
   })
 );
 
+// 4.1 IFC FILES CACHE - CacheFirst for heavy files (save mobile data)
+registerRoute(
+  ({ url }) => 
+    url.pathname.includes('/storage/') && 
+    (url.pathname.endsWith('.ifc') || url.pathname.endsWith('.ifcxml')),
+  new CacheFirst({
+    cacheName: 'ifc-models-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days - persist for offline access
+      }),
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+    ],
+  })
+);
+
 // 5. MESSAGE HANDLERS
 self.addEventListener('message', async (event) => {
   if (event.data && event.data.type === 'GET_PENDING_COUNT') {
