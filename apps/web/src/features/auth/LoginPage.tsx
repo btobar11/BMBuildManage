@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, LayoutDashboard, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { BMLogo } from '../../components/ui/BMLogo';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ export function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img src="/logo-full.svg" alt="BMBuildManage" className="h-8 object-contain" />
+          <BMLogo variant="full" className="h-8" />
         </div>
 
         {/* Card */}

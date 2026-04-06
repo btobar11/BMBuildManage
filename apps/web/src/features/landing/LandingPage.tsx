@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { BMLogo } from '../../components/ui/BMLogo';
 import { 
   BarChart3, 
   HardHat, 
@@ -157,7 +158,7 @@ export function LandingPage() {
       }`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo-full.svg" alt="BMBuildManage" className="h-7 object-contain" />
+            <BMLogo variant="full" className="h-7" />
           </div>
           
           <div className="hidden md:flex items-center gap-8">

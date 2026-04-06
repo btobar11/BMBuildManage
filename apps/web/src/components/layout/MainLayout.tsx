@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { BMLogo } from '../ui/BMLogo';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -73,9 +74,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {/* Logo */}
         <div className="h-14 flex items-center justify-center border-b border-border px-4">
           {sidebarExpanded ? (
-            <img src="/logo-full.svg" alt="BMBuildManage" className="h-6 object-contain" />
+            <BMLogo variant="full" className="h-6" />
           ) : (
-            <img src="/logo-icon.svg" alt="BM" className="w-8 h-8 object-contain" />
+            <BMLogo variant="icon" className="h-8 w-8" />
           )}
         </div>
 
