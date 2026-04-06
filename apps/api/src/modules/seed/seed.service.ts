@@ -59,8 +59,6 @@ export class SeedService {
           tax_id: '76.123.456-7',
           phone: '+56 9 1234 5678',
           email: 'contacto@democonstructora.cl',
-          country: 'Chile',
-          currency: 'CLP',
         });
         await this.companyRepository.save(company);
       }

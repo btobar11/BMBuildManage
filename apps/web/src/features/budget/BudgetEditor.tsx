@@ -136,6 +136,8 @@ export default function BudgetEditor() {
             unit_cost: i.unit_cost || 0,
             unit_price: i.unit_price || 0,
             is_price_overridden: i.is_price_overridden || false,
+            item_type: i.item_type || 'material',
+            markup_percentage: i.markup_percentage,
             position: iIdx,
             apu_template_id: i.apu_template_id,
             cubication_mode: i.cubication_mode,
@@ -257,9 +259,11 @@ export default function BudgetEditor() {
             unit_price: Number(i.unit_price) || 0,
             unit_cost: Number(i.unit_cost) || 0,
             is_price_overridden: (i as any).is_price_overridden || false,
+            item_type: (i as any).item_type || 'material',
+            markup_percentage: (i as any).markup_percentage,
             total: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
             apu_template_id: i.apu_template_id,
-            cubication_mode: (i.cubication_mode as any) || 'manual',
+            cubication_mode: (i as any).cubication_mode || 'manual',
             dim_length: Number(i.dim_length) || 0,
             dim_width: Number(i.dim_width) || 0,
             dim_height: Number(i.dim_height) || 0,
@@ -357,7 +361,14 @@ export default function BudgetEditor() {
   };
 
   return (
-    <div className="h-full bg-background text-foreground">
+    <div className="h-full bg-background text-foreground relative">
+      {budget.status === 'draft' && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+          <div className="bg-amber-500/20 border-2 border-amber-500/50 rounded-full px-6 py-2">
+            <span className="text-amber-400 font-black text-lg tracking-widest uppercase">BORRADOR</span>
+          </div>
+        </div>
+      )}
       {/* Top nav */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-between gap-4">

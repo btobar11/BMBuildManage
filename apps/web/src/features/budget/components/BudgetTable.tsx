@@ -178,6 +178,32 @@ function StageSection({
 
   const columns = useMemo(() => [
     columnHelper.display({
+      id: 'itemType',
+      header: () => <div className="text-center">Tipo</div>,
+      cell: ({ row }) => {
+        const type = row.original.item_type || 'material';
+        const colors: Record<string, string> = {
+          material: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+          labor: 'bg-green-500/20 text-green-400 border-green-500/30',
+          machinery: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+          subcontract: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+        };
+        return (
+          <select
+            value={type}
+            onChange={(e) => onUpdateItem(row.original.id, { item_type: e.target.value as any })}
+            className={`text-[10px] font-bold px-1.5 py-0.5 rounded border cursor-pointer ${colors[type] || colors.material}`}
+          >
+            <option value="material">M</option>
+            <option value="labor">L</option>
+            <option value="machinery">E</option>
+            <option value="subcontract">S</option>
+          </select>
+        );
+      },
+      size: 40,
+    }),
+    columnHelper.display({
       id: 'expander',
       header: () => null,
       cell: ({ row }) => (

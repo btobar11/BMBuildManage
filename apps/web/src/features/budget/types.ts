@@ -6,11 +6,14 @@ export interface LineItem {
   unit_cost?: number;
   unit_price: number;
   cost_code?: string;
-  total?: number; // legacy alias for total_price
-  total_cost?: number; // quantity * unit_cost
-  total_price?: number; // quantity * unit_price
-  // APU & cubicacion
+  total?: number;
+  total_cost?: number;
+  total_price?: number;
+  
+  item_type?: 'material' | 'labor' | 'machinery' | 'subcontract';
+  
   apu_template_id?: string;
+  apu_components?: ApuComponent[];
   cubication_mode?: 'manual' | 'dimensions' | 'cad' | 'pdf' | 'bim';
   dim_length?: number;
   dim_width?: number;
@@ -21,13 +24,23 @@ export interface LineItem {
   formula?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   geometry_data?: any;
-  // BIM / IFC link
   ifc_global_id?: string;
-  // Ejecución real
   quantity_executed?: number;
   real_cost?: number;
-  // Modificaciones y sobreescritura de precio
   is_price_overridden?: boolean;
+  markup_percentage?: number;
+}
+
+export interface ApuComponent {
+  id: string;
+  name: string;
+  category: 'material' | 'labor' | 'machinery';
+  unit: string;
+  quantity: number;
+  unitCost: number;
+  unitPrice: number;
+  totalCost: number;
+  totalPrice: number;
 }
 
 export interface Stage {

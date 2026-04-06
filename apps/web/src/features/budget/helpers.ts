@@ -5,7 +5,21 @@ export const DEFAULT_MARKUP_PERCENTAGE = 20;
 export const DEFAULT_PROFESSIONAL_FEE_PERCENTAGE = 10;
 export const DEFAULT_UTILITY_PERCENTAGE = 15;
 
-export function calculateUnitPrice(unitCost: number, markupPercentage: number = DEFAULT_MARKUP_PERCENTAGE): number {
+export const DEFAULT_MARKUP_BY_ITEM_TYPE: Record<string, number> = {
+  material: 20,
+  labor: 30,
+  machinery: 25,
+  subcontract: 15,
+};
+
+export function calculateUnitPrice(
+  unitCost: number, 
+  markupPercentage: number = DEFAULT_MARKUP_PERCENTAGE,
+  itemType?: string
+): number {
+  if (itemType && DEFAULT_MARKUP_BY_ITEM_TYPE[itemType]) {
+    markupPercentage = DEFAULT_MARKUP_BY_ITEM_TYPE[itemType];
+  }
   return Math.round(unitCost * (1 + markupPercentage / 100));
 }
 
@@ -115,8 +129,10 @@ export function calcLineItem(item: Omit<LineItem, 'total' | 'total_cost' | 'tota
   const unit_cost = item.unit_cost || 0;
   let unit_price = item.unit_price || 0;
   
+  const markupByType = item.markup_percentage ?? DEFAULT_MARKUP_BY_ITEM_TYPE[item.item_type || ''] ?? DEFAULT_MARKUP_PERCENTAGE;
+  
   if (!item.is_price_overridden && unit_cost > 0 && unit_price === 0) {
-    unit_price = calculateUnitPrice(unit_cost);
+    unit_price = calculateUnitPrice(unit_cost, markupByType, item.item_type);
   }
   
   return { 
