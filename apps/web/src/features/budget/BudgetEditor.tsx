@@ -15,6 +15,7 @@ import type { BudgetTab } from './types';
 import { applyTemplate } from './templates';
 import type { Template } from './templates';
 import { SyncIndicatorInline } from '../../components/SyncIndicator';
+import { BMLogo } from '../../components/ui/BMLogo';
 import { ContingenciesTab } from './components/ContingenciesTab';
 import { AnalysisTab } from './components/AnalysisTab';
 import { AuditLogSidebar } from './components/AuditLogSidebar';
@@ -358,7 +359,7 @@ export default function BudgetEditor() {
         <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <div className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center pointer-events-none -ml-2">
-              <img src="/logo-icon.png" alt="BMBuildManage" className="h-full w-full object-contain scale-[1.25] mix-blend-multiply dark:mix-blend-normal" />
+              <BMLogo variant="icon" className="h-full w-full" />
             </div>
             <div className="hidden sm:block">
               <span className="font-black text-foreground text-lg tracking-tight">Editor</span>

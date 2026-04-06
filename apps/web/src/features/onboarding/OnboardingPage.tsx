@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOnboardingSeeding } from './onboarding.mutations';
+import { BMLogo } from '../../components/ui/BMLogo';
 import { 
   Building2, 
   Pickaxe, 
@@ -92,7 +93,7 @@ export function OnboardingPage() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <img src="/logo-full.svg" alt="BMBuildManage" className="h-8 object-contain" />
+          <BMLogo variant="full" className="h-8" />
         </div>
 
         {/* Progress */}

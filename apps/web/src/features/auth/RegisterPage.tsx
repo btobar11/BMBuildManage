@@ -113,7 +113,7 @@ export function RegisterPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
-            <img src="/logo-full.svg" alt="BMBuildManage" className="h-7 object-contain" />
+            <BMLogo variant="full" className="h-7" />
           </div>
 
           <div className="bg-card rounded-xl border border-border p-8 shadow-sm">

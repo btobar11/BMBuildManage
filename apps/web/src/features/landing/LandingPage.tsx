@@ -460,7 +460,7 @@ export function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/logo-full.png" alt="BMBuildManage" className="h-6 object-contain" />
+                <BMLogo variant="icon" className="h-6" />
               </div>
               <p className="text-sm text-muted-foreground">
                 El software de gestión de construcción más completo del mercado chileno.
