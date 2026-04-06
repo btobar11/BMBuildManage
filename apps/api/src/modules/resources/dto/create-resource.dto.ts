@@ -5,6 +5,7 @@ import {
   IsNumber,
   MaxLength,
   Min,
+  IsBoolean,
 } from 'class-validator';
 import { ResourceType } from '../resource.entity';
 
@@ -31,4 +32,8 @@ export class CreateResourceDto {
   @IsNumber()
   @Min(0)
   base_price: number;
+
+  @IsOptional()
+  @IsBoolean()
+  has_vat?: boolean;
 }

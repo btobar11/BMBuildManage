@@ -20,6 +20,7 @@ interface Resource {
   base_price: number;
   description?: string;
   category?: string;
+  has_vat?: boolean;
   company_id?: string | null;
   created_at: string;
 }
@@ -114,6 +115,7 @@ function ResourceForm({ initial, onSave, onCancel, isLoading, units }: ResourceF
     type: initial?.type ?? 'material' as ResourceType,
     unit_id: initial?.unit_id ?? '',
     base_price: initial?.base_price ?? 0,
+    has_vat: initial?.has_vat ?? false,
     description: initial?.description ?? '',
     category: initial?.category ?? '',
   });
@@ -200,14 +202,23 @@ function ResourceForm({ initial, onSave, onCancel, isLoading, units }: ResourceF
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block font-semibold uppercase tracking-wider">Precio (CLP)</label>
-            <input
-              type="number"
-              value={form.base_price || ''}
-              onChange={(e) => setForm({ ...form, base_price: parseFloat(e.target.value) || 0 })}
-              min={0}
-              required
-              className="w-full bg-muted border border-border/50 rounded-xl px-4 py-3 text-foreground text-sm outline-none focus:border-emerald-500/50"
-            />
+            <div className="flex bg-muted border border-border/50 rounded-xl overflow-hidden focus-within:border-emerald-500/50 focus-within:ring-2 focus-within:ring-emerald-500/10 transition-all">
+              <input
+                type="number"
+                value={form.base_price || ''}
+                onChange={(e) => setForm({ ...form, base_price: parseFloat(e.target.value) || 0 })}
+                min={0}
+                required
+                className="w-full bg-transparent px-4 py-3 text-foreground text-sm outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setForm(f => ({ ...f, has_vat: !f.has_vat }))}
+                className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-colors border-l border-border/50 ${form.has_vat ? 'bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20' : 'bg-transparent text-muted-foreground hover:bg-white/5'}`}
+              >
+                {form.has_vat ? 'Con IVA' : 'Sin IVA'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -537,7 +548,12 @@ export function ResourcesPage() {
                       <span className="text-emerald-400 font-bold tabular-nums">
                         {formatCLP(r.base_price)}
                       </span>
-                      <p className="text-[10px] opacity-40 uppercase">/ {r.unit?.symbol || 'un'}</p>
+                      <div className="flex items-center justify-end gap-1 mt-0.5">
+                        <span className={`text-[9px] font-black uppercase px-1 rounded ${r.has_vat ? 'bg-indigo-500/10 text-indigo-400' : 'bg-white/5 text-muted-foreground'}`}>
+                          {r.has_vat ? 'C/ IVA' : 'NETO'}
+                        </span>
+                        <span className="text-[10px] opacity-40 uppercase">/ {r.unit?.symbol || 'un'}</span>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">

@@ -1,0 +1,7 @@
+Error: null value in column "company_id" of relation "resources" violates not-null constraint
+Detail: Failing row contains (a840833a-bd86-4a81-b4f2-8f0554bd3845, null, Test Resource 1775445515560, null, 100.00, material, Test cat, 2026-04-06 03:18:35.485024+00, f, 2da2b80f-7904-4a1f-a7a4-adcac5a41b81, Test desc).
+Code: 23502
+Stack: error: null value in column "company_id" of relation "resources" violates not-null constraint
+    at C:\Users\benja\OneDrive\Escritorio\BMBuildManage\node_modules\pg\lib\client.js:631:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async run (C:\Users\benja\OneDrive\Escritorio\BMBuildManage\scripts\test_insert.js:18:5)

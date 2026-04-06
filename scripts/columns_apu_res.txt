@@ -1,0 +1,6 @@
+id: uuid
+apu_template_id: uuid
+resource_id: uuid
+quantity: numeric
+unit_cost: numeric
+created_at: timestamp with time zone

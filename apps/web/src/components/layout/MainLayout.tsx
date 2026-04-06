@@ -12,7 +12,10 @@ import {
   Bell,
   Moon,
   Sun,
-  Box
+  Box,
+  FileQuestion,
+  FileText,
+  ClipboardCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -23,6 +26,9 @@ interface MainLayoutProps {
 
 const NAV_ITEMS = [
   { label: 'Proyectos', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
+  { label: 'RFIs', icon: <FileQuestion size={20} />, path: '/rfis' },
+  { label: 'Submittals', icon: <FileText size={20} />, path: '/submittals' },
+  { label: 'Punch List', icon: <ClipboardCheck size={20} />, path: '/punch-list' },
   { label: 'Recursos', icon: <Package size={20} />, path: '/resources' },
   { label: 'APU', icon: <Calculator size={20} />, path: '/apu-library' },
   { label: 'Modelos BIM', icon: <Box size={20} />, path: '/bim' },

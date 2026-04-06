@@ -49,6 +49,9 @@ export class Resource {
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   base_price: number;
 
+  @Column({ type: 'boolean', default: false })
+  has_vat: boolean;
+
   @OneToMany(() => ResourcePriceHistory, (h) => h.resource, { cascade: false })
   price_history: ResourcePriceHistory[];
 
