@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://sfzkrnfyfwonxyceugya.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmemtybmZ5Zndvbnh5Y2V1Z3lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjE5MDcsImV4cCI6MjA4ODk5NzkwN30.4AAIwrvdA1LK5w-mDDqvmr_EVzfJ502j6nJ2JT3xjeg';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmemtybmZ5Zndvbnh5Y2V1Z3lhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzQyMTkwNywiZXhwIjoyMDg4OTk3OTA3fQ.4MZdd_SOgzPCuvNfx49AswALEkPifrTZUL3OWYpybOo';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function seed() {
-  console.log('🌱 Starting seed...');
+  console.log('🌱 Starting seed with service role...');
 
   const companyId = '00000000-0000-0000-0000-000000000001';
   const userId = '00000000-0000-0000-0000-000000000001';
@@ -30,7 +30,7 @@ async function seed() {
     name: 'Usuario Demo',
     company_id: companyId,
     role: 'admin',
-  }, { onConflict: 'id' });
+  });
 
   console.log('🏢 Creating client...');
   await supabase.from('clients').upsert({
@@ -41,7 +41,7 @@ async function seed() {
     email: 'jperez@horizonte.com',
     phone: '+58 212 555 5678',
     address: 'Torre Business, Piso 15, Caracas',
-  }, { onConflict: 'id' });
+  });
 
   console.log('🏗️ Creating project...');
   await supabase.from('projects').upsert({
@@ -49,7 +49,7 @@ async function seed() {
     company_id: companyId,
     client_id: clientId,
     name: 'Edificio Residencial Torres del Parque',
-    description: 'Proyecto de construcción de edificio residencial de 20 pisos con 120 apartamentos, zonas comunes y áreas de estacionamiento.',
+    description: 'Proyecto de construcción de edificio residencial de 20 pisos.',
     location: 'Av. Libertador, Caracas',
     type: 'residential',
     status: 'in_progress',
@@ -57,7 +57,7 @@ async function seed() {
     end_date: '2026-06-30',
     estimated_budget: 4500000,
     estimated_price: 5800000,
-  }, { onConflict: 'id' });
+  });
 
   console.log('💰 Creating budget...');
   await supabase.from('budgets').upsert({
@@ -68,8 +68,7 @@ async function seed() {
     is_active: true,
     total_estimated_cost: 4200000,
     total_estimated_price: 5800000,
-    notes: 'Presupuesto inicial aprobado',
-  }, { onConflict: 'id' });
+  });
 
   const stages = [
     { name: 'Cimentación', position: 1, total_cost: 450000, total_price: 600000 },
@@ -93,7 +92,7 @@ async function seed() {
       position: stage.position,
       total_cost: stage.total_cost,
       total_price: stage.total_price,
-    }, { onConflict: 'id' });
+    });
 
     const items = getItemsForStage(i);
     for (let j = 0; j < items.length; j++) {
@@ -109,7 +108,7 @@ async function seed() {
         unit_cost: item.unit_cost,
         unit_price: item.unit_price,
         position: j,
-      }, { onConflict: 'id' });
+      });
     }
   }
 
@@ -128,7 +127,6 @@ async function seed() {
   for (let i = 0; i < workers.length; i++) {
     const w = workers[i];
     const workerId = `00000000-0000-0000-3000-${String(i).padStart(10, '0')}`;
-    
     await supabase.from('workers').upsert({
       id: workerId,
       company_id: companyId,
@@ -136,28 +134,7 @@ async function seed() {
       role: w.role,
       daily_rate: w.daily_rate,
       rating: w.rating,
-      phone: `+58 412 ${String(Math.floor(Math.random() * 9000000)).padStart(7, '0')}`,
-    }, { onConflict: 'id' });
-  }
-
-  console.log('📄 Creating documents...');
-  const docs = [
-    { name: 'Planos Arquitectura', type: 'drawing' },
-    { name: 'Planos Estructurales', type: 'drawing' },
-    { name: 'Memoria Descriptiva', type: 'document' },
-    { name: 'Especificaciones Técnicas', type: 'document' },
-    { name: 'Presupuesto Detallado', type: 'spreadsheet' },
-  ];
-
-  for (let i = 0; i < docs.length; i++) {
-    const d = docs[i];
-    await supabase.from('documents').upsert({
-      id: `00000000-0000-0000-4000-${String(i).padStart(10, '0')}`,
-      project_id: projectId,
-      name: d.name,
-      type: d.type,
-      file_url: 'https://example.com/demo.pdf',
-    }, { onConflict: 'id' });
+    });
   }
 
   console.log('📝 Creating RFIs...');
@@ -176,8 +153,7 @@ async function seed() {
       status: r.status,
       priority: r.priority,
       question: `Se requiere aclaración sobre: ${r.title}`,
-      answer: i === 1 ? 'Ya está detallado en el plano E-204' : null,
-    }, { onConflict: 'id' });
+    });
   }
 
   console.log('📤 Creating submittals...');
@@ -195,7 +171,7 @@ async function seed() {
       title: s.title,
       status: s.status,
       spec_section: s.spec_section,
-    }, { onConflict: 'id' });
+    });
   }
 
   console.log('✅ Creating punch list items...');
@@ -213,7 +189,7 @@ async function seed() {
       title: p.title,
       status: p.status,
       location: p.location,
-    }, { onConflict: 'id' });
+    });
   }
 
   console.log('📅 Creating schedule tasks...');
@@ -239,7 +215,7 @@ async function seed() {
       priority: t.progress > 50 ? 'high' : 'medium',
       duration: 30,
       position: i,
-    }, { onConflict: 'id' });
+    });
   }
 
   console.log('💵 Creating expenses...');
@@ -259,8 +235,7 @@ async function seed() {
       description: e.description,
       amount: e.amount,
       category: e.category,
-      date: '2025-03-15',
-    }, { onConflict: 'id' });
+    });
   }
 
   console.log('🏢 Creating subcontractors...');
@@ -280,26 +255,33 @@ async function seed() {
       trade: s.trade,
       contract_value: s.contract_value,
       status: 'active',
-    }, { onConflict: 'id' });
+    });
   }
 
-  console.log('✅ Seed completed successfully!');
+  // Create auth user
+  console.log('👤 Creating auth user...');
+  try {
+    const { error: authError } = await supabase.auth.admin.createUser({
+      email: 'demo@bmbuildmanage.com',
+      password: 'demo123456',
+      email_confirm: true,
+      user_metadata: { name: 'Usuario Demo' }
+    });
+    
+    if (authError && !authError.message.includes('already')) {
+      console.log('Auth error:', authError.message);
+    } else {
+      console.log('✅ Auth user created or already exists');
+    }
+  } catch (e) {
+    console.log('Auth creation skipped');
+  }
+
+  console.log('✅ Seed completed!');
   console.log('');
-  console.log('📌 Datos de prueba creados:');
-  console.log('- Empresa: Constructora Demo C.A.');
-  console.log('- Cliente: Inmobiliaria Horizonte C.A.');
-  console.log('- Proyecto: Edificio Residencial Torres del Parque');
-  console.log('- Presupuesto con 7 etapas y ~30 items');
-  console.log('- 8 trabajadores');
-  console.log('- 5 documentos');
-  console.log('- 3 RFIs, 3 Submittals, 3 Punch Items');
-  console.log('- 6 tareas de cronograma');
-  console.log('- 5 gastos registrados');
-  console.log('- 4 subcontratistas');
-  console.log('');
-  console.log('🔐 Credenciales de prueba:');
+  console.log('📝 Credenciales de acceso:');
   console.log('Email: demo@bmbuildmanage.com');
-  console.log('Password: demopassword123');
+  console.log('Password: demo123456');
 }
 
 function getItemsForStage(stageIndex: number): any[] {
@@ -335,7 +317,7 @@ function getItemsForStage(stageIndex: number): any[] {
     ],
     [
       { name: 'Piso porcelánico', quantity: 4500, unit: 'm2', unit_cost: 45, unit_price: 62 },
-      { name: 'Pintura Walls', quantity: 8200, unit: 'm2', unit_cost: 8, unit_price: 12 },
+      { name: 'Pintura', quantity: 8200, unit: 'm2', unit_cost: 8, unit_price: 12 },
       { name: 'Cerámica baños', quantity: 1450, unit: 'm2', unit_cost: 38, unit_price: 52 },
       { name: 'Ventanas aluminio', quantity: 185, unit: 'und', unit_cost: 850, unit_price: 1150 },
     ],
@@ -345,8 +327,7 @@ function getItemsForStage(stageIndex: number): any[] {
       { name: 'Elevadores', quantity: 4, unit: 'und', unit_cost: 85000, unit_price: 115000 },
     ],
   ];
-
   return itemsByStage[stageIndex] || [];
 }
 
-seed().catch(console.error);
+seed();
