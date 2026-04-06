@@ -20,7 +20,7 @@ import { MainLayout } from './components/layout/MainLayout';
 import { ConfigWarning } from './components/ConfigWarning';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { AIAssistant } from './components/AIAssistant';
+import { VectorAI } from './components/AIAssistant';
 
 function App() {
   const { token, isLoading, isConfigured } = useAuth();
@@ -111,7 +111,7 @@ function App() {
           element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" />} 
         />
       </Routes>
-      <AIAssistant />
+      <VectorAI />
     </ErrorBoundary>
   );
 }

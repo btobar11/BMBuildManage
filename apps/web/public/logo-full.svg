@@ -1,43 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" fill="none">
   <defs>
-    <linearGradient id="gradTop" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10B981"/>
-      <stop offset="100%" stop-color="#059669"/>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#A855F7"/>
     </linearGradient>
-    <linearGradient id="gradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#059669"/>
-      <stop offset="100%" stop-color="#047857"/>
+    <linearGradient id="secondaryGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
     </linearGradient>
-    <linearGradient id="gradRight" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34D399"/>
-      <stop offset="100%" stop-color="#10B981"/>
+    <linearGradient id="accentGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#F472B6"/>
     </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- Icono - Cubo isométrico moderno -->
-  <g transform="translate(8, 8)">
-    <!-- Cara superior -->
-    <path d="M32 4 L56 18 L32 32 L8 18 Z" fill="url(#gradTop)" stroke="none"/>
-    <path d="M32 4 L56 18 L32 32 L8 18 Z" stroke="#065F46" stroke-width="0.5" stroke-opacity="0.3"/>
+  <!-- Icono principal -->
+  <g transform="translate(50, 50)" filter="url(#glow)">
+    <!-- Building base -->
+    <path d="M-24 16 L-24 -6 Q-24 -16 -14 -16 L14 -16 Q24 -16 24 -6 L24 16 L24 28 L-24 28 Z" fill="url(#secondaryGrad)"/>
     
-    <!-- Cara izquierda -->
-    <path d="M8 18 L32 32 L32 60 L8 46 Z" fill="url(#gradLeft)" stroke="none"/>
-    <path d="M8 18 L32 32 L32 60 L8 46 Z" stroke="#065F46" stroke-width="0.5" stroke-opacity="0.3"/>
+    <!-- Windows -->
+    <rect x="-18" y="-8" width="7" height="9" rx="1" fill="#E0E7FF" opacity="0.9"/>
+    <rect x="-5" y="-8" width="7" height="9" rx="1" fill="#E0E7FF" opacity="0.9"/>
+    <rect x="8" y="-8" width="7" height="9" rx="1" fill="#E0E7FF" opacity="0.9"/>
+    <rect x="-18" y="6" width="7" height="9" rx="1" fill="#E0E7FF" opacity="0.7"/>
+    <rect x="-5" y="6" width="7" height="9" rx="1" fill="#E0E7FF" opacity="0.7"/>
+    <rect x="8" y="6" width="7" height="9" rx="1" fill="#E0E7FF" opacity="0.7"/>
     
-    <!-- Cara derecha -->
-    <path d="M32 32 L56 18 L56 46 L32 60 Z" fill="url(#gradRight)" stroke="none"/>
-    <path d="M32 32 L56 18 L56 46 L32 60 Z" stroke="#065F46" stroke-width="0.5" stroke-opacity="0.3"/>
+    <!-- Accent top -->
+    <path d="M-14 -22 L-14 -16 L14 -16 L14 -22 Q14 -26 10 -26 L-10 -26 Q-14 -26 -14 -22" fill="url(#accentGrad)"/>
     
-    <!-- Líneas decorativas - Construcción -->
-    <path d="M20 24 L20 40" stroke="#ECFDF5" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M44 24 L44 40" stroke="#ECFDF5" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M20 24 L32 18" stroke="#ECFDF5" stroke-width="1" stroke-linecap="round"/>
-    <path d="M44 24 L32 18" stroke="#ECFDF5" stroke-width="1" stroke-linecap="round"/>
-    <path d="M20 40 L32 46" stroke="#ECFDF5" stroke-width="1" stroke-linecap="round"/>
-    <path d="M44 40 L32 46" stroke="#ECFDF5" stroke-width="1" stroke-linecap="round"/>
+    <!-- Roof -->
+    <path d="M-7 -26 L0 -32 L7 -26" stroke="#F472B6" stroke-width="2" stroke-linecap="round" fill="none"/>
+    
+    <!-- Ground -->
+    <path d="M-30 28 L30 28" stroke="#E0E7FF" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
   </g>
   
-  <!-- Texto principal -->
-  <text x="78" y="38" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="700" font-size="28" fill="#0F172A" letter-spacing="-0.5">BM</text>
-  <text x="78" y="56" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="600" font-size="11" fill="#64748B" letter-spacing="3">BUILD MANAGE</text>
+  <!-- Texto BM -->
+  <text x="115" y="45" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="800" font-size="42" fill="#0F172A" letter-spacing="-1">BM</text>
+  <text x="115" y="65" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="700" font-size="14" fill="#6366F1" letter-spacing="5" letter-spacing="4">BUILD MANAGE</text>
+  
+  <!-- Tagline -->
+  <text x="290" y="58" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="500" font-size="11" fill="#94A3B8" letter-spacing="1">Construction Intelligence</text>
 </svg>

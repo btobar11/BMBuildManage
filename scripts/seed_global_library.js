@@ -149,8 +149,8 @@ async function run() {
       } else {
         apuId = crypto.randomUUID();
         await client.query(`
-          INSERT INTO apu_templates (id, name, unit_id, description, category, company_id)
-          VALUES ($1, $2, $3, $4, $5, NULL)
+          INSERT INTO apu_templates (id, name, unit_id, description, category, company_id, is_global)
+          VALUES ($1, $2, $3, $4, $5, NULL, true)
         `, [apuId, apu.name, apu.unit_id, apu.description, apu.category]);
         console.log(`Inserted APU ${apu.name}`);
       }

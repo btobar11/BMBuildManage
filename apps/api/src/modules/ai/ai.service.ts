@@ -76,13 +76,21 @@ export class AIService {
     const normalizedQuery = query.toLowerCase().trim();
     
     const intentPatterns = [
-      { pattern: /^(estado|situación|cómo va|progreso)/i, intent: 'projectStatus' },
-      { pattern: /^(presupuesto|costo|gasto|cuánto)/i, intent: 'budget' },
-      { pattern: /^(retraso|demora|atrasado|cuando)/i, intent: 'schedule' },
-      { pattern: /^(trabajador|trabajadores|personal|equipo|obreros)/i, intent: 'workers' },
-      { pattern: /^(recomienda|sugiere|qué hacer|ayúdame|consejo)/i, intent: 'recommendation' },
-      { pattern: /^(pronóstico|predice|pronostica|estimado|predecir)/i, intent: 'prediction' },
-      { pattern: /^(comparar|comparación|vs|versus)/i, intent: 'comparison' },
+      { pattern: /^(estado|situación|cómo va|progreso|resumen)/i, intent: 'projectStatus' },
+      { pattern: /^(presupuesto|costo|gasto|cuánto|precio|valor)/i, intent: 'budget' },
+      { pattern: /^(retraso|demora|atrasado|cuando|plazo|cronograma)/i, intent: 'schedule' },
+      { pattern: /^(trabajador|trabajadores|personal|equipo|obreros|workers)/i, intent: 'workers' },
+      { pattern: /^(recomienda|sugiere|qué hacer|ayúdame|consejo|建议)/i, intent: 'recommendation' },
+      { pattern: /^(pronóstico|predice|pronostica|estimado|predecir|previsión)/i, intent: 'prediction' },
+      { pattern: /^(comparar|comparación|vs|versus|vs\.|diferencia)/i, intent: 'comparison' },
+      { pattern: /^(gasto|gastos|expense|expenses)/i, intent: 'expenses' },
+      { pattern: /^(documento|documentos|archivo|files)/i, intent: 'documents' },
+      { pattern: /^(rfi|submittal|punch|qc|quality)/i, intent: 'quality' },
+      { pattern: /^(cuál|cules|que es|qué es|explain|explica)/i, intent: 'explain' },
+      { pattern: /^(optimiz|mejora|eficiente|mejorar)/i, intent: 'optimization' },
+      { pattern: /^(reporte|reporte|report|resumen|summary)/i, intent: 'report' },
+      { pattern: /^(ayuda|help|comandos|commands|qué puedes)/i, intent: 'help' },
+      { pattern: /^(hola|buenos|hi|hello)/i, intent: 'greeting' },
     ];
 
     let detectedIntent = 'general';

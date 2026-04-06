@@ -1,21 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" fill="none">
-  <!-- Isotipo Cubo Isométrico B/M (mini) -->
-  <g transform="translate(2, 2)">
-    <!-- Cara superior -->
-    <path d="M14 0 L28 8.66 L14 17.32 L0 8.66 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
-    
-    <!-- Cara izquierda -->
-    <path d="M0 8.66 L14 17.32 L14 34.64 L0 25.98 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
-    
-    <!-- Cara derecha -->
-    <path d="M14 17.32 L28 8.66 L28 25.98 L14 34.64 Z" stroke="#10B981" stroke-width="1.5" fill="none"/>
-    
-    <!-- Líneas internas B/M -->
-    <path d="M14 8.66 L14 34.64" stroke="#10B981" stroke-width="1"/>
-    <path d="M7 12.99 L7 21.65" stroke="#10B981" stroke-width="1"/>
-    <path d="M21 12.99 L21 21.65" stroke="#10B981" stroke-width="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 36" fill="none">
+  <defs>
+    <linearGradient id="sidebarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Icono -->
+  <g transform="translate(8, 4)">
+    <path d="M-8 4 L-8 -4 Q-8 -10 -3 -10 L3 -10 Q8 -10 8 -4 L8 4 L8 12 L-8 12 Z" fill="url(#sidebarGrad)"/>
+    <rect x="-5" y="-6" width="3" height="4" rx="0.5" fill="#E0E7FF" opacity="0.9"/>
+    <rect x="0" y="-6" width="3" height="4" rx="0.5" fill="#E0E7FF" opacity="0.9"/>
+    <rect x="-5" y="0" width="3" height="4" rx="0.5" fill="#E0E7FF" opacity="0.7"/>
+    <rect x="0" y="0" width="3" height="4" rx="0.5" fill="#E0E7FF" opacity="0.7"/>
+    <path d="M-3 -12 L0 -15 L3 -12" stroke="#F472B6" stroke-width="1.5" stroke-linecap="round" fill="none"/>
   </g>
   
-  <!-- Texto BM -->
-  <text x="38" y="22" font-family="Inter, sans-serif" font-weight="700" font-size="16" fill="#ffffff">BM</text>
+  <!-- Texto -->
+  <text x="35" y="22" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="700" font-size="18" fill="#F8FAFC" letter-spacing="-0.5">BM</text>
+  <text x="68" y="22" font-family="system-ui, -apple-system, Inter, sans-serif" font-weight="500" font-size="9" fill="#A855F7" letter-spacing="2">BUILD</text>
 </svg>
