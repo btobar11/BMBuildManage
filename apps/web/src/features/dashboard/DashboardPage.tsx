@@ -137,14 +137,15 @@ export const DashboardPage = () => {
 
   const filteredProjects = projects?.filter((p: Project) => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         (p.location?.toLowerCase().includes(searchQuery.toLowerCase()));
+                         (p.location?.toLowerCase()?.includes(searchQuery.toLowerCase()) ?? false);
     return matchesSearch;
   });
 
   const totalBudget = projects?.reduce((acc: number, p: Project) => acc + (p.estimated_budget || 0), 0) || 0;
 
   return (
-    <div className="space-y-6 animate-fade-up">
+    <>
+      <div className="space-y-6 animate-fade-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -308,6 +309,7 @@ export const DashboardPage = () => {
           </div>
         </div>
       )}
+      </div>
 
       <CreateProjectModal 
         isOpen={isCreateModalOpen} 
@@ -340,6 +342,6 @@ export const DashboardPage = () => {
         placeholder="Mi Carpeta"
         submitText="Mover"
       />
-    </div>
+    </>
   );
 };

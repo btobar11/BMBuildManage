@@ -70,6 +70,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          // If we have a real session, clean up any ghost dev tokens
+          localStorage.removeItem('DEV_TOKEN');
+          setToken(session.access_token);
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata.name || session.user.email?.split('@')[0] || 'Usuario',
+            role: session.user.user_metadata.role || 'manager',
+            company_id: session.user.user_metadata.company_id
+          });
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
+      }
+
+      // Fallback to dev token ONLY if no real session exists
       const devToken = localStorage.getItem('DEV_TOKEN');
       if (devToken) {
         setToken(devToken);
@@ -80,24 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: 'admin',
           company_id: '77777777-7777-7777-7777-777777777777'
         });
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setToken(session.access_token);
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            name: session.user.user_metadata.name || session.user.email?.split('@')[0] || 'Usuario',
-            role: session.user.user_metadata.role || 'manager',
-            company_id: session.user.user_metadata.company_id
-          });
-        }
-      } catch (error) {
-        console.error('Auth error:', error);
       }
       setIsLoading(false);
     };
