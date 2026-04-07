@@ -236,4 +236,37 @@ export class BudgetsService {
     await this.budgetRepository.remove(budget);
     return { deleted: true };
   }
+
+  async bulkCreateItems(
+    budgetId: string,
+    items: Array<{
+      stage_id: string;
+      name: string;
+      quantity: number;
+      unit: string;
+      unit_cost: number;
+      unit_price: number;
+      position: number;
+    }>,
+  ) {
+    const budget = await this.findOne(budgetId);
+
+    const newItems = items.map((item) => {
+      const newItem = new Item();
+      newItem.stage_id = item.stage_id;
+      newItem.name = item.name;
+      newItem.quantity = item.quantity;
+      newItem.unit = item.unit;
+      newItem.unit_cost = item.unit_cost;
+      newItem.unit_price = item.unit_price;
+      newItem.position = item.position;
+      return newItem;
+    });
+
+    const savedItems = await this.itemRepository.save(newItems);
+
+    await this.financialService.calculateBudgetTotals(budget);
+
+    return { created: savedItems.length, items: savedItems };
+  }
 }

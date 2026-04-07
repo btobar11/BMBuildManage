@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { SubcontractorsService } from './subcontractors.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -29,7 +38,10 @@ export class SubcontractorsController {
   }
 
   @Post('project/:projectId/contracts')
-  async createContract(@Param('projectId') projectId: string, @Body() dto: any) {
+  async createContract(
+    @Param('projectId') projectId: string,
+    @Body() dto: any,
+  ) {
     return this.service.createContract(projectId, dto);
   }
 
@@ -39,7 +51,10 @@ export class SubcontractorsController {
   }
 
   @Post('contracts/:contractId/payments')
-  async createPayment(@Param('contractId') contractId: string, @Body() dto: any) {
+  async createPayment(
+    @Param('contractId') contractId: string,
+    @Body() dto: any,
+  ) {
     return this.service.createPayment(contractId, dto);
   }
 

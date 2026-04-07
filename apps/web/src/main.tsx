@@ -1,11 +1,3 @@
-/**
- * BM Build Manage - PWA Entry Point
- * Configured for offline-first architecture with:
- * - React Query persistence to localStorage
- * - Extended cache times for field work
- * - Service Worker registration (manual)
- */
-
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -15,10 +7,9 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { compress, decompress } from 'lz-string'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { NotificationsProvider } from './context/NotificationsContext'
 import './index.css'
 import App from './App'
-
-console.log('MAIN.TSX STARTING WITH OFFLINE-FIRST CONFIGURATION');
 
 // ============================================
 // QUERY CLIENT CONFIGURATION
@@ -26,39 +17,21 @@ console.log('MAIN.TSX STARTING WITH OFFLINE-FIRST CONFIGURATION');
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Extended stale time: 5 minutes before considering data stale
-      // Critical for field work where connection is intermittent
       staleTime: 5 * 60 * 1000,
-
-      // Extended garbage collection: 24 hours
-      // Prevents cached data from being removed too quickly
       gcTime: 24 * 60 * 60 * 1000,
-
-      // Retry configuration for unstable connections
       retry: (failureCount, error) => {
-        // Don't retry on 4xx errors (client errors)
         if (error instanceof Error) {
           const status = (error as unknown as { status?: number }).status;
           if (status && status >= 400 && status < 500) return false;
         }
-        // Retry up to 3 times for network errors
         return failureCount < 3;
       },
-
-      // Exponential backoff for retries
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-
-      // Refetch on window focus only when online
       refetchOnWindowFocus: 'always',
-
-      // Refetch on reconnect
       refetchOnReconnect: true,
-
-      // Network mode: always try to fetch, fallback to cache
       networkMode: 'offlineFirst',
     },
     mutations: {
-      // Retry mutations once (for transient network issues)
       retry: 1,
       retryDelay: 1000,
     },
@@ -71,23 +44,20 @@ const queryClient = new QueryClient({
 const localStoragePersister = createAsyncStoragePersister({
   storage: window.localStorage,
   key: 'BM_QUERY_CACHE',
-
-  // Compression for large datasets (budgets with many items)
   serialize: (data) => compress(JSON.stringify(data)) ?? '',
   deserialize: (data) => {
     try {
       if (!data || typeof data !== 'string') return {};
       const decompressed = decompress(data);
       return decompressed ? JSON.parse(decompressed) : {};
-    } catch (e) {
-      console.error('[Persistence] Deserialization failed:', e);
+    } catch {
       return {};
     }
   },
 });
 
 // ============================================
-// SERVICE WORKER REGISTRATION (Manual)
+// SERVICE WORKER REGISTRATION
 // ============================================
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -96,29 +66,22 @@ async function registerServiceWorker() {
         scope: '/',
       });
 
-      console.log('[SW] Service Worker registered:', registration.scope);
-
-      // Handle updates
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[SW] New version available');
-              // Auto-activate for seamless updates
               newWorker.postMessage({ type: 'SKIP_WAITING' });
             }
           });
         }
       });
 
-      // Check for pending mutations on load
       if (registration.active) {
         registration.active.postMessage({ type: 'GET_PENDING_COUNT' });
       }
-
-    } catch (error) {
-      console.warn('[SW] Registration failed (expected in development):', error);
+    } catch {
+      // Service worker unavailable in this environment
     }
   }
 }
@@ -129,8 +92,6 @@ async function registerServiceWorker() {
 function setupNetworkTracking() {
   const updateNetworkStatus = () => {
     document.documentElement.classList.toggle('offline', !navigator.onLine);
-
-    // Dispatch custom event for components to listen
     window.dispatchEvent(new CustomEvent('network-change', {
       detail: { online: navigator.onLine }
     }));
@@ -138,8 +99,6 @@ function setupNetworkTracking() {
 
   window.addEventListener('online', updateNetworkStatus);
   window.addEventListener('offline', updateNetworkStatus);
-
-  // Initial state
   updateNetworkStatus();
 }
 
@@ -148,11 +107,8 @@ function setupNetworkTracking() {
 // ============================================
 try {
   setupNetworkTracking();
-
-  // Register Service Worker
   registerServiceWorker();
 
-  // Render app with persistence
   const container = document.getElementById('root');
   if (!container) throw new Error('Root element not found');
 
@@ -171,22 +127,20 @@ try {
       >
         <AuthProvider>
           <ThemeProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
+            <NotificationsProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </NotificationsProvider>
           </ThemeProvider>
         </AuthProvider>
       </PersistQueryClientProvider>
     </StrictMode>
   );
 
-  // Signal that app is ready to hide skeleton
   window.dispatchEvent(new CustomEvent('app-ready'));
-  console.log('[Main] App initialization complete');
 
-} catch (error) {
-  console.error('[Main] CRITICAL INITIALIZATION ERROR:', error);
-  // Emergency: Hide skeleton so user can see ErrorBoundary (if it loaded) or console
+} catch {
   window.dispatchEvent(new CustomEvent('app-ready'));
 }
 

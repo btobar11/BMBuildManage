@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.3",
     "@supabase/supabase-js": "^2.99.1",
     "@tanstack/query-async-storage-persister": "^5.90.21",
     "@tanstack/react-query": "^5.90.21",
@@ -26,6 +27,7 @@
     "dxf-parser": "^1.1.2",
     "expr-eval": "^2.0.2",
     "fabric": "^7.2.0",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.577.0",
     "lz-string": "^1.5.0",
     "nanoid": "^5.1.6",
@@ -38,7 +40,8 @@
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2",
     "web-ifc": "^0.0.77",
-    "workbox-window": "^7.4.0"
+    "workbox-window": "^7.4.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

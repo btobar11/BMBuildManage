@@ -26,7 +26,9 @@ export class BimModelsService {
   }
 
   async deleteModel(modelId: string) {
-    const model = await this.modelRepository.findOne({ where: { id: modelId } });
+    const model = await this.modelRepository.findOne({
+      where: { id: modelId },
+    });
     if (!model) throw new NotFoundException('Modelo no encontrado');
     await this.modelRepository.remove(model);
     return { success: true };

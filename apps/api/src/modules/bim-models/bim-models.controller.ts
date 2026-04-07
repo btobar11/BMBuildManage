@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Delete, Query, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Query,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { BimModelsService } from './bim-models.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
@@ -13,10 +22,7 @@ export class BimModelsController {
   }
 
   @Post()
-  async createModel(
-    @Body('projectId') projectId: string,
-    @Body() dto: any,
-  ) {
+  async createModel(@Body('projectId') projectId: string, @Body() dto: any) {
     return this.service.createModel(projectId, dto);
   }
 

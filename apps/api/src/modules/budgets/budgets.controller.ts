@@ -123,4 +123,24 @@ export class BudgetsController {
   remove(@Param('id') id: string) {
     return this.budgetsService.remove(id);
   }
+
+  @Post(':id/items/bulk')
+  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT)
+  bulkCreateItems(
+    @Param('id') budgetId: string,
+    @Body()
+    body: {
+      items: Array<{
+        stage_id: string;
+        name: string;
+        quantity: number;
+        unit: string;
+        unit_cost: number;
+        unit_price: number;
+        position: number;
+      }>;
+    },
+  ) {
+    return this.budgetsService.bulkCreateItems(budgetId, body.items);
+  }
 }

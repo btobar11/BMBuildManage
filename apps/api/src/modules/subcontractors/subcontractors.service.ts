@@ -1,7 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Subcontractor, SubcontractorContract, SubcontractorPayment, SubcontractorRAM } from './subcontractor.entity';
+import {
+  Subcontractor,
+  SubcontractorContract,
+  SubcontractorPayment,
+  SubcontractorRAM,
+} from './subcontractor.entity';
 
 @Injectable()
 export class SubcontractorsService {
@@ -24,7 +29,10 @@ export class SubcontractorsService {
   }
 
   async create(companyId: string, data: Partial<Subcontractor>) {
-    const sub = this.subcontractorRepo.create({ ...data, company_id: companyId });
+    const sub = this.subcontractorRepo.create({
+      ...data,
+      company_id: companyId,
+    });
     return this.subcontractorRepo.save(sub);
   }
 
@@ -43,8 +51,14 @@ export class SubcontractorsService {
     });
   }
 
-  async createContract(projectId: string, data: Partial<SubcontractorContract>) {
-    const contract = this.contractRepo.create({ ...data, project_id: projectId });
+  async createContract(
+    projectId: string,
+    data: Partial<SubcontractorContract>,
+  ) {
+    const contract = this.contractRepo.create({
+      ...data,
+      project_id: projectId,
+    });
     return this.contractRepo.save(contract);
   }
 
@@ -63,15 +77,20 @@ export class SubcontractorsService {
   }
 
   async createPayment(contractId: string, data: Partial<SubcontractorPayment>) {
-    const payment = this.paymentRepo.create({ ...data, contract_id: contractId });
+    const payment = this.paymentRepo.create({
+      ...data,
+      contract_id: contractId,
+    });
     const saved = await this.paymentRepo.save(payment);
-    
-    const contract = await this.contractRepo.findOne({ where: { id: contractId } });
+
+    const contract = await this.contractRepo.findOne({
+      where: { id: contractId },
+    });
     if (contract) {
       contract.paid_amount = (contract.paid_amount || 0) + saved.amount;
       await this.contractRepo.save(contract);
     }
-    
+
     return saved;
   }
 
@@ -95,11 +114,17 @@ export class SubcontractorsService {
 
     const summary = {
       totalContracts: contracts.length,
-      totalValue: contracts.reduce((sum, c) => sum + Number(c.contract_amount), 0),
+      totalValue: contracts.reduce(
+        (sum, c) => sum + Number(c.contract_amount),
+        0,
+      ),
       totalPaid: contracts.reduce((sum, c) => sum + Number(c.paid_amount), 0),
-      totalApproved: contracts.reduce((sum, c) => sum + Number(c.approved_amount), 0),
-      pendingPayments: contracts.filter(c => !c.is_completed).length,
-      completedContracts: contracts.filter(c => c.is_completed).length,
+      totalApproved: contracts.reduce(
+        (sum, c) => sum + Number(c.approved_amount),
+        0,
+      ),
+      pendingPayments: contracts.filter((c) => !c.is_completed).length,
+      completedContracts: contracts.filter((c) => c.is_completed).length,
     };
 
     summary.totalApproved = summary.totalValue - summary.totalPaid;

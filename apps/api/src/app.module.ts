@@ -44,17 +44,32 @@ import { BimModelsModule } from './modules/bim-models/bim-models.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get('DATABASE_URL'),
-        autoLoadEntities: true,
-        synchronize: process.env.NODE_ENV !== 'production',
-        logging: process.env.NODE_ENV !== 'production',
-        ssl:
-          process.env.NODE_ENV === 'production'
-            ? { rejectUnauthorized: false }
-            : false,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const isProduction =
+          configService.get<string>('NODE_ENV') === 'production';
+
+        // SEC-002: Hard safety guard — synchronize MUST be false in production.
+        // TypeORM synchronize can silently drop columns/tables on entity drift.
+        const synchronize = isProduction ? false : true;
+
+        if (isProduction && synchronize) {
+          throw new Error(
+            '[SEC-002] FATAL: TypeORM synchronize=true in production. Aborting.',
+          );
+        }
+
+        return {
+          type: 'postgres',
+          url: configService.get<string>('DATABASE_URL'),
+          autoLoadEntities: true,
+          synchronize,
+          logging: isProduction ? false : true,
+          ssl: isProduction ? { rejectUnauthorized: false } : false,
+          // Production: use explicit migrations only
+          migrationsRun: false,
+          migrations: [],
+        };
+      },
       inject: [ConfigService],
     }),
     AuthModule,

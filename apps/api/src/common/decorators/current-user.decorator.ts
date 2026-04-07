@@ -1,9 +1,19 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
+export interface RequestUser {
+  id: string;
+  email: string;
+  company_id: string;
+  role: string;
+}
+
+/**
+ * Parameter decorator to extract the authenticated user from request.
+ * Usage: @CurrentUser() user: RequestUser
+ */
 export const CurrentUser = createParamDecorator(
-  (data: string | undefined, ctx: ExecutionContext) => {
+  (_data: unknown, ctx: ExecutionContext): RequestUser => {
     const request = ctx.switchToHttp().getRequest();
-    const user = request.user;
-    return data ? user?.[data] : user;
+    return request.user as RequestUser;
   },
 );

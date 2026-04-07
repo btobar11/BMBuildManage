@@ -1,5 +1,0 @@
-﻿src/features/bim/hooks/useBimEngine.ts(68,9): error TS6133: 'checkWebGL' is declared but its value is never read.
-src/features/bim/hooks/useBimEngine.ts(84,11): error TS6133: 'isInitializingProject' is declared but its value is never read.
-src/features/budget/components/DocumentsTab.tsx(27,3): error TS6133: 'CheckCircle' is declared but its value is never read.
-src/features/budget/components/DocumentsTab.tsx(28,17): error TS6133: 'CalcIcon' is declared but its value is never read.
-src/features/budget/components/DocumentsTab.tsx(29,3): error TS6133: 'Info' is declared but its value is never read.

@@ -6,7 +6,10 @@ import { ProjectModel } from './project-model.entity';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProjectModel]), forwardRef(() => UsersModule)],
+  imports: [
+    TypeOrmModule.forFeature([ProjectModel]),
+    forwardRef(() => UsersModule),
+  ],
   controllers: [BimModelsController],
   providers: [BimModelsService],
   exports: [BimModelsService],

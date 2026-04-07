@@ -34,7 +34,11 @@ export class SupabaseAuthGuard implements CanActivate {
 
     const token = authHeader.replace('Bearer ', '');
 
-    if ((process.env.NODE_ENV !== 'production' || process.env.ALLOW_DEV_TOKEN === 'true') && token === 'dev-token') {
+    if (
+      (process.env.NODE_ENV !== 'production' ||
+        process.env.ALLOW_DEV_TOKEN === 'true') &&
+      token === 'dev-token'
+    ) {
       request.user = {
         id: '11111111-1111-1111-1111-111111111111',
         email: 'demo@bmbuild.com',

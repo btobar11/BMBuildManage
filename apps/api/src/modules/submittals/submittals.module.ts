@@ -6,7 +6,10 @@ import { SubmittalsController } from './submittals.controller';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Submittal]), forwardRef(() => UsersModule)],
+  imports: [
+    TypeOrmModule.forFeature([Submittal]),
+    forwardRef(() => UsersModule),
+  ],
   providers: [SubmittalsService],
   controllers: [SubmittalsController],
   exports: [SubmittalsService],

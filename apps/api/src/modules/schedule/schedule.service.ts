@@ -1,7 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ScheduleTask, ScheduleMilestone, ScheduleResource, TaskStatus, TaskPriority } from './schedule.entity';
+import {
+  ScheduleTask,
+  ScheduleMilestone,
+  ScheduleResource,
+  TaskStatus,
+  TaskPriority,
+} from './schedule.entity';
 
 @Injectable()
 export class ScheduleService {
@@ -41,11 +47,11 @@ export class ScheduleService {
   }
 
   private calculateCriticalPath(tasks: ScheduleTask[]): string[] {
-    const taskMap = new Map(tasks.map(t => [t.id, t]));
+    const taskMap = new Map(tasks.map((t) => [t.id, t]));
     const criticalTasks: string[] = [];
 
-    const sorted = [...tasks].sort((a, b) => 
-      new Date(b.end_date).getTime() - new Date(a.end_date).getTime()
+    const sorted = [...tasks].sort(
+      (a, b) => new Date(b.end_date).getTime() - new Date(a.end_date).getTime(),
     );
 
     let maxEnd = 0;
@@ -60,13 +66,20 @@ export class ScheduleService {
     return criticalTasks;
   }
 
-  private calculateStats(tasks: ScheduleTask[], milestones: ScheduleMilestone[]) {
+  private calculateStats(
+    tasks: ScheduleTask[],
+    milestones: ScheduleMilestone[],
+  ) {
     const total = tasks.length;
-    const completed = tasks.filter(t => t.status === TaskStatus.COMPLETED).length;
-    const inProgress = tasks.filter(t => t.status === TaskStatus.IN_PROGRESS).length;
-    const delayed = tasks.filter(t => t.status === TaskStatus.DELAYED).length;
+    const completed = tasks.filter(
+      (t) => t.status === TaskStatus.COMPLETED,
+    ).length;
+    const inProgress = tasks.filter(
+      (t) => t.status === TaskStatus.IN_PROGRESS,
+    ).length;
+    const delayed = tasks.filter((t) => t.status === TaskStatus.DELAYED).length;
 
-    const completedMilestones = milestones.filter(m => m.completed).length;
+    const completedMilestones = milestones.filter((m) => m.completed).length;
 
     return {
       totalTasks: total,
@@ -103,7 +116,7 @@ export class ScheduleService {
   async deleteTask(taskId: string) {
     const task = await this.taskRepository.findOne({ where: { id: taskId } });
     if (!task) throw new NotFoundException('Tarea no encontrada');
-    
+
     await this.taskRepository.remove(task);
     return { success: true };
   }
@@ -117,7 +130,9 @@ export class ScheduleService {
   }
 
   async updateMilestone(milestoneId: string, data: Partial<ScheduleMilestone>) {
-    const milestone = await this.milestoneRepository.findOne({ where: { id: milestoneId } });
+    const milestone = await this.milestoneRepository.findOne({
+      where: { id: milestoneId },
+    });
     if (!milestone) throw new NotFoundException('Hito no encontrado');
 
     Object.assign(milestone, data);
@@ -143,7 +158,7 @@ export class ScheduleService {
     });
 
     return {
-      tasks: tasks.map(t => ({
+      tasks: tasks.map((t) => ({
         id: t.id,
         name: t.name,
         start: t.start_date,
@@ -153,7 +168,7 @@ export class ScheduleService {
         priority: t.priority,
         dependencies: t.dependency_days,
       })),
-      milestones: milestones.map(m => ({
+      milestones: milestones.map((m) => ({
         id: m.id,
         name: m.name,
         date: m.target_date,
@@ -169,19 +184,22 @@ export class ScheduleService {
 
     const totalDuration = tasks.reduce((sum, t) => sum + (t.duration || 0), 0);
     const completedDuration = tasks
-      .filter(t => t.status === TaskStatus.COMPLETED)
+      .filter((t) => t.status === TaskStatus.COMPLETED)
       .reduce((sum, t) => sum + (t.duration || 0), 0);
 
     const criticalPath = this.calculateCriticalPath(tasks);
     const criticalDuration = tasks
-      .filter(t => criticalPath.includes(t.id))
+      .filter((t) => criticalPath.includes(t.id))
       .reduce((sum, t) => sum + (t.duration || 0), 0);
 
     return {
       totalDuration,
       completedDuration,
       remainingDuration: totalDuration - completedDuration,
-      completionPercentage: totalDuration > 0 ? Math.round((completedDuration / totalDuration) * 100) : 0,
+      completionPercentage:
+        totalDuration > 0
+          ? Math.round((completedDuration / totalDuration) * 100)
+          : 0,
       criticalPathLength: criticalDuration,
       taskCount: tasks.length,
     };

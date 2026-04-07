@@ -20,10 +20,7 @@ export class AIController {
 
   @Post('query')
   @UseGuards(SupabaseAuthGuard)
-  async processQuery(
-    @CurrentUser() user: any,
-    @Body() dto: NLPQueryDto,
-  ) {
+  async processQuery(@CurrentUser() user: any, @Body() dto: NLPQueryDto) {
     const companyId = user.company_id;
     return this.aiService.processNaturalLanguageQuery(
       user.id,

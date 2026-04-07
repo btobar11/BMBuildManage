@@ -78,6 +78,15 @@ export interface Worker {
   notes?: string;
 }
 
+export interface Company {
+  name?: string;
+  logo_url?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  tax_id?: string;
+}
+
 export interface Budget {
   id: string;
   projectName: string;
@@ -93,6 +102,7 @@ export interface Budget {
   start_date?: string;
   end_date?: string;
   folder?: string;
+  version?: number;
   stages: Stage[];
   expenses: Expense[];
   workers: Worker[];

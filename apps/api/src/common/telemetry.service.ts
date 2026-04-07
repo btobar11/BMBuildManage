@@ -30,10 +30,15 @@ export class TelemetryService {
     this.persistLog(logEntry);
   }
 
-  logError(message: string, error?: Error | unknown, context?: Record<string, unknown>) {
-    const errorDetails = error instanceof Error
-      ? { name: error.name, message: error.message, stack: error.stack }
-      : { error: String(error) };
+  logError(
+    message: string,
+    error?: unknown,
+    context?: Record<string, unknown>,
+  ) {
+    const errorDetails =
+      error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack }
+        : { error: String(error) };
 
     const logEntry = {
       level: 'error',
@@ -49,7 +54,7 @@ export class TelemetryService {
     tableName: string,
     constraintName: string,
     attemptedValue: Record<string, unknown>,
-    userId?: string
+    userId?: string,
   ) {
     const logEntry = {
       level: 'error',
@@ -60,13 +65,14 @@ export class TelemetryService {
         attemptedValue,
         userId,
         errorCode: '23514',
-        suggestion: 'Verificar que los valores sean válidos antes de enviar a la API',
+        suggestion:
+          'Verificar que los valores sean válidos antes de enviar a la API',
       },
       timestamp: new Date().toISOString(),
     };
     this.logger.error(
       `CONSTRAINT_VIOLATION: ${constraintName} on ${tableName}`,
-      JSON.stringify(logEntry.context)
+      JSON.stringify(logEntry.context),
     );
     this.persistLog(logEntry);
   }

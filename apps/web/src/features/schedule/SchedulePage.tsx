@@ -65,7 +65,8 @@ const statusIcons = {
 
 export function SchedulePage() {
   const { id: projectId } = useParams<{ id: string }>();
-  const {} = useAuth();
+  // Auth context available via context if needed
+  void useAuth;
   const queryClient = useQueryClient();
   const [viewStartDate] = useState(() => {
     const date = new Date();

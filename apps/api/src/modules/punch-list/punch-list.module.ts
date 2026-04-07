@@ -6,7 +6,10 @@ import { PunchListController } from './punch-list.controller';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PunchItem]), forwardRef(() => UsersModule)],
+  imports: [
+    TypeOrmModule.forFeature([PunchItem]),
+    forwardRef(() => UsersModule),
+  ],
   providers: [PunchListService],
   controllers: [PunchListController],
   exports: [PunchListService],

@@ -50,7 +50,8 @@ export function VectorAI() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [showCapabilities, setShowCapabilities] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const {} = useAuth();
+  // Auth context available via context if needed
+  void useAuth;
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {

@@ -60,7 +60,11 @@ export class Subcontractor {
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   contract_value: number;
 
-  @Column({ type: 'enum', enum: SubcontractorStatus, default: SubcontractorStatus.ACTIVE })
+  @Column({
+    type: 'enum',
+    enum: SubcontractorStatus,
+    default: SubcontractorStatus.ACTIVE,
+  })
   status: SubcontractorStatus;
 
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })

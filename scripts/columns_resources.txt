@@ -1,9 +1,0 @@
-id
-company_id
-name
-unit
-unit_cost
-type
-category
-created_at
-has_vat

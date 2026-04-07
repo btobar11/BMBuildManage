@@ -8,7 +8,7 @@ import { ProjectHeader } from './components/ProjectHeader';
 import { BudgetTable } from './components/BudgetTable';
 import { FinancialSummaryPanel } from './components/FinancialSummaryPanel';
 import { TemplateSelector } from './components/TemplateSelector';
-import { FileText, Receipt, HardHat, FolderOpen, Download, Plus, Save, Loader2, Check, AlertTriangle, Calculator, BarChart3, GitBranch, History, Box, RefreshCcw } from 'lucide-react';
+import { FileText, Receipt, HardHat, FolderOpen, Download, Plus, Save, Loader2, Check, AlertTriangle, Calculator, BarChart3, GitBranch, History, Box, RefreshCcw, FileSpreadsheet } from 'lucide-react';
 import { ExpensesTab } from './components/ExpensesTab';
 import { WorkersTab } from './components/WorkersTab';
 import type { BudgetTab } from './types';
@@ -18,12 +18,15 @@ import { SyncIndicatorInline } from '../../components/SyncIndicator';
 import { BMLogo } from '../../components/ui/BMLogo';
 import { ContingenciesTab } from './components/ContingenciesTab';
 import { AnalysisTab } from './components/AnalysisTab';
+import { downloadBudgetPDF } from './ProfessionalReportService';
+import toast from 'react-hot-toast';
 import { AuditLogSidebar } from './components/AuditLogSidebar';
 import { DocumentsTab } from './components/DocumentsTab';
 import { BimTab } from './components/BimTab';
 import { CashflowTab } from './components/CashflowTab';
 import { ConfirmModal } from '../../components/Modal';
-import toast from 'react-hot-toast';
+import { BudgetBulkImporter } from './components/BudgetBulkImporter';
+import { AIAssistant } from './components/AIAssistant';
 
 const TABS: { id: BudgetTab; label: string; icon: ReactNode }[] = [
   { id: 'presupuesto', label: 'Presupuesto', icon: <FileText size={14} /> },
@@ -51,6 +54,14 @@ interface ServerBudget {
     location?: string;
     start_date?: string;
     end_date?: string;
+    company?: {
+      name: string;
+      logo_url?: string;
+      address?: string;
+      phone?: string;
+      email?: string;
+      rut?: string;
+    };
   };
   stages?: Array<{
     id: string;
@@ -284,6 +295,9 @@ export default function BudgetEditor() {
   const [showAuditLog, setShowAuditLog] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [showRevisionConfirm, setShowRevisionConfirm] = useState(false);
+  const [showImporter, setShowImporter] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfParams, setPdfParams] = useState({ generalExpenses: 12, utility: 18 });
 
   if (isLoading) {
     return (
@@ -337,24 +351,25 @@ export default function BudgetEditor() {
   };
 
   const handleExportPDF = async () => {
+    setShowPdfModal(true);
+  };
+
+  const handleGeneratePDF = async () => {
     if (!id) return;
     setExporting(true);
     try {
-      const response = await api.get(`/budgets/${id}/export/pdf`, {
-        responseType: 'blob',
+      await downloadBudgetPDF({
+        budget: budget,
+        company: serverBudget?.project?.company,
+        professionalName: user?.name,
+        hasBimModel: false,
+        generalExpensesPercentage: pdfParams.generalExpenses,
+        utilityPercentage: pdfParams.utility,
       });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      const projectName = budget.projectName || 'presupuesto';
-      link.setAttribute('download', `Presupuesto_${projectName.replace(/\s+/g, '_')}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast.success('PDF exportado correctamente');
+      toast.success('PDF generado correctamente');
+      setShowPdfModal(false);
     } catch {
-      toast.error('Error al exportar PDF. Guarda los cambios primero.');
+      toast.error('Error al generar PDF');
     } finally {
       setExporting(false);
     }
@@ -427,12 +442,19 @@ export default function BudgetEditor() {
                 Vista Terreno
               </button>
               <div className="w-px h-4 bg-border mx-2" />
-             <button
-               onClick={() => budgetCtx.addStage()}
-               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:bg-muted px-3 py-1.5 rounded-lg transition-colors"
-             >
-               <Plus size={13} /> Etapa
-             </button>
+              <button
+                onClick={() => budgetCtx.addStage()}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:bg-muted px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <Plus size={13} /> Etapa
+              </button>
+              <button
+                onClick={() => setShowImporter(true)}
+                title="Importar desde Excel"
+                className="flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/10 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <FileSpreadsheet size={13} /> Importar
+              </button>
               <button
                 onClick={() => setShowRevisionConfirm(true)}
                 disabled={isCreatingRevision}
@@ -609,6 +631,63 @@ export default function BudgetEditor() {
         isLoading={isCreatingRevision}
       />
 
+      {showImporter && budget.stages[0] && (
+        <BudgetBulkImporter
+          budgetId={id!}
+          stageId={budget.stages[0].id}
+          onComplete={(count) => {
+            toast.success(`${count} partidas importadas`);
+            queryClient.invalidateQueries({ queryKey: ['budget', id] });
+            setShowImporter(false);
+          }}
+          onCancel={() => setShowImporter(false)}
+        />
+      )}
+
+      {showPdfModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6">
+            <h2 className="text-xl font-bold text-white mb-4">Configurar PDF</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Gastos Generales (%)</label>
+                <input
+                  type="number"
+                  value={pdfParams.generalExpenses}
+                  onChange={(e) => setPdfParams({ ...pdfParams, generalExpenses: Number(e.target.value) })}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Utilidad (%)</label>
+                <input
+                  type="number"
+                  value={pdfParams.utility}
+                  onChange={(e) => setPdfParams({ ...pdfParams, utility: Number(e.target.value) })}
+                  className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowPdfModal(false)}
+                className="px-4 py-2 text-slate-400 hover:text-white"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGeneratePDF}
+                disabled={exporting}
+                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 text-white rounded-lg font-medium flex items-center gap-2"
+              >
+                {exporting && <Loader2 size={16} className="animate-spin" />}
+                Generar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Print styles */}
       <style>{`
         @media print {
@@ -616,6 +695,18 @@ export default function BudgetEditor() {
           body { background: white !important; color: black !important; }
         }
       `}</style>
+
+      <AIAssistant 
+        budgetId={id}
+        projectContext={{
+          name: serverBudget?.project?.name || 'Proyecto',
+          location: serverBudget?.project?.location,
+          stages: budget.stages.map(s => ({
+            name: s.name,
+            items: s.items.map(i => ({ name: i.name, quantity: i.quantity, unit: i.unit }))
+          }))
+        }}
+      />
     </div>
   );
 }

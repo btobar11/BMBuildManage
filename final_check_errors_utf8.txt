@@ -1,3 +1,0 @@
-﻿apps/web/src/features/apu/ApuLibraryPage.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
-apps/web/src/features/resources/ResourcesPage.tsx(3,1): error TS6133: 'useNavigate' is declared but its value is never read.
-apps/web/src/features/resources/ResourcesPage.tsx(6,51): error TS6133: 'ChevronLeft' is declared but its value is never read.

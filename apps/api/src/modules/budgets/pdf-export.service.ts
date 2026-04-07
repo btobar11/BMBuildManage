@@ -34,23 +34,23 @@ export class PDFExportService {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', (err: Error) => reject(err));
 
-    // 1. HEADER
-    this.generateHeader(doc, company, logoBuffer);
+      // 1. HEADER
+      this.generateHeader(doc, company, logoBuffer);
 
-    // 2. PROJECT INFO
-    this.generateProjectInfo(doc, budget, projectName);
+      // 2. PROJECT INFO
+      this.generateProjectInfo(doc, budget, projectName);
 
-    // 3. FINANCIAL SUMMARY
-    this.generateFinancialSummary(doc, budget);
+      // 3. FINANCIAL SUMMARY
+      this.generateFinancialSummary(doc, budget);
 
-    // 4. BUDGET TABLE
-    this.generateBudgetTable(doc, budget);
+      // 4. BUDGET TABLE
+      this.generateBudgetTable(doc, budget);
 
-    // 5. BREAKDOWN BY TYPE
-    this.generateBreakdownByType(doc, budget);
+      // 5. BREAKDOWN BY TYPE
+      this.generateBreakdownByType(doc, budget);
 
-    // 6. TERMS AND CONDITIONS
-    this.generateTerms(doc);
+      // 6. TERMS AND CONDITIONS
+      this.generateTerms(doc);
 
       // 5. SIGNATURE BLOCKS
       const clientName = (budget as any).project?.client?.name || 'Cliente';
@@ -118,7 +118,7 @@ export class PDFExportService {
 
   private generateFinancialSummary(doc: PDFKit.PDFDocument, budget: any) {
     let y = 260;
-    
+
     doc.fillColor('#1e3a5f').fontSize(12).font('Helvetica-Bold');
     doc.text('RESUMEN FINANCIERO', 50, y);
     y += 20;
@@ -135,8 +135,16 @@ export class PDFExportService {
       { label: 'Honorarios Profesionales:', value: `${professionalFee}%` },
       { label: 'Margen Utilidad:', value: `${utility}%` },
       { label: '', value: '' },
-      { label: 'PRECIO VENTA NETO:', value: this.formatCurrency(totalPrice), bold: true },
-      { label: 'Utilidad Proyecto:', value: this.formatCurrency(profit), highlight: margin < 20 },
+      {
+        label: 'PRECIO VENTA NETO:',
+        value: this.formatCurrency(totalPrice),
+        bold: true,
+      },
+      {
+        label: 'Utilidad Proyecto:',
+        value: this.formatCurrency(profit),
+        highlight: margin < 20,
+      },
     ];
 
     doc.font('Helvetica').fontSize(10).fillColor('#333333');
@@ -159,16 +167,30 @@ export class PDFExportService {
 
   private generateBreakdownByType(doc: PDFKit.PDFDocument, budget: any) {
     let y = (doc as any).y + 20;
-    if (y > 650) { doc.addPage(); y = 50; }
+    if (y > 650) {
+      doc.addPage();
+      y = 50;
+    }
 
     const stages = budget.stages || [];
-    const byType: Record<string, number> = { material: 0, labor: 0, machinery: 0, subcontract: 0 };
-    const costByType: Record<string, number> = { material: 0, labor: 0, machinery: 0, subcontract: 0 };
+    const byType: Record<string, number> = {
+      material: 0,
+      labor: 0,
+      machinery: 0,
+      subcontract: 0,
+    };
+    const costByType: Record<string, number> = {
+      material: 0,
+      labor: 0,
+      machinery: 0,
+      subcontract: 0,
+    };
 
     for (const stage of stages) {
       for (const item of stage.items || []) {
         const total = (item.quantity || 0) * (item.unit_price || 0);
-        const cost = (item.quantity || 0) * (item.unit_cost || item.unit_price || 0);
+        const cost =
+          (item.quantity || 0) * (item.unit_cost || item.unit_price || 0);
         const type = item.item_type || 'material';
         if (byType[type] !== undefined) {
           byType[type] = (byType[type] || 0) + total;
@@ -201,8 +223,14 @@ export class PDFExportService {
       doc.text(typeLabels[type] || type, 50, y);
       doc.font('Helvetica');
       doc.text(`${percentage}%`, 180, y, { width: 40, align: 'right' });
-      doc.text(this.formatCurrency(value), 280, y, { width: 80, align: 'right' });
-      doc.text(this.formatCurrency(profit), 380, y, { width: 70, align: 'right' });
+      doc.text(this.formatCurrency(value), 280, y, {
+        width: 80,
+        align: 'right',
+      });
+      doc.text(this.formatCurrency(profit), 380, y, {
+        width: 70,
+        align: 'right',
+      });
       doc.text(`${typeMargin}%`, 460, y, { width: 40, align: 'right' });
       y += 14;
     }
@@ -215,8 +243,13 @@ export class PDFExportService {
     doc.text('TOTAL', 50, y);
     doc.text('100%', 180, y, { width: 40, align: 'right' });
     doc.text(this.formatCurrency(total), 280, y, { width: 80, align: 'right' });
-    const totalProfit = Object.values(byType).reduce((a, b) => a + b, 0) - Object.values(costByType).reduce((a, b) => a + b, 0);
-    doc.text(this.formatCurrency(totalProfit), 380, y, { width: 70, align: 'right' });
+    const totalProfit =
+      Object.values(byType).reduce((a, b) => a + b, 0) -
+      Object.values(costByType).reduce((a, b) => a + b, 0);
+    doc.text(this.formatCurrency(totalProfit), 380, y, {
+      width: 70,
+      align: 'right',
+    });
     const totalMargin = total > 0 ? Math.round((totalProfit / total) * 100) : 0;
     doc.text(`${totalMargin}%`, 460, y, { width: 40, align: 'right' });
   }

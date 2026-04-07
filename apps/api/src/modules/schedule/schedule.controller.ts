@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { TaskStatus, TaskPriority } from './schedule.entity';
@@ -63,7 +72,9 @@ export class ScheduleController {
       ...dto,
       start_date: new Date(dto.start_date),
       end_date: new Date(dto.end_date),
-      priority: dto.priority ? TaskPriority[dto.priority.toUpperCase() as keyof typeof TaskPriority] : undefined,
+      priority: dto.priority
+        ? TaskPriority[dto.priority.toUpperCase() as keyof typeof TaskPriority]
+        : undefined,
     });
   }
 
@@ -77,8 +88,14 @@ export class ScheduleController {
       ...dto,
       start_date: dto.start_date ? new Date(dto.start_date) : undefined,
       end_date: dto.end_date ? new Date(dto.end_date) : undefined,
-      status: dto.status ? TaskStatus[dto.status.toUpperCase().replace('_', '') as keyof typeof TaskStatus] : undefined,
-      priority: dto.priority ? TaskPriority[dto.priority.toUpperCase() as keyof typeof TaskPriority] : undefined,
+      status: dto.status
+        ? TaskStatus[
+            dto.status.toUpperCase().replace('_', '') as keyof typeof TaskStatus
+          ]
+        : undefined,
+      priority: dto.priority
+        ? TaskPriority[dto.priority.toUpperCase() as keyof typeof TaskPriority]
+        : undefined,
     });
   }
 
