@@ -37,7 +37,12 @@ describe('BusinessRulesService Unit Tests', () => {
         stages: [
           {
             items: [
-              { name: 'Item 1', quantity: -10, unit_cost: 100, unit_price: 120 },
+              {
+                name: 'Item 1',
+                quantity: -10,
+                unit_cost: 100,
+                unit_price: 120,
+              },
             ],
           } as Stage,
         ],
@@ -51,7 +56,12 @@ describe('BusinessRulesService Unit Tests', () => {
         stages: [
           {
             items: [
-              { name: 'Item 1', quantity: 10, unit_cost: -100, unit_price: 120 },
+              {
+                name: 'Item 1',
+                quantity: 10,
+                unit_cost: -100,
+                unit_price: 120,
+              },
             ],
           } as Stage,
         ],
@@ -65,7 +75,12 @@ describe('BusinessRulesService Unit Tests', () => {
         stages: [
           {
             items: [
-              { name: 'Item 1', quantity: 10, unit_cost: 100, unit_price: -120 },
+              {
+                name: 'Item 1',
+                quantity: 10,
+                unit_cost: 100,
+                unit_price: -120,
+              },
             ],
           } as Stage,
         ],
@@ -79,10 +94,10 @@ describe('BusinessRulesService Unit Tests', () => {
         stages: [
           {
             items: [
-              { 
-                name: 'Item 1', 
-                quantity: 10, 
-                unit_cost: 100, 
+              {
+                name: 'Item 1',
+                quantity: 10,
+                unit_cost: 100,
                 unit_price: 120,
                 unit: 'm3',
                 cubication_mode: CubicationMode.DIMENSIONS,
@@ -98,7 +113,7 @@ describe('BusinessRulesService Unit Tests', () => {
 
       const result = await service.validateBudget(budget as Budget);
 
-      expect(result.some(w => w.includes('dimensiones válidas'))).toBe(true);
+      expect(result.some((w) => w.includes('dimensiones válidas'))).toBe(true);
     });
 
     it('should warn for incomplete m2 dimensions', async () => {
@@ -106,10 +121,10 @@ describe('BusinessRulesService Unit Tests', () => {
         stages: [
           {
             items: [
-              { 
-                name: 'Item 1', 
-                quantity: 10, 
-                unit_cost: 100, 
+              {
+                name: 'Item 1',
+                quantity: 10,
+                unit_cost: 100,
                 unit_price: 120,
                 unit: 'm2',
                 cubication_mode: CubicationMode.DIMENSIONS,
@@ -124,7 +139,7 @@ describe('BusinessRulesService Unit Tests', () => {
 
       const result = await service.validateBudget(budget as Budget);
 
-      expect(result.some(w => w.includes('unidad m2'))).toBe(true);
+      expect(result.some((w) => w.includes('unidad m2'))).toBe(true);
     });
 
     it('should warn for exceeded execution quantity > 5%', async () => {
@@ -132,11 +147,11 @@ describe('BusinessRulesService Unit Tests', () => {
         stages: [
           {
             items: [
-              { 
-                name: 'Item 1', 
-                quantity: 10, 
+              {
+                name: 'Item 1',
+                quantity: 10,
                 quantity_executed: 16,
-                unit_cost: 100, 
+                unit_cost: 100,
                 unit_price: 120,
               },
             ],
@@ -146,7 +161,7 @@ describe('BusinessRulesService Unit Tests', () => {
 
       const result = await service.validateBudget(budget as Budget);
 
-      expect(result.some(w => w.includes('superado'))).toBe(true);
+      expect(result.some((w) => w.includes('superado'))).toBe(true);
     });
 
     it('should not warn for normal execution within threshold', async () => {
@@ -154,11 +169,11 @@ describe('BusinessRulesService Unit Tests', () => {
         stages: [
           {
             items: [
-              { 
-                name: 'Item 1', 
-                quantity: 100, 
+              {
+                name: 'Item 1',
+                quantity: 100,
                 quantity_executed: 103,
-                unit_cost: 100, 
+                unit_cost: 100,
                 unit_price: 120,
               },
             ],
@@ -168,7 +183,7 @@ describe('BusinessRulesService Unit Tests', () => {
 
       const result = await service.validateBudget(budget as Budget);
 
-      expect(result.some(w => w.includes('superado'))).toBe(false);
+      expect(result.some((w) => w.includes('superado'))).toBe(false);
     });
   });
 });
@@ -184,16 +199,25 @@ describe('Budget Calculation Logic', () => {
       const expectedCost = 10 * 50000 + 100 * 1000;
       const expectedPrice = 10 * 60000 + 100 * 1200;
 
-      const calculatedCost = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
-      const calculatedPrice = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+      const calculatedCost = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_cost,
+        0,
+      );
+      const calculatedPrice = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_price,
+        0,
+      );
 
       expect(calculatedCost).toBe(expectedCost);
       expect(calculatedPrice).toBe(expectedPrice);
     });
 
     it('should handle empty items array', () => {
-      const items: Array<{quantity: number; unit_cost: number}> = [];
-      const directCost = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
+      const items: Array<{ quantity: number; unit_cost: number }> = [];
+      const directCost = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_cost,
+        0,
+      );
       expect(directCost).toBe(0);
     });
 
@@ -209,7 +233,8 @@ describe('Budget Calculation Logic', () => {
       const directCost = 1000000;
       const professionalFeePercentage = 10;
 
-      const withProfessionalFee = directCost * (1 + professionalFeePercentage / 100);
+      const withProfessionalFee =
+        directCost * (1 + professionalFeePercentage / 100);
 
       expect(withProfessionalFee).toBe(1100000);
     });
@@ -232,7 +257,10 @@ describe('Budget Calculation Logic', () => {
       const professionalFee = 10;
       const utility = 15;
 
-      const directCost = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
+      const directCost = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_cost,
+        0,
+      );
       const costWithFee = directCost * (1 + professionalFee / 100);
       const finalPrice = costWithFee * (1 + utility / 100);
 
@@ -258,23 +286,25 @@ describe('Budget Calculation Logic', () => {
       const stages = [
         {
           name: 'Obra Gruesa',
-          items: [
-            { quantity: 10, unit_cost: 50000 },
-          ],
+          items: [{ quantity: 10, unit_cost: 50000 }],
         },
         {
           name: 'Terminaciones',
-          items: [
-            { quantity: 100, unit_cost: 10000 },
-          ],
+          items: [{ quantity: 100, unit_cost: 10000 }],
         },
       ];
 
-      const stageTotals = stages.map(stage => 
-        stage.items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0)
+      const stageTotals = stages.map((stage) =>
+        stage.items.reduce(
+          (sum, item) => sum + item.quantity * item.unit_cost,
+          0,
+        ),
       );
 
-      const totalCost = stageTotals.reduce((sum, stageTotal) => sum + stageTotal, 0);
+      const totalCost = stageTotals.reduce(
+        (sum, stageTotal) => sum + stageTotal,
+        0,
+      );
 
       expect(stageTotals[0]).toBe(500000);
       expect(stageTotals[1]).toBe(1000000);
