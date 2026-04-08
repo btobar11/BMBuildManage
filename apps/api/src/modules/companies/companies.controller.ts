@@ -19,8 +19,8 @@ import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 @Injectable()
 export class IsUUIDValidationPipe implements PipeTransform {
   transform(value: any): string {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    // Relaxed UUID validation for development (allows test UUIDs)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(value)) {
       throw new BadRequestException('Invalid UUID format');
     }

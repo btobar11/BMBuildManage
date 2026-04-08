@@ -37,11 +37,25 @@ export class BimModelsService {
 
   async uploadModel(projectId: string, file: Express.Multer.File) {
     try {
-      // Upload file to Supabase Storage
+      // Get project to find company_id
+      const project = await this.modelRepository.manager.query(
+        'SELECT company_id FROM projects WHERE id = $1',
+        [projectId]
+      );
+      
+      if (!project.length) {
+        throw new Error('Project not found');
+      }
+      
+      const companyId = project[0].company_id;
+      
+      // Upload file to Supabase Storage with company isolation
       const fileName = `${Date.now()}_${file.originalname}`;
+      const storagePath = `${companyId}/models/${fileName}`;
+      
       const { data: uploadData, error: uploadError } = await this.supabase.storage
         .from('bim-models')
-        .upload(`models/${fileName}`, file.buffer, {
+        .upload(storagePath, file.buffer, {
           contentType: file.mimetype,
         });
 
@@ -52,12 +66,13 @@ export class BimModelsService {
       // Get public URL
       const { data: urlData } = this.supabase.storage
         .from('bim-models')
-        .getPublicUrl(`models/${fileName}`);
+        .getPublicUrl(storagePath);
 
       // Save to database
       const model = this.modelRepository.create({
         project_id: projectId,
         name: file.originalname.replace(/\.(ifc|ifcxml)$/i, ''),
+        storage_path: storagePath,
         file_url: urlData.publicUrl,
         file_size: file.size,
         format: file.originalname.endsWith('.ifcxml') ? 'IFCXML' : 'IFC',
@@ -99,11 +114,10 @@ export class BimModelsService {
     if (!model) throw new NotFoundException('Modelo no encontrado');
     
     // Delete from storage if exists
-    if (model.file_url) {
-      const fileName = model.file_url.split('/').pop();
+    if (model.storage_path) {
       await this.supabase.storage
         .from('bim-models')
-        .remove([`models/${fileName}`]);
+        .remove([model.storage_path]);
     }
     
     await this.modelRepository.remove(model);

@@ -31,6 +31,18 @@ export class ProjectModel {
   @Column({ type: 'bigint', nullable: true })
   file_size: number;
 
+  @Column({ length: 50, nullable: true })
+  format: string;
+
+  @Column({ length: 50, default: 'pending' })
+  processing_status: string;
+
+  @Column({ type: 'text', nullable: true })
+  file_url: string;
+
   @CreateDateColumn()
   created_at: Date;
+
+  @CreateDateColumn()
+  updated_at: Date;
 }
