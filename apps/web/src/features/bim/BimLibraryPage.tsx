@@ -9,9 +9,11 @@ import {
   Eye, 
   Download, 
   Plus,
-  Loader2
+  Loader2,
+  TestTube
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { BimViewerTest } from './components/BimViewerTest';
 
 interface ProjectModel {
   id: string;
@@ -198,6 +200,20 @@ export function BimLibraryPage() {
           </label>
         </div>
       )}
+
+      {/* BIM Viewer Test */}
+      <div className="mt-8">
+        <div className="flex items-center gap-2 mb-4">
+          <TestTube size={20} className="text-indigo-500" />
+          <h2 className="text-lg font-semibold text-foreground">Prueba del Motor BIM 3D</h2>
+        </div>
+        <div className="bg-card rounded-lg border p-4">
+          <p className="text-sm text-muted-foreground mb-4">
+            Test del motor de renderizado Three.js + ThatOpen Components
+          </p>
+          <BimViewerTest />
+        </div>
+      </div>
     </div>
   );
 }

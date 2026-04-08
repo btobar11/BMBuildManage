@@ -7,7 +7,10 @@ import {
   Param,
   Body,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { BimModelsService } from './bim-models.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
@@ -22,8 +25,20 @@ export class BimModelsController {
   }
 
   @Post()
-  async createModel(@Body('projectId') projectId: string, @Body() dto: any) {
-    return this.service.createModel(projectId, dto);
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadModel(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('projectId') projectId: string,
+  ) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+    
+    if (!file.originalname.match(/\.(ifc|ifcxml)$/i)) {
+      throw new Error('Only IFC files are allowed');
+    }
+
+    return this.service.uploadModel(projectId, file);
   }
 
   @Delete(':id')
