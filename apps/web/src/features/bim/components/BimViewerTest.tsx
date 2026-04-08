@@ -1,10 +1,10 @@
 /**
  * BIM Viewer Test Component - Para probar el visor 3D sin archivos IFC
  */
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import * as OBC from "@thatopen/components";
-import { Loader2, Cube, RotateCcw } from 'lucide-react';
+import { Loader2, Box, RotateCcw } from 'lucide-react';
 
 export function BimViewerTest() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -22,10 +22,8 @@ export function BimViewerTest() {
         setIsLoading(true);
         setError(null);
 
-        // Initialize OBC Components
         components = new OBC.Components();
         
-        // Create world (scene, camera, renderer)
         const worlds = components.get(OBC.Worlds);
         const world = worlds.create<
           OBC.SimpleScene,
@@ -33,32 +31,22 @@ export function BimViewerTest() {
           OBC.SimpleRenderer
         >();
 
-        // Configure renderer
         world.scene = new OBC.SimpleScene(components);
         world.renderer = new OBC.SimpleRenderer(components, containerRef.current!);
         world.camera = new OBC.SimpleCamera(components);
         
-        // Set renderer size
-        const { clientWidth, clientHeight } = containerRef.current!;
-        world.renderer.setSize(clientWidth, clientHeight);
-
-        // Add basic lighting
         world.scene.setup();
         
-        // Create a simple test cube
         const geometry = new THREE.BoxGeometry(2, 2, 2);
         const material = new THREE.MeshPhongMaterial({ color: 0x6366f1 });
         const cube = new THREE.Mesh(geometry, material);
         world.scene.three.add(cube);
 
-        // Position camera
         world.camera.three.position.set(5, 5, 5);
         world.camera.three.lookAt(0, 0, 0);
 
-        // Add controls
         await world.camera.controls.setLookAt(5, 5, 5, 0, 0, 0);
 
-        // Start render loop
         const animate = () => {
           cube.rotation.x += 0.01;
           cube.rotation.y += 0.01;
@@ -71,16 +59,16 @@ export function BimViewerTest() {
 
         console.log('✅ BIM Viewer Test initialized successfully');
         
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Error initializing BIM viewer';
         console.error('❌ BIM Viewer initialization failed:', err);
-        setError(err.message || 'Error initializing BIM viewer');
+        setError(message);
         setIsLoading(false);
       }
     };
 
     initViewer();
 
-    // Cleanup
     return () => {
       if (components) {
         components.dispose();
@@ -88,13 +76,9 @@ export function BimViewerTest() {
     };
   }, [isInitialized]);
 
-  // Handle container resize
   useEffect(() => {
     const handleResize = () => {
-      if (containerRef.current && isInitialized) {
-        const { clientWidth, clientHeight } = containerRef.current;
-        // Trigger resize if needed
-      }
+      // Handle resize if needed
     };
 
     window.addEventListener('resize', handleResize);
@@ -108,14 +92,12 @@ export function BimViewerTest() {
 
   return (
     <div className="relative w-full h-96 bg-gray-900 rounded-lg overflow-hidden">
-      {/* Canvas Container */}
       <div 
         ref={containerRef}
         className="w-full h-full"
         style={{ touchAction: 'none' }}
       />
 
-      {/* Loading Overlay */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
           <div className="flex flex-col items-center gap-3 text-white">
@@ -125,12 +107,11 @@ export function BimViewerTest() {
         </div>
       )}
 
-      {/* Error Overlay */}
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-red-900/80">
           <div className="text-center text-white p-6">
             <div className="text-red-400 mb-3">
-              <Cube size={48} />
+              <Box size={48} />
             </div>
             <h3 className="text-lg font-medium mb-2">Error del Motor BIM</h3>
             <p className="text-sm text-red-200 mb-4">{error}</p>
@@ -145,14 +126,12 @@ export function BimViewerTest() {
         </div>
       )}
 
-      {/* Success Indicator */}
       {!isLoading && !error && isInitialized && (
         <div className="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
           ✅ Motor BIM activo
         </div>
       )}
 
-      {/* Info */}
       {!isLoading && !error && isInitialized && (
         <div className="absolute bottom-4 left-4 bg-gray-900/80 text-white px-3 py-2 rounded-lg text-xs">
           <p>🎯 Three.js + ThatOpen Components</p>
