@@ -51,9 +51,12 @@ export default defineConfig({
   ],
 
   // SEC-003: Strip console.* from production builds to prevent telemetry leaks
-  esbuild: {
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
-  },
+  esbuild: (() => {
+    if (process.env.NODE_ENV === 'production') {
+      return { drop: ['console', 'debugger'] } as unknown as false;
+    }
+    return false;
+  })(),
 
   build: {
     // Disable source maps in production to prevent code exposure

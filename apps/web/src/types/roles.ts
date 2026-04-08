@@ -1,15 +1,17 @@
 /**
  * Role types matching the backend UserRole enum
  */
-export enum UserRole {
-  ADMIN = 'admin',
-  ENGINEER = 'engineer',
-  ARCHITECT = 'architect',
-  SITE_SUPERVISOR = 'site_supervisor',
-  FOREMAN = 'foreman',
-  ACCOUNTING = 'accounting',
-  VIEWER = 'viewer',
-}
+export const UserRole = {
+  ADMIN: 'admin',
+  ENGINEER: 'engineer',
+  ARCHITECT: 'architect',
+  SITE_SUPERVISOR: 'site_supervisor',
+  FOREMAN: 'foreman',
+  ACCOUNTING: 'accounting',
+  VIEWER: 'viewer',
+} as const;
+
+export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   [UserRole.ADMIN]: 'Administrador',

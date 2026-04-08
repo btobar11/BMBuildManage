@@ -1,5 +1,4 @@
 import { useAuth } from '../context/AuthContext';
-import { UserRole } from '../types/roles';
 
 /**
  * Hook for role-based access control in the frontend.
