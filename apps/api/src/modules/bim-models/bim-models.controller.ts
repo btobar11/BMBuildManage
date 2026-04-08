@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BimModelsService } from './bim-models.service';
@@ -20,7 +21,10 @@ export class BimModelsController {
   constructor(private readonly service: BimModelsService) {}
 
   @Get()
-  async getModels(@Query('projectId') projectId: string) {
+  async getModels(@Query('projectId') projectId?: string) {
+    if (!projectId) {
+      return [];
+    }
     return this.service.getModelsByProject(projectId);
   }
 
@@ -31,14 +35,24 @@ export class BimModelsController {
     @Body('projectId') projectId: string,
   ) {
     if (!file) {
-      throw new Error('No file uploaded');
+      throw new BadRequestException('No file uploaded');
+    }
+    
+    if (!projectId) {
+      throw new BadRequestException('Project ID is required');
     }
     
     if (!file.originalname.match(/\.(ifc|ifcxml)$/i)) {
-      throw new Error('Only IFC files are allowed');
+      throw new BadRequestException('Only IFC files are allowed');
     }
 
-    return this.service.uploadModel(projectId, file);
+    try {
+      return await this.service.uploadModel(projectId, file);
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : 'Upload failed'
+      );
+    }
   }
 
   @Delete(':id')

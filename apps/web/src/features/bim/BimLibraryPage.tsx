@@ -37,7 +37,7 @@ export function BimLibraryPage() {
 
   const { data: models, isLoading, refetch } = useQuery<ProjectModel[]>({
     queryKey: ['bim-models', selectedProject],
-    queryFn: () => api.get('/bim/models', { params: {} }).then(r => r.data),
+    queryFn: () => api.get('/bim/models', { params: { projectId: selectedProject } }).then(r => r.data),
     enabled: !!selectedProject,
   });
 
