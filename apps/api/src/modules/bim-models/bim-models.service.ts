@@ -71,6 +71,7 @@ export class BimModelsService {
       // Save to database
       const model = this.modelRepository.create({
         project_id: projectId,
+        company_id: companyId,
         name: file.originalname.replace(/\.(ifc|ifcxml)$/i, ''),
         storage_path: storagePath,
         file_url: urlData.publicUrl,

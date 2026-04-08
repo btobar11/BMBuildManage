@@ -18,6 +18,9 @@ export class ProjectModel {
   @Column()
   project_id: string;
 
+  @Column()
+  company_id: string;
+
   @ManyToOne(() => Project, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'project_id' })
   project: Project;
