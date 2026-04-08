@@ -11,6 +11,8 @@ export interface CubicationParams {
   radio?: number;
   diametro?: number;
   piezas?: number;
+  huecos?: number;
+  vano?: number;
 }
 
 export const evaluateFormula = (formula: string, params: CubicationParams): number => {
@@ -29,6 +31,8 @@ export const evaluateFormula = (formula: string, params: CubicationParams): numb
       radio: 0,
       diametro: 0,
       piezas: 1,
+      huecos: 0,
+      vano: 0,
       ...params
     };
     return expr.evaluate(cleanParams);
