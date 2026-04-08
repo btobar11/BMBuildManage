@@ -18,8 +18,8 @@ export class PDFExportService {
         if (fetchRes.ok) {
           logoBuffer = Buffer.from(await fetchRes.arrayBuffer());
         }
-      } catch (error) {
-        console.warn('Could not fetch logo for PDF', error);
+      } catch {
+        // Logo not available, continue without it
       }
     }
 

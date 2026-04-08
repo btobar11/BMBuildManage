@@ -190,7 +190,6 @@ export class ProjectsService {
       return { deleted: result.affected || 0 };
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      console.error('Bulk deletion failed:', err);
       throw err;
     } finally {
       await queryRunner.release();

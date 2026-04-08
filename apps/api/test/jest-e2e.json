@@ -2,12 +2,31 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
+  "testRegex": "(e2e-spec|full-product-suite)\\.spec\\.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/../src/$1"
+  "testTimeout": 30000,
+  "collectCoverage": true,
+  "coverageDirectory": "../coverage/e2e",
+  "collectCoverageFrom": [
+    "../src/**/*.ts"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "branches": 10,
+      "functions": 10,
+      "lines": 10,
+      "statements": 10
+    }
   },
-  "testTimeout": 30000
+  "coveragePathIgnorePatterns": [
+    "node_modules",
+    "\\.spec\\.ts$",
+    "\\.module\\.ts$",
+    "\\.entity\\.ts$",
+    "\\.dto\\.ts$",
+    "\\.interface\\.ts$",
+    "\\.constant\\.ts$"
+  ]
 }

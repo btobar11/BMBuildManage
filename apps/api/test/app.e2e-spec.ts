@@ -16,13 +16,15 @@ describe('Budgets E2E (Full Integration)', () => {
     // Seed test data first
     const seedDataSource = new DataSource({
       type: 'postgres',
-      url: process.env.DATABASE_URL || 'postgresql://postgres:test@localhost:5433/bmbuild_test',
+      url:
+        process.env.DATABASE_URL ||
+        'postgresql://postgres:test@localhost:5433/bmbuild_test',
       synchronize: false,
       logging: false,
     });
 
     await seedDataSource.initialize();
-    
+
     // Create company
     await seedDataSource.query(`
       INSERT INTO companies (id, name, tax_id, country, address, email, phone, created_at, updated_at)
@@ -245,8 +247,7 @@ describe('Budgets E2E (Full Integration)', () => {
     });
 
     it('✅ should reject workers without auth', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/workers');
+      const response = await request(app.getHttpServer()).get('/workers');
 
       expect(response.status).toBe(401);
     });
@@ -275,7 +276,7 @@ describe('Budgets E2E (Full Integration)', () => {
   describe('Data Integrity', () => {
     it('✅ should have seeded company in DB', async () => {
       const result = await dataSource.query(
-        `SELECT id, name FROM companies WHERE id = '${TEST_COMPANY_ID}'`
+        `SELECT id, name FROM companies WHERE id = '${TEST_COMPANY_ID}'`,
       );
       expect(result.length).toBeGreaterThan(0);
       expect(result[0].name).toBe('Test Construction Company');
@@ -283,7 +284,7 @@ describe('Budgets E2E (Full Integration)', () => {
 
     it('✅ should have seeded user in DB', async () => {
       const result = await dataSource.query(
-        `SELECT id, email, role, company_id FROM users WHERE id = '${TEST_USER_ID}'`
+        `SELECT id, email, role, company_id FROM users WHERE id = '${TEST_USER_ID}'`,
       );
       expect(result.length).toBeGreaterThan(0);
       expect(result[0].email).toBe('demo@bmbuild.com');

@@ -9,8 +9,14 @@ describe('Budget Calculation Business Logic', () => {
       const expectedCost = 10 * 50000 + 100 * 1000;
       const expectedPrice = 10 * 60000 + 100 * 1200;
 
-      const calculatedCost = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
-      const calculatedPrice = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+      const calculatedCost = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_cost,
+        0,
+      );
+      const calculatedPrice = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_price,
+        0,
+      );
 
       expect(calculatedCost).toBe(expectedCost);
       expect(calculatedPrice).toBe(expectedPrice);
@@ -37,7 +43,8 @@ describe('Budget Calculation Business Logic', () => {
       const directCost = 1000000;
       const professionalFeePercentage = 10;
 
-      const withProfessionalFee = directCost * (1 + professionalFeePercentage / 100);
+      const withProfessionalFee =
+        directCost * (1 + professionalFeePercentage / 100);
 
       expect(withProfessionalFee).toBe(1100000);
     });
@@ -57,7 +64,10 @@ describe('Budget Calculation Business Logic', () => {
         { quantity: 100, unit_cost: 1000 },
       ];
 
-      const directCost = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
+      const directCost = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_cost,
+        0,
+      );
       const professionalFee = 10;
       const utility = 15;
 
@@ -74,8 +84,11 @@ describe('Budget Calculation Business Logic', () => {
     });
 
     it('should handle zero items gracefully', () => {
-      const items: Array<{quantity: number; unit_cost: number}> = [];
-      const directCost = items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0);
+      const items: Array<{ quantity: number; unit_cost: number }> = [];
+      const directCost = items.reduce(
+        (sum, item) => sum + item.quantity * item.unit_cost,
+        0,
+      );
       expect(directCost).toBe(0);
     });
 
@@ -95,7 +108,9 @@ describe('Budget Calculation Business Logic', () => {
         quantity: 5,
       };
 
-      const totalAPUCost = (apuItem.materialsCost + apuItem.laborCost + apuItem.equipmentCost) * apuItem.quantity;
+      const totalAPUCost =
+        (apuItem.materialsCost + apuItem.laborCost + apuItem.equipmentCost) *
+        apuItem.quantity;
 
       expect(totalAPUCost).toBe(450000);
     });
@@ -108,7 +123,9 @@ describe('Budget Calculation Business Logic', () => {
         quantity: 3,
       };
 
-      const totalAPUCost = (apuItem.materialsCost + apuItem.laborCost + apuItem.equipmentCost) * apuItem.quantity;
+      const totalAPUCost =
+        (apuItem.materialsCost + apuItem.laborCost + apuItem.equipmentCost) *
+        apuItem.quantity;
 
       expect(totalAPUCost).toBe(150000);
     });
@@ -119,23 +136,25 @@ describe('Budget Calculation Business Logic', () => {
       const stages = [
         {
           name: 'Obra Gruesa',
-          items: [
-            { quantity: 10, unit_cost: 50000 },
-          ],
+          items: [{ quantity: 10, unit_cost: 50000 }],
         },
         {
           name: 'Terminaciones',
-          items: [
-            { quantity: 100, unit_cost: 10000 },
-          ],
+          items: [{ quantity: 100, unit_cost: 10000 }],
         },
       ];
 
-      const stageTotals = stages.map(stage => 
-        stage.items.reduce((sum, item) => sum + (item.quantity * item.unit_cost), 0)
+      const stageTotals = stages.map((stage) =>
+        stage.items.reduce(
+          (sum, item) => sum + item.quantity * item.unit_cost,
+          0,
+        ),
       );
 
-      const totalCost = stageTotals.reduce((sum, stageTotal) => sum + stageTotal, 0);
+      const totalCost = stageTotals.reduce(
+        (sum, stageTotal) => sum + stageTotal,
+        0,
+      );
 
       expect(stageTotals[0]).toBe(500000);
       expect(stageTotals[1]).toBe(1000000);

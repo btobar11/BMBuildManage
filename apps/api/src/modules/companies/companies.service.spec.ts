@@ -1,0 +1,123 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { NotFoundException } from '@nestjs/common';
+import { CompaniesService } from './companies.service';
+import { Company } from './company.entity';
+
+const createMockCompany = (overrides?: Partial<Company>): Company =>
+  ({
+    id: 'company-1',
+    name: 'Company 1',
+    country: 'US',
+    tax_id: 'TAX001',
+    address: 'Test address',
+    logo_url: null,
+    email: 'company@example.com',
+    phone: '123456',
+    created_at: new Date(),
+    updated_at: new Date(),
+    ...overrides,
+  }) as unknown as Company;
+
+const mockRepository = () => ({
+  create: jest.fn(),
+  save: jest.fn(),
+  find: jest.fn(),
+  findOne: jest.fn(),
+  remove: jest.fn(),
+  merge: jest.fn(),
+});
+
+describe('CompaniesService', () => {
+  let service: CompaniesService;
+  let repository: jest.Mocked<Repository<Company>>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        CompaniesService,
+        { provide: getRepositoryToken(Company), useFactory: mockRepository },
+      ],
+    }).compile();
+
+    service = module.get<CompaniesService>(CompaniesService);
+    repository = module.get(getRepositoryToken(Company));
+  });
+
+  describe('create', () => {
+    it('should create a company', async () => {
+      const createDto = { name: 'Company 1', country: 'US' };
+      const company = createMockCompany(createDto);
+      repository.create.mockReturnValue(company);
+      repository.save.mockResolvedValue(company);
+
+      const result = await service.create(createDto);
+      expect(repository.create).toHaveBeenCalledWith(createDto);
+      expect(repository.save).toHaveBeenCalledWith(company);
+      expect(result).toEqual(company);
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return all companies', async () => {
+      const companies = [
+        createMockCompany({ id: '1' }),
+        createMockCompany({ id: '2' }),
+      ];
+      repository.find.mockResolvedValue(companies);
+
+      const result = await service.findAll();
+      expect(repository.find).toHaveBeenCalled();
+      expect(result).toEqual(companies);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a company by id', async () => {
+      const company = createMockCompany();
+      repository.findOne.mockResolvedValue(company);
+
+      const result = await service.findOne('company-1');
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { id: 'company-1' },
+      });
+      expect(result).toEqual(company);
+    });
+
+    it('should throw NotFoundException if company not found', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('should update a company', async () => {
+      const company = createMockCompany();
+      const updated = { ...company, name: 'Updated Company' };
+      repository.findOne.mockResolvedValue(company);
+      repository.merge.mockReturnValue(updated);
+      repository.save.mockResolvedValue(updated);
+
+      const result = await service.update('company-1', {
+        name: 'Updated Company',
+      });
+      expect(result.name).toBe('Updated Company');
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a company', async () => {
+      const company = createMockCompany();
+      repository.findOne.mockResolvedValue(company);
+      repository.remove.mockResolvedValue(company);
+
+      const result = await service.remove('company-1');
+      expect(repository.remove).toHaveBeenCalledWith(company);
+      expect(result).toEqual({ deleted: true });
+    });
+  });
+});
