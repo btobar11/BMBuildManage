@@ -50,10 +50,22 @@ api.interceptors.response.use(
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const devToken = localStorage.getItem('DEV_TOKEN');
   if (devToken) {
+    // SECURITY WARNING: DEV_TOKEN causes multi-tenant issues
+    console.warn('[API] ⚠️  DEV_TOKEN detected! This causes multi-tenant security issues.');
+    console.warn('[API] All users will see the same data. Remove DEV_TOKEN to fix this.');
+    
+    // Only allow dev token in development environment
+    if (import.meta.env.PROD) {
+      console.error('[API] 🚨 DEV_TOKEN not allowed in production! Removing...');
+      localStorage.removeItem('DEV_TOKEN');
+      window.location.reload();
+      return config;
+    }
+    
     if (config.headers) {
       config.headers.Authorization = `Bearer ${devToken}`;
     }
-    console.log('[API] Using dev token');
+    console.log('[API] Using dev token (development only)');
     return config;
   }
 

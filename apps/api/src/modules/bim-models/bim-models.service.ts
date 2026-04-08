@@ -20,9 +20,12 @@ export class BimModelsService {
     );
   }
 
-  async getModelsByProject(projectId: string) {
+  async getModelsByProject(projectId: string, companyId: string) {
     return this.modelRepository.find({
-      where: { project_id: projectId },
+      where: { 
+        project_id: projectId,
+        company_id: companyId
+      },
       order: { created_at: 'DESC' },
     });
   }
@@ -108,9 +111,12 @@ export class BimModelsService {
     }, 5000);
   }
 
-  async deleteModel(modelId: string) {
+  async deleteModel(modelId: string, companyId: string) {
     const model = await this.modelRepository.findOne({
-      where: { id: modelId },
+      where: { 
+        id: modelId,
+        company_id: companyId
+      },
     });
     if (!model) throw new NotFoundException('Modelo no encontrado');
     

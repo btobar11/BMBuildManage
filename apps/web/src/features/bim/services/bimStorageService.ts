@@ -1,8 +1,9 @@
 /**
- * Supabase Storage Service for BIM Models
- * Handles upload, download, and management of IFC files
+ * BIM Storage Service for BIM Models
+ * Handles upload, download, and management of IFC files via API
  */
 import { supabase } from '../../../lib/supabase';
+import { api } from '../../../lib/api';
 import type { ProjectModel } from '../types';
 
 const BUCKET_NAME = 'bim-models';
@@ -15,7 +16,7 @@ export interface UploadProgress {
 }
 
 /**
- * Upload an IFC model file to Supabase Storage and register it in project_models
+ * Upload an IFC model file via API endpoint (recommended approach)
  */
 export async function uploadModel(
   file: File,
@@ -28,71 +29,61 @@ export async function uploadModel(
     throw new Error(`El archivo excede el límite de 50MB (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
   }
 
-  if (!file.name.toLowerCase().endsWith('.ifc')) {
-    throw new Error('Solo se permiten archivos .ifc');
+  if (!file.name.toLowerCase().endsWith('.ifc') && !file.name.toLowerCase().endsWith('.ifcxml')) {
+    throw new Error('Solo se permiten archivos .ifc o .ifcxml');
   }
 
-  const fileName = file.name;
-  const storagePath = `${companyId}/${projectId}/${fileName}`;
-  const displayName = modelName || fileName.replace('.ifc', '');
+  // Use API endpoint instead of direct Supabase insertion
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('projectId', projectId);
+  if (modelName) {
+    formData.append('modelName', modelName);
+  }
 
-  // Upload to Supabase Storage
-  const { error: uploadError } = await supabase.storage
-    .from(BUCKET_NAME)
-    .upload(storagePath, file, {
-      cacheControl: '3600',
-      upsert: true,
-      contentType: 'application/octet-stream',
+  try {
+    const response = await api.post('/bim/models', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
 
-  if (uploadError) {
-    console.error('Storage upload error:', uploadError);
-    throw new Error(`Error al subir el archivo: ${uploadError.message}`);
+    return response.data.model as ProjectModel;
+  } catch (error: any) {
+    console.error('API upload error:', error);
+    
+    if (error.response?.status === 400) {
+      throw new Error(error.response.data.message || 'Error de validación en la subida del archivo');
+    }
+    
+    if (error.response?.status === 500) {
+      throw new Error('Error interno del servidor. Por favor intenta nuevamente.');
+    }
+    
+    throw new Error(`Error al subir el archivo: ${error.message}`);
   }
-
-  // Register in project_models table (upserting if a file with the same path already exists)
-  const { data, error: dbError } = await supabase
-    .from('project_models')
-    .upsert({
-      project_id: projectId,
-      company_id: companyId,
-      name: displayName,
-      file_name: fileName,
-      storage_path: storagePath,
-      file_size: file.size,
-      status: 'uploaded',
-    }, {
-      onConflict: 'project_id, storage_path'
-    })
-    .select()
-    .single();
-
-  if (dbError) {
-    // Try to clean up the uploaded file
-    await supabase.storage.from(BUCKET_NAME).remove([storagePath]);
-    console.error('DB insert error:', dbError);
-    throw new Error(`Error al registrar el modelo: ${dbError.message}`);
-  }
-
-  return data as ProjectModel;
 }
 
 /**
- * Get all BIM models for a project
+ * Get all BIM models for a project (via API endpoint)
  */
 export async function getProjectModels(projectId: string): Promise<ProjectModel[]> {
-  const { data, error } = await supabase
-    .from('project_models')
-    .select('*')
-    .eq('project_id', projectId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
+  try {
+    const response = await api.get(`/bim/models?projectId=${projectId}`);
+    return response.data as ProjectModel[];
+  } catch (error: any) {
     console.error('Error fetching project models:', error);
+    
+    if (error.response?.status === 404) {
+      return []; // No models found, return empty array
+    }
+    
+    if (error.response?.status === 500) {
+      throw new Error('Error interno del servidor al obtener los modelos');
+    }
+    
     throw new Error(`Error al obtener modelos: ${error.message}`);
   }
-
-  return (data || []) as ProjectModel[];
 }
 
 /**
@@ -129,38 +120,25 @@ export async function downloadModelBuffer(storagePath: string): Promise<Uint8Arr
 }
 
 /**
- * Delete a BIM model (from both storage and database)
+ * Delete a BIM model (via API endpoint)
  */
 export async function deleteModel(modelId: string, storagePath: string): Promise<void> {
   console.log(`[bimStorageService] deleteModel called for ID: ${modelId}, Path: ${storagePath}`);
   
-  // 1. Delete from Storage (wrapped in try-catch to handle missing files gracefully)
   try {
-    const { data: storageData, error: storageError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove([storagePath]);
-
-    if (storageError) {
-      console.warn('[bimStorageService] Storage removal warning (may already be deleted):', storageError);
-    } else {
-      console.log('[bimStorageService] Storage removal response:', storageData);
+    await api.delete(`/bim/models/${modelId}`);
+    console.log('[bimStorageService] Deletion completed successfully via API');
+  } catch (error: any) {
+    console.error('[bimStorageService] API deletion error:', error);
+    
+    if (error.response?.status === 404) {
+      throw new Error('El modelo no fue encontrado');
     }
-  } catch (err) {
-    console.error('[bimStorageService] Unexpected storage removal error:', err);
-    // Continue to database deletion anyway
+    
+    if (error.response?.status === 500) {
+      throw new Error('Error interno del servidor al eliminar el modelo');
+    }
+    
+    throw new Error(`Error al eliminar el modelo: ${error.message}`);
   }
-
-  // 2. Delete from Database
-  console.log('[bimStorageService] Attempting database record removal...');
-  const { error: dbError } = await supabase
-    .from('project_models')
-    .delete()
-    .eq('id', modelId);
-
-  if (dbError) {
-    console.error('[bimStorageService] Database deletion error:', dbError);
-    throw new Error(`Error al eliminar el registro de la base de datos: ${dbError.message}`);
-  }
-
-  console.log('[bimStorageService] Deletion completed successfully');
 }

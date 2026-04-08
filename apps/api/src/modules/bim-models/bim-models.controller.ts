@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BimModelsService } from './bim-models.service';
@@ -21,11 +22,12 @@ export class BimModelsController {
   constructor(private readonly service: BimModelsService) {}
 
   @Get()
-  async getModels(@Query('projectId') projectId?: string) {
+  async getModels(@Query('projectId') projectId?: string, @Request() req: any) {
     if (!projectId) {
       return [];
     }
-    return this.service.getModelsByProject(projectId);
+    const { company_id } = req.user;
+    return this.service.getModelsByProject(projectId, company_id);
   }
 
   @Post()
@@ -33,6 +35,7 @@ export class BimModelsController {
   async uploadModel(
     @UploadedFile() file: Express.Multer.File,
     @Body('projectId') projectId: string,
+    @Request() req: any,
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
@@ -46,6 +49,8 @@ export class BimModelsController {
       throw new BadRequestException('Only IFC files are allowed');
     }
 
+    const { company_id } = req.user;
+
     try {
       return await this.service.uploadModel(projectId, file);
     } catch (error) {
@@ -56,7 +61,8 @@ export class BimModelsController {
   }
 
   @Delete(':id')
-  async deleteModel(@Param('id') id: string) {
-    return this.service.deleteModel(id);
+  async deleteModel(@Param('id') id: string, @Request() req: any) {
+    const { company_id } = req.user;
+    return this.service.deleteModel(id, company_id);
   }
 }

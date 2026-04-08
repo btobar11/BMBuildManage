@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Project } from '../projects/project.entity';
+import { Company } from '../companies/company.entity';
 
 export enum DocumentType {
   PLAN = 'plan',
@@ -24,6 +25,8 @@ export enum DocumentType {
 
 @Entity('documents')
 @Index(['project_id'])
+@Index(['company_id'])
+@Index(['project_id', 'company_id'])
 export class Document {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -31,9 +34,16 @@ export class Document {
   @Column()
   project_id: string;
 
+  @Column()
+  company_id: string;
+
   @ManyToOne(() => Project, (project) => project.documents)
   @JoinColumn({ name: 'project_id' })
   project: Project;
+
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @Column({ length: 300 })
   name: string;

@@ -8,9 +8,11 @@ import {
   Index,
 } from 'typeorm';
 import { Project } from '../projects/project.entity';
+import { Company } from '../companies/company.entity';
 
 @Entity('invoices')
 @Index(['project_id'])
+@Index(['company_id'])
 export class Invoice {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -18,9 +20,16 @@ export class Invoice {
   @Column()
   project_id: string;
 
+  @Column()
+  company_id: string;
+
   @ManyToOne(() => Project)
   @JoinColumn({ name: 'project_id' })
   project: Project;
+
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @Column({ length: 300 })
   supplier: string;

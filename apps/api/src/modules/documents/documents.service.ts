@@ -12,18 +12,31 @@ export class DocumentsService {
     private readonly documentRepository: Repository<Document>,
   ) {}
 
-  create(createDto: CreateDocumentDto) {
-    const document = this.documentRepository.create(createDto);
+  create(createDto: CreateDocumentDto, companyId: string) {
+    const document = this.documentRepository.create({
+      ...createDto,
+      company_id: companyId,
+    });
     return this.documentRepository.save(document);
   }
 
-  findAllByProject(projectId: string) {
-    return this.documentRepository.find({ where: { project_id: projectId } });
+  findAllByProject(projectId: string, companyId: string) {
+    return this.documentRepository.find({ 
+      where: { 
+        project_id: projectId,
+        company_id: companyId,
+      },
+      order: { uploaded_at: 'DESC' },
+      relations: ['project'],
+    });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, companyId: string) {
     const document = await this.documentRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        company_id: companyId,
+      },
       relations: ['project'],
     });
     if (!document) {
@@ -32,14 +45,14 @@ export class DocumentsService {
     return document;
   }
 
-  async update(id: string, updateDto: UpdateDocumentDto) {
-    const document = await this.findOne(id);
+  async update(id: string, updateDto: UpdateDocumentDto, companyId: string) {
+    const document = await this.findOne(id, companyId);
     this.documentRepository.merge(document, updateDto);
     return this.documentRepository.save(document);
   }
 
-  async remove(id: string) {
-    const document = await this.findOne(id);
+  async remove(id: string, companyId: string) {
+    const document = await this.findOne(id, companyId);
     await this.documentRepository.remove(document);
     return { deleted: true };
   }
