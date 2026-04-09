@@ -64,25 +64,31 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* Sidebar */}
       <aside className={`
         fixed lg:relative inset-y-0 left-0 z-50
-        w-16 hover:w-64 transition-all duration-200 ease-out
-        bg-card border-r border-border flex flex-col
+        w-16 hover:w-64 transition-all duration-300 cubic-bezier(0.16, 1, 0.3, 1)
+        bg-card/95 backdrop-blur-lg border-r border-border flex flex-col
+        shadow-lg lg:shadow-none
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
       onMouseEnter={() => setSidebarExpanded(true)}
       onMouseLeave={() => setSidebarExpanded(false)}
       >
         {/* Logo */}
-        <div className="h-14 flex items-center justify-center border-b border-border px-4">
-          {sidebarExpanded ? (
-            <BMLogo variant="full" className="h-6" />
-          ) : (
-            <BMLogo variant="icon" className="h-8 w-8" />
-          )}
+        <div className="h-14 flex items-center justify-center border-b border-border px-4 relative overflow-hidden">
+          {/* Background gradient effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-50/30 to-transparent dark:from-primary-950/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          
+          <div className={`transition-all duration-300 transform ${sidebarExpanded ? 'scale-100' : 'scale-110 hover:scale-125'}`}>
+            {sidebarExpanded ? (
+              <BMLogo variant="full" className="h-6 transition-all duration-200" />
+            ) : (
+              <BMLogo variant="icon" className="h-8 w-8 transition-all duration-200" />
+            )}
+          </div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-2 space-y-1 overflow-hidden">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
@@ -90,20 +96,46 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
                 className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all whitespace-nowrap
+                  group relative flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                  transition-all duration-200 cubic-bezier(0.16, 1, 0.3, 1) whitespace-nowrap
+                  hover-lift
                   ${isActive 
-                    ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' 
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-primary-50 dark:bg-primary-950/20 text-primary-700 dark:text-primary-400 shadow-sm' 
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground hover:shadow-sm'
                   }
                 `}
                 title={item.label}
+                style={{ 
+                  animationDelay: `${index * 50}ms` 
+                }}
               >
-                <span className={isActive ? 'text-emerald-600 dark:text-emerald-400' : ''}>
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 rounded-r-full" />
+                )}
+                
+                {/* Icon with micro-animation */}
+                <span className={`
+                  transition-all duration-200 transform
+                  ${isActive 
+                    ? 'text-primary-600 dark:text-primary-400 scale-110' 
+                    : 'group-hover:scale-110 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                  }
+                `}>
                   {item.icon}
                 </span>
-                <span className={`text-sm font-medium sidebar-label ${sidebarExpanded ? 'opacity-100' : 'opacity-0 lg:opacity-0 w-0'}`}>
+                
+                {/* Label with stagger animation */}
+                <span className={`
+                  text-sm font-medium sidebar-label transition-all duration-300
+                  ${sidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 lg:opacity-0 w-0'}
+                  ${isActive ? 'font-semibold' : ''}
+                `}>
                   {item.label}
                 </span>
+                
+                {/* Hover effect background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg -z-10" />
               </Link>
             );
           })}
@@ -111,52 +143,119 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
         {/* User Section */}
         <div className="p-2 border-t border-border">
-          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors"
+          <div className="group relative flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-all duration-200 hover-lift"
                onClick={handleLogout}
+               title={`${user?.name} - Click to logout`}
           >
-            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 font-medium text-sm shrink-0">
-              {user?.name?.[0]?.toUpperCase() || <User size={16} />}
+            {/* User Avatar with status indicator */}
+            <div className="relative">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center text-primary-700 dark:text-primary-300 font-semibold text-sm shrink-0 transition-transform duration-200 group-hover:scale-110">
+                {user?.name?.[0]?.toUpperCase() || <User size={16} />}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-success-500 border-2 border-card rounded-full" />
             </div>
-            <div className="sidebar-label overflow-hidden">
-              <p className="text-sm font-medium text-foreground truncate">{user?.name}</p>
+            
+            {/* User Info */}
+            <div className={`sidebar-label overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 w-0'}`}>
+              <p className="text-sm font-medium text-foreground truncate leading-tight">{user?.name}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
+            
+            {/* Hover gradient effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg -z-10" />
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="h-14 flex items-center justify-between px-4 border-b border-border bg-card shrink-0">
-          <button 
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors"
-          >
-            <Menu size={20} />
-          </button>
+        {/* Header Profesional */}
+        <header className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-border bg-card/95 backdrop-blur-sm shrink-0">
+          {/* Left Section */}
+          <div className="flex items-center gap-4">
+            {/* Mobile Menu */}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 hover:bg-muted rounded-lg transition-all duration-200 hover:scale-105"
+              title="Abrir menú"
+            >
+              <Menu size={20} />
+            </button>
 
-          <div className="flex items-center gap-3 ml-auto">
-            {/* Theme Toggle */}
-            <div className="hidden sm:flex items-center gap-1 p-1 bg-muted rounded-lg">
+            {/* Breadcrumbs */}
+            <nav className="hidden sm:flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="font-medium text-foreground">BMBuildManage</span>
+                <span>/</span>
+                <span className="capitalize">
+                  {location.pathname === '/dashboard' ? 'Proyectos' : 
+                   location.pathname.replace('/', '').replace('-', ' ')}
+                </span>
+              </div>
+            </nav>
+          </div>
+
+          {/* Right Section */}
+          <div className="flex items-center gap-3">
+            {/* Search (desktop only) */}
+            <div className="hidden md:flex items-center relative">
+              <input 
+                type="text" 
+                placeholder="Buscar..."
+                className="w-64 h-9 pl-3 pr-9 text-sm bg-muted border border-transparent rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary-300 focus:bg-background focus:ring-2 focus:ring-primary-500/20 transition-all duration-150"
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-muted-foreground">
+                  <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                  <path d="21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Theme Toggle Premium */}
+            <div className="hidden sm:flex items-center gap-0.5 p-1 bg-muted rounded-lg shadow-inner">
               <button
                 onClick={() => setTheme('light')}
-                className={`p-1.5 rounded ${theme === 'light' ? 'bg-background shadow-sm' : ''}`}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  theme === 'light' 
+                    ? 'bg-background shadow-sm text-foreground scale-105' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                }`}
+                title="Modo claro"
               >
-                <Sun size={16} className={theme === 'light' ? 'text-foreground' : 'text-muted-foreground'} />
+                <Sun size={16} />
               </button>
               <button
                 onClick={() => setTheme('dark')}
-                className={`p-1.5 rounded ${theme === 'dark' ? 'bg-background shadow-sm' : ''}`}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  theme === 'dark' 
+                    ? 'bg-background shadow-sm text-foreground scale-105' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                }`}
+                title="Modo oscuro"
               >
-                <Moon size={16} className={theme === 'dark' ? 'text-foreground' : 'text-muted-foreground'} />
+                <Moon size={16} />
               </button>
             </div>
 
-            <button className="p-2 hover:bg-muted rounded-lg transition-colors relative">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full" />
+            {/* Notifications */}
+            <button className="relative p-2 hover:bg-muted rounded-lg transition-all duration-200 hover:scale-105 group"
+                    title="Notificaciones">
+              <Bell size={18} className="group-hover:text-primary-600 transition-colors duration-200" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger-500 rounded-full animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger-500 rounded-full animate-ping" />
             </button>
+
+            {/* Quick Actions */}
+            <div className="hidden lg:flex items-center border-l border-border pl-3 ml-1">
+              <button 
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/20 rounded-lg transition-all duration-200"
+                title="Crear proyecto"
+              >
+                <div className="w-1.5 h-1.5 bg-primary-500 rounded-full" />
+                Nuevo Proyecto
+              </button>
+            </div>
           </div>
         </header>
 

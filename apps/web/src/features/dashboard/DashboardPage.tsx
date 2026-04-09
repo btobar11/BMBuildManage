@@ -6,6 +6,8 @@ import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { CreateProjectModal } from './components/CreateProjectModal';
 import { ConfirmModal, PromptModal } from '../../components/Modal';
+import { MetricCard, Card, CardHeader, CardContent } from '../../components/ui/Card';
+import { Button, IconButton } from '../../components/ui/Button';
 import { 
   Plus, 
   Search,
@@ -19,7 +21,11 @@ import {
   FolderOpen,
   X,
   RefreshCcw,
-  ChevronRight
+  ChevronRight,
+  Building2,
+  Users,
+  TrendingUp,
+  AlertTriangle
 } from 'lucide-react';
 
 interface Project {
@@ -37,11 +43,11 @@ interface Project {
 
 const ProjectStatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
-    draft: 'bg-slate-100 text-slate-600',
-    sent: 'bg-violet-100 text-violet-700',
-    approved: 'bg-blue-100 text-blue-700',
-    in_progress: 'bg-emerald-100 text-emerald-700',
-    completed: 'bg-slate-200 text-slate-700',
+    draft: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+    sent: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
+    approved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    in_progress: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
+    completed: 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400',
   };
 
   const labels: Record<string, string> = {
@@ -53,7 +59,7 @@ const ProjectStatusBadge = ({ status }: { status: string }) => {
   };
 
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || styles.draft}`}>
+    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${styles[status] || styles.draft}`}>
       {labels[status] || status}
     </span>
   );
@@ -146,64 +152,81 @@ export const DashboardPage = () => {
   return (
     <>
       <div className="space-y-6 animate-fade-up">
-      {/* Header */}
+      {/* Header Premium */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Proyectos</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Bienvenido, <span className="font-medium text-emerald-600">{user?.name}</span>
+            Bienvenido de nuevo, <span className="font-medium text-primary-600">{user?.name}</span>
           </p>
         </div>
         
         <div className="flex items-center gap-3">
-          <button onClick={handleRefresh} className="p-2.5 rounded-lg border border-border hover:bg-muted transition-colors">
-            <RefreshCcw size={18} className={isRefreshing ? 'animate-spin' : ''} />
-          </button>
-          <button onClick={() => setIsCreateModalOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors">
-            <Plus size={18} />
-            <span>Nuevo Proyecto</span>
-          </button>
+          <IconButton 
+            icon={RefreshCcw} 
+            label="Actualizar datos"
+            variant="outline"
+            onClick={handleRefresh}
+            className={isRefreshing ? 'animate-spin' : ''}
+          />
+          <Button 
+            leftIcon={Plus} 
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            Nuevo Proyecto
+          </Button>
         </div>
       </div>
 
-      {/* Stats Bento Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-card rounded-xl p-5 border border-border">
-          <DollarSign size={20} className="text-emerald-500 mb-3" />
-          <p className="text-2xl font-bold text-foreground data-mono">
-            ${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(totalBudget)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">Valor Total</p>
-        </div>
+      {/* Stats Bento Grid Premium */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Presupuesto Total"
+          value={`$${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(totalBudget)}`}
+          change={8.5}
+          previousValue={`$${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(totalBudget * 0.92)}`}
+          icon={DollarSign}
+          iconColor="success"
+          description="En todos los proyectos"
+        />
 
-        <div className="bg-card rounded-xl p-5 border border-border">
-          <BarChart3 size={20} className="text-amber-500 mb-3" />
-          <p className="text-2xl font-bold text-foreground">{projects?.filter(p => p.status === 'sent').length || 0}</p>
-          <p className="text-xs text-muted-foreground mt-1">Pendientes</p>
-        </div>
+        <MetricCard
+          title="Proyectos Activos"
+          value={projects?.filter(p => p.status === 'in_progress').length || 0}
+          change={12.5}
+          previousValue={(projects?.filter(p => p.status === 'in_progress').length || 0) - 1}
+          icon={Building2}
+          iconColor="primary"
+          description="En construcción"
+        />
 
-        <div className="bg-card rounded-xl p-5 border border-border">
-          <Clock size={20} className="text-emerald-500 mb-3" />
-          <p className="text-2xl font-bold text-foreground">{projects?.filter(p => p.status === 'in_progress').length || 0}</p>
-          <p className="text-xs text-muted-foreground mt-1">En Obra</p>
-        </div>
+        <MetricCard
+          title="Pendientes"
+          value={projects?.filter(p => p.status === 'sent' || p.status === 'approved').length || 0}
+          icon={Clock}
+          iconColor="warning"
+          description="Esperando aprobación"
+        />
 
-        <div className="bg-card rounded-xl p-5 border border-border">
-          <CheckCircle2 size={20} className="text-slate-500 mb-3" />
-          <p className="text-2xl font-bold text-foreground">{projects?.filter(p => p.status === 'completed').length || 0}</p>
-          <p className="text-xs text-muted-foreground mt-1">Completados</p>
-        </div>
+        <MetricCard
+          title="Completados"
+          value={projects?.filter(p => p.status === 'completed').length || 0}
+          change={5.2}
+          icon={CheckCircle2}
+          iconColor="info"
+          description="Este año"
+        />
       </div>
 
-      {/* Search */}
+      {/* Search Premium */}
       <div className="relative">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input 
           type="text" 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar proyectos..."
-          className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+          placeholder="Buscar proyectos por nombre o ubicación..."
+          className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
         />
       </div>
 
@@ -214,20 +237,25 @@ export const DashboardPage = () => {
             <div key={i} className="bg-card rounded-xl border border-border h-48 animate-pulse" />
           ))
         ) : filteredProjects?.length === 0 ? (
-          <div className="col-span-full py-16 text-center">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
-              <Search size={24} className="text-muted-foreground" />
+          <Card className="col-span-full py-16" variant="outlined">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/20 rounded-2xl mb-4">
+                <Search size={32} className="text-primary-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Sin proyectos</h3>
+              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">Crea tu primer proyecto para comenzar a gestionar tu construcción</p>
+              <Button leftIcon={Plus} onClick={() => setIsCreateModalOpen(true)}>
+                Crear Proyecto
+              </Button>
             </div>
-            <h3 className="font-medium text-foreground mb-1">Sin proyectos</h3>
-            <p className="text-sm text-muted-foreground mb-4">Crea tu primer proyecto para comenzar</p>
-            <button onClick={() => setIsCreateModalOpen(true)} className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">
-              <Plus size={16} /> Crear Proyecto
-            </button>
-          </div>
+          </Card>
         ) : (
           filteredProjects?.map((project) => (
-            <div 
+            <Card 
               key={project.id}
+              variant="default"
+              hoverable
+              clickable
               onClick={() => {
                 if (selectedIds.length > 0) {
                   toggleSelect(project.id);
@@ -240,70 +268,69 @@ export const DashboardPage = () => {
                   }
                 }
               }}
-              className={`bg-card rounded-xl border cursor-pointer transition-all hover-lift ${
-                selectedIds.includes(project.id) ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-border hover:border-emerald-300'
-              }`}
+              className={selectedIds.includes(project.id) ? 'ring-2 ring-primary-500/30 border-primary-500' : ''}
             >
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <ProjectStatusBadge status={project.status} />
-                  <span className="text-lg font-bold text-emerald-600 data-mono">
-                    ${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(project.estimated_budget || 0)}
-                  </span>
+              <div className="flex items-start justify-between mb-4">
+                <ProjectStatusBadge status={project.status} />
+                <span className="text-xl font-bold text-primary-600 data-mono">
+                  ${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(project.estimated_budget || 0)}
+                </span>
+              </div>
+
+              <h3 className="font-semibold text-lg text-foreground mb-2 truncate">{project.name}</h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                <MapPin size={14} />
+                <span className="truncate">{project.location || 'Sin ubicación'}</span>
+              </div>
+
+              {project.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{project.description}</p>
+              )}
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Progreso</span>
+                  <span className="font-medium text-foreground">{project.progress || 0}%</span>
                 </div>
-
-                <h3 className="font-semibold text-foreground mb-1 truncate">{project.name}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-                  <MapPin size={12} />
-                  <span className="truncate">{project.location || 'Sin ubicación'}</span>
-                </div>
-
-                {project.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{project.description}</p>
-                )}
-
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Progreso</span>
-                    <span className="font-medium text-foreground">{project.progress || 0}%</span>
-                  </div>
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${project.progress || 0}%` }} />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Calendar size={12} />
-                    <span>{project.start_date ? new Date(project.start_date).toLocaleDateString('es-CL') : 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                    Abrir <ChevronRight size={14} />
-                  </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary-500 to-primary-400 rounded-full transition-all duration-500" 
+                    style={{ width: `${project.progress || 0}%` }} 
+                  />
                 </div>
               </div>
-            </div>
+
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar size={14} />
+                  <span>{project.start_date ? new Date(project.start_date).toLocaleDateString('es-CL') : 'Sin fecha'}</span>
+                </div>
+                <div className="flex items-center gap-1 text-sm font-medium text-primary-600 group-hover:translate-x-1 transition-transform">
+                  Abrir <ChevronRight size={16} />
+                </div>
+              </div>
+            </Card>
           ))
         )}
       </div>
 
-      {/* Bulk Actions */}
+      {/* Bulk Actions Premium */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white rounded-xl px-6 py-4 flex items-center gap-6 shadow-xl">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl px-6 py-4 flex items-center gap-6 shadow-2xl animate-scale-in">
           <div className="flex items-center gap-3 pr-6 border-r border-slate-700">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center font-bold text-sm">
+            <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center font-bold text-sm">
               {selectedIds.length}
             </div>
             <span className="text-sm font-medium">Seleccionados</span>
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={() => setShowFolderPrompt(true)} className="text-sm font-medium hover:text-emerald-400 transition-colors">
+            <button onClick={() => setShowFolderPrompt(true)} className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-300 hover:text-white" title="Mover a carpeta">
               <FolderOpen size={18} />
             </button>
-            <button onClick={handleBulkDelete} className="text-sm font-medium text-rose-400 hover:text-rose-300 transition-colors">
+            <button onClick={handleBulkDelete} className="p-2 hover:bg-danger-500/20 rounded-lg transition-colors text-danger-400 hover:text-danger-300" title="Eliminar">
               <Trash2 size={18} />
             </button>
-            <button onClick={() => setSelectedIds([])} className="p-1 hover:bg-slate-700 rounded transition-colors">
+            <button onClick={() => setSelectedIds([])} className="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Cancelar">
               <X size={18} />
             </button>
           </div>

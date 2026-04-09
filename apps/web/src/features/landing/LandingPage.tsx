@@ -169,7 +169,7 @@ export function LandingPage() {
             </button>
             <button 
               onClick={handleCTA}
-              className="px-4 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/25"
             >
               Empezar Gratis
             </button>
@@ -186,7 +186,7 @@ export function LandingPage() {
             <button className="block w-full text-left text-sm text-muted-foreground py-2">Características</button>
             <button className="block w-full text-left text-sm text-muted-foreground py-2">Precios</button>
             <button onClick={handleLogin} className="block w-full text-left text-sm text-muted-foreground py-2">Iniciar Sesión</button>
-            <button onClick={handleCTA} className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-lg font-medium text-sm">
+            <button onClick={handleCTA} className="w-full px-4 py-2.5 bg-primary-600 text-white rounded-lg font-medium text-sm">
               Empezar Gratis
             </button>
           </div>
@@ -198,8 +198,8 @@ export function LandingPage() {
         <section className="relative py-20 sm:py-32 px-4">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-medium mb-8">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-600 text-xs font-medium mb-8">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
               Plataforma #1 en Gestión de Construcción
             </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 export type BMLogoVariant = 'full' | 'compact' | 'icon';
 
@@ -10,41 +10,45 @@ interface BMLogoProps {
 }
 
 export function BMLogo({ variant, className = '' }: BMLogoProps) {
-  const gradientId = useId();
-  const gradientRef = `${gradientId}-emerald`;
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
-  const isotipo = (
+  // Minimal logo mark - geometric BM monogram
+  const logoMark = (
     <svg
-      viewBox="0 0 40 40"
+      viewBox="0 0 60 60"
       className="shrink-0 w-full h-full"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <defs>
-        <linearGradient id={gradientRef} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#10b981" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
-      </defs>
+      {/* Main Structure - Emerald Teal #047857 */}
+      <rect x="5" y="10" width="8" height="40" fill={isDark ? "#10b981" : "#047857"}/>
+      <rect x="5" y="10" width="40" height="8" fill={isDark ? "#10b981" : "#047857"}/>
+      <rect x="47" y="10" width="8" height="40" fill={isDark ? "#10b981" : "#047857"}/>
+      <rect x="21" y="10" width="8" height="40" fill={isDark ? "#10b981" : "#047857"}/>
       
-      <g stroke={`url(#${gradientRef})`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 4 L36 14 L20 24 L4 14 Z" />
-        <path d="M4 14 L20 24 L20 36 L4 26 Z" />
-        <path d="M20 24 L36 14 L36 26 L20 36 Z" />
-        <path d="M10 18 L10 22 M10 18 C12 18 13 19 13 20 C13 21 12 22 10 22" strokeWidth="1.5" opacity="0.6" />
-        <path d="M26 18 L30 24 L34 18 M28 21 L30 24 L32 21" strokeWidth="1.5" opacity="0.6" />
-      </g>
+      {/* Accent Lines - Emerald Green #10b981 */}
+      <path d="M32 10 L38 2 L44 10 L38 6 Z" fill="#10b981"/>
+      <rect x="13" y="22" width="26" height="3" fill="#10b981"/>
+      <rect x="13" y="29" width="34" height="3" fill="#10b981"/>
+      <rect x="13" y="36" width="34" height="3" fill="#10b981"/>
+      <rect x="29" y="22" width="3" height="17" fill="#10b981"/>
+      
+      {/* Gaucho hat silhouette - white negative space */}
+      <rect x="21" y="24" width="8" height="4" fill={isDark ? "#020617" : "#ffffff"}/>
+      <rect x="18" y="28" width="14" height="2" fill={isDark ? "#020617" : "#ffffff"}/>
+      <rect x="23" y="18" width="4" height="6" fill={isDark ? "#020617" : "#ffffff"}/>
     </svg>
   );
 
   const textBM = (
-    <span className="text-slate-950 dark:text-white font-bold text-lg leading-none">
+    <span className="text-foreground font-bold text-lg leading-none tracking-tight">
       BM
     </span>
   );
 
   const textBuildManage = (
-    <span className="text-slate-500 dark:text-slate-400 font-medium text-[10px] tracking-widest uppercase leading-none">
+    <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: isDark ? '#10b981' : '#047857' }}>
       BUILD MANAGE
     </span>
   );
@@ -57,27 +61,31 @@ export function BMLogo({ variant, className = '' }: BMLogoProps) {
 
   const textElements = {
     full: (
-      <>
+      <div className="flex flex-col leading-none">
         {textBM}
         {textBuildManage}
-      </>
+      </div>
     ),
-    compact: textBM,
+    compact: (
+      <div className="flex flex-col leading-none">
+        {textBM}
+      </div>
+    ),
     icon: null,
   };
 
-  const sizeClass = variant === 'icon' ? 'w-6 h-6' : 'w-8 h-8';
+  const sizeClass = {
+    full: 'w-8 h-8',
+    compact: 'w-7 h-7', 
+    icon: 'w-6 h-6'
+  }[variant];
 
   return (
     <div className={`${containerClasses[variant]} ${className}`}>
       <div className={`shrink-0 ${sizeClass}`}>
-        {isotipo}
+        {logoMark}
       </div>
-      {textElements[variant] && (
-        <div className="flex flex-col leading-none">
-          {textElements[variant]}
-        </div>
-      )}
+      {textElements[variant]}
     </div>
   );
 }
