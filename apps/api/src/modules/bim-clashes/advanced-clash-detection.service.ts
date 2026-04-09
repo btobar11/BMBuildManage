@@ -233,7 +233,7 @@ export class AdvancedClashDetectionService {
       ifc_type: e.ifc_type,
       name: e.name,
       model_id: e.model_id,
-      discipline: e.bim_models.discipline,
+      discipline: (e.bim_models as any)?.discipline,
       bounding_box: e.bounding_box,
       storey_name: e.storey_name,
       priority: this.ELEMENT_TYPE_PRIORITIES[e.ifc_type] || 5,
@@ -866,13 +866,17 @@ export class AdvancedClashDetectionService {
 
     if (projectId) {
       // Join with models to filter by project
-      query = query.in(
-        'model_a_id',
-        this.supabase
-          .from('bim_models')
-          .select('id')
-          .eq('project_id', projectId),
-      );
+      const { data: modelIds } = await this.supabase
+        .from('bim_models')
+        .select('id')
+        .eq('project_id', projectId);
+
+      if (modelIds && modelIds.length > 0) {
+        query = query.in(
+          'model_a_id',
+          modelIds.map((m) => m.id),
+        );
+      }
     }
 
     const { data: clashes } = await query;

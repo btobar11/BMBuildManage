@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'src/features/bim/components/**/*', 'src/features/bim/hooks/**/*', 'src/features/bim/services/**/*']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

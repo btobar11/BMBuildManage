@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Eye, EyeOff, AlertCircle, Check } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** Input label */
   label?: string
   /** Input size */
@@ -26,6 +26,13 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   floatingLabel?: boolean
   /** Full width input */
   fullWidth?: boolean
+}
+
+const StatusIcon: React.FC<{ loading?: boolean; error?: string; success?: boolean; iconSize: number }> = ({ loading, error, success, iconSize }) => {
+  if (loading) return <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground border-t-transparent" />
+  if (error) return <AlertCircle size={iconSize} className="text-danger-500" />
+  if (success) return <Check size={iconSize} className="text-success-500" />
+  return null
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -77,7 +84,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       ${fullWidth ? 'w-full' : 'w-auto'}
     `
 
-    const sizeStyles = {
+    const sizeStyles: Record<'sm' | 'md' | 'lg', {
+      input: string
+      icon: number
+      label: string
+      spacing: string
+    }> = {
       sm: {
         input: 'h-8 px-3 text-sm',
         icon: 14,
@@ -156,13 +168,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       transition-colors duration-150
     `
 
-    const StatusIcon = () => {
-      if (loading) return <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground border-t-transparent" />
-      if (error) return <AlertCircle size={sizeStyles[size].icon} className="text-danger-500" />
-      if (success) return <Check size={sizeStyles[size].icon} className="text-success-500" />
-      return null
-    }
-
     return (
       <div className={baseContainerStyles}>
         {/* Label */}
@@ -199,7 +204,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <div className={cn(iconContainerStyles, 'right-3')}>
             <div className="flex items-center gap-1">
               {/* Status Icon (loading, error, success) */}
-              <StatusIcon />
+              <StatusIcon loading={loading} error={error} success={success} iconSize={sizeStyles[size].icon} />
               
               {/* Password Toggle */}
               {isPasswordType && !loading && (
@@ -242,4 +247,3 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = 'Input'
 
 export { Input }
-export type { InputProps }

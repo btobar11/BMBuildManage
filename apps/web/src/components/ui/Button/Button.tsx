@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Button visual style variant */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success'
   /** Button size */
@@ -18,6 +18,31 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Icon only button (for icon buttons) */
   iconOnly?: boolean
 }
+
+const LoadingSpinner: React.FC = () => (
+  <div className="animate-spin">
+    <svg 
+      className="h-4 w-4" 
+      xmlns="http://www.w3.org/2000/svg" 
+      fill="none" 
+      viewBox="0 0 24 24"
+    >
+      <circle 
+        className="opacity-25" 
+        cx="12" 
+        cy="12" 
+        r="10" 
+        stroke="currentColor" 
+        strokeWidth="4"
+      />
+      <path 
+        className="opacity-75" 
+        fill="currentColor" 
+        d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
+  </div>
+)
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({
@@ -115,31 +140,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       xl: 20
     }
 
-    const LoadingSpinner = () => (
-      <div className="animate-spin">
-        <svg 
-          className={`h-${iconSizes[size] / 4} w-${iconSizes[size] / 4}`} 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
-          viewBox="0 0 24 24"
-        >
-          <circle 
-            className="opacity-25" 
-            cx="12" 
-            cy="12" 
-            r="10" 
-            stroke="currentColor" 
-            strokeWidth="4"
-          />
-          <path 
-            className="opacity-75" 
-            fill="currentColor" 
-            d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          />
-        </svg>
-      </div>
-    )
-
     return (
       <button
         ref={ref}
@@ -184,4 +184,3 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button'
 
 export { Button }
-export type { ButtonProps }

@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
 
-export type SkeletonProps = {
+export interface SkeletonProps {
   /** Skeleton variant */
   variant?: 'text' | 'circular' | 'rectangular' | 'rounded'
   /** Custom width */
@@ -165,5 +165,3 @@ export const SkeletonMetric: React.FC<{ className?: string }> = ({ className }) 
     </div>
   )
 }
-
-export type { SkeletonProps }

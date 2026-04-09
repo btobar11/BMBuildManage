@@ -1,9 +1,9 @@
-import React, { forwardRef, useState } from 'react'
+import React, { forwardRef } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { AlertCircle, Check } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   /** Textarea label */
   label?: string
   /** Textarea size */
@@ -32,6 +32,13 @@ export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & 
   fullWidth?: boolean
 }
 
+const TextareaStatusIcon: React.FC<{ loading?: boolean; error?: string; success?: boolean; iconSize: number }> = ({ loading, error, success, iconSize }) => {
+  if (loading) return <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground border-t-transparent" />
+  if (error) return <AlertCircle size={iconSize} className="text-danger-500" />
+  if (success) return <Check size={iconSize} className="text-success-500" />
+  return null
+}
+
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({
     className,
@@ -55,18 +62,15 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     rows = 3,
     ...props
   }, ref) => {
-    
     const charCount = value ? String(value).length : 0
     const isOverLimit = maxLength ? charCount > maxLength : false
 
     const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-      setFocused(true)
-      onFocus?.(e)
+      props.onFocus?.(e)
     }
 
     const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-      setFocused(false)
-      onBlur?.(e)
+      props.onBlur?.(e)
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -152,13 +156,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       transition-colors duration-150
     `
 
-    const StatusIcon = () => {
-      if (loading) return <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground border-t-transparent" />
-      if (error) return <AlertCircle size={sizeStyles[size].icon} className="text-danger-500" />
-      if (success) return <Check size={sizeStyles[size].icon} className="text-success-500" />
-      return null
-    }
-
     return (
       <div className={baseContainerStyles}>
         {/* Label */}
@@ -196,7 +193,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             <div className={cn(iconContainerStyles, 'top-3 right-3')}>
               <div className="flex items-center gap-1">
                 {/* Status Icon */}
-                <StatusIcon />
+                <TextareaStatusIcon loading={loading} error={error} success={success} iconSize={sizeStyles[size].icon} />
                 
                 {/* Custom Right Icon */}
                 {RightIcon && !loading && !error && !success && (
@@ -237,4 +234,3 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 Textarea.displayName = 'Textarea'
 
 export { Textarea }
-export type { TextareaProps }

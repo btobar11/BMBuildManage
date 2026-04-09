@@ -3,13 +3,13 @@ import type { LucideIcon } from 'lucide-react'
 import { ChevronDown, AlertCircle, Check } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export type SelectOption = {
+export interface SelectOption {
   value: string | number
   label: string
   disabled?: boolean
 }
 
-export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
+export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
   /** Select label */
   label?: string
   /** Select size */
@@ -32,6 +32,13 @@ export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   placeholder?: string
   /** Full width select */
   fullWidth?: boolean
+}
+
+const SelectStatusIcon: React.FC<{ loading?: boolean; error?: string; success?: boolean; iconSize: number }> = ({ loading, error, success, iconSize }) => {
+  if (loading) return <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground border-t-transparent" />
+  if (error) return <AlertCircle size={iconSize} className="text-danger-500" />
+  if (success) return <Check size={iconSize} className="text-success-500" />
+  return null
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
@@ -61,7 +68,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
       ${fullWidth ? 'w-full' : 'w-auto'}
     `
 
-    const sizeStyles = {
+    const sizeStyles: Record<'sm' | 'md' | 'lg', {
+      select: string
+      icon: number
+      label: string
+    }> = {
       sm: {
         select: 'h-8 px-3 text-sm',
         icon: 14,
@@ -130,13 +141,6 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
       pointer-events-none
     `
 
-    const StatusIcon = () => {
-      if (loading) return <div className="animate-spin rounded-full h-4 w-4 border-2 border-muted-foreground border-t-transparent" />
-      if (error) return <AlertCircle size={sizeStyles[size].icon} className="text-danger-500" />
-      if (success) return <Check size={sizeStyles[size].icon} className="text-success-500" />
-      return null
-    }
-
     return (
       <div className={baseContainerStyles}>
         {/* Label */}
@@ -192,7 +196,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <div className={cn(iconContainerStyles, 'right-3')}>
             <div className="flex items-center gap-1">
               {/* Status Icon */}
-              <StatusIcon />
+              <SelectStatusIcon loading={loading} error={error} success={success} iconSize={sizeStyles[size].icon} />
               
               {/* Chevron (always present) */}
               <ChevronDown 
@@ -223,4 +227,3 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
 Select.displayName = 'Select'
 
 export { Select }
-export type { SelectProps, SelectOption }

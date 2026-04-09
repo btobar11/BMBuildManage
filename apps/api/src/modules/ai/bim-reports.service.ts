@@ -200,7 +200,7 @@ export interface ResourceAllocationReport {
 @Injectable()
 export class BIMReportsService {
   // Industry benchmarks for cost per m³ (Chilean market, 2024)
-  private readonly COST_BENCHMARKS = {
+  private readonly COST_BENCHMARKS: Record<string, number> = {
     Estructura: 850000, // CLP per m³
     Mampostería: 450000,
     Losas: 650000,

@@ -25,5 +25,17 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.spec.ts", "src/**/*.spec.tsx", "src/**/*.test.ts", "src/**/*.test.tsx", "src/test-setup.ts", "src/__tests__", "src/features/bim/__tests__", "src/features/budget/__tests__"]
+  "exclude": [
+    "src/**/*.spec.ts", 
+    "src/**/*.spec.tsx", 
+    "src/**/*.test.ts", 
+    "src/**/*.test.tsx", 
+    "src/test-setup.ts", 
+    "src/__tests__", 
+    "src/features/bim/__tests__", 
+    "src/features/budget/__tests__",
+    "src/features/bim/components/**/*",
+    "src/features/bim/hooks/**/*",
+    "src/features/bim/services/**/*"
+  ]
 }

@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react'
 import { Button } from './Button/Button'
 import { cn } from '../../utils/cn'
 
-export type EmptyStateProps = {
+export interface EmptyStateProps {
   /** Icon component */
   icon?: LucideIcon
   /** Empty state title */
@@ -130,5 +130,3 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     </div>
   )
 }
-
-export type { EmptyStateProps }

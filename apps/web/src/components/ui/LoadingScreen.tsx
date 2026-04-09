@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
 
-export type LoadingScreenProps = {
+export interface LoadingScreenProps {
   /** Loading message */
   message?: string
   /** Show logo */
@@ -110,5 +110,3 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     </div>
   )
 }
-
-export type { LoadingScreenProps }

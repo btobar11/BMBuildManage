@@ -20,7 +20,8 @@ import {
   X,
   RefreshCcw,
   ChevronRight,
-  Building2
+  Building2,
+  Trash2
 } from 'lucide-react';
 
 interface Project {

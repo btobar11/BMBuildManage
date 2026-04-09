@@ -219,15 +219,24 @@ export class BIM4DService {
       },
     });
 
-    const elementsState = scheduleElements.map((element) => ({
-      ifc_global_id: element.ifc_global_id,
-      status: element.status,
-      progress_percentage: element.progress_percentage,
-      activity_id: element.schedule_activity_id,
-      phase: element.construction_phase || 'unknown',
-      visible: true,
-      color: this.getStatusColor(element.status, element.progress_percentage),
-    }));
+    const elementsState = scheduleElements.map((element) => {
+      // Map status to allowed values
+      let mappedStatus: 'not_started' | 'in_progress' | 'completed' =
+        'not_started';
+      if (element.status === 'in_progress') mappedStatus = 'in_progress';
+      else if (element.status === 'completed') mappedStatus = 'completed';
+      else mappedStatus = 'not_started'; // delayed, on_hold, not_started all map to not_started
+
+      return {
+        ifc_global_id: element.ifc_global_id,
+        status: mappedStatus,
+        progress_percentage: element.progress_percentage,
+        activity_id: element.schedule_activity_id,
+        phase: element.construction_phase || 'unknown',
+        visible: true,
+        color: this.getStatusColor(element.status, element.progress_percentage),
+      };
+    });
 
     const summary = {
       total_elements: scheduleElements.length,
@@ -492,16 +501,18 @@ export class BIM4DService {
     }
 
     // Get BIM elements for the project to map to template phases
+    const { data: modelIds } = await this.supabase
+      .from('bim_models')
+      .select('id')
+      .eq('project_id', projectId);
+
     const { data: bimElements } = await this.supabase
       .from('bim_elements')
       .select('ifc_guid, ifc_type, name')
       .eq('company_id', companyId)
       .in(
         'model_id',
-        this.supabase
-          .from('bim_models')
-          .select('id')
-          .eq('project_id', projectId),
+        (modelIds || []).map((m) => m.id),
       );
 
     const scheduleElements: BIMScheduleElement[] = [];
