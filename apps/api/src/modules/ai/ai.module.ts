@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AIService } from './ai.service';
 import { AIController } from './ai.controller';
+import { BIMAnalyticsService } from './bim-analytics.service';
+import { BIMReportsService } from './bim-reports.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Project } from '../projects/project.entity';
 import { Budget } from '../budgets/budget.entity';
@@ -26,7 +28,12 @@ import { ProjectContingency } from '../contingencies/project-contingency.entity'
     ]),
   ],
   controllers: [AIController],
-  providers: [AIService, FinancialService],
-  exports: [AIService],
+  providers: [
+    AIService,
+    BIMAnalyticsService,
+    BIMReportsService,
+    FinancialService,
+  ],
+  exports: [AIService, BIMAnalyticsService, BIMReportsService],
 })
 export class AIModule {}

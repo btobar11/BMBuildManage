@@ -1,9 +1,9 @@
 import React from 'react'
-import { LucideIcon } from 'lucide-react'
-import { Button } from '../Button'
+import type { LucideIcon } from 'lucide-react'
+import { Button } from './Button/Button'
 import { cn } from '../../utils/cn'
 
-export interface EmptyStateProps {
+export type EmptyStateProps = {
   /** Icon component */
   icon?: LucideIcon
   /** Empty state title */

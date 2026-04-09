@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
 
-export interface SkeletonProps {
+export type SkeletonProps = {
   /** Skeleton variant */
   variant?: 'text' | 'circular' | 'rectangular' | 'rounded'
   /** Custom width */

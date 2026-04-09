@@ -37,6 +37,7 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
       '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+      '@typescript-eslint/unbound-method': 'off',
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },

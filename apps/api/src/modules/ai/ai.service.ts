@@ -7,6 +7,7 @@ import { Stage } from '../stages/stage.entity';
 import { Item } from '../items/item.entity';
 import { Worker } from '../workers/worker.entity';
 import { FinancialService } from '../budgets/financial.service';
+import { BIMAnalyticsService } from './bim-analytics.service';
 
 export interface AIInsight {
   type: 'warning' | 'opportunity' | 'risk' | 'recommendation';
@@ -65,6 +66,7 @@ export class AIService {
     private readonly workerRepository: Repository<Worker>,
     private readonly dataSource: DataSource,
     private readonly financialService: FinancialService,
+    private readonly bimAnalyticsService: BIMAnalyticsService,
   ) {}
 
   async processNaturalLanguageQuery(
@@ -128,6 +130,41 @@ export class AIService {
         intent: 'help',
       },
       { pattern: /^(hola|buenos|hi|hello)/i, intent: 'greeting' },
+      // NEW BIM INTELLIGENT PATTERNS
+      {
+        pattern: /^(bim|modelo|modelos|elementos?|ifc|3d)/i,
+        intent: 'bimElements',
+      },
+      {
+        pattern: /^(colisiones?|clashes?|conflictos?|interferencias?)/i,
+        intent: 'bimClashes',
+      },
+      {
+        pattern:
+          /^(cubicación|cubicaciones|cantidades?|volúmenes?|m3|m2|metros)/i,
+        intent: 'bimQuantities',
+      },
+      {
+        pattern: /^(pisos?|plantas?|storeys?|niveles?)/i,
+        intent: 'bimStoreys',
+      },
+      {
+        pattern:
+          /^(disciplinas?|arquitectura|estructura|mep|hvac|plumbing|electrical)/i,
+        intent: 'bimDisciplines',
+      },
+      {
+        pattern: /^(calidad|quality|consistencia|completitud)/i,
+        intent: 'bimQuality',
+      },
+      {
+        pattern: /^(concreto|hormigón|acero|madera|materiales?)/i,
+        intent: 'bimMaterials',
+      },
+      {
+        pattern: /^(optimización|eficiencia|desperdicio|waste|recursos)/i,
+        intent: 'bimOptimization',
+      },
     ];
 
     let detectedIntent = 'general';
@@ -169,6 +206,63 @@ export class AIService {
         );
       case 'prediction':
         return await this.predictProjectOutcome(companyId, context?.projectId);
+      // NEW BIM INTELLIGENT HANDLERS
+      case 'bimElements':
+        return await this.handleBIMElementsQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
+      case 'bimClashes':
+        return await this.handleBIMClashesQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
+      case 'bimQuantities':
+        return await this.handleBIMQuantitiesQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
+      case 'bimStoreys':
+        return await this.handleBIMStoreysQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
+      case 'bimDisciplines':
+        return await this.handleBIMDisciplinesQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
+      case 'bimQuality':
+        return await this.handleBIMQualityQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
+      case 'bimMaterials':
+        return await this.handleBIMMaterialsQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
+      case 'bimOptimization':
+        return await this.handleBIMOptimizationQuery(
+          companyId,
+          context?.projectId,
+          query,
+          entities,
+        );
       default:
         return this.handleGeneralQuery(companyId, context?.projectId, query);
     }
@@ -974,6 +1068,782 @@ export class AIService {
     } catch (error) {
       console.error('Error in generateProjectReport:', error);
       return null;
+    }
+  }
+
+  // =====================================================
+  // BIM INTELLIGENT QUERY HANDLERS
+  // =====================================================
+
+  private async handleBIMElementsQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const summary = await this.bimAnalyticsService.getBIMSummaryInsights(
+        companyId,
+        projectId,
+      );
+
+      // Extract specific IFC type from query
+      const ifcTypeMatch = query?.match(
+        /(ifc\w+|wall|slab|column|beam|door|window|stair)/i,
+      );
+      let specificType = ifcTypeMatch?.[1]?.toLowerCase();
+
+      // Map common terms to IFC types
+      const typeMapping: Record<string, string> = {
+        wall: 'IfcWall',
+        muro: 'IfcWall',
+        slab: 'IfcSlab',
+        losa: 'IfcSlab',
+        column: 'IfcColumn',
+        columna: 'IfcColumn',
+        beam: 'IfcBeam',
+        viga: 'IfcBeam',
+        door: 'IfcDoor',
+        puerta: 'IfcDoor',
+        window: 'IfcWindow',
+        ventana: 'IfcWindow',
+        stair: 'IfcStair',
+        escalera: 'IfcStair',
+      };
+
+      if (specificType && typeMapping[specificType]) {
+        specificType = typeMapping[specificType];
+      }
+
+      if (specificType && specificType.startsWith('ifc')) {
+        // Specific element type query
+        const elements = await this.bimAnalyticsService.getBIMElements(
+          companyId,
+          {
+            projectId,
+            ifcType:
+              specificType.charAt(0).toUpperCase() + specificType.slice(1),
+          },
+        );
+
+        const totalVolume = elements.reduce(
+          (sum, el) => sum + (el.quantities.netVolume || 0),
+          0,
+        );
+        const totalArea = elements.reduce(
+          (sum, el) => sum + (el.quantities.netArea || 0),
+          0,
+        );
+
+        let answer = `Encontré ${elements.length} elementos ${specificType}. `;
+        if (totalVolume > 0)
+          answer += `Volumen total: ${totalVolume.toFixed(2)} m³. `;
+        if (totalArea > 0) answer += `Área total: ${totalArea.toFixed(2)} m². `;
+
+        return {
+          answer,
+          data: { elements: elements.slice(0, 10), totalVolume, totalArea },
+          sources: ['BIM Model'],
+          confidence: 0.95,
+          actionable: true,
+          suggestedActions:
+            elements.length > 0
+              ? ['Ver detalles de elementos', 'Generar reporte']
+              : [],
+        };
+      }
+
+      // General BIM elements summary
+      let answer = `Tu modelo BIM tiene ${summary.totalElements} elementos. `;
+      if (summary.totalVolume > 0)
+        answer += `Volumen total: ${summary.totalVolume.toFixed(2)} m³. `;
+      answer += `Progreso: ${summary.progressPercentage}%. `;
+      answer += `Calidad: ${summary.qualityScore}%.`;
+
+      if (summary.criticalIssues.length > 0) {
+        answer += ` ⚠️ Problemas: ${summary.criticalIssues[0]}.`;
+      }
+
+      return {
+        answer,
+        data: summary,
+        sources: ['BIM Model'],
+        confidence: 0.9,
+        actionable: summary.criticalIssues.length > 0,
+        suggestedActions: summary.keyRecommendations,
+      };
+    } catch (error) {
+      console.error('Error in handleBIMElementsQuery:', error);
+      return {
+        answer:
+          'No pude analizar los elementos BIM. Verifica que tengas modelos cargados.',
+        confidence: 0.5,
+        sources: [],
+      };
+    }
+  }
+
+  private async handleBIMClashesQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const clashAnalysis =
+        await this.bimAnalyticsService.generateClashAnalysis(
+          companyId,
+          projectId,
+        );
+
+      // Check for specific severity or type queries
+      const severityMatch = query?.match(
+        /(critical|crítico|high|alto|medium|medio|low|bajo)/i,
+      );
+      const typeMatch = query?.match(
+        /(hard|soft|clearance|estructural|instalaciones)/i,
+      );
+
+      let answer = `Tienes ${clashAnalysis.totalClashes} colisiones detectadas. `;
+
+      if (clashAnalysis.criticalUnresolved > 0) {
+        answer += `🚨 ${clashAnalysis.criticalUnresolved} CRÍTICAS sin resolver. `;
+      }
+
+      answer += `Resueltas: ${clashAnalysis.resolvedPercentage.toFixed(1)}%. `;
+
+      if (clashAnalysis.avgResolutionTime > 0) {
+        answer += `Tiempo promedio de resolución: ${clashAnalysis.avgResolutionTime.toFixed(1)} días.`;
+      }
+
+      // Specific filtering based on query
+      if (severityMatch) {
+        const severity = severityMatch[1].toLowerCase();
+        const severityMap: Record<string, string> = {
+          critical: 'critical',
+          crítico: 'critical',
+          high: 'high',
+          alto: 'high',
+          medium: 'medium',
+          medio: 'medium',
+          low: 'low',
+          bajo: 'low',
+        };
+
+        const mappedSeverity = severityMap[severity];
+        if (
+          mappedSeverity &&
+          clashAnalysis.bySeverity[
+            mappedSeverity as keyof typeof clashAnalysis.bySeverity
+          ] !== undefined
+        ) {
+          const count =
+            clashAnalysis.bySeverity[
+              mappedSeverity as keyof typeof clashAnalysis.bySeverity
+            ];
+          answer = `Colisiones ${severity}: ${count}.`;
+        }
+      }
+
+      const actionable =
+        clashAnalysis.criticalUnresolved > 0 ||
+        clashAnalysis.resolvedPercentage < 80;
+      const actions: string[] = [];
+
+      if (clashAnalysis.criticalUnresolved > 0) {
+        actions.push('Resolver colisiones críticas inmediatamente');
+      }
+      if (clashAnalysis.resolvedPercentage < 50) {
+        actions.push('Asignar recursos para resolución de colisiones');
+      }
+      if (clashAnalysis.avgResolutionTime > 7) {
+        actions.push('Optimizar proceso de resolución de colisiones');
+      }
+
+      return {
+        answer,
+        data: clashAnalysis,
+        sources: ['BIM Clash Detection'],
+        confidence: 0.95,
+        actionable,
+        suggestedActions: actions,
+      };
+    } catch (error) {
+      console.error('Error in handleBIMClashesQuery:', error);
+      return {
+        answer:
+          'No pude analizar las colisiones BIM. Ejecuta un análisis de colisiones primero.',
+        confidence: 0.5,
+        sources: [],
+      };
+    }
+  }
+
+  private async handleBIMQuantitiesQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const costAnalysis = await this.bimAnalyticsService.generateCostAnalysis(
+        companyId,
+        projectId,
+      );
+
+      // Extract material type from query
+      const materialMatch = query?.match(
+        /(concreto|hormigón|concrete|acero|steel|madera|wood)/i,
+      );
+
+      if (materialMatch) {
+        const material = materialMatch[1].toLowerCase();
+        const materialTypes: Record<string, string[]> = {
+          concreto: [
+            'IfcSlab',
+            'IfcWall',
+            'IfcColumn',
+            'IfcBeam',
+            'IfcFooting',
+          ],
+          hormigón: [
+            'IfcSlab',
+            'IfcWall',
+            'IfcColumn',
+            'IfcBeam',
+            'IfcFooting',
+          ],
+          concrete: [
+            'IfcSlab',
+            'IfcWall',
+            'IfcColumn',
+            'IfcBeam',
+            'IfcFooting',
+          ],
+          acero: ['IfcBeam', 'IfcColumn'],
+          steel: ['IfcBeam', 'IfcColumn'],
+          madera: ['IfcBeam', 'IfcColumn'],
+          wood: ['IfcBeam', 'IfcColumn'],
+        };
+
+        const relevantTypes = materialTypes[material] || [];
+        const relevantAnalysis = costAnalysis.filter((ca) =>
+          relevantTypes.includes(ca.ifcType),
+        );
+
+        const totalVolume = relevantAnalysis.reduce(
+          (sum, ca) => sum + ca.totalVolume,
+          0,
+        );
+        const totalCost = relevantAnalysis.reduce(
+          (sum, ca) => sum + ca.totalCost,
+          0,
+        );
+
+        let answer = `${material.toUpperCase()}: ${totalVolume.toFixed(2)} m³ planificados. `;
+        if (totalCost > 0)
+          answer += `Costo total: $${totalCost.toLocaleString()}. `;
+
+        return {
+          answer,
+          data: {
+            material,
+            analysis: relevantAnalysis,
+            totalVolume,
+            totalCost,
+          },
+          sources: ['BIM Quantities'],
+          confidence: 0.9,
+          actionable: true,
+          suggestedActions: [
+            'Ver desglose por elemento',
+            'Comparar con presupuesto',
+          ],
+        };
+      }
+
+      // General quantities summary
+      const totalVolume = costAnalysis.reduce(
+        (sum, ca) => sum + ca.totalVolume,
+        0,
+      );
+      const totalArea = costAnalysis.reduce((sum, ca) => sum + ca.totalArea, 0);
+      const totalCost = costAnalysis.reduce((sum, ca) => sum + ca.totalCost, 0);
+
+      let answer = `Cantidades totales: ${totalVolume.toFixed(2)} m³, ${totalArea.toFixed(2)} m². `;
+      if (totalCost > 0)
+        answer += `Costo estimado: $${totalCost.toLocaleString()}. `;
+
+      const topTypes = costAnalysis
+        .sort((a, b) => b.totalVolume - a.totalVolume)
+        .slice(0, 3)
+        .map((ca) => `${ca.ifcType}: ${ca.totalVolume.toFixed(1)}m³`)
+        .join(', ');
+
+      if (topTypes) answer += `Principales: ${topTypes}.`;
+
+      return {
+        answer,
+        data: { costAnalysis, totalVolume, totalArea, totalCost },
+        sources: ['BIM Quantities'],
+        confidence: 0.9,
+        actionable: true,
+        suggestedActions: [
+          'Ver análisis detallado por tipo',
+          'Exportar cantidades',
+        ],
+      };
+    } catch (error) {
+      console.error('Error in handleBIMQuantitiesQuery:', error);
+      return {
+        answer:
+          'No pude analizar las cantidades BIM. Verifica que tengas elementos con cubicación.',
+        confidence: 0.5,
+        sources: [],
+      };
+    }
+  }
+
+  private async handleBIMStoreysQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const progressAnalysis =
+        await this.bimAnalyticsService.generateProgressAnalysis(
+          companyId,
+          projectId,
+        );
+
+      // Extract specific storey from query
+      const storeyMatch = query?.match(
+        /(piso\s*\d+|planta\s*\d+|level\s*\d+|pB|pb|basement|sótano)/i,
+      );
+
+      if (storeyMatch) {
+        const storeyQuery = storeyMatch[1];
+        const storeyData = Object.entries(progressAnalysis.byStorey).find(
+          ([storey]) =>
+            storey.toLowerCase().includes(storeyQuery.toLowerCase()),
+        );
+
+        if (storeyData) {
+          const [storeyName, data] = storeyData;
+          let answer = `${storeyName}: ${data.total} elementos, ${data.percentage.toFixed(1)}% completado. `;
+          if (data.volume > 0)
+            answer += `Volumen: ${data.volume.toFixed(2)} m³.`;
+
+          return {
+            answer,
+            data: { storey: storeyName, ...data },
+            sources: ['BIM Progress'],
+            confidence: 0.95,
+            actionable: data.percentage < 80,
+            suggestedActions:
+              data.percentage < 50 ? ['Acelerar trabajo en este piso'] : [],
+          };
+        }
+      }
+
+      // General storeys summary
+      const storeyCount = Object.keys(progressAnalysis.byStorey).length;
+      const avgProgress =
+        Object.values(progressAnalysis.byStorey).reduce(
+          (sum, data) => sum + data.percentage,
+          0,
+        ) / storeyCount;
+
+      const slowestStoreys = Object.entries(progressAnalysis.byStorey)
+        .filter(([_, data]) => data.percentage < 50)
+        .map(([storey]) => storey);
+
+      let answer = `${storeyCount} pisos/niveles en el proyecto. Progreso promedio: ${avgProgress.toFixed(1)}%. `;
+
+      if (slowestStoreys.length > 0) {
+        answer += `⚠️ Pisos con retraso: ${slowestStoreys.join(', ')}.`;
+      } else {
+        answer += '✅ Todos los pisos van según cronograma.';
+      }
+
+      return {
+        answer,
+        data: {
+          storeyCount,
+          avgProgress,
+          byStorey: progressAnalysis.byStorey,
+          slowestStoreys,
+        },
+        sources: ['BIM Progress'],
+        confidence: 0.9,
+        actionable: slowestStoreys.length > 0,
+        suggestedActions:
+          slowestStoreys.length > 0
+            ? ['Revisar recursos en pisos con retraso']
+            : ['Mantener ritmo actual'],
+      };
+    } catch (error) {
+      console.error('Error in handleBIMStoreysQuery:', error);
+      return {
+        answer:
+          'No pude analizar el progreso por pisos. Verifica la asignación de elementos a niveles.',
+        confidence: 0.5,
+        sources: [],
+      };
+    }
+  }
+
+  private async handleBIMDisciplinesQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const clashAnalysis =
+        await this.bimAnalyticsService.generateClashAnalysis(
+          companyId,
+          projectId,
+        );
+
+      // Extract specific discipline from query
+      const disciplineMatch = query?.match(
+        /(arquitectura|architecture|estructura|structure|mep|hvac|plumbing|electrical)/i,
+      );
+
+      if (disciplineMatch) {
+        const discipline = disciplineMatch[1].toLowerCase();
+        const disciplineMap: Record<string, string> = {
+          arquitectura: 'architecture',
+          architecture: 'architecture',
+          estructura: 'structure',
+          structure: 'structure',
+          mep: 'mep',
+          hvac: 'mep_hvac',
+          plumbing: 'mep_plumbing',
+          electrical: 'mep_electrical',
+        };
+
+        const mappedDiscipline = disciplineMap[discipline];
+        if (mappedDiscipline) {
+          const disciplineClashes = Object.entries(clashAnalysis.byDiscipline)
+            .filter(([key]) => key.includes(mappedDiscipline))
+            .reduce((sum, [_, count]) => sum + count, 0);
+
+          const answer = `Disciplina ${discipline}: ${disciplineClashes} colisiones detectadas.`;
+
+          return {
+            answer,
+            data: { discipline: mappedDiscipline, clashes: disciplineClashes },
+            sources: ['BIM Disciplines'],
+            confidence: 0.9,
+            actionable: disciplineClashes > 0,
+            suggestedActions:
+              disciplineClashes > 0
+                ? [`Revisar colisiones en ${discipline}`]
+                : [],
+          };
+        }
+      }
+
+      // General discipline analysis
+      const disciplineStats = Object.entries(clashAnalysis.byDiscipline)
+        .sort(([_, a], [__, b]) => b - a)
+        .slice(0, 5);
+
+      let answer = `Análisis por disciplinas: `;
+      if (disciplineStats.length > 0) {
+        const topClashes = disciplineStats
+          .map(([disciplines, count]) => `${disciplines}: ${count}`)
+          .join(', ');
+        answer += topClashes + '.';
+      } else {
+        answer += 'No hay colisiones interdisciplinarias detectadas.';
+      }
+
+      return {
+        answer,
+        data: { byDiscipline: clashAnalysis.byDiscipline },
+        sources: ['BIM Disciplines'],
+        confidence: 0.85,
+        actionable: disciplineStats.length > 0,
+        suggestedActions:
+          disciplineStats.length > 0
+            ? ['Coordinar reunión interdisciplinaria']
+            : [],
+      };
+    } catch (error) {
+      console.error('Error in handleBIMDisciplinesQuery:', error);
+      return {
+        answer:
+          'No pude analizar las disciplinas. Verifica que tengas modelos federados.',
+        confidence: 0.5,
+        sources: [],
+      };
+    }
+  }
+
+  private async handleBIMQualityQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const qualityMetrics =
+        await this.bimAnalyticsService.generateQualityMetrics(
+          companyId,
+          projectId,
+        );
+
+      let answer = `Calidad del modelo BIM: ${qualityMetrics.qualityScore.toFixed(1)}%. `;
+      answer += `Completitud: ${qualityMetrics.modelCompleteness.toFixed(1)}%. `;
+      answer += `Consistencia: ${qualityMetrics.dataConsistency.toFixed(1)}%. `;
+
+      if (qualityMetrics.elementsWithIssues > 0) {
+        answer += `⚠️ ${qualityMetrics.elementsWithIssues} elementos con problemas.`;
+      }
+
+      // Top issues
+      const topIssues = qualityMetrics.commonIssues
+        .filter(
+          (issue) => issue.impact === 'high' || issue.impact === 'critical',
+        )
+        .slice(0, 3);
+
+      if (topIssues.length > 0) {
+        answer += ` Problemas principales: ${topIssues.map((i) => i.issue).join(', ')}.`;
+      }
+
+      const recommendations: string[] = [];
+      if (qualityMetrics.qualityScore < 70) {
+        recommendations.push('Mejorar calidad de datos del modelo');
+      }
+      if (qualityMetrics.modelCompleteness < 80) {
+        recommendations.push('Completar información faltante');
+      }
+      if (qualityMetrics.dataConsistency < 80) {
+        recommendations.push('Estandarizar nomenclatura de elementos');
+      }
+
+      return {
+        answer,
+        data: qualityMetrics,
+        sources: ['BIM Quality Analysis'],
+        confidence: 0.95,
+        actionable: qualityMetrics.qualityScore < 80,
+        suggestedActions: recommendations,
+      };
+    } catch (error) {
+      console.error('Error in handleBIMQualityQuery:', error);
+      return {
+        answer: 'No pude analizar la calidad del modelo BIM.',
+        confidence: 0.5,
+        sources: [],
+      };
+    }
+  }
+
+  private async handleBIMMaterialsQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const costAnalysis = await this.bimAnalyticsService.generateCostAnalysis(
+        companyId,
+        projectId,
+      );
+
+      // Material-specific analysis based on IFC types
+      const materialMapping: Record<string, string[]> = {
+        'Concreto/Hormigón': [
+          'IfcSlab',
+          'IfcWall',
+          'IfcColumn',
+          'IfcBeam',
+          'IfcFooting',
+        ],
+        Acero: ['IfcBeam', 'IfcColumn'],
+        Mampostería: ['IfcWall'],
+        Madera: ['IfcBeam', 'IfcColumn'],
+        Vidrio: ['IfcWindow', 'IfcCurtainWall'],
+        Acabados: ['IfcCovering', 'IfcDoor'],
+      };
+
+      const materialAnalysis = Object.entries(materialMapping)
+        .map(([material, ifcTypes]) => {
+          const relevantAnalysis = costAnalysis.filter((ca) =>
+            ifcTypes.includes(ca.ifcType),
+          );
+          return {
+            material,
+            volume: relevantAnalysis.reduce(
+              (sum, ca) => sum + ca.totalVolume,
+              0,
+            ),
+            area: relevantAnalysis.reduce((sum, ca) => sum + ca.totalArea, 0),
+            cost: relevantAnalysis.reduce((sum, ca) => sum + ca.totalCost, 0),
+            elements: relevantAnalysis.reduce(
+              (sum, ca) => sum + ca.elementCount,
+              0,
+            ),
+          };
+        })
+        .filter((ma) => ma.volume > 0 || ma.area > 0);
+
+      if (materialAnalysis.length === 0) {
+        return {
+          answer: 'No encontré información de materiales en el modelo BIM.',
+          confidence: 0.8,
+          sources: [],
+        };
+      }
+
+      // Sort by volume/cost
+      materialAnalysis.sort((a, b) => b.volume + b.area - (a.volume + a.area));
+
+      const topMaterial = materialAnalysis[0];
+      const totalCost = materialAnalysis.reduce((sum, ma) => sum + ma.cost, 0);
+
+      let answer = `Análisis de materiales: Material principal es ${topMaterial.material} `;
+      if (topMaterial.volume > 0)
+        answer += `(${topMaterial.volume.toFixed(2)} m³). `;
+      if (topMaterial.area > 0)
+        answer += `(${topMaterial.area.toFixed(2)} m²). `;
+
+      if (totalCost > 0) {
+        answer += `Costo total de materiales: $${totalCost.toLocaleString()}. `;
+        const costShare = (topMaterial.cost / totalCost) * 100;
+        answer += `${topMaterial.material} representa ${costShare.toFixed(1)}% del costo.`;
+      }
+
+      // Check for material optimization opportunities
+      const optimizationTips: string[] = [];
+      const highCostMaterials = materialAnalysis.filter(
+        (ma) => ma.cost > totalCost * 0.3,
+      );
+      if (highCostMaterials.length > 0) {
+        optimizationTips.push(
+          `Evaluar alternativas para ${highCostMaterials.map((m) => m.material).join(', ')}`,
+        );
+      }
+
+      return {
+        answer,
+        data: { materialAnalysis, totalCost },
+        sources: ['BIM Materials Analysis'],
+        confidence: 0.9,
+        actionable: optimizationTips.length > 0,
+        suggestedActions:
+          optimizationTips.length > 0
+            ? optimizationTips
+            : ['Verificar especificaciones de materiales'],
+      };
+    } catch (error) {
+      console.error('Error in handleBIMMaterialsQuery:', error);
+      return {
+        answer: 'No pude analizar los materiales del modelo BIM.',
+        confidence: 0.5,
+        sources: [],
+      };
+    }
+  }
+
+  private async handleBIMOptimizationQuery(
+    companyId: string,
+    projectId?: string,
+    query?: string,
+    entities?: any,
+  ): Promise<NLPQueryResult> {
+    try {
+      const optimization =
+        await this.bimAnalyticsService.generateResourceOptimization(
+          companyId,
+          projectId,
+        );
+
+      let answer = 'Análisis de optimización BIM: ';
+
+      // Material waste analysis
+      if (optimization.materialWaste.length > 0) {
+        const totalWaste = optimization.materialWaste.reduce(
+          (sum, w) => sum + w.costImpact,
+          0,
+        );
+        const highestWaste = optimization.materialWaste[0];
+
+        answer += `Desperdicio detectado: $${totalWaste.toLocaleString()}. `;
+        answer += `Mayor problema: ${highestWaste.type} (${highestWaste.wastePercentage.toFixed(1)}% desperdicio). `;
+      }
+
+      // Labor efficiency analysis
+      if (optimization.laborEfficiency.length > 0) {
+        const avgEfficiency =
+          optimization.laborEfficiency.reduce(
+            (sum, l) => sum + l.efficiency,
+            0,
+          ) / optimization.laborEfficiency.length;
+
+        const inefficientZones = optimization.laborEfficiency.filter(
+          (l) => l.efficiency < 80,
+        );
+
+        answer += `Eficiencia laboral promedio: ${avgEfficiency.toFixed(1)}%. `;
+        if (inefficientZones.length > 0) {
+          answer += `Zonas con baja eficiencia: ${inefficientZones.map((z) => z.zone).join(', ')}. `;
+        }
+      }
+
+      // Equipment utilization
+      if (optimization.equipmentUtilization.length > 0) {
+        const overUtilized = optimization.equipmentUtilization.filter(
+          (e) => e.utilization > 100,
+        );
+        const underUtilized = optimization.equipmentUtilization.filter(
+          (e) => e.utilization < 70,
+        );
+
+        if (overUtilized.length > 0) {
+          answer += `Equipos sobrecargados: ${overUtilized.map((e) => e.equipment).join(', ')}. `;
+        }
+        if (underUtilized.length > 0) {
+          answer += `Equipos subutilizados: ${underUtilized.map((e) => e.equipment).join(', ')}. `;
+        }
+      }
+
+      // Recommendations
+      const recommendations = optimization.optimizationRecommendations;
+      if (recommendations.length > 0) {
+        answer += `💡 Recomendaciones principales: ${recommendations.slice(0, 2).join(', ')}.`;
+      }
+
+      const hasOptimizationOpportunities =
+        optimization.materialWaste.length > 0 ||
+        optimization.laborEfficiency.some((l) => l.efficiency < 85) ||
+        optimization.equipmentUtilization.some(
+          (e) => e.utilization < 70 || e.utilization > 110,
+        );
+
+      return {
+        answer,
+        data: optimization,
+        sources: ['BIM Optimization Analysis'],
+        confidence: 0.85,
+        actionable: hasOptimizationOpportunities,
+        suggestedActions: recommendations.slice(0, 3),
+      };
+    } catch (error) {
+      console.error('Error in handleBIMOptimizationQuery:', error);
+      return {
+        answer:
+          'No pude generar análisis de optimización. Verifica que tengas suficientes datos.',
+        confidence: 0.5,
+        sources: [],
+        suggestedActions: ['Asegurar integración BIM-presupuesto completa'],
+      };
     }
   }
 }

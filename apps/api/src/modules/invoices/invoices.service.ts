@@ -33,7 +33,7 @@ export class InvoicesService {
 
   async findOne(id: string, companyId: string) {
     const invoice = await this.invoiceRepository.findOne({
-      where: { 
+      where: {
         id,
         company_id: companyId,
       },

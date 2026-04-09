@@ -1,6 +1,7 @@
 import React from 'react'
-import { LucideIcon } from 'lucide-react'
-import { Button, ButtonProps } from './Button'
+import type { LucideIcon } from 'lucide-react'
+import { Button } from './Button'
+import type { ButtonProps } from './Button'
 
 interface IconButtonProps extends Omit<ButtonProps, 'leftIcon' | 'rightIcon' | 'iconOnly'> {
   /** Icon component to display */

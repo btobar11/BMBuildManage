@@ -1,8 +1,8 @@
 import React, { forwardRef } from 'react'
-import { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+export type CardHeaderProps = React.HTMLAttributes<HTMLDivElement> & {
   /** Header title */
   title?: string
   /** Header subtitle/description */

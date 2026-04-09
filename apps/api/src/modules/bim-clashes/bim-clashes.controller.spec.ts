@@ -14,6 +14,15 @@ const mockBimClashesService = {
   remove: jest.fn(),
   removeByJob: jest.fn(),
   getClashSummary: jest.fn(),
+  createFederatedJob: jest.fn(),
+  findAllFederatedJobs: jest.fn(),
+  findOneFederatedJob: jest.fn(),
+  startFederatedClashDetection: jest.fn(),
+  getFederatedJobProgress: jest.fn(),
+  findFederatedClashes: jest.fn(),
+  updateFederatedClash: jest.fn(),
+  addClashComment: jest.fn(),
+  getClashComments: jest.fn(),
 };
 
 const mockAuthGuard = {
@@ -233,6 +242,207 @@ describe('BimClashesController', () => {
       expect(mockBimClashesService.getClashSummary).toHaveBeenCalledWith(
         'company-1',
         'project-1',
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('createFederatedJob', () => {
+    it('should create a federated clash job', async () => {
+      const dto = {
+        project_id: 'project-1',
+        federation_id: 'fed-1',
+        enabled_disciplines: ['structure', 'mep_hvac'],
+      };
+      const mockResult = { id: 'fed-job-1', ...dto };
+      mockBimClashesService.createFederatedJob.mockResolvedValue(mockResult);
+
+      const result = await controller.createFederatedJob(dto, mockRequest);
+
+      expect(mockBimClashesService.createFederatedJob).toHaveBeenCalledWith({
+        ...dto,
+        company_id: 'company-1',
+      });
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('findAllFederatedJobs', () => {
+    it('should return all federated clash jobs', async () => {
+      const mockResult = [{ id: 'fed-job-1' }, { id: 'fed-job-2' }];
+      mockBimClashesService.findAllFederatedJobs.mockResolvedValue(mockResult);
+
+      const result = await controller.findAllFederatedJobs(mockRequest);
+
+      expect(mockBimClashesService.findAllFederatedJobs).toHaveBeenCalledWith(
+        'company-1',
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('findOneFederatedJob', () => {
+    it('should return a single federated clash job', async () => {
+      const mockResult = { id: 'fed-job-1' };
+      mockBimClashesService.findOneFederatedJob.mockResolvedValue(mockResult);
+
+      const result = await controller.findOneFederatedJob(
+        'fed-job-1',
+        mockRequest,
+      );
+
+      expect(mockBimClashesService.findOneFederatedJob).toHaveBeenCalledWith(
+        'fed-job-1',
+        'company-1',
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('startFederatedJob', () => {
+    it('should start federated job', async () => {
+      const mockResult = { success: true, message: 'Started' };
+      mockBimClashesService.startFederatedClashDetection.mockResolvedValue(
+        mockResult,
+      );
+
+      const result = await controller.startFederatedJob(
+        'fed-job-1',
+        mockRequest,
+      );
+
+      expect(
+        mockBimClashesService.startFederatedClashDetection,
+      ).toHaveBeenCalledWith('fed-job-1', 'company-1');
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getFederatedJobProgress', () => {
+    it('should return federated job progress', async () => {
+      const mockResult = { progress: 50, status: 'running' };
+      mockBimClashesService.getFederatedJobProgress.mockResolvedValue(
+        mockResult,
+      );
+
+      const result = await controller.getFederatedJobProgress(
+        'fed-job-1',
+        mockRequest,
+      );
+
+      expect(
+        mockBimClashesService.getFederatedJobProgress,
+      ).toHaveBeenCalledWith('fed-job-1', 'company-1');
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('findFederatedClashes', () => {
+    it('should return federated clashes with filters', async () => {
+      const mockResult: any[] = [{ id: 'clash-1' }];
+      mockBimClashesService.findFederatedClashes.mockResolvedValue(mockResult);
+
+      const result = await controller.findFederatedClashes(
+        mockRequest,
+        'fed-job-1',
+        'structure',
+        'mep_hvac',
+        'open',
+        'high',
+      );
+
+      expect(mockBimClashesService.findFederatedClashes).toHaveBeenCalledWith(
+        'company-1',
+        {
+          federationJobId: 'fed-job-1',
+          disciplineA: 'structure',
+          disciplineB: 'mep_hvac',
+          status: 'open',
+          severity: 'high',
+        },
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should return federated clashes without filters', async () => {
+      const mockResult: any[] = [];
+      mockBimClashesService.findFederatedClashes.mockResolvedValue(mockResult);
+
+      const result = await controller.findFederatedClashes(
+        mockRequest,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
+
+      expect(mockBimClashesService.findFederatedClashes).toHaveBeenCalledWith(
+        'company-1',
+        {
+          federationJobId: undefined,
+          disciplineA: undefined,
+          disciplineB: undefined,
+          status: undefined,
+          severity: undefined,
+        },
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('updateFederatedClash', () => {
+    it('should update a federated clash', async () => {
+      const dto = { status: 'resolved' as const, resolution_notes: 'Fixed' };
+      const mockResult = { id: 'clash-1', ...dto };
+      mockBimClashesService.updateFederatedClash.mockResolvedValue(mockResult);
+
+      const result = await controller.updateFederatedClash(
+        'clash-1',
+        dto,
+        mockRequest,
+      );
+
+      expect(mockBimClashesService.updateFederatedClash).toHaveBeenCalledWith(
+        'clash-1',
+        'company-1',
+        dto,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('addClashComment', () => {
+    it('should add a comment to a clash', async () => {
+      const dto = { content: 'Test comment', author_email: 'test@test.com' };
+      const mockResult = { id: 'comment-1', ...dto };
+      mockBimClashesService.addClashComment.mockResolvedValue(mockResult);
+
+      const result = await controller.addClashComment(
+        'clash-1',
+        dto,
+        mockRequest,
+      );
+
+      expect(mockBimClashesService.addClashComment).toHaveBeenCalledWith(
+        'clash-1',
+        'company-1',
+        dto,
+      );
+      expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('getClashComments', () => {
+    it('should return comments for a clash', async () => {
+      const mockResult = [{ id: 'comment-1', content: 'Test' }];
+      mockBimClashesService.getClashComments.mockResolvedValue(mockResult);
+
+      const result = await controller.getClashComments('clash-1', mockRequest);
+
+      expect(mockBimClashesService.getClashComments).toHaveBeenCalledWith(
+        'clash-1',
+        'company-1',
       );
       expect(result).toEqual(mockResult);
     });

@@ -85,7 +85,20 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
+      "!**/*.spec.ts",
+      "!**/index.ts",
+      "main.ts",
+      "telemetry.service.ts",
+      "**/config/**",
+      "**/common/index.ts",
+      "!**/*.module.ts",
       "**/*.(t|j)s"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "main.ts",
+      "telemetry.service.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

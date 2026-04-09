@@ -14,6 +14,40 @@ export interface ClashJobResult {
   clearanceDistance?: number;
 }
 
+export interface FederatedClashJob {
+  id: string;
+  company_id: string;
+  project_id: string;
+  federation_id: string;
+  tolerance_mm: number;
+  enabled_disciplines: string[];
+  severity_threshold: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress: number;
+  clashes_found: number;
+  models_processed: number;
+  total_models: number;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FederatedClash extends Clash {
+  federation_job_id: string;
+  discipline_a: string;
+  discipline_b: string;
+  element_a_name: string;
+  element_b_name: string;
+  clash_center_x: number | null;
+  clash_center_y: number | null;
+  clash_center_z: number | null;
+  assigned_to: string | null;
+  comments: any[];
+  tolerance_used: number;
+}
+
 export interface ClashJob {
   id: string;
   company_id: string;
@@ -460,5 +494,419 @@ export class BimClashesService {
     if (volume > 1) return 'high';
     if (volume > 0.1) return 'medium';
     return 'low';
+  }
+
+  // Federated Clash Detection Methods
+
+  async createFederatedJob(data: {
+    company_id: string;
+    project_id: string;
+    federation_id: string;
+    tolerance_mm?: number;
+    enabled_disciplines: string[];
+    severity_threshold?: string;
+  }): Promise<FederatedClashJob> {
+    const { data: job, error } = await this.supabase
+      .from('bim_federated_clash_jobs')
+      .insert({
+        company_id: data.company_id,
+        project_id: data.project_id,
+        federation_id: data.federation_id,
+        tolerance_mm: data.tolerance_mm || 10,
+        enabled_disciplines: data.enabled_disciplines,
+        severity_threshold: data.severity_threshold || 'medium',
+        status: 'pending',
+        progress: 0,
+        clashes_found: 0,
+        models_processed: 0,
+        total_models: 0,
+      })
+      .select()
+      .single();
+
+    if (error)
+      throw new Error(`Failed to create federated clash job: ${error.message}`);
+    return job as FederatedClashJob;
+  }
+
+  async findAllFederatedJobs(companyId: string): Promise<FederatedClashJob[]> {
+    const { data, error } = await this.supabase
+      .from('bim_federated_clash_jobs')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false });
+
+    if (error)
+      throw new Error(`Failed to fetch federated clash jobs: ${error.message}`);
+    return (data || []) as FederatedClashJob[];
+  }
+
+  async findOneFederatedJob(
+    id: string,
+    companyId: string,
+  ): Promise<FederatedClashJob | null> {
+    const { data, error } = await this.supabase
+      .from('bim_federated_clash_jobs')
+      .select('*')
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to fetch federated clash job: ${error.message}`);
+    }
+    return data as FederatedClashJob | null;
+  }
+
+  async startFederatedClashDetection(
+    jobId: string,
+    companyId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const job = await this.findOneFederatedJob(jobId, companyId);
+    if (!job) {
+      throw new Error('Federated clash job not found');
+    }
+
+    if (job.status !== 'pending') {
+      throw new Error(`Job is already ${job.status}`);
+    }
+
+    // Update job status to running
+    const { error: updateError } = await this.supabase
+      .from('bim_federated_clash_jobs')
+      .update({
+        status: 'running',
+        started_at: new Date().toISOString(),
+        progress: 0,
+      })
+      .eq('id', jobId);
+
+    if (updateError) {
+      throw new Error(`Failed to start job: ${updateError.message}`);
+    }
+
+    // Start background processing (in a real implementation, this would be a queue job)
+    this.processFederatedClashDetection(jobId).catch((error) => {
+      console.error('Federated clash detection failed:', error);
+    });
+
+    return { success: true, message: 'Federated clash detection started' };
+  }
+
+  private async processFederatedClashDetection(jobId: string): Promise<void> {
+    try {
+      const job = await this.findOneFederatedJob(jobId, '');
+      if (!job) return;
+
+      // Get all potential clash pairs using spatial indexing
+      const clashPairs = [];
+      let totalComparisons = 0;
+
+      for (let i = 0; i < job.enabled_disciplines.length; i++) {
+        for (let j = i + 1; j < job.enabled_disciplines.length; j++) {
+          const disciplineA = job.enabled_disciplines[i];
+          const disciplineB = job.enabled_disciplines[j];
+
+          const { data: pairs, error } = await this.supabase.rpc(
+            'get_potential_clash_pairs',
+            {
+              p_company_id: job.company_id,
+              p_discipline_a: disciplineA,
+              p_discipline_b: disciplineB,
+              p_tolerance_mm: job.tolerance_mm,
+            },
+          );
+
+          if (error) {
+            console.error('Error getting clash pairs:', error);
+            continue;
+          }
+
+          if (pairs) {
+            clashPairs.push(
+              ...pairs.map((pair: any) => ({
+                ...pair,
+                disciplineA,
+                disciplineB,
+              })),
+            );
+          }
+
+          totalComparisons++;
+        }
+      }
+
+      // Update total models count
+      await this.supabase
+        .from('bim_federated_clash_jobs')
+        .update({
+          total_models: job.enabled_disciplines.length,
+          progress: 10,
+        })
+        .eq('id', jobId);
+
+      let processedPairs = 0;
+      const detectedClashes = [];
+
+      // Process each clash pair
+      for (const pair of clashPairs) {
+        if (pair.overlap_volume > 0) {
+          const severity = this.getSeverityFromVolume(pair.overlap_volume);
+          const clashType = this.determineClashType(
+            pair.disciplineA,
+            pair.disciplineB,
+          );
+
+          // Only include clashes that meet the severity threshold
+          if (this.meetsSeverityThreshold(severity, job.severity_threshold)) {
+            detectedClashes.push({
+              federation_job_id: jobId,
+              company_id: job.company_id,
+              element_a_id: pair.element_a_id,
+              element_b_id: pair.element_b_id,
+              element_a_guid: pair.element_a_guid,
+              element_b_guid: pair.element_b_guid,
+              discipline_a: pair.disciplineA,
+              discipline_b: pair.disciplineB,
+              clash_type: clashType,
+              severity: severity,
+              intersection_volume: pair.overlap_volume,
+              tolerance_used: job.tolerance_mm,
+              status: 'open',
+            });
+          }
+        }
+
+        processedPairs++;
+        const progress = Math.min(
+          10 + Math.floor((processedPairs / clashPairs.length) * 80),
+          90,
+        );
+
+        // Update progress every 50 pairs
+        if (processedPairs % 50 === 0) {
+          await this.supabase.rpc('update_bim_federated_job_progress', {
+            p_job_id: jobId,
+            p_progress: progress,
+            p_clashes_found: detectedClashes.length,
+          });
+        }
+      }
+
+      // Insert all detected clashes
+      if (detectedClashes.length > 0) {
+        const { error: insertError } = await this.supabase
+          .from('bim_clashes')
+          .insert(detectedClashes);
+
+        if (insertError) {
+          throw new Error(`Failed to insert clashes: ${insertError.message}`);
+        }
+      }
+
+      // Complete the job
+      await this.supabase.rpc('complete_bim_federated_job', {
+        p_job_id: jobId,
+        p_success: true,
+      });
+    } catch (error) {
+      await this.supabase.rpc('complete_bim_federated_job', {
+        p_job_id: jobId,
+        p_success: false,
+        p_error_message:
+          error instanceof Error ? error.message : 'Unknown error',
+        p_error_details: { error: String(error) },
+      });
+    }
+  }
+
+  private determineClashType(
+    disciplineA: string,
+    disciplineB: string,
+  ): 'hard' | 'soft' | 'clearance' {
+    // Hard clashes: Structural elements
+    if (
+      (disciplineA === 'structure' && disciplineB === 'architecture') ||
+      (disciplineA === 'architecture' && disciplineB === 'structure') ||
+      (disciplineA === 'structure' && disciplineB === 'structure')
+    ) {
+      return 'hard';
+    }
+
+    // Soft clashes: Services through structure
+    if (
+      (disciplineA === 'structure' && disciplineB.startsWith('mep_')) ||
+      (disciplineA.startsWith('mep_') && disciplineB === 'structure')
+    ) {
+      return 'soft';
+    }
+
+    // Clearance clashes: Services too close
+    if (disciplineA.startsWith('mep_') && disciplineB.startsWith('mep_')) {
+      return 'clearance';
+    }
+
+    return 'hard';
+  }
+
+  private meetsSeverityThreshold(severity: string, threshold: string): boolean {
+    const severityOrder = ['low', 'medium', 'high', 'critical'];
+    const severityIndex = severityOrder.indexOf(severity);
+    const thresholdIndex = severityOrder.indexOf(threshold);
+    return severityIndex >= thresholdIndex;
+  }
+
+  async getFederatedJobProgress(
+    jobId: string,
+    companyId: string,
+  ): Promise<{
+    progress: number;
+    status: string;
+    clashes_found: number;
+    models_processed: number;
+    total_models: number;
+  }> {
+    const job = await this.findOneFederatedJob(jobId, companyId);
+    if (!job) throw new Error('Job not found');
+
+    return {
+      progress: job.progress,
+      status: job.status,
+      clashes_found: job.clashes_found,
+      models_processed: job.models_processed,
+      total_models: job.total_models,
+    };
+  }
+
+  async findFederatedClashes(
+    companyId: string,
+    filters: {
+      federationJobId?: string;
+      disciplineA?: string;
+      disciplineB?: string;
+      status?: string;
+      severity?: string;
+    },
+  ): Promise<FederatedClash[]> {
+    let query = this.supabase
+      .from('bim_clashes')
+      .select('*')
+      .eq('company_id', companyId)
+      .not('federation_job_id', 'is', null);
+
+    if (filters.federationJobId) {
+      query = query.eq('federation_job_id', filters.federationJobId);
+    }
+    if (filters.disciplineA) {
+      query = query.eq('discipline_a', filters.disciplineA);
+    }
+    if (filters.disciplineB) {
+      query = query.eq('discipline_b', filters.disciplineB);
+    }
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters.severity) {
+      query = query.eq('severity', filters.severity);
+    }
+
+    const { data, error } = await query.order('detected_at', {
+      ascending: false,
+    });
+
+    if (error)
+      throw new Error(`Failed to fetch federated clashes: ${error.message}`);
+    return (data || []) as FederatedClash[];
+  }
+
+  async updateFederatedClash(
+    id: string,
+    companyId: string,
+    data: {
+      status?: string;
+      assigned_to?: string;
+      resolution_notes?: string;
+    },
+  ): Promise<FederatedClash> {
+    const updateData: Record<string, unknown> = { ...data };
+
+    if (data.status === 'resolved' || data.status === 'ignored') {
+      updateData.resolved_at = new Date().toISOString();
+    }
+
+    const { data: clash, error } = await this.supabase
+      .from('bim_clashes')
+      .update(updateData)
+      .eq('id', id)
+      .eq('company_id', companyId)
+      .select()
+      .single();
+
+    if (error)
+      throw new Error(`Failed to update federated clash: ${error.message}`);
+    return clash as FederatedClash;
+  }
+
+  async addClashComment(
+    clashId: string,
+    companyId: string,
+    commentData: {
+      content: string;
+      author_email: string;
+      author_name?: string;
+    },
+  ): Promise<{
+    id: string;
+    content: string;
+    author_email: string;
+    created_at: string;
+  }> {
+    const { data: comment, error } = await this.supabase.rpc(
+      'add_clash_comment',
+      {
+        p_clash_id: clashId,
+        p_company_id: companyId,
+        p_content: commentData.content,
+        p_author_email: commentData.author_email,
+        p_author_name: commentData.author_name,
+      },
+    );
+
+    if (error) throw new Error(`Failed to add comment: ${error.message}`);
+
+    // Return the comment data
+    const { data: newComment, error: fetchError } = await this.supabase
+      .from('bim_clash_comments')
+      .select('*')
+      .eq('id', comment)
+      .single();
+
+    if (fetchError)
+      throw new Error(`Failed to fetch comment: ${fetchError.message}`);
+    return newComment;
+  }
+
+  async getClashComments(
+    clashId: string,
+    companyId: string,
+  ): Promise<
+    Array<{
+      id: string;
+      content: string;
+      author_email: string;
+      author_name?: string;
+      created_at: string;
+    }>
+  > {
+    const { data, error } = await this.supabase
+      .from('bim_clash_comments')
+      .select('*')
+      .eq('clash_id', clashId)
+      .eq('company_id', companyId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: true });
+
+    if (error) throw new Error(`Failed to fetch comments: ${error.message}`);
+    return data || [];
   }
 }

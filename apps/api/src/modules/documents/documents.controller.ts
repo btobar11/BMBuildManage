@@ -36,7 +36,7 @@ export class DocumentsController {
   @Get('project/:id')
   findByProject(
     @Param('id', ParseUUIDPipe) projectId: string,
-    @Request() req: any
+    @Request() req: any,
   ) {
     const { company_id } = req.user;
     return this.service.findAllByProject(projectId, company_id);
@@ -50,9 +50,9 @@ export class DocumentsController {
 
   @Patch(':id')
   update(
-    @Param('id', ParseUUIDPipe) id: string, 
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdateDocumentDto,
-    @Request() req: any
+    @Request() req: any,
   ) {
     const { company_id } = req.user;
     return this.service.update(id, updateDto, company_id);

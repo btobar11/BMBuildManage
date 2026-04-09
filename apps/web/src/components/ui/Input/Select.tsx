@@ -1,14 +1,15 @@
 import React, { forwardRef, useState } from 'react'
-import { LucideIcon, ChevronDown, ChevronUp, AlertCircle, Check } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { ChevronDown, AlertCircle, Check } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export interface SelectOption {
+export type SelectOption = {
   value: string | number
   label: string
   disabled?: boolean
 }
 
-export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
+export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   /** Select label */
   label?: string
   /** Select size */

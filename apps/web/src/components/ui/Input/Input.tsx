@@ -1,8 +1,9 @@
 import React, { forwardRef, useState } from 'react'
-import { LucideIcon, Eye, EyeOff, AlertCircle, Check } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, Check } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   /** Input label */
   label?: string
   /** Input size */

@@ -5,7 +5,7 @@ import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 const mockBimModelsService = {
   getModelsByProject: jest.fn(),
-  createModel: jest.fn(),
+  uploadModel: jest.fn(),
   deleteModel: jest.fn(),
 };
 
@@ -15,6 +15,15 @@ const mockAuthGuard = {
 
 describe('BimModelsController', () => {
   let controller: BimModelsController;
+
+  const mockRequest = {
+    user: {
+      company_id: 'test-company-id',
+      id: 'test-user-id',
+      email: 'test@example.com',
+      role: 'admin',
+    },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,26 +48,41 @@ describe('BimModelsController', () => {
       const mockResult = [{ id: 'model-1' }, { id: 'model-2' }];
       mockBimModelsService.getModelsByProject.mockResolvedValue(mockResult);
 
-      const result = await controller.getModels('project-1');
+      const result = await controller.getModels(mockRequest, 'project-1');
 
       expect(mockBimModelsService.getModelsByProject).toHaveBeenCalledWith(
         'project-1',
+        'test-company-id',
       );
       expect(result).toEqual(mockResult);
     });
+
+    it('should return empty array when no projectId provided', async () => {
+      const result = await controller.getModels(mockRequest);
+      expect(result).toEqual([]);
+    });
   });
 
-  describe('createModel', () => {
-    it('should create a model', async () => {
-      const dto = { name: 'Test Model', file_url: 'http://test.com' };
-      const mockResult = { id: 'model-1', project_id: 'project-1', ...dto };
-      mockBimModelsService.createModel.mockResolvedValue(mockResult);
+  describe('uploadModel', () => {
+    it('should upload a model', async () => {
+      const mockFile = {
+        originalname: 'test.ifc',
+        buffer: Buffer.from('test'),
+        size: 1000,
+        mimetype: 'application/octet-stream',
+      };
+      const mockResult = { success: true, model: { id: 'model-1' } };
+      mockBimModelsService.uploadModel.mockResolvedValue(mockResult);
 
-      const result = await controller.createModel('project-1', dto);
-
-      expect(mockBimModelsService.createModel).toHaveBeenCalledWith(
+      const result = await controller.uploadModel(
+        mockFile,
         'project-1',
-        dto,
+        mockRequest,
+      );
+
+      expect(mockBimModelsService.uploadModel).toHaveBeenCalledWith(
+        'project-1',
+        mockFile,
       );
       expect(result).toEqual(mockResult);
     });
@@ -69,9 +93,12 @@ describe('BimModelsController', () => {
       const mockResult = { success: true };
       mockBimModelsService.deleteModel.mockResolvedValue(mockResult);
 
-      const result = await controller.deleteModel('model-1');
+      const result = await controller.deleteModel('model-1', mockRequest);
 
-      expect(mockBimModelsService.deleteModel).toHaveBeenCalledWith('model-1');
+      expect(mockBimModelsService.deleteModel).toHaveBeenCalledWith(
+        'model-1',
+        'test-company-id',
+      );
       expect(result).toEqual(mockResult);
     });
   });

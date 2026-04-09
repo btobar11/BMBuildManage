@@ -1,7 +1,7 @@
 import React from 'react'
 import { cn } from '../../utils/cn'
 
-export interface LoadingScreenProps {
+export type LoadingScreenProps = {
   /** Loading message */
   message?: string
   /** Show logo */

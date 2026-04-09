@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesController } from './invoices.controller';
 import { InvoicesService } from './invoices.service';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 describe('InvoicesController', () => {
   let controller: InvoicesController;
@@ -13,6 +14,12 @@ describe('InvoicesController', () => {
     remove: jest.fn(),
   };
 
+  const mockAuthGuard = { canActivate: () => true };
+
+  const mockRequest = {
+    user: { company_id: 'company-1', id: 'user-1', email: 'test@example.com' },
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [InvoicesController],
@@ -22,7 +29,10 @@ describe('InvoicesController', () => {
           useValue: mockInvoicesService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(SupabaseAuthGuard)
+      .useValue(mockAuthGuard)
+      .compile();
 
     controller = module.get<InvoicesController>(InvoicesController);
     service = module.get<InvoicesService>(InvoicesService);
@@ -44,9 +54,12 @@ describe('InvoicesController', () => {
       const expected = { id: 'invoice-1', ...createDto };
       mockInvoicesService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create(createDto, mockRequest);
 
-      expect(mockInvoicesService.create).toHaveBeenCalledWith(createDto);
+      expect(mockInvoicesService.create).toHaveBeenCalledWith(
+        createDto,
+        'company-1',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -56,10 +69,11 @@ describe('InvoicesController', () => {
       const expected = [{ id: 'invoice-1', number: 'INV-001' }];
       mockInvoicesService.findAllByProject.mockResolvedValue(expected);
 
-      const result = await controller.findAll('proj-1');
+      const result = await controller.findAll('proj-1', mockRequest);
 
       expect(mockInvoicesService.findAllByProject).toHaveBeenCalledWith(
         'proj-1',
+        'company-1',
       );
       expect(result).toEqual(expected);
     });
@@ -70,9 +84,12 @@ describe('InvoicesController', () => {
       const expected = { id: 'invoice-1', number: 'INV-001' };
       mockInvoicesService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('invoice-1');
+      const result = await controller.findOne('invoice-1', mockRequest);
 
-      expect(mockInvoicesService.findOne).toHaveBeenCalledWith('invoice-1');
+      expect(mockInvoicesService.findOne).toHaveBeenCalledWith(
+        'invoice-1',
+        'company-1',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -81,9 +98,12 @@ describe('InvoicesController', () => {
     it('should remove an invoice', async () => {
       mockInvoicesService.remove.mockResolvedValue({ id: 'invoice-1' });
 
-      const result = await controller.remove('invoice-1');
+      const result = await controller.remove('invoice-1', mockRequest);
 
-      expect(mockInvoicesService.remove).toHaveBeenCalledWith('invoice-1');
+      expect(mockInvoicesService.remove).toHaveBeenCalledWith(
+        'invoice-1',
+        'company-1',
+      );
       expect(result).toEqual({ id: 'invoice-1' });
     });
   });

@@ -3,7 +3,7 @@
  * Handles upload, download, and management of IFC files via API
  */
 import { supabase } from '../../../lib/supabase';
-import { api } from '../../../lib/api';
+import api from '../../../lib/api';
 import type { ProjectModel } from '../types';
 
 const BUCKET_NAME = 'bim-models';
@@ -21,7 +21,7 @@ export interface UploadProgress {
 export async function uploadModel(
   file: File,
   projectId: string,
-  companyId: string,
+  _companyId: string,
   modelName?: string
 ): Promise<ProjectModel> {
   // Validate file

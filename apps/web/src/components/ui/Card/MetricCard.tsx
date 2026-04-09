@@ -1,9 +1,10 @@
 import React from 'react'
-import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import { Card } from './Card'
 import { cn } from '../../../utils/cn'
 
-export interface MetricCardProps {
+export type MetricCardProps = {
   /** Metric title */
   title: string
   /** Main value to display */

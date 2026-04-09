@@ -12,6 +12,22 @@ import { Project } from '../projects/project.entity';
 import { Worker } from '../workers/worker.entity';
 import { Template } from '../templates/template.entity';
 
+export enum CompanySpecialty {
+  RESIDENTIAL = 'residential',
+  CIVIL_WORKS = 'civil_works',
+  RENOVATIONS = 'renovations',
+  INDUSTRIAL = 'industrial',
+  COMMERCIAL = 'commercial',
+}
+
+export enum SeismicZone {
+  E = 'E', // Zona sísmica E (menor riesgo)
+  D = 'D', // Zona sísmica D
+  C = 'C', // Zona sísmica C
+  B = 'B', // Zona sísmica B
+  A = 'A', // Zona sísmica A (mayor riesgo)
+}
+
 @Entity('companies')
 export class Company {
   @PrimaryGeneratedColumn('uuid')
@@ -37,6 +53,29 @@ export class Company {
 
   @Column({ nullable: true })
   phone: string;
+
+  @Column({
+    type: 'enum',
+    enum: CompanySpecialty,
+    nullable: true,
+  })
+  specialty: CompanySpecialty;
+
+  @Column({
+    type: 'enum',
+    enum: SeismicZone,
+    nullable: true,
+  })
+  seismic_zone: SeismicZone;
+
+  @Column({ length: 10, nullable: true, default: 'CL-RM' })
+  region_code: string;
+
+  @Column({ type: 'boolean', default: false })
+  library_seeded: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  seeded_at: Date | null;
 
   @CreateDateColumn()
   created_at: Date;

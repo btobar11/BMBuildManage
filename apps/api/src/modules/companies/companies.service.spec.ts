@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CompaniesService } from './companies.service';
-import { Company } from './company.entity';
+import { Company, CompanySpecialty, SeismicZone } from './company.entity';
 
 const createMockCompany = (overrides?: Partial<Company>): Company =>
   ({
@@ -15,6 +16,11 @@ const createMockCompany = (overrides?: Partial<Company>): Company =>
     logo_url: null,
     email: 'company@example.com',
     phone: '123456',
+    specialty: null,
+    seismic_zone: null,
+    region_code: 'CL-RM',
+    library_seeded: false,
+    seeded_at: null,
     created_at: new Date(),
     updated_at: new Date(),
     ...overrides,
@@ -27,22 +33,55 @@ const mockRepository = () => ({
   findOne: jest.fn(),
   remove: jest.fn(),
   merge: jest.fn(),
+  update: jest.fn(),
 });
+
+const mockConfigService = () => ({
+  get: jest.fn((key: string) => {
+    const config = {
+      'supabase.url': 'http://localhost:54321',
+      'supabase.anonKey': 'test-anon-key',
+    };
+    return config[key];
+  }),
+});
+
+const mockSupabase = {
+  rpc: jest.fn(),
+  from: jest.fn(() => ({
+    select: jest.fn(() => ({
+      eq: jest.fn(() => ({ count: 50, error: null })),
+    })),
+    delete: jest.fn(() => ({
+      eq: jest.fn(() => ({ error: null })),
+    })),
+  })),
+};
 
 describe('CompaniesService', () => {
   let service: CompaniesService;
   let repository: jest.Mocked<Repository<Company>>;
+  let configService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CompaniesService,
         { provide: getRepositoryToken(Company), useFactory: mockRepository },
+        { provide: ConfigService, useFactory: mockConfigService },
       ],
     }).compile();
 
     service = module.get<CompaniesService>(CompaniesService);
     repository = module.get(getRepositoryToken(Company));
+    configService = module.get<ConfigService>(ConfigService);
+
+    // Mock the Supabase client
+    (service as any).supabase = mockSupabase;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('create', () => {
@@ -118,6 +157,101 @@ describe('CompaniesService', () => {
       const result = await service.remove('company-1');
       expect(repository.remove).toHaveBeenCalledWith(company);
       expect(result).toEqual({ deleted: true });
+    });
+  });
+
+  describe('Library Seeding', () => {
+    it('should seed company library successfully', async () => {
+      const company = createMockCompany();
+      repository.findOne.mockResolvedValue(company);
+
+      const mockSeedResult = {
+        success: true,
+        resources_created: 75,
+        apus_created: 25,
+        seeded_at: new Date().toISOString(),
+      };
+
+      mockSupabase.rpc.mockResolvedValueOnce({
+        data: mockSeedResult,
+        error: null,
+      });
+
+      repository.update.mockResolvedValueOnce({ affected: 1 });
+
+      const seedDto = {
+        specialty: CompanySpecialty.RESIDENTIAL,
+        seismic_zone: SeismicZone.C,
+        region_code: 'CL-RM',
+      };
+
+      const result = await service.seedCompanyLibrary('company-1', seedDto);
+
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('seed_company_library', {
+        p_company_id: 'company-1',
+        p_specialty: CompanySpecialty.RESIDENTIAL,
+        p_seismic_zone: SeismicZone.C,
+        p_region_code: 'CL-RM',
+      });
+
+      expect(repository.update).toHaveBeenCalledWith('company-1', {
+        specialty: CompanySpecialty.RESIDENTIAL,
+        seismic_zone: SeismicZone.C,
+        region_code: 'CL-RM',
+        library_seeded: true,
+        seeded_at: expect.any(Date),
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.resources_created).toBe(75);
+      expect(result.apus_created).toBe(25);
+    });
+
+    it('should prevent double seeding', async () => {
+      const seededCompany = createMockCompany({
+        library_seeded: true,
+      });
+      repository.findOne.mockResolvedValue(seededCompany);
+
+      const seedDto = {
+        specialty: CompanySpecialty.RESIDENTIAL,
+      };
+
+      const result = await service.seedCompanyLibrary('company-1', seedDto);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Company library already seeded');
+      expect(mockSupabase.rpc).not.toHaveBeenCalled();
+    });
+
+    it('should get seeded library stats', async () => {
+      const seededCompany = createMockCompany({
+        library_seeded: true,
+        seeded_at: new Date(),
+        specialty: CompanySpecialty.RESIDENTIAL,
+        seismic_zone: SeismicZone.C,
+      });
+
+      repository.findOne.mockResolvedValue(seededCompany);
+
+      const result = await service.getSeededLibraryStats('company-1');
+
+      expect(result.isSeeded).toBe(true);
+      expect(result.specialty).toBe(CompanySpecialty.RESIDENTIAL);
+      expect(result.seismicZone).toBe(SeismicZone.C);
+      expect(result.resourcesCount).toBe(50); // From mock
+      expect(result.apusCount).toBe(50); // From mock
+    });
+
+    it('should return available specialties', async () => {
+      const result = await service.getAvailableSpecialties();
+
+      expect(result.specialties).toHaveLength(5);
+      expect(result.seismicZones).toHaveLength(5);
+
+      expect(result.specialties[0]).toHaveProperty('value');
+      expect(result.specialties[0]).toHaveProperty('label');
+      expect(result.specialties[0]).toHaveProperty('description');
     });
   });
 });

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { BimModelsService } from './bim-models.service';
 import { ProjectModel } from './project-model.entity';
 
@@ -24,6 +25,19 @@ const mockModelRepository = () => ({
   remove: jest.fn(),
 });
 
+const mockConfigService = {
+  get: jest.fn((key: string) => {
+    switch (key) {
+      case 'SUPABASE_URL':
+        return 'https://test.supabase.co';
+      case 'SUPABASE_ANON_KEY':
+        return 'test-key';
+      default:
+        return null;
+    }
+  }),
+};
+
 describe('BimModelsService', () => {
   let service: BimModelsService;
   let modelRepo: jest.Mocked<Repository<ProjectModel>>;
@@ -35,6 +49,10 @@ describe('BimModelsService', () => {
         {
           provide: getRepositoryToken(ProjectModel),
           useFactory: mockModelRepository,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

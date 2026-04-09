@@ -13,6 +13,11 @@ import {
 import { BimClashesService } from './bim-clashes.service';
 import { CreateClashJobDto } from './dto/create-clash-job.dto';
 import { UpdateClashDto } from './dto/update-clash.dto';
+import { CreateFederatedClashJobDto } from './dto/create-federated-clash-job.dto';
+import {
+  UpdateFederatedClashDto,
+  AddClashCommentDto,
+} from './dto/update-federated-clash.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 @Controller('bim-clashes')
@@ -95,5 +100,93 @@ export class BimClashesController {
       req.user.company_id,
       projectId,
     );
+  }
+
+  // Federated Clash Detection Endpoints
+
+  @Post('federated/jobs')
+  createFederatedJob(
+    @Body() createFederatedJobDto: CreateFederatedClashJobDto,
+    @Request() req: any,
+  ) {
+    return this.bimClashesService.createFederatedJob({
+      ...createFederatedJobDto,
+      company_id: req.user.company_id,
+    });
+  }
+
+  @Get('federated/jobs')
+  findAllFederatedJobs(@Request() req: any) {
+    return this.bimClashesService.findAllFederatedJobs(req.user.company_id);
+  }
+
+  @Get('federated/jobs/:id')
+  findOneFederatedJob(@Param('id') id: string, @Request() req: any) {
+    return this.bimClashesService.findOneFederatedJob(id, req.user.company_id);
+  }
+
+  @Post('federated/jobs/:id/start')
+  startFederatedJob(@Param('id') id: string, @Request() req: any) {
+    return this.bimClashesService.startFederatedClashDetection(
+      id,
+      req.user.company_id,
+    );
+  }
+
+  @Get('federated/jobs/:id/progress')
+  getFederatedJobProgress(@Param('id') id: string, @Request() req: any) {
+    return this.bimClashesService.getFederatedJobProgress(
+      id,
+      req.user.company_id,
+    );
+  }
+
+  @Get('federated/clashes')
+  findFederatedClashes(
+    @Request() req: any,
+    @Query('federationJobId') federationJobId?: string,
+    @Query('disciplineA') disciplineA?: string,
+    @Query('disciplineB') disciplineB?: string,
+    @Query('status') status?: string,
+    @Query('severity') severity?: string,
+  ) {
+    return this.bimClashesService.findFederatedClashes(req.user.company_id, {
+      federationJobId,
+      disciplineA,
+      disciplineB,
+      status,
+      severity,
+    });
+  }
+
+  @Patch('federated/clashes/:id')
+  updateFederatedClash(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateFederatedClashDto,
+    @Request() req: any,
+  ) {
+    return this.bimClashesService.updateFederatedClash(
+      id,
+      req.user.company_id,
+      updateDto,
+    );
+  }
+
+  @Post('federated/clashes/:id/comments')
+  addClashComment(
+    @Param('id') id: string,
+    @Body() commentDto: AddClashCommentDto,
+    @Request() req: any,
+  ) {
+    return this.bimClashesService.addClashComment(
+      id,
+      req.user.company_id,
+      commentDto,
+    );
+  }
+
+  @Get('federated/clashes/:id/comments')
+  getClashComments(@Param('id') id: string, @Request() req: any) {
+    return this.bimClashesService.getClashComments(id, req.user.company_id);
   }
 }

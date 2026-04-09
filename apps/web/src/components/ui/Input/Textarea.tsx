@@ -1,8 +1,9 @@
 import React, { forwardRef, useState } from 'react'
-import { LucideIcon, AlertCircle, Check } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { AlertCircle, Check } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
   /** Textarea label */
   label?: string
   /** Textarea size */
@@ -50,12 +51,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     disabled,
     value,
     onChange,
-    onFocus,
-    onBlur,
+    children,
     rows = 3,
     ...props
   }, ref) => {
-    const [focused, setFocused] = useState(false)
     
     const charCount = value ? String(value).length : 0
     const isOverLimit = maxLength ? charCount > maxLength : false

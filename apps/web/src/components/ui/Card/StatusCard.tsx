@@ -1,11 +1,11 @@
 import React from 'react'
-import { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { Card } from './Card'
 import { CardHeader } from './CardHeader'
 import { CardContent } from './CardContent'
 import { cn } from '../../../utils/cn'
 
-export interface StatusCardProps {
+export type StatusCardProps = {
   /** Card title */
   title: string
   /** Status text */

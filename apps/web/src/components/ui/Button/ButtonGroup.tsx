@@ -33,18 +33,16 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
       role="group"
     >
       {React.Children.map(children, (child, index) => {
-        if (!React.isValidElement(child)) return child
+        if (!React.isValidElement<{ size?: string; className?: string }>(child)) return child
         
         const isFirst = index === 0
         const isLast = index === React.Children.count(children) - 1
         const isMiddle = !isFirst && !isLast
         
         return React.cloneElement(child, {
-          ...child.props,
           size: child.props.size || size,
           className: cn(
             child.props.className,
-            // Remove individual rounded corners and borders for connected look
             isHorizontal ? [
               isFirst && 'rounded-r-none border-r-0',
               isMiddle && 'rounded-none border-r-0',
@@ -54,7 +52,6 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
               isMiddle && 'rounded-none border-b-0', 
               isLast && 'rounded-t-none',
             ],
-            // Add focus ring that doesn't interfere with grouping
             'focus:z-10 relative'
           )
         })

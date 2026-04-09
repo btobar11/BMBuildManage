@@ -1,8 +1,8 @@
 import React, { forwardRef } from 'react'
-import { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   /** Button visual style variant */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success'
   /** Button size */

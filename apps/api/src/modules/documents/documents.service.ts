@@ -21,8 +21,8 @@ export class DocumentsService {
   }
 
   findAllByProject(projectId: string, companyId: string) {
-    return this.documentRepository.find({ 
-      where: { 
+    return this.documentRepository.find({
+      where: {
         project_id: projectId,
         company_id: companyId,
       },
@@ -33,7 +33,7 @@ export class DocumentsService {
 
   async findOne(id: string, companyId: string) {
     const document = await this.documentRepository.findOne({
-      where: { 
+      where: {
         id,
         company_id: companyId,
       },

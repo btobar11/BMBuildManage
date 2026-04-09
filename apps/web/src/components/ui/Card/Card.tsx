@@ -1,8 +1,7 @@
 import React, { forwardRef } from 'react'
-import { LucideIcon } from 'lucide-react'
 import { cn } from '../../../utils/cn'
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+export type CardProps = React.HTMLAttributes<HTMLDivElement> & {
   /** Card visual variant */
   variant?: 'default' | 'outlined' | 'elevated' | 'ghost' | 'gradient'
   /** Card size */

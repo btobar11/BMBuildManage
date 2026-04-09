@@ -51,7 +51,6 @@ describe('DocumentsService', () => {
     it('should create a document', async () => {
       const createDto = {
         project_id: 'project-1',
-        company_id: 'company-1',
         name: 'Document 1',
         type: 'other' as any,
         file_url: 'http://example.com/doc.pdf',
@@ -60,8 +59,11 @@ describe('DocumentsService', () => {
       repository.create.mockReturnValue(document);
       repository.save.mockResolvedValue(document);
 
-      const result = await service.create(createDto);
-      expect(repository.create).toHaveBeenCalledWith(createDto);
+      const result = await service.create(createDto, 'company-1');
+      expect(repository.create).toHaveBeenCalledWith({
+        ...createDto,
+        company_id: 'company-1',
+      });
       expect(repository.save).toHaveBeenCalledWith(document);
       expect(result).toEqual(document);
     });
@@ -75,9 +77,11 @@ describe('DocumentsService', () => {
       ];
       repository.find.mockResolvedValue(documents);
 
-      const result = await service.findAllByProject('project-1');
+      const result = await service.findAllByProject('project-1', 'company-1');
       expect(repository.find).toHaveBeenCalledWith({
-        where: { project_id: 'project-1' },
+        where: { project_id: 'project-1', company_id: 'company-1' },
+        order: { uploaded_at: 'DESC' },
+        relations: ['project'],
       });
       expect(result).toEqual(documents);
     });
@@ -88,9 +92,9 @@ describe('DocumentsService', () => {
       const document = createMockDocument();
       repository.findOne.mockResolvedValue(document);
 
-      const result = await service.findOne('doc-1');
+      const result = await service.findOne('doc-1', 'company-1');
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { id: 'doc-1' },
+        where: { id: 'doc-1', company_id: 'company-1' },
         relations: ['project'],
       });
       expect(result).toEqual(document);
@@ -99,7 +103,7 @@ describe('DocumentsService', () => {
     it('should throw NotFoundException if document not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
+      await expect(service.findOne('nonexistent', 'company-1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -113,9 +117,11 @@ describe('DocumentsService', () => {
       repository.merge.mockReturnValue(updated);
       repository.save.mockResolvedValue(updated);
 
-      const result = await service.update('doc-1', {
-        name: 'Updated Document',
-      });
+      const result = await service.update(
+        'doc-1',
+        { name: 'Updated Document' },
+        'company-1',
+      );
       expect(result.name).toBe('Updated Document');
     });
   });
@@ -126,7 +132,7 @@ describe('DocumentsService', () => {
       repository.findOne.mockResolvedValue(document);
       repository.remove.mockResolvedValue(document);
 
-      const result = await service.remove('doc-1');
+      const result = await service.remove('doc-1', 'company-1');
       expect(repository.remove).toHaveBeenCalledWith(document);
       expect(result).toEqual({ deleted: true });
     });

@@ -6,7 +6,7 @@ import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { CreateProjectModal } from './components/CreateProjectModal';
 import { ConfirmModal, PromptModal } from '../../components/Modal';
-import { MetricCard, Card, CardHeader, CardContent } from '../../components/ui/Card';
+import { MetricCard, Card } from '../../components/ui/Card';
 import { Button, IconButton } from '../../components/ui/Button';
 import { 
   Plus, 
@@ -16,16 +16,11 @@ import {
   Clock,
   CheckCircle2,
   DollarSign,
-  BarChart3,
-  Trash2,
   FolderOpen,
   X,
   RefreshCcw,
   ChevronRight,
-  Building2,
-  Users,
-  TrendingUp,
-  AlertTriangle
+  Building2
 } from 'lucide-react';
 
 interface Project {

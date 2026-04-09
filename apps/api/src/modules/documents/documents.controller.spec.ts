@@ -17,6 +17,10 @@ describe('DocumentsController', () => {
 
   const mockAuthGuard = { canActivate: () => true };
 
+  const mockRequest = {
+    user: { company_id: 'company-1', id: 'user-1', email: 'test@example.com' },
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DocumentsController],
@@ -49,9 +53,12 @@ describe('DocumentsController', () => {
       const expected = { id: 'doc-1', ...createDto };
       mockDocumentsService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create(createDto, mockRequest);
 
-      expect(mockDocumentsService.create).toHaveBeenCalledWith(createDto);
+      expect(mockDocumentsService.create).toHaveBeenCalledWith(
+        createDto,
+        'company-1',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -61,10 +68,11 @@ describe('DocumentsController', () => {
       const expected = [{ id: 'doc-1', name: 'Doc 1' }];
       mockDocumentsService.findAllByProject.mockResolvedValue(expected);
 
-      const result = await controller.findAll('proj-1');
+      const result = await controller.findAll('proj-1', mockRequest);
 
       expect(mockDocumentsService.findAllByProject).toHaveBeenCalledWith(
         'proj-1',
+        'company-1',
       );
       expect(result).toEqual(expected);
     });
@@ -75,9 +83,12 @@ describe('DocumentsController', () => {
       const expected = { id: 'doc-1', name: 'Doc 1' };
       mockDocumentsService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('doc-1');
+      const result = await controller.findOne('doc-1', mockRequest);
 
-      expect(mockDocumentsService.findOne).toHaveBeenCalledWith('doc-1');
+      expect(mockDocumentsService.findOne).toHaveBeenCalledWith(
+        'doc-1',
+        'company-1',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -88,11 +99,12 @@ describe('DocumentsController', () => {
       const expected = { id: 'doc-1', ...updateDto };
       mockDocumentsService.update.mockResolvedValue(expected);
 
-      const result = await controller.update('doc-1', updateDto);
+      const result = await controller.update('doc-1', updateDto, mockRequest);
 
       expect(mockDocumentsService.update).toHaveBeenCalledWith(
         'doc-1',
         updateDto,
+        'company-1',
       );
       expect(result).toEqual(expected);
     });
@@ -102,9 +114,12 @@ describe('DocumentsController', () => {
     it('should remove a document', async () => {
       mockDocumentsService.remove.mockResolvedValue({ id: 'doc-1' });
 
-      const result = await controller.remove('doc-1');
+      const result = await controller.remove('doc-1', mockRequest);
 
-      expect(mockDocumentsService.remove).toHaveBeenCalledWith('doc-1');
+      expect(mockDocumentsService.remove).toHaveBeenCalledWith(
+        'doc-1',
+        'company-1',
+      );
       expect(result).toEqual({ id: 'doc-1' });
     });
   });

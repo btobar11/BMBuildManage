@@ -8,6 +8,7 @@ import { Stage } from '../stages/stage.entity';
 import { Item } from '../items/item.entity';
 import { Worker } from '../workers/worker.entity';
 import { FinancialService } from '../budgets/financial.service';
+import { BIMAnalyticsService } from './bim-analytics.service';
 
 const createMockProject = (overrides?: Partial<Project>): Project => {
   const project = {
@@ -163,6 +164,19 @@ describe('AIService', () => {
   let itemRepo: any;
   let workerRepo: any;
   let financialService: any;
+  let bimAnalyticsService: any;
+
+  const mockBIMAnalyticsService = {
+    getModelStatistics: jest.fn().mockResolvedValue({
+      total_elements: 0,
+      by_discipline: {},
+      by_ifc_type: {},
+    }),
+    generateProgressReport: jest.fn().mockResolvedValue({
+      overall_progress: 0,
+      by_phase: {},
+    }),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -190,6 +204,7 @@ describe('AIService', () => {
         },
         { provide: DataSource, useFactory: mockDataSource },
         { provide: FinancialService, useFactory: mockFinancialService },
+        { provide: BIMAnalyticsService, useValue: mockBIMAnalyticsService },
       ],
     }).compile();
 
@@ -200,6 +215,7 @@ describe('AIService', () => {
     itemRepo = module.get(getRepositoryToken(Item));
     workerRepo = module.get(getRepositoryToken(Worker));
     financialService = module.get(FinancialService);
+    bimAnalyticsService = module.get(BIMAnalyticsService);
   });
 
   describe('processNaturalLanguageQuery', () => {
@@ -710,6 +726,229 @@ describe('AIService', () => {
       );
 
       expect(result.sections[0].title).toBe('Resumen Técnico');
+    });
+  });
+
+  describe('BIM-related queries', () => {
+    beforeEach(() => {
+      bimAnalyticsService.getBIMElements = jest.fn().mockResolvedValue([]);
+      bimAnalyticsService.generateClashAnalysis = jest.fn().mockResolvedValue({
+        totalClashes: 0,
+        bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
+      });
+      bimAnalyticsService.generateCostAnalysis = jest.fn().mockResolvedValue([]);
+      bimAnalyticsService.getModelStatistics = jest.fn().mockResolvedValue({
+        total_elements: 0,
+        by_discipline: {},
+      });
+      bimAnalyticsService.generateQualityMetrics = jest.fn().mockResolvedValue({
+        qualityScore: 100,
+        elementsWithIssues: 0,
+      });
+      bimAnalyticsService.generateResourceOptimization = jest.fn().mockResolvedValue({
+        laborEfficiency: [],
+        materialWaste: [],
+      });
+    });
+
+    describe('handleBIMElementsQuery', () => {
+      it('should handle BIM elements query', async () => {
+        const result = await (service as any).handleBIMElementsQuery(
+          'company-1',
+          'project-1',
+          'elementos BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+
+    describe('handleBIMClashesQuery', () => {
+      it('should handle BIM clashes query', async () => {
+        bimAnalyticsService.generateClashAnalysis.mockResolvedValue({
+          totalClashes: 5,
+          bySeverity: { critical: 1, high: 2, medium: 1, low: 1 },
+        });
+
+        const result = await (service as any).handleBIMClashesQuery(
+          'company-1',
+          'project-1',
+          'colisiones BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+
+    describe('handleBIMQuantitiesQuery', () => {
+      it('should handle BIM quantities query', async () => {
+        bimAnalyticsService.generateCostAnalysis.mockResolvedValue([]);
+
+        const result = await (service as any).handleBIMQuantitiesQuery(
+          'company-1',
+          'project-1',
+          'cubicaciones BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+
+    describe('handleBIMStoreysQuery', () => {
+      it('should handle BIM storeys query', async () => {
+        bimAnalyticsService.getBIMElements.mockResolvedValue([]);
+
+        const result = await (service as any).handleBIMStoreysQuery(
+          'company-1',
+          'project-1',
+          'pisos BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+
+    describe('handleBIMDisciplinesQuery', () => {
+      it('should handle BIM disciplines query', async () => {
+        bimAnalyticsService.generateClashAnalysis.mockResolvedValue({
+          totalClashes: 10,
+          bySeverity: { critical: 2, high: 3, medium: 3, low: 2 },
+          byDiscipline: { 'structure-MEP': 5, 'architecture-structure': 3 },
+        });
+
+        const result = await (service as any).handleBIMDisciplinesQuery(
+          'company-1',
+          'project-1',
+          'disciplinas BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+
+    describe('handleBIMQualityQuery', () => {
+      it('should handle BIM quality query', async () => {
+        bimAnalyticsService.generateQualityMetrics.mockResolvedValue({
+          qualityScore: 85,
+          elementsWithIssues: 5,
+        });
+
+        const result = await (service as any).handleBIMQualityQuery(
+          'company-1',
+          'project-1',
+          'calidad BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+
+    describe('handleBIMMaterialsQuery', () => {
+      it('should handle BIM materials query', async () => {
+        bimAnalyticsService.generateCostAnalysis.mockResolvedValue([
+          { ifcType: 'IfcWall', totalVolume: 100, totalCost: 50000 },
+        ]);
+
+        const result = await (service as any).handleBIMMaterialsQuery(
+          'company-1',
+          'project-1',
+          'materiales BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+
+    describe('handleBIMOptimizationQuery', () => {
+      it('should handle BIM optimization query', async () => {
+        bimAnalyticsService.generateResourceOptimization.mockResolvedValue({
+          laborEfficiency: [],
+          materialWaste: [],
+        });
+
+        const result = await (service as any).handleBIMOptimizationQuery(
+          'company-1',
+          'project-1',
+          'optimizacion BIM',
+          {},
+        );
+
+        expect(result).toHaveProperty('answer');
+      });
+    });
+  });
+
+  describe('extractEntities', () => {
+    it('should extract currentPeriod from query', () => {
+      const result = (service as any).extractEntities('proyectos de esta semana');
+      expect(result).toHaveProperty('currentPeriod');
+    });
+
+    it('should return empty object for no matches', () => {
+      const result = (service as any).extractEntities('test query');
+      expect(Object.keys(result)).toHaveLength(0);
+    });
+  });
+
+  describe('handleGeneralQuery', () => {
+    it('should handle general query', async () => {
+      projectRepo.find.mockResolvedValue([]);
+
+      const result = await (service as any).handleGeneralQuery('company-1', undefined, 'test query');
+
+      expect(result).toHaveProperty('answer');
+      expect(result).toHaveProperty('confidence');
+    });
+
+    it('should include projects in general query', async () => {
+      const project = createMockProject();
+      projectRepo.find.mockResolvedValue([project]);
+
+      const result = await (service as any).handleGeneralQuery('company-1', undefined, 'test query');
+
+      expect(result.answer).toContain('proyecto');
+    });
+  });
+
+  describe('handleWorkersQuery', () => {
+    it('should handle workers query', async () => {
+      const worker = createMockWorker();
+      workerRepo.find.mockResolvedValue([worker]);
+
+      const result = await (service as any).handleWorkersQuery('company-1');
+
+      expect(result).toHaveProperty('answer');
+      expect(result.data).toHaveProperty('workers');
+    });
+
+    it('should return message when no workers', async () => {
+      workerRepo.find.mockResolvedValue([]);
+
+      const result = await (service as any).handleWorkersQuery('company-1');
+
+      expect(result.answer).toContain('trabajadores');
+    });
+  });
+
+  describe('handleScheduleQuery', () => {
+    it('should handle schedule query', async () => {
+      const project = createMockProject();
+      projectRepo.find.mockResolvedValue([project]);
+
+      const result = await (service as any).handleScheduleQuery(
+        'company-1',
+        undefined,
+        {},
+      );
+
+      expect(result).toHaveProperty('answer');
     });
   });
 });
