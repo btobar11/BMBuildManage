@@ -94,10 +94,13 @@ describe('BIMAnalyticsService', () => {
       bySeverity: { critical: 2, high: 5, medium: 6, low: 2 },
       byType: { wall_column: 5, MEP_structure: 3, door_wall: 7 },
     };
-    fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve({}),
-    }) as any);
+    fetchSpy = jest.spyOn(global, 'fetch').mockImplementation(
+      () =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({}),
+        }) as any,
+    );
   });
 
   afterEach(() => {
@@ -473,11 +476,19 @@ describe('BIMAnalyticsService', () => {
       const result = await service.generateClashAnalysis('company-1');
 
       expect(result.totalClashes).toBe(0);
-      expect(result.bySeverity).toEqual({ critical: 0, high: 0, medium: 0, low: 0 });
+      expect(result.bySeverity).toEqual({
+        critical: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+      });
     });
 
     it('should return default quality metrics structure', async () => {
-      const result = await service.generateQualityMetrics('company-1', 'project-1');
+      const result = await service.generateQualityMetrics(
+        'company-1',
+        'project-1',
+      );
       expect(result).toHaveProperty('elementsWithIssues');
       expect(result).toHaveProperty('qualityScore');
       expect(result).toHaveProperty('commonIssues');
@@ -486,7 +497,10 @@ describe('BIMAnalyticsService', () => {
     });
 
     it('should return default resource optimization structure', async () => {
-      const result = await service.generateResourceOptimization('company-1', 'project-1');
+      const result = await service.generateResourceOptimization(
+        'company-1',
+        'project-1',
+      );
       expect(result).toHaveProperty('materialWaste');
       expect(result).toHaveProperty('laborEfficiency');
       expect(result).toHaveProperty('equipmentUtilization');

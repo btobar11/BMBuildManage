@@ -41,43 +41,47 @@ export class BimModelsService {
   /**
    * Detect and validate file format for BIM processing
    */
-  detectBIMFormat(filename: string): { format: string; supported: boolean; guidance?: string } {
+  detectBIMFormat(filename: string): {
+    format: string;
+    supported: boolean;
+    guidance?: string;
+  } {
     const extension = filename.toLowerCase().split('.').pop();
-    
+
     switch (extension) {
       case 'ifc':
         return { format: 'IFC', supported: true };
       case 'ifcxml':
         return { format: 'IFCXML', supported: true };
       case 'dwg':
-        return { 
-          format: 'DWG', 
-          supported: false, 
-          guidance: 'Export as .IFC from AutoCAD: File > Export > IFC' 
+        return {
+          format: 'DWG',
+          supported: false,
+          guidance: 'Export as .IFC from AutoCAD: File > Export > IFC',
         };
       case 'rvt':
-        return { 
-          format: 'RVT', 
-          supported: false, 
-          guidance: 'Export as .IFC from Revit: File > Export > IFC' 
+        return {
+          format: 'RVT',
+          supported: false,
+          guidance: 'Export as .IFC from Revit: File > Export > IFC',
         };
       case '3dm':
-        return { 
-          format: '3DM', 
-          supported: false, 
-          guidance: 'Export as .IFC from Rhino using IFC export plugins' 
+        return {
+          format: '3DM',
+          supported: false,
+          guidance: 'Export as .IFC from Rhino using IFC export plugins',
         };
       case 'skp':
-        return { 
-          format: 'SKP', 
-          supported: false, 
-          guidance: 'Export as .IFC from SketchUp using IFC extension' 
+        return {
+          format: 'SKP',
+          supported: false,
+          guidance: 'Export as .IFC from SketchUp using IFC extension',
         };
       default:
-        return { 
-          format: extension?.toUpperCase() || 'UNKNOWN', 
-          supported: false, 
-          guidance: 'Please use supported BIM formats: .IFC or .IFCXML' 
+        return {
+          format: extension?.toUpperCase() || 'UNKNOWN',
+          supported: false,
+          guidance: 'Please use supported BIM formats: .IFC or .IFCXML',
         };
     }
   }
@@ -90,10 +94,13 @@ export class BimModelsService {
       DWG: '1. Open AutoCAD\n2. Go to File > Export > IFC\n3. Select IFC4 format\n4. Upload the .ifc file',
       RVT: '1. Open Revit\n2. Go to File > Export > IFC\n3. Configure IFC export settings\n4. Upload the .ifc file',
       SKP: '1. Install IFC extension in SketchUp\n2. Use Extensions > IFC > Export\n3. Upload the .ifc file',
-      '3DM': '1. Use Rhino IFC export plugin\n2. Export as IFC format\n3. Upload the .ifc file'
+      '3DM':
+        '1. Use Rhino IFC export plugin\n2. Export as IFC format\n3. Upload the .ifc file',
     };
-    
-    return guides[format] || 'Please convert to .IFC format using your BIM software';
+
+    return (
+      guides[format] || 'Please convert to .IFC format using your BIM software'
+    );
   }
 
   async uploadModel(projectId: string, file: any) {

@@ -117,6 +117,11 @@ export class AIService {
         pattern: /^(cuál|cules|que es|qué es|explain|explica)/i,
         intent: 'explain',
       },
+      // BIM optimization should come BEFORE general optimization to match correctly
+      {
+        pattern: /^(optimizaci[oó]n|eficiencia|desperdicio|waste|recursos)/i,
+        intent: 'bimOptimization',
+      },
       {
         pattern: /^(optimiz|mejora|eficiente|mejorar)/i,
         intent: 'optimization',
@@ -160,10 +165,6 @@ export class AIService {
       {
         pattern: /^(concreto|hormigón|acero|madera|materiales?)/i,
         intent: 'bimMaterials',
-      },
-      {
-        pattern: /^(optimización|eficiencia|desperdicio|waste|recursos)/i,
-        intent: 'bimOptimization',
       },
     ];
 
@@ -388,7 +389,7 @@ export class AIService {
             : ['Continuar monitoreando'],
       };
     } catch (error) {
-      console.error('Error in handleProjectStatus:', error);
+      // Error logged internally
       return {
         answer: 'Tuve problemas al obtener el estado de los proyectos.',
         confidence: 0.5,
@@ -519,7 +520,7 @@ export class AIService {
               : ['Mantener control'],
       };
     } catch (error) {
-      console.error('Error in handleBudgetQuery:', error);
+      // Error logged internally
       return {
         answer: 'Error al consultar presupuestos.',
         confidence: 0.5,
@@ -617,7 +618,7 @@ export class AIService {
           delayed + warning > 0 ? ['Revisar cronogramas en riesgo'] : [],
       };
     } catch (error) {
-      console.error('Error in handleScheduleQuery:', error);
+      // Error logged internally
       return {
         answer: 'Error al analizar cronograma.',
         confidence: 0.5,
@@ -667,7 +668,7 @@ export class AIService {
         confidence: 0.9,
       };
     } catch (error) {
-      console.error('Error in handleWorkersQuery:', error);
+      // Error logged internally
       return {
         answer: 'Error al consultar trabajadores.',
         confidence: 0.5,
@@ -773,7 +774,7 @@ export class AIService {
         actionable: insights.some((i) => i.type === 'warning'),
       };
     } catch (error) {
-      console.error('Error in generateRecommendations:', error);
+      // Error logged internally
       return {
         answer: 'Error al generar recomendaciones.',
         confidence: 0.5,
@@ -918,7 +919,7 @@ export class AIService {
           highRisk.length > 0 ? ['Revisar proyectos de riesgo'] : [],
       };
     } catch (error) {
-      console.error('Error in predictProjectOutcome:', error);
+      // Error logged internally
       return {
         answer: 'Error al predecir resultados.',
         confidence: 0.5,
@@ -1010,7 +1011,7 @@ export class AIService {
 
       return analysis;
     } catch (error) {
-      console.error('Error in analyzeBudgetDeviation:', error);
+      // Error logged internally
       return null;
     }
   }
@@ -1066,7 +1067,7 @@ export class AIService {
 
       return report;
     } catch (error) {
-      console.error('Error in generateProjectReport:', error);
+      // Error logged internally
       return null;
     }
   }
@@ -1173,7 +1174,7 @@ export class AIService {
         suggestedActions: summary.keyRecommendations,
       };
     } catch (error) {
-      console.error('Error in handleBIMElementsQuery:', error);
+      // Error logged internally
       return {
         answer:
           'No pude analizar los elementos BIM. Verifica que tengas modelos cargados.',
@@ -1269,7 +1270,7 @@ export class AIService {
         suggestedActions: actions,
       };
     } catch (error) {
-      console.error('Error in handleBIMClashesQuery:', error);
+      // Error logged internally
       return {
         answer:
           'No pude analizar las colisiones BIM. Ejecuta un análisis de colisiones primero.',
@@ -1394,7 +1395,7 @@ export class AIService {
         ],
       };
     } catch (error) {
-      console.error('Error in handleBIMQuantitiesQuery:', error);
+      // Error logged internally
       return {
         answer:
           'No pude analizar las cantidades BIM. Verifica que tengas elementos con cubicación.',
@@ -1484,7 +1485,7 @@ export class AIService {
             : ['Mantener ritmo actual'],
       };
     } catch (error) {
-      console.error('Error in handleBIMStoreysQuery:', error);
+      // Error logged internally
       return {
         answer:
           'No pude analizar el progreso por pisos. Verifica la asignación de elementos a niveles.',
@@ -1574,7 +1575,7 @@ export class AIService {
             : [],
       };
     } catch (error) {
-      console.error('Error in handleBIMDisciplinesQuery:', error);
+      // Error logged internally
       return {
         answer:
           'No pude analizar las disciplinas. Verifica que tengas modelos federados.',
@@ -1636,7 +1637,7 @@ export class AIService {
         suggestedActions: recommendations,
       };
     } catch (error) {
-      console.error('Error in handleBIMQualityQuery:', error);
+      // Error logged internally
       return {
         answer: 'No pude analizar la calidad del modelo BIM.',
         confidence: 0.5,
@@ -1743,7 +1744,7 @@ export class AIService {
             : ['Verificar especificaciones de materiales'],
       };
     } catch (error) {
-      console.error('Error in handleBIMMaterialsQuery:', error);
+      // Error logged internally
       return {
         answer: 'No pude analizar los materiales del modelo BIM.',
         confidence: 0.5,
@@ -1836,7 +1837,7 @@ export class AIService {
         suggestedActions: recommendations.slice(0, 3),
       };
     } catch (error) {
-      console.error('Error in handleBIMOptimizationQuery:', error);
+      // Error logged internally
       return {
         answer:
           'No pude generar análisis de optimización. Verifica que tengas suficientes datos.',

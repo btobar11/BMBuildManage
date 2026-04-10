@@ -47,22 +47,24 @@ export class BimModelsController {
 
     // Check file extension and provide appropriate guidance
     const fileExtension = file.originalname.toLowerCase();
-    
+
     if (fileExtension.endsWith('.dwg')) {
       throw new BadRequestException({
         message: 'AutoCAD .DWG files detected',
-        guidance: 'Please export your .DWG file as .IFC from AutoCAD using: File > Export > IFC',
+        guidance:
+          'Please export your .DWG file as .IFC from AutoCAD using: File > Export > IFC',
         supportedFormats: ['.ifc', '.ifcxml'],
-        detectedFormat: '.dwg'
+        detectedFormat: '.dwg',
       });
     }
-    
+
     if (fileExtension.endsWith('.rvt')) {
       throw new BadRequestException({
         message: 'Revit .RVT files detected',
-        guidance: 'Please export your .RVT file as .IFC from Revit using: File > Export > IFC',
+        guidance:
+          'Please export your .RVT file as .IFC from Revit using: File > Export > IFC',
         supportedFormats: ['.ifc', '.ifcxml'],
-        detectedFormat: '.rvt'
+        detectedFormat: '.rvt',
       });
     }
 
@@ -71,7 +73,7 @@ export class BimModelsController {
         message: 'Unsupported file format',
         guidance: 'Please upload files in supported BIM formats',
         supportedFormats: ['.ifc', '.ifcxml'],
-        detectedFormat: file.originalname.split('.').pop()
+        detectedFormat: file.originalname.split('.').pop(),
       });
     }
 
