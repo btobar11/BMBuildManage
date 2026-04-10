@@ -83,40 +83,58 @@ export function VectorAI() {
       type: 'text',
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    if (!overrideInput) setInput('');
-    setIsLoading(true);
+      setMessages((prev) => [...prev, userMessage]);
+      if (!overrideInput) setInput('');
+      setIsLoading(true);
 
-    try {
-      const response = await api.post<AIResponse>('/ai/query', {
-        query: messageText,
-      });
+      try {
+        const response = await api.post<AIResponse>('/ai/query', {
+          query: messageText,
+        });
 
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.data.answer,
-        timestamp: new Date(),
-        actionable: response.data.actionable,
-        suggestedActions: response.data.suggestedActions,
-        data: response.data.data,
-        type: 'text',
-      };
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response.data.answer,
+          timestamp: new Date(),
+          actionable: response.data.actionable,
+          suggestedActions: response.data.suggestedActions,
+          data: response.data.data,
+          type: 'text',
+        };
 
-      setMessages((prev) => [...prev, aiResponse]);
-    } catch (error) {
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Lo siento, tuve un problema al procesar tu solicitud. Por favor intenta de nuevo.',
-        timestamp: new Date(),
-        type: 'text',
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        setMessages((prev) => [...prev, aiResponse]);
+      } catch (error: any) {
+        console.error('[Vector] Error:', error);
+        let errorContent = 'Lo siento, tuve un problema al procesar tu solicitud. Por favor intenta de nuevo.';
+        
+        if (error.response?.status === 400) {
+          const message = error.response?.data?.message;
+          if (message?.includes('query')) {
+            errorContent = 'Por favor ingresa una pregunta válida.';
+          } else if (message) {
+            errorContent = `Error: ${message}`;
+          }
+        } else if (error.response?.status === 401) {
+          errorContent = 'Tu sesión ha expirado. Por favor, cierra sesión y vuelve a entrar.';
+        } else if (error.response?.status === 403) {
+          errorContent = 'No tienes permiso para acceder a esta función.';
+        } else if (error.message?.includes('conexión')) {
+          errorContent = 'No se puede conectar con el servidor. Verifica tu conexión a internet.';
+        }
+        
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: errorContent,
+          timestamp: new Date(),
+          type: 'text',
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

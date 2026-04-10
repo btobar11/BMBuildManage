@@ -1,17 +1,29 @@
 import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { IsString, IsOptional, IsNotEmpty, IsUUID } from 'class-validator';
 import { AIService } from './ai.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 class NLPQueryDto {
-  query: string;
+  @IsString()
+  @IsNotEmpty({ message: 'El campo query es requerido' })
+  query!: string;
+
+  @IsOptional()
+  @IsUUID()
   projectId?: string;
+
+  @IsOptional()
+  @IsUUID()
   budgetId?: string;
 }
 
 class ReportDto {
-  projectId: string;
-  type: 'executive' | 'financial' | 'technical';
+  @IsUUID()
+  projectId!: string;
+
+  @IsString()
+  type!: 'executive' | 'financial' | 'technical';
 }
 
 @Controller('ai')

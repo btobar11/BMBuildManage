@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  ForbiddenException,
   Inject,
   forwardRef,
 } from '@nestjs/common';
@@ -82,12 +83,19 @@ export class SupabaseAuthGuard implements CanActivate {
       // User not yet in DB, use default role
     }
 
+    const finalCompanyId =
+      companyId || (dbUserData.user_metadata?.company_id as string | undefined);
+
+    if (!finalCompanyId) {
+      throw new ForbiddenException(
+        'User does not belong to any company. Please contact administrator.',
+      );
+    }
+
     request.user = {
       id: dbUserData.id,
       email: dbUserData.email || '',
-      company_id:
-        companyId ||
-        (dbUserData.user_metadata?.company_id as string | undefined),
+      company_id: finalCompanyId,
       role,
     };
     return true;
