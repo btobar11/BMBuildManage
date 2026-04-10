@@ -89,9 +89,14 @@ describe('BudgetsController', () => {
       const mockBudget = { id: 'budget-1', name: 'Test Budget' };
       mockBudgetsService.findOne.mockResolvedValue(mockBudget);
 
-      const result = await controller.findOne('budget-1');
+      const result = await controller.findOne('budget-1', {
+        user: { company_id: 'company-1' },
+      });
 
-      expect(mockBudgetsService.findOne).toHaveBeenCalledWith('budget-1');
+      expect(mockBudgetsService.findOne).toHaveBeenCalledWith(
+        'budget-1',
+        'company-1',
+      );
       expect(result).toEqual(mockBudget);
     });
   });
@@ -110,6 +115,7 @@ describe('BudgetsController', () => {
         'budget-1',
         updateDto,
         'user-1',
+        undefined,
       );
       expect(result).toEqual(mockBudget);
     });
@@ -140,6 +146,7 @@ describe('BudgetsController', () => {
       expect(mockBudgetsService.setActiveVersion).toHaveBeenCalledWith(
         'budget-1',
         'user-1',
+        undefined,
       );
       expect(result).toEqual({ id: 'budget-1', is_active: true });
     });
@@ -150,9 +157,14 @@ describe('BudgetsController', () => {
       const summary = { total: 1000, items: 10 };
       mockBudgetsService.getSummary.mockResolvedValue(summary);
 
-      const result = await controller.getSummary('project-1');
+      const result = await controller.getSummary('project-1', {
+        user: { company_id: 'company-1' },
+      });
 
-      expect(mockBudgetsService.getSummary).toHaveBeenCalledWith('project-1');
+      expect(mockBudgetsService.getSummary).toHaveBeenCalledWith(
+        'project-1',
+        'company-1',
+      );
       expect(result).toEqual(summary);
     });
   });
@@ -172,9 +184,16 @@ describe('BudgetsController', () => {
         Buffer.from('PDF content'),
       );
 
-      await controller.exportPdf('budget-1', mockRes as any);
+      await controller.exportPdf(
+        'budget-1',
+        { user: { company_id: 'company-1' } },
+        mockRes as any,
+      );
 
-      expect(mockBudgetsService.findOne).toHaveBeenCalledWith('budget-1');
+      expect(mockBudgetsService.findOne).toHaveBeenCalledWith(
+        'budget-1',
+        'company-1',
+      );
       expect(mockPdfExportService.generateBudgetPDF).toHaveBeenCalledWith(
         'budget-1',
       );
@@ -202,8 +221,16 @@ describe('BudgetsController', () => {
         Buffer.from('PDF'),
       );
 
-      await controller.exportPdf('budget-1', mockRes as any);
+      await controller.exportPdf(
+        'budget-1',
+        { user: { company_id: 'company-1' } },
+        mockRes as any,
+      );
 
+      expect(mockBudgetsService.findOne).toHaveBeenCalledWith(
+        'budget-1',
+        'company-1',
+      );
       expect(mockRes.set).toHaveBeenCalledWith(
         expect.objectContaining({
           'Content-Type': 'application/pdf',
@@ -228,8 +255,16 @@ describe('BudgetsController', () => {
         Buffer.from('X'),
       );
 
-      await controller.exportPdf('budget-1', mockRes as any);
+      await controller.exportPdf(
+        'budget-1',
+        { user: { company_id: 'company-1' } },
+        mockRes as any,
+      );
 
+      expect(mockBudgetsService.findOne).toHaveBeenCalledWith(
+        'budget-1',
+        'company-1',
+      );
       expect(mockRes.set).toHaveBeenCalledWith(
         expect.objectContaining({
           'Content-Disposition': expect.stringContaining(
@@ -255,8 +290,16 @@ describe('BudgetsController', () => {
         Buffer.from('excel'),
       );
 
-      await controller.exportExcel('budget-1', mockRes as any);
+      await controller.exportExcel(
+        'budget-1',
+        { user: { company_id: 'company-1' } },
+        mockRes as any,
+      );
 
+      expect(mockBudgetsService.findOne).toHaveBeenCalledWith(
+        'budget-1',
+        'company-1',
+      );
       expect(mockExportService.exportBudgetToExcel).toHaveBeenCalledWith(
         'budget-1',
       );
@@ -285,8 +328,19 @@ describe('BudgetsController', () => {
         Buffer.from('XLS'),
       );
 
-      await controller.exportExcel('budget-1', mockRes as any);
+      await controller.exportExcel(
+        'budget-1',
+        { user: { company_id: 'company-1' } },
+        mockRes as any,
+      );
 
+      expect(mockBudgetsService.findOne).toHaveBeenCalledWith(
+        'budget-1',
+        'company-1',
+      );
+      expect(mockExportService.exportBudgetToExcel).toHaveBeenCalledWith(
+        'budget-1',
+      );
       expect(mockRes.set).toHaveBeenCalledWith(
         expect.objectContaining({
           'Content-Type':

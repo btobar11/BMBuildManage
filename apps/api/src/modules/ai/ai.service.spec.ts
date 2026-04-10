@@ -175,7 +175,14 @@ describe('AIService', () => {
         name: 'Wall 01',
         storey_name: 'Ground Floor',
         quantities: { netVolume: 5.0, netArea: 12.5 },
-        bounding_box: { minX: 0, minY: 0, minZ: 0, maxX: 5, maxY: 2.5, maxZ: 3 },
+        bounding_box: {
+          minX: 0,
+          minY: 0,
+          minZ: 0,
+          maxX: 5,
+          maxY: 2.5,
+          maxZ: 3,
+        },
         model_id: 'model-1',
         company_id: 'company-1',
       },
@@ -208,7 +215,10 @@ describe('AIService', () => {
         elementsWithIssues: 8,
         qualityScore: 92.5,
         issuesByType: { 'Missing Properties': 3, 'Geometry Issues': 5 },
-        recommendations: ['Review element properties', 'Check geometry consistency'],
+        recommendations: [
+          'Review element properties',
+          'Check geometry consistency',
+        ],
       },
       resourceOptimization: {
         materialWaste: [{ material: 'Concrete', wastePercentage: 5.2 }],
@@ -242,7 +252,10 @@ describe('AIService', () => {
       elementsWithIssues: 8,
       qualityScore: 92.5,
       issuesByType: { 'Missing Properties': 3, 'Geometry Issues': 5 },
-      recommendations: ['Review element properties', 'Check geometry consistency'],
+      recommendations: [
+        'Review element properties',
+        'Check geometry consistency',
+      ],
     }),
     generateResourceOptimization: jest.fn().mockResolvedValue({
       materialWaste: [{ material: 'Concrete', wastePercentage: 5.2 }],
@@ -842,36 +855,42 @@ describe('AIService', () => {
       bimAnalyticsService.getBIMQuantities = jest.fn().mockResolvedValue({
         totalVolume: 1000,
         totalArea: 500,
-        materials: []
+        materials: [],
       });
-      
-      bimAnalyticsService.getStoreyBreakdown = jest.fn().mockResolvedValue([
-        { name: 'Ground Floor', area: 200, elements: 50 }
-      ]);
-      
+
+      bimAnalyticsService.getStoreyBreakdown = jest
+        .fn()
+        .mockResolvedValue([{ name: 'Ground Floor', area: 200, elements: 50 }]);
+
       bimAnalyticsService.getDisciplineBreakdown = jest.fn().mockResolvedValue({
         architecture: { elements: 100, completeness: 95 },
-        structure: { elements: 50, completeness: 85 }
+        structure: { elements: 50, completeness: 85 },
       });
-      
+
       bimAnalyticsService.getModelQualityReport = jest.fn().mockResolvedValue({
         overall_score: 85,
         issues: [],
-        completeness: 90
+        completeness: 90,
       });
-      
-      bimAnalyticsService.getMaterialBreakdown = jest.fn().mockResolvedValue([
-        { material: 'Concrete', volume: 100, cost: 5000 }
-      ]);
 
-      bimAnalyticsService.generateProgressAnalysis = jest.fn().mockResolvedValue({
-        overall: { percentage: 75, elementsCompleted: 300, elementsTotal: 400 },
-        byStorey: {
-          'Piso 1': { total: 100, percentage: 85.0, volume: 50.5 },
-          'Piso 2': { total: 80, percentage: 60.0, volume: 40.2 },
-          'Basement': { total: 50, percentage: 45.0, volume: 30.0 }
-        }
-      });
+      bimAnalyticsService.getMaterialBreakdown = jest
+        .fn()
+        .mockResolvedValue([{ material: 'Concrete', volume: 100, cost: 5000 }]);
+
+      bimAnalyticsService.generateProgressAnalysis = jest
+        .fn()
+        .mockResolvedValue({
+          overall: {
+            percentage: 75,
+            elementsCompleted: 300,
+            elementsTotal: 400,
+          },
+          byStorey: {
+            'Piso 1': { total: 100, percentage: 85.0, volume: 50.5 },
+            'Piso 2': { total: 80, percentage: 60.0, volume: 40.2 },
+            Basement: { total: 50, percentage: 45.0, volume: 30.0 },
+          },
+        });
     });
 
     describe('handleBIMElementsQuery', () => {
@@ -890,12 +909,20 @@ describe('AIService', () => {
         // Test that covers lines 1115-1116 (typeMapping)
         bimAnalyticsService.getBIMSummaryInsights.mockResolvedValue({
           totalElements: 150,
-          byCategory: {}
+          byCategory: {},
         });
-        
+
         bimAnalyticsService.getBIMElements.mockResolvedValueOnce([
-          { id: '1', ifcType: 'IfcWall', quantities: { netVolume: 10.5, netArea: 25.3 } },
-          { id: '2', ifcType: 'IfcWall', quantities: { netVolume: 8.2, netArea: 20.1 } }
+          {
+            id: '1',
+            ifcType: 'IfcWall',
+            quantities: { netVolume: 10.5, netArea: 25.3 },
+          },
+          {
+            id: '2',
+            ifcType: 'IfcWall',
+            quantities: { netVolume: 8.2, netArea: 20.1 },
+          },
         ]);
 
         const result = await (service as any).handleBIMElementsQuery(
@@ -934,7 +961,7 @@ describe('AIService', () => {
           criticalUnresolved: 5,
           resolvedPercentage: 65.0,
           avgResolutionTime: 3.5,
-          bySeverity: { critical: 8, high: 6, medium: 4, low: 2 }
+          bySeverity: { critical: 8, high: 6, medium: 4, low: 2 },
         });
 
         const result = await (service as any).handleBIMClashesQuery(
@@ -947,9 +974,13 @@ describe('AIService', () => {
         expect(result.answer).toContain('20 colisiones detectadas');
         expect(result.answer).toContain('🚨 5 CRÍTICAS sin resolver');
         expect(result.answer).toContain('Resueltas: 65.0%');
-        expect(result.answer).toContain('Tiempo promedio de resolución: 3.5 días');
+        expect(result.answer).toContain(
+          'Tiempo promedio de resolución: 3.5 días',
+        );
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions).toContain('Resolver colisiones críticas inmediatamente');
+        expect(result.suggestedActions).toContain(
+          'Resolver colisiones críticas inmediatamente',
+        );
       });
 
       it('should handle query for critical severity clashes', async () => {
@@ -958,7 +989,7 @@ describe('AIService', () => {
           criticalUnresolved: 0,
           resolvedPercentage: 90.0,
           avgResolutionTime: 2.0,
-          bySeverity: { critical: 3, high: 5, medium: 4, low: 3 }
+          bySeverity: { critical: 3, high: 5, medium: 4, low: 3 },
         });
 
         const result = await (service as any).handleBIMClashesQuery(
@@ -978,7 +1009,7 @@ describe('AIService', () => {
           criticalUnresolved: 0,
           resolvedPercentage: 90.0,
           avgResolutionTime: 2.0,
-          bySeverity: { critical: 3, high: 7, medium: 4, low: 1 }
+          bySeverity: { critical: 3, high: 7, medium: 4, low: 1 },
         });
 
         const result = await (service as any).handleBIMClashesQuery(
@@ -997,7 +1028,7 @@ describe('AIService', () => {
           criticalUnresolved: 0,
           resolvedPercentage: 45.0,
           avgResolutionTime: 2.0,
-          bySeverity: { critical: 0, high: 10, medium: 15, low: 5 }
+          bySeverity: { critical: 0, high: 10, medium: 15, low: 5 },
         });
 
         const result = await (service as any).handleBIMClashesQuery(
@@ -1008,7 +1039,9 @@ describe('AIService', () => {
         );
 
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions).toContain('Asignar recursos para resolución de colisiones');
+        expect(result.suggestedActions).toContain(
+          'Asignar recursos para resolución de colisiones',
+        );
       });
 
       it('should handle high avg resolution time with optimization suggestion', async () => {
@@ -1017,7 +1050,7 @@ describe('AIService', () => {
           criticalUnresolved: 0,
           resolvedPercentage: 85.0,
           avgResolutionTime: 10.5,
-          bySeverity: { critical: 0, high: 2, medium: 5, low: 3 }
+          bySeverity: { critical: 0, high: 2, medium: 5, low: 3 },
         });
 
         const result = await (service as any).handleBIMClashesQuery(
@@ -1027,7 +1060,9 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.suggestedActions).toContain('Optimizar proceso de resolución de colisiones');
+        expect(result.suggestedActions).toContain(
+          'Optimizar proceso de resolución de colisiones',
+        );
       });
 
       it('should handle medium severity query in Spanish', async () => {
@@ -1036,7 +1071,7 @@ describe('AIService', () => {
           criticalUnresolved: 0,
           resolvedPercentage: 88.0,
           avgResolutionTime: 3.0,
-          bySeverity: { critical: 1, high: 3, medium: 6, low: 2 }
+          bySeverity: { critical: 1, high: 3, medium: 6, low: 2 },
         });
 
         const result = await (service as any).handleBIMClashesQuery(
@@ -1055,7 +1090,7 @@ describe('AIService', () => {
           criticalUnresolved: 0,
           resolvedPercentage: 95.0,
           avgResolutionTime: 1.5,
-          bySeverity: { critical: 0, high: 1, medium: 2, low: 5 }
+          bySeverity: { critical: 0, high: 1, medium: 2, low: 5 },
         });
 
         const result = await (service as any).handleBIMClashesQuery(
@@ -1088,7 +1123,7 @@ describe('AIService', () => {
           { ifcType: 'IfcSlab', totalVolume: 150.5, totalCost: 45000 },
           { ifcType: 'IfcWall', totalVolume: 200.3, totalCost: 60000 },
           { ifcType: 'IfcColumn', totalVolume: 50.2, totalCost: 15000 },
-          { ifcType: 'IfcBeam', totalVolume: 75.0, totalCost: 22500 }
+          { ifcType: 'IfcBeam', totalVolume: 75.0, totalCost: 22500 },
         ]);
 
         const result = await (service as any).handleBIMQuantitiesQuery(
@@ -1105,7 +1140,7 @@ describe('AIService', () => {
       it('should handle hormigón (Spanish concrete) query', async () => {
         bimAnalyticsService.generateCostAnalysis.mockResolvedValue([
           { ifcType: 'IfcSlab', totalVolume: 100.0, totalCost: 30000 },
-          { ifcType: 'IfcFooting', totalVolume: 25.0, totalCost: 7500 }
+          { ifcType: 'IfcFooting', totalVolume: 25.0, totalCost: 7500 },
         ]);
 
         const result = await (service as any).handleBIMQuantitiesQuery(
@@ -1122,7 +1157,7 @@ describe('AIService', () => {
       it('should handle steel material query', async () => {
         bimAnalyticsService.generateCostAnalysis.mockResolvedValue([
           { ifcType: 'IfcBeam', totalVolume: 30.5, totalCost: 45000 },
-          { ifcType: 'IfcColumn', totalVolume: 20.3, totalCost: 30000 }
+          { ifcType: 'IfcColumn', totalVolume: 20.3, totalCost: 30000 },
         ]);
 
         const result = await (service as any).handleBIMQuantitiesQuery(
@@ -1139,7 +1174,7 @@ describe('AIService', () => {
       it('should handle wood material query', async () => {
         bimAnalyticsService.generateCostAnalysis.mockResolvedValue([
           { ifcType: 'IfcBeam', totalVolume: 15.0, totalCost: 8000 },
-          { ifcType: 'IfcColumn', totalVolume: 10.0, totalCost: 5000 }
+          { ifcType: 'IfcColumn', totalVolume: 10.0, totalCost: 5000 },
         ]);
 
         const result = await (service as any).handleBIMQuantitiesQuery(
@@ -1155,7 +1190,7 @@ describe('AIService', () => {
 
       it('should handle material query with zero cost', async () => {
         bimAnalyticsService.generateCostAnalysis.mockResolvedValue([
-          { ifcType: 'IfcBeam', totalVolume: 20.0, totalCost: 0 }
+          { ifcType: 'IfcBeam', totalVolume: 20.0, totalCost: 0 },
         ]);
 
         const result = await (service as any).handleBIMQuantitiesQuery(
@@ -1192,7 +1227,9 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.answer).toContain('Piso 1: 100 elementos, 85.0% completado');
+        expect(result.answer).toContain(
+          'Piso 1: 100 elementos, 85.0% completado',
+        );
         expect(result.answer).toContain('Volumen: 50.50 m³');
         expect(result.confidence).toBe(0.95);
         expect(result.actionable).toBe(false); // >80% no es actionable
@@ -1207,7 +1244,9 @@ describe('AIService', () => {
         );
 
         // Covers lines 1427-1447
-        expect(result.answer).toContain('Piso 2: 80 elementos, 60.0% completado');
+        expect(result.answer).toContain(
+          'Piso 2: 80 elementos, 60.0% completado',
+        );
         expect(result.answer).toContain('Volumen: 40.20 m³');
         expect(result.actionable).toBe(true); // <80% es actionable
         expect(result.suggestedActions).toEqual([]); // >50% no sugiere aceleración
@@ -1221,9 +1260,13 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.answer).toContain('Basement: 50 elementos, 45.0% completado');
+        expect(result.answer).toContain(
+          'Basement: 50 elementos, 45.0% completado',
+        );
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions).toContain('Acelerar trabajo en este piso');
+        expect(result.suggestedActions).toContain(
+          'Acelerar trabajo en este piso',
+        );
       });
 
       it('should handle general storeys summary with slow storeys', async () => {
@@ -1243,12 +1286,16 @@ describe('AIService', () => {
 
       it('should handle storeys with all good progress', async () => {
         bimAnalyticsService.generateProgressAnalysis.mockResolvedValue({
-          overall: { percentage: 90, elementsCompleted: 360, elementsTotal: 400 },
+          overall: {
+            percentage: 90,
+            elementsCompleted: 360,
+            elementsTotal: 400,
+          },
           byStorey: {
             'Piso 1': { total: 100, percentage: 95.0, volume: 50.5 },
             'Piso 2': { total: 80, percentage: 88.0, volume: 40.2 },
-            'Piso 3': { total: 50, percentage: 85.0, volume: 30.0 }
-          }
+            'Piso 3': { total: 50, percentage: 85.0, volume: 30.0 },
+          },
         });
 
         const result = await (service as any).handleBIMStoreysQuery(
@@ -1259,7 +1306,9 @@ describe('AIService', () => {
         );
 
         expect(result.answer).toContain('3 pisos/niveles en el proyecto');
-        expect(result.answer).toContain('✅ Todos los pisos van según cronograma');
+        expect(result.answer).toContain(
+          '✅ Todos los pisos van según cronograma',
+        );
       });
     });
 
@@ -1440,7 +1489,8 @@ describe('AIService', () => {
       });
 
       it('should handle very long queries', async () => {
-        const longQuery = 'cual es el estado muy detallado y completo del proyecto incluyendo todos los aspectos financieros presupuestarios de costos y gastos y tambien el estado de los trabajadores y su rendimiento y eficiencia en las tareas asignadas durante este periodo de tiempo';
+        const longQuery =
+          'cual es el estado muy detallado y completo del proyecto incluyendo todos los aspectos financieros presupuestarios de costos y gastos y tambien el estado de los trabajadores y su rendimiento y eficiencia en las tareas asignadas durante este periodo de tiempo';
 
         const result = await service.processNaturalLanguageQuery(
           'user-1',
@@ -1538,7 +1588,9 @@ describe('AIService', () => {
 
     describe('Repository error handling', () => {
       it('should handle project repository errors gracefully', async () => {
-        projectRepo.find.mockRejectedValue(new Error('Database connection failed'));
+        projectRepo.find.mockRejectedValue(
+          new Error('Database connection failed'),
+        );
 
         const result = await service.processNaturalLanguageQuery(
           'user-1',
@@ -1578,7 +1630,7 @@ describe('AIService', () => {
     describe('Missing BIM intent handlers for coverage', () => {
       it('should handle BIM quantities intent', async () => {
         const result = await service.processNaturalLanguageQuery(
-          'user-1', 
+          'user-1',
           'company-1',
           'cantidades BIM del proyecto',
         );
@@ -1591,7 +1643,7 @@ describe('AIService', () => {
       it('should handle BIM storeys intent', async () => {
         const result = await service.processNaturalLanguageQuery(
           'user-1',
-          'company-1', 
+          'company-1',
           'plantas del edificio',
           {},
         );
@@ -1638,7 +1690,7 @@ describe('AIService', () => {
     describe('BIM Analytics service integration', () => {
       it('should handle BIM analytics service errors in elements query', async () => {
         bimAnalyticsService.getBIMSummaryInsights.mockRejectedValue(
-          new Error('BIM service unavailable')
+          new Error('BIM service unavailable'),
         );
 
         const result = await service.processNaturalLanguageQuery(
@@ -1653,7 +1705,7 @@ describe('AIService', () => {
 
       it('should handle BIM clash analysis errors', async () => {
         bimAnalyticsService.generateClashAnalysis.mockRejectedValue(
-          new Error('Clash detection failed')
+          new Error('Clash detection failed'),
         );
 
         const result = await service.processNaturalLanguageQuery(
@@ -1683,7 +1735,7 @@ describe('AIService', () => {
 
       it('should handle quality metrics errors', async () => {
         bimAnalyticsService.generateQualityMetrics.mockRejectedValue(
-          new Error('Quality analysis failed')
+          new Error('Quality analysis failed'),
         );
 
         const result = await service.processNaturalLanguageQuery(
@@ -1713,7 +1765,7 @@ describe('AIService', () => {
 
       it('should handle resource optimization errors', async () => {
         bimAnalyticsService.generateResourceOptimization.mockRejectedValue(
-          new Error('Optimization failed')
+          new Error('Optimization failed'),
         );
 
         const result = await service.processNaturalLanguageQuery(
@@ -1722,7 +1774,9 @@ describe('AIService', () => {
           'optimizacion recursos BIM',
         );
 
-        expect(result.answer).toContain('No pude generar análisis de optimización');
+        expect(result.answer).toContain(
+          'No pude generar análisis de optimización',
+        );
         expect(result.confidence).toBe(0.5);
       });
 
@@ -1732,7 +1786,7 @@ describe('AIService', () => {
           materialWaste: undefined, // Missing arrays to trigger undefined.length error
           laborEfficiency: undefined,
           equipmentUtilization: undefined,
-          optimizationRecommendations: []
+          optimizationRecommendations: [],
         });
 
         const result = await service.processNaturalLanguageQuery(
@@ -1741,7 +1795,9 @@ describe('AIService', () => {
           'optimizacion recursos BIM',
         );
 
-        expect(result.answer).toContain('No pude generar análisis de optimización');
+        expect(result.answer).toContain(
+          'No pude generar análisis de optimización',
+        );
       });
     });
 
@@ -1919,7 +1975,7 @@ describe('AIService', () => {
 
       it('should handle schedule query errors', async () => {
         projectRepo.find.mockRejectedValue(new Error('Database error'));
-        
+
         const result = await service.processNaturalLanguageQuery(
           'user-1',
           'company-1',
@@ -1932,8 +1988,11 @@ describe('AIService', () => {
 
       it('should handle generateRecommendations errors', async () => {
         projectRepo.find.mockRejectedValue(new Error('Database error'));
-        
-        const result = await (service as any).generateRecommendations('company-1', 'project-1');
+
+        const result = await (service as any).generateRecommendations(
+          'company-1',
+          'project-1',
+        );
 
         expect(result.answer).toContain('Error al generar recomendaciones');
         expect(result.confidence).toBe(0.5);
@@ -1941,8 +2000,11 @@ describe('AIService', () => {
 
       it('should handle predictProjectOutcome errors', async () => {
         projectRepo.find.mockRejectedValue(new Error('Database error'));
-        
-        const result = await (service as any).predictProjectOutcome('company-1', 'project-1');
+
+        const result = await (service as any).predictProjectOutcome(
+          'company-1',
+          'project-1',
+        );
 
         expect(result.answer).toContain('Error al predecir resultados');
         expect(result.confidence).toBe(0.5);
@@ -1951,12 +2013,12 @@ describe('AIService', () => {
       it('should handle budget query with specific budget ID', async () => {
         const budget = createMockBudget({ id: 'budget-specific' });
         budgetRepo.findOne.mockResolvedValue(budget);
-        
+
         const result = await (service as any).handleBudgetQuery(
-          'company-1', 
-          null, 
-          'budget-specific', 
-          {}
+          'company-1',
+          null,
+          'budget-specific',
+          {},
         );
 
         expect(result.answer).toContain('Presupuesto total');
@@ -1967,12 +2029,12 @@ describe('AIService', () => {
         budgetRepo.findOne.mockResolvedValue(null);
         projectRepo.find.mockResolvedValue([]);
         budgetRepo.find.mockResolvedValue([]);
-        
+
         const result = await (service as any).handleBudgetQuery(
-          'company-1', 
-          'project-1', 
-          null, 
-          {}
+          'company-1',
+          'project-1',
+          null,
+          {},
         );
 
         expect(result.answer).toContain('No encontré presupuestos');
@@ -1980,18 +2042,18 @@ describe('AIService', () => {
       });
 
       it('should handle budget with zero variance (within expected)', async () => {
-        const budget = createMockBudget({ 
+        const budget = createMockBudget({
           total_estimated_price: 50000,
-          total_executed_cost: 50000  // Exact match
+          total_executed_cost: 50000, // Exact match
         });
         budgetRepo.find.mockResolvedValue([budget]);
         projectRepo.find.mockResolvedValue([createMockProject()]);
-        
+
         const result = await (service as any).handleBudgetQuery(
-          'company-1', 
-          null, 
-          null, 
-          {}
+          'company-1',
+          null,
+          null,
+          {},
         );
 
         expect(result.answer).toContain('dentro de lo previsto');
@@ -2004,49 +2066,49 @@ describe('AIService', () => {
       it('should handle predictions with high risk projects', async () => {
         // Create high-risk scenario: High cost variance + schedule issues
         const mockStages = [
-          { 
+          {
             items: [
-              { 
-                id: 'item-1', 
-                quantity_estimated: 100, 
+              {
+                id: 'item-1',
+                quantity_estimated: 100,
                 quantity_executed: 80, // 80% executed
-                unit_cost: 100 
+                unit_cost: 100,
               },
-              { 
-                id: 'item-2', 
-                quantity_estimated: 50, 
+              {
+                id: 'item-2',
+                quantity_estimated: 50,
                 quantity_executed: 10, // Only 20% executed
-                unit_cost: 200 
-              }
-            ]
-          }
+                unit_cost: 200,
+              },
+            ],
+          },
         ];
-        
+
         // Create budget with high execution cost relative to progress
-        const budget1 = createMockBudget({ 
+        const budget1 = createMockBudget({
           id: 'budget-1',
           project_id: 'project-1',
-          stages: mockStages
+          stages: mockStages,
         });
-        
-        const budget2 = createMockBudget({ 
+
+        const budget2 = createMockBudget({
           id: 'budget-2',
           project_id: 'project-2',
-          stages: mockStages
+          stages: mockStages,
         });
-        
-        const project1 = createMockProject({ 
+
+        const project1 = createMockProject({
           id: 'project-1',
           name: 'Proyecto Alto Riesgo',
           progress: 25, // Low progress
-          budgets: [budget1]
+          budgets: [budget1],
         });
-        
-        const project2 = createMockProject({ 
+
+        const project2 = createMockProject({
           id: 'project-2',
           name: 'Proyecto Crítico',
           progress: 30, // Low progress
-          budgets: [budget2]
+          budgets: [budget2],
         });
 
         projectRepo.find.mockResolvedValue([project1, project2]);
@@ -2055,7 +2117,7 @@ describe('AIService', () => {
           if (where.project_id === 'project-2') return Promise.resolve(budget2);
           return Promise.resolve(null);
         });
-        
+
         const result = await (service as any).predictProjectOutcome(
           'company-1',
           null,
@@ -2065,14 +2127,19 @@ describe('AIService', () => {
         expect(result.answer).toContain('con riesgo alto');
         expect(result.answer).toContain('días de retraso');
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions).toContain('Revisar proyectos de riesgo');
+        expect(result.suggestedActions).toContain(
+          'Revisar proyectos de riesgo',
+        );
       });
 
       // Line 1015: analyzeBudgetDeviation error handler
       it('should return null when analyzeBudgetDeviation fails', async () => {
         budgetRepo.find.mockRejectedValue(new Error('Database error'));
-        
-        const result = await (service as any).analyzeBudgetDeviation('company-1', 'project-1');
+
+        const result = await (service as any).analyzeBudgetDeviation(
+          'company-1',
+          'project-1',
+        );
 
         expect(result).toBeNull();
       });
@@ -2080,8 +2147,11 @@ describe('AIService', () => {
       // Line 1071: generateProjectReport error handler
       it('should return null when generateProjectReport fails', async () => {
         projectRepo.findOne.mockRejectedValue(new Error('Database error'));
-        
-        const result = await service.generateProjectReport('project-1', 'executive');
+
+        const result = await service.generateProjectReport(
+          'project-1',
+          'executive',
+        );
 
         expect(result).toBeNull();
       });
@@ -2090,12 +2160,20 @@ describe('AIService', () => {
       it('should handle BIM elements query with direct IFC type', async () => {
         bimAnalyticsService.getBIMSummaryInsights.mockResolvedValue({
           totalElements: 150,
-          byCategory: {}
+          byCategory: {},
         });
-        
+
         bimAnalyticsService.getBIMElements.mockResolvedValueOnce([
-          { id: '1', ifcType: 'IfcStair', quantities: { netVolume: 5.5, netArea: 15.0 } },
-          { id: '2', ifcType: 'IfcStair', quantities: { netVolume: 4.2, netArea: 12.3 } }
+          {
+            id: '1',
+            ifcType: 'IfcStair',
+            quantities: { netVolume: 5.5, netArea: 15.0 },
+          },
+          {
+            id: '2',
+            ifcType: 'IfcStair',
+            quantities: { netVolume: 4.2, netArea: 12.3 },
+          },
         ]);
 
         const result = await (service as any).handleBIMElementsQuery(
@@ -2117,8 +2195,14 @@ describe('AIService', () => {
           totalVolume: 850.5,
           progressPercentage: 72,
           qualityScore: 68,
-          criticalIssues: ['Geometría inválida en 15 elementos', 'Propiedades faltantes'],
-          keyRecommendations: ['Revisar elementos con errores', 'Completar información']
+          criticalIssues: [
+            'Geometría inválida en 15 elementos',
+            'Propiedades faltantes',
+          ],
+          keyRecommendations: [
+            'Revisar elementos con errores',
+            'Completar información',
+          ],
         });
 
         const result = await (service as any).handleBIMElementsQuery(
@@ -2128,18 +2212,43 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.answer).toContain('⚠️ Problemas: Geometría inválida en 15 elementos');
+        expect(result.answer).toContain(
+          '⚠️ Problemas: Geometría inválida en 15 elementos',
+        );
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions).toEqual(['Revisar elementos con errores', 'Completar información']);
+        expect(result.suggestedActions).toEqual([
+          'Revisar elementos con errores',
+          'Completar información',
+        ]);
       });
 
       // Lines 1368, 1376, 1379-1381: BIM Quantities general summary with cost
       it('should handle BIM quantities general summary with costs', async () => {
         bimAnalyticsService.generateCostAnalysis.mockResolvedValue([
-          { ifcType: 'IfcSlab', totalVolume: 200.5, totalArea: 500.2, totalCost: 60000 },
-          { ifcType: 'IfcWall', totalVolume: 300.8, totalArea: 800.5, totalCost: 90000 },
-          { ifcType: 'IfcColumn', totalVolume: 80.3, totalArea: 150.0, totalCost: 24000 },
-          { ifcType: 'IfcBeam', totalVolume: 120.0, totalArea: 280.0, totalCost: 36000 }
+          {
+            ifcType: 'IfcSlab',
+            totalVolume: 200.5,
+            totalArea: 500.2,
+            totalCost: 60000,
+          },
+          {
+            ifcType: 'IfcWall',
+            totalVolume: 300.8,
+            totalArea: 800.5,
+            totalCost: 90000,
+          },
+          {
+            ifcType: 'IfcColumn',
+            totalVolume: 80.3,
+            totalArea: 150.0,
+            totalCost: 24000,
+          },
+          {
+            ifcType: 'IfcBeam',
+            totalVolume: 120.0,
+            totalArea: 280.0,
+            totalCost: 36000,
+          },
         ]);
 
         const result = await (service as any).handleBIMQuantitiesQuery(
@@ -2159,7 +2268,9 @@ describe('AIService', () => {
 
       // Line 1399: BIM Quantities error handler
       it('should handle BIM quantities query errors gracefully', async () => {
-        bimAnalyticsService.generateCostAnalysis.mockRejectedValue(new Error('Analysis error'));
+        bimAnalyticsService.generateCostAnalysis.mockRejectedValue(
+          new Error('Analysis error'),
+        );
 
         const result = await (service as any).handleBIMQuantitiesQuery(
           'company-1',
@@ -2174,7 +2285,9 @@ describe('AIService', () => {
 
       // Line 1489: BIM Storeys error handler
       it('should handle BIM storeys query errors gracefully', async () => {
-        bimAnalyticsService.generateProgressAnalysis.mockRejectedValue(new Error('Progress error'));
+        bimAnalyticsService.generateProgressAnalysis.mockRejectedValue(
+          new Error('Progress error'),
+        );
 
         const result = await (service as any).handleBIMStoreysQuery(
           'company-1',
@@ -2183,7 +2296,9 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.answer).toContain('No pude analizar el progreso por pisos');
+        expect(result.answer).toContain(
+          'No pude analizar el progreso por pisos',
+        );
         expect(result.confidence).toBe(0.5);
       });
 
@@ -2192,11 +2307,11 @@ describe('AIService', () => {
         bimAnalyticsService.generateClashAnalysis.mockResolvedValue({
           totalClashes: 25,
           bySeverity: { critical: 3, high: 8, medium: 10, low: 4 },
-          byDiscipline: { 
+          byDiscipline: {
             'architecture-structure': 8,
             'architecture-mep': 5,
-            'structure-mep': 12
-          }
+            'structure-mep': 12,
+          },
         });
 
         const result = await (service as any).handleBIMDisciplinesQuery(
@@ -2210,18 +2325,20 @@ describe('AIService', () => {
         expect(result.answer).toContain('colisiones detectadas');
         expect(result.data.discipline).toBe('architecture');
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions[0]).toContain('Revisar colisiones en arquitectura');
+        expect(result.suggestedActions[0]).toContain(
+          'Revisar colisiones en arquitectura',
+        );
       });
 
       it('should handle specific discipline query - structure', async () => {
         bimAnalyticsService.generateClashAnalysis.mockResolvedValue({
           totalClashes: 20,
           bySeverity: { critical: 2, high: 6, medium: 8, low: 4 },
-          byDiscipline: { 
+          byDiscipline: {
             'architecture-structure': 7,
             'structure-mep': 10,
-            'mep-mep': 3
-          }
+            'mep-mep': 3,
+          },
         });
 
         const result = await (service as any).handleBIMDisciplinesQuery(
@@ -2240,7 +2357,7 @@ describe('AIService', () => {
         bimAnalyticsService.generateClashAnalysis.mockResolvedValue({
           totalClashes: 0,
           bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-          byDiscipline: {}
+          byDiscipline: {},
         });
 
         const result = await (service as any).handleBIMDisciplinesQuery(
@@ -2250,7 +2367,9 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.answer).toContain('No hay colisiones interdisciplinarias detectadas');
+        expect(result.answer).toContain(
+          'No hay colisiones interdisciplinarias detectadas',
+        );
         expect(result.actionable).toBe(false);
         expect(result.suggestedActions).toEqual([]);
       });
@@ -2265,8 +2384,12 @@ describe('AIService', () => {
           commonIssues: [
             { issue: 'Propiedades faltantes', count: 20, impact: 'high' },
             { issue: 'Geometría duplicada', count: 15, impact: 'critical' },
-            { issue: 'Nomenclatura inconsistente', count: 10, impact: 'medium' }
-          ]
+            {
+              issue: 'Nomenclatura inconsistente',
+              count: 10,
+              impact: 'medium',
+            },
+          ],
         });
 
         const result = await (service as any).handleBIMQualityQuery(
@@ -2281,9 +2404,15 @@ describe('AIService', () => {
         expect(result.answer).toContain('Problemas principales:');
         expect(result.answer).toContain('Propiedades faltantes');
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions).toContain('Mejorar calidad de datos del modelo');
-        expect(result.suggestedActions).toContain('Completar información faltante');
-        expect(result.suggestedActions).toContain('Estandarizar nomenclatura de elementos');
+        expect(result.suggestedActions).toContain(
+          'Mejorar calidad de datos del modelo',
+        );
+        expect(result.suggestedActions).toContain(
+          'Completar información faltante',
+        );
+        expect(result.suggestedActions).toContain(
+          'Estandarizar nomenclatura de elementos',
+        );
       });
 
       it('should handle BIM quality with low completeness only', async () => {
@@ -2292,7 +2421,7 @@ describe('AIService', () => {
           modelCompleteness: 75,
           dataConsistency: 88,
           elementsWithIssues: 10,
-          commonIssues: []
+          commonIssues: [],
         });
 
         const result = await (service as any).handleBIMQualityQuery(
@@ -2302,7 +2431,9 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.suggestedActions).toContain('Completar información faltante');
+        expect(result.suggestedActions).toContain(
+          'Completar información faltante',
+        );
         expect(result.actionable).toBe(false); // Score >= 80
       });
 
@@ -2312,7 +2443,7 @@ describe('AIService', () => {
           modelCompleteness: 92,
           dataConsistency: 75,
           elementsWithIssues: 5,
-          commonIssues: []
+          commonIssues: [],
         });
 
         const result = await (service as any).handleBIMQualityQuery(
@@ -2322,20 +2453,27 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.suggestedActions).toContain('Estandarizar nomenclatura de elementos');
+        expect(result.suggestedActions).toContain(
+          'Estandarizar nomenclatura de elementos',
+        );
         expect(result.actionable).toBe(false);
       });
 
       // Lines 1716, 1748, 1773-1797: BIM Materials
       it('should handle BIM materials with both volume and area', async () => {
         bimAnalyticsService.generateCostAnalysis.mockResolvedValue([
-          { ifcType: 'IfcSlab', totalVolume: 150.5, totalArea: 400.2, totalCost: 45000 },
-          { ifcType: 'IfcWall', totalVolume: 0, totalArea: 0, totalCost: 0 }
+          {
+            ifcType: 'IfcSlab',
+            totalVolume: 150.5,
+            totalArea: 400.2,
+            totalCost: 45000,
+          },
+          { ifcType: 'IfcWall', totalVolume: 0, totalArea: 0, totalCost: 0 },
         ]);
 
         // Mock material breakdown to return materials with area
         const materialAnalysis = [
-          { material: 'Concrete', volume: 150.5, area: 400.2, cost: 45000 }
+          { material: 'Concrete', volume: 150.5, area: 400.2, cost: 45000 },
         ];
 
         const result = await (service as any).handleBIMMaterialsQuery(
@@ -2350,7 +2488,9 @@ describe('AIService', () => {
       });
 
       it('should handle BIM materials error', async () => {
-        bimAnalyticsService.generateCostAnalysis.mockRejectedValue(new Error('Materials error'));
+        bimAnalyticsService.generateCostAnalysis.mockRejectedValue(
+          new Error('Materials error'),
+        );
 
         const result = await (service as any).handleBIMMaterialsQuery(
           'company-1',
@@ -2359,7 +2499,9 @@ describe('AIService', () => {
           {},
         );
 
-        expect(result.answer).toContain('No pude analizar los materiales del modelo BIM'); // Line 1748
+        expect(result.answer).toContain(
+          'No pude analizar los materiales del modelo BIM',
+        ); // Line 1748
         expect(result.confidence).toBe(0.5);
       });
 
@@ -2368,11 +2510,14 @@ describe('AIService', () => {
         bimAnalyticsService.generateResourceOptimization.mockResolvedValue({
           materialWaste: [
             { type: 'Concrete', wastePercentage: 12.5, costImpact: 15000 },
-            { type: 'Steel', wastePercentage: 8.2, costImpact: 8000 }
+            { type: 'Steel', wastePercentage: 8.2, costImpact: 8000 },
           ],
           laborEfficiency: [],
           equipmentUtilization: [],
-          optimizationRecommendations: ['Optimizar cortes de material', 'Mejorar almacenamiento']
+          optimizationRecommendations: [
+            'Optimizar cortes de material',
+            'Mejorar almacenamiento',
+          ],
         });
 
         const result = await (service as any).handleBIMOptimizationQuery(
@@ -2386,7 +2531,9 @@ describe('AIService', () => {
         expect(result.answer).toContain('Mayor problema: Concrete');
         expect(result.answer).toContain('12.5% desperdicio');
         expect(result.actionable).toBe(true);
-        expect(result.suggestedActions).toContain('Optimizar cortes de material');
+        expect(result.suggestedActions).toContain(
+          'Optimizar cortes de material',
+        );
       });
 
       it('should handle BIM optimization with labor efficiency issues', async () => {
@@ -2395,10 +2542,12 @@ describe('AIService', () => {
           laborEfficiency: [
             { zone: 'Zona A', efficiency: 65 },
             { zone: 'Zona B', efficiency: 78 },
-            { zone: 'Zona C', efficiency: 92 }
+            { zone: 'Zona C', efficiency: 92 },
           ],
           equipmentUtilization: [],
-          optimizationRecommendations: ['Redistribuir personal en zonas de baja eficiencia']
+          optimizationRecommendations: [
+            'Redistribuir personal en zonas de baja eficiencia',
+          ],
         });
 
         const result = await (service as any).handleBIMOptimizationQuery(
@@ -2409,22 +2558,25 @@ describe('AIService', () => {
         );
 
         expect(result.answer).toContain('Eficiencia laboral promedio');
-        expect(result.answer).toContain('Zonas con baja eficiencia: Zona A, Zona B');
+        expect(result.answer).toContain(
+          'Zonas con baja eficiencia: Zona A, Zona B',
+        );
         expect(result.actionable).toBe(true);
       });
 
       it('should handle BIM optimization with equipment utilization', async () => {
         bimAnalyticsService.generateResourceOptimization.mockResolvedValue({
           materialWaste: [],
-          laborEfficiency: [
-            { zone: 'Zona A', efficiency: 90 }
-          ],
+          laborEfficiency: [{ zone: 'Zona A', efficiency: 90 }],
           equipmentUtilization: [
             { equipment: 'Grúa 1', utilization: 120 },
             { equipment: 'Excavadora', utilization: 55 },
-            { equipment: 'Mixer', utilization: 85 }
+            { equipment: 'Mixer', utilization: 85 },
           ],
-          optimizationRecommendations: ['Agregar grúa adicional', 'Reasignar excavadora']
+          optimizationRecommendations: [
+            'Agregar grúa adicional',
+            'Reasignar excavadora',
+          ],
         });
 
         const result = await (service as any).handleBIMOptimizationQuery(
@@ -2443,19 +2595,15 @@ describe('AIService', () => {
       it('should handle BIM optimization with all metrics', async () => {
         bimAnalyticsService.generateResourceOptimization.mockResolvedValue({
           materialWaste: [
-            { type: 'Wood', wastePercentage: 15, costImpact: 5000 }
+            { type: 'Wood', wastePercentage: 15, costImpact: 5000 },
           ],
-          laborEfficiency: [
-            { zone: 'Zona X', efficiency: 70 }
-          ],
-          equipmentUtilization: [
-            { equipment: 'Bomba', utilization: 115 }
-          ],
+          laborEfficiency: [{ zone: 'Zona X', efficiency: 70 }],
+          equipmentUtilization: [{ equipment: 'Bomba', utilization: 115 }],
           optimizationRecommendations: [
             'Optimizar uso de madera',
             'Mejorar eficiencia en Zona X',
-            'Revisar programación de bomba'
-          ]
+            'Revisar programación de bomba',
+          ],
         });
 
         const result = await (service as any).handleBIMOptimizationQuery(

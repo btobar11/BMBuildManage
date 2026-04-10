@@ -187,7 +187,10 @@ describe('BudgetsService', () => {
       const budget = createMockBudget({ notes: 'Test budget' });
       const updatedBudget = createMockBudget({ ...budget, notes: 'Updated' });
       budgetRepo.findOne.mockResolvedValue(budget);
-      budgetRepo.merge.mockImplementation((b, dto) => ({ ...b, ...dto }));
+      budgetRepo.merge.mockImplementation((b: any, ...rest: any[]) => ({
+        ...b,
+        ...rest[0],
+      }));
       budgetRepo.save.mockResolvedValue(updatedBudget);
 
       const result = await service.update('budget-1', { notes: 'Updated' });
@@ -199,7 +202,10 @@ describe('BudgetsService', () => {
       const budget = createMockBudget();
       const updatedBudget = createMockBudget({ ...budget, stages: [] });
       budgetRepo.findOne.mockResolvedValue(budget);
-      budgetRepo.merge.mockImplementation((b, dto) => ({ ...b, ...dto }));
+      budgetRepo.merge.mockImplementation((b: any, ...rest: any[]) => ({
+        ...b,
+        ...rest[0],
+      }));
       budgetRepo.save.mockResolvedValue(updatedBudget);
 
       const mockStageRepo = {
@@ -238,7 +244,10 @@ describe('BudgetsService', () => {
     it('should throw ConflictException on optimistic lock failure', async () => {
       const budget = createMockBudget();
       budgetRepo.findOne.mockResolvedValue(budget);
-      budgetRepo.merge.mockImplementation((b, dto) => ({ ...b, ...dto }));
+      budgetRepo.merge.mockImplementation((b: any, ...rest: any[]) => ({
+        ...b,
+        ...rest[0],
+      }));
 
       budgetRepo.save.mockRejectedValue(
         new OptimisticLockVersionMismatchError(budget, 1, 2),
@@ -267,6 +276,7 @@ describe('BudgetsService', () => {
       const result = await service.getSummary('project-1');
       expect(financialService.getProjectSummary).toHaveBeenCalledWith(
         'project-1',
+        undefined,
       );
       expect(result).toEqual({ total: 100000 });
     });

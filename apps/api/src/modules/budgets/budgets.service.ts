@@ -69,7 +69,7 @@ export class BudgetsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, companyId?: string) {
     const budget = await this.budgetRepository.findOne({
       where: { id },
       relations: ['stages', 'stages.items', 'project', 'project.company'],
@@ -77,11 +77,22 @@ export class BudgetsService {
     if (!budget) {
       throw new NotFoundException(`Budget with ID ${id} not found`);
     }
+
+    // Security: Verify budget belongs to user's company
+    if (companyId && budget.project?.company_id !== companyId) {
+      throw new NotFoundException(`Budget with ID ${id} not found`);
+    }
+
     return budget;
   }
 
-  async update(id: string, updateBudgetDto: UpdateBudgetDto, userId?: string) {
-    const budget = await this.findOne(id);
+  async update(
+    id: string,
+    updateBudgetDto: UpdateBudgetDto,
+    userId?: string,
+    companyId?: string,
+  ) {
+    const budget = await this.findOne(id, companyId);
 
     // Update scalar budget fields
     const { stages, ...scalarFields } = updateBudgetDto as any;
@@ -156,8 +167,8 @@ export class BudgetsService {
     }
   }
 
-  async setActiveVersion(id: string, userId?: string) {
-    const budget = await this.findOne(id);
+  async setActiveVersion(id: string, userId?: string, companyId?: string) {
+    const budget = await this.findOne(id, companyId);
 
     // Deactivate others for the same project
     await this.budgetRepository.update(
@@ -178,8 +189,8 @@ export class BudgetsService {
     return saved;
   }
 
-  getSummary(projectId: string) {
-    return this.financialService.getProjectSummary(projectId);
+  getSummary(projectId: string, companyId?: string) {
+    return this.financialService.getProjectSummary(projectId, companyId);
   }
 
   async createRevision(id: string, userId?: string, companyId?: string) {

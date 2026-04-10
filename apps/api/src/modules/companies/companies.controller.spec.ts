@@ -72,9 +72,14 @@ describe('CompaniesController', () => {
       const expected = { id: 'company-1', name: 'Company A' };
       mockCompaniesService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('company-1');
+      const result = await controller.findOne('company-1', {
+        user: { company_id: 'company-1' },
+      });
 
-      expect(mockCompaniesService.findOne).toHaveBeenCalledWith('company-1');
+      expect(mockCompaniesService.findOne).toHaveBeenCalledWith(
+        'company-1',
+        'company-1',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -85,11 +90,14 @@ describe('CompaniesController', () => {
       const expected = { id: 'company-1', ...updateDto };
       mockCompaniesService.update.mockResolvedValue(expected);
 
-      const result = await controller.update('company-1', updateDto);
+      const result = await controller.update('company-1', updateDto, {
+        user: { company_id: 'company-1' },
+      });
 
       expect(mockCompaniesService.update).toHaveBeenCalledWith(
         'company-1',
         updateDto,
+        'company-1',
       );
       expect(result).toEqual(expected);
     });

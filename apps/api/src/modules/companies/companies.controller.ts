@@ -11,6 +11,7 @@ import {
   PipeTransform,
   Injectable,
   Query,
+  Req,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -47,16 +48,24 @@ export class CompaniesController {
   }
 
   @Get(':id')
-  findOne(@Param('id', new IsUUIDValidationPipe()) id: string) {
-    return this.companiesService.findOne(id);
+  findOne(
+    @Param('id', new IsUUIDValidationPipe()) id: string,
+    @Req() req: any,
+  ) {
+    return this.companiesService.findOne(id, req.user?.company_id);
   }
 
   @Patch(':id')
   update(
     @Param('id', new IsUUIDValidationPipe()) id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
+    @Req() req: any,
   ) {
-    return this.companiesService.update(id, updateCompanyDto);
+    return this.companiesService.update(
+      id,
+      updateCompanyDto,
+      req.user?.company_id,
+    );
   }
 
   @Delete(':id')
@@ -70,8 +79,13 @@ export class CompaniesController {
   async seedLibrary(
     @Param('id', new IsUUIDValidationPipe()) id: string,
     @Body() seedDto: SeedCompanyLibraryDto,
+    @Req() req: any,
   ) {
-    return this.companiesService.seedCompanyLibrary(id, seedDto);
+    return this.companiesService.seedCompanyLibrary(
+      id,
+      seedDto,
+      req.user?.company_id,
+    );
   }
 
   @Post(':id/reseed-library')
@@ -79,17 +93,25 @@ export class CompaniesController {
     @Param('id', new IsUUIDValidationPipe()) id: string,
     @Body() seedDto: SeedCompanyLibraryDto,
     @Query('force') force: string = 'false',
+    @Req() req: any,
   ) {
     return this.companiesService.reseedCompanyLibrary(
       id,
       seedDto,
       force === 'true',
+      req.user?.company_id,
     );
   }
 
   @Get(':id/library-stats')
-  async getLibraryStats(@Param('id', new IsUUIDValidationPipe()) id: string) {
-    return this.companiesService.getSeededLibraryStats(id);
+  async getLibraryStats(
+    @Param('id', new IsUUIDValidationPipe()) id: string,
+    @Req() req: any,
+  ) {
+    return this.companiesService.getSeededLibraryStats(
+      id,
+      req.user?.company_id,
+    );
   }
 
   @Get('specialties/available')

@@ -33,8 +33,12 @@ export class BudgetsController {
   ) {}
 
   @Get(':id/export/pdf')
-  async exportPdf(@Param('id') id: string, @Res() res: Response) {
-    const budget = await this.budgetsService.findOne(id);
+  async exportPdf(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    const budget = await this.budgetsService.findOne(id, req.user?.company_id);
     const projectName = budget.project?.name || 'presupuesto';
     const safeName = projectName.replace(/[^a-zA-Z0-9_\-áéíóú]/g, '_');
 
@@ -57,7 +61,11 @@ export class BudgetsController {
   @Post(':id/activate')
   @Roles(UserRole.ADMIN, UserRole.ENGINEER)
   setActive(@Param('id') id: string, @Req() req: any) {
-    return this.budgetsService.setActiveVersion(id, req.user?.id);
+    return this.budgetsService.setActiveVersion(
+      id,
+      req.user?.id,
+      req.user?.company_id,
+    );
   }
 
   @Get()
@@ -66,13 +74,13 @@ export class BudgetsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.budgetsService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req: any) {
+    return this.budgetsService.findOne(id, req.user?.company_id);
   }
 
   @Get('project/:projectId/summary')
-  getSummary(@Param('projectId') projectId: string) {
-    return this.budgetsService.getSummary(projectId);
+  getSummary(@Param('projectId') projectId: string, @Req() req: any) {
+    return this.budgetsService.getSummary(projectId, req.user?.company_id);
   }
 
   @Patch(':id')
@@ -82,7 +90,12 @@ export class BudgetsController {
     @Body() updateBudgetDto: UpdateBudgetDto,
     @Req() req: any,
   ) {
-    return this.budgetsService.update(id, updateBudgetDto, req.user?.id);
+    return this.budgetsService.update(
+      id,
+      updateBudgetDto,
+      req.user?.id,
+      req.user?.company_id,
+    );
   }
 
   @Post(':id/revision')
@@ -102,8 +115,12 @@ export class BudgetsController {
   }
 
   @Get(':id/export/excel')
-  async exportExcel(@Param('id') id: string, @Res() res: Response) {
-    const budget = await this.budgetsService.findOne(id);
+  async exportExcel(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    const budget = await this.budgetsService.findOne(id, req.user?.company_id);
     const projectName = budget.project?.name || 'presupuesto';
     const safeName = projectName.replace(/[^a-zA-Z0-9_\-áéíóú]/g, '_');
 

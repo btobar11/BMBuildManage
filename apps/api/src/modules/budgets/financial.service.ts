@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Budget } from './budget.entity';
@@ -58,12 +58,18 @@ export class FinancialService {
   /**
    * Gets a complete financial summary for a project.
    */
-  async getProjectSummary(projectId: string) {
+  async getProjectSummary(projectId: string, companyId?: string) {
     // 1. Get current approved budget (or most recent)
     const budget = await this.budgetRepository.findOne({
       where: { project_id: projectId },
       order: { created_at: 'DESC' }, // Pick the newest revision
+      relations: ['project'],
     });
+
+    // Security: Verify project belongs to user's company
+    if (companyId && budget?.project?.company_id !== companyId) {
+      throw new NotFoundException('Project not found');
+    }
 
     const [realExpenses, workerPayments, contingenciesTotal] =
       await Promise.all([

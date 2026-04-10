@@ -47,16 +47,24 @@ export class CompaniesService {
     return this.companyRepository.find();
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, companyId?: string) {
     const company = await this.companyRepository.findOne({ where: { id } });
     if (!company) {
+      throw new NotFoundException(`Company with ID ${id} not found`);
+    }
+    // Security: Verify company belongs to user's company (except for findAll which is admin only)
+    if (companyId && company.id !== companyId) {
       throw new NotFoundException(`Company with ID ${id} not found`);
     }
     return company;
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto) {
-    const company = await this.findOne(id);
+  async update(
+    id: string,
+    updateCompanyDto: UpdateCompanyDto,
+    companyId?: string,
+  ) {
+    const company = await this.findOne(id, companyId);
     this.companyRepository.merge(company, updateCompanyDto);
     return this.companyRepository.save(company);
   }
@@ -70,10 +78,11 @@ export class CompaniesService {
   async seedCompanyLibrary(
     companyId: string,
     seedDto: SeedCompanyLibraryDto,
+    requestingCompanyId?: string,
   ): Promise<SeedingResult> {
     try {
       // Verify company exists and is not already seeded
-      const company = await this.findOne(companyId);
+      const company = await this.findOne(companyId, requestingCompanyId);
 
       if (company.library_seeded) {
         throw new Error('Company library already seeded');
@@ -123,7 +132,10 @@ export class CompaniesService {
     }
   }
 
-  async getSeededLibraryStats(companyId: string): Promise<{
+  async getSeededLibraryStats(
+    companyId: string,
+    requestingCompanyId?: string,
+  ): Promise<{
     isSeeded: boolean;
     seededAt?: Date;
     specialty?: CompanySpecialty;
@@ -131,7 +143,7 @@ export class CompaniesService {
     resourcesCount: number;
     apusCount: number;
   }> {
-    const company = await this.findOne(companyId);
+    const company = await this.findOne(companyId, requestingCompanyId);
 
     // Get counts from Supabase
     const [resourcesResult, apusResult] = await Promise.all([
@@ -159,9 +171,10 @@ export class CompaniesService {
     companyId: string,
     seedDto: SeedCompanyLibraryDto,
     force: boolean = false,
+    requestingCompanyId?: string,
   ): Promise<SeedingResult> {
     if (!force) {
-      const company = await this.findOne(companyId);
+      const company = await this.findOne(companyId, requestingCompanyId);
       if (company.library_seeded) {
         throw new Error('Company already seeded. Use force=true to reseed.');
       }
