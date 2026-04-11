@@ -1,12 +1,24 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { CurrentCompany } from '../../common/decorators/current-company.decorator';
 import { AnalyticsService } from './analytics.service';
+import { AnalyticsExportService } from './analytics-export.service';
 
 @Controller('analytics')
 @UseGuards(SupabaseAuthGuard)
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(
+    private readonly analyticsService: AnalyticsService,
+    private readonly analyticsExportService: AnalyticsExportService,
+  ) {}
 
   @Get('dashboard')
   async getDashboardSummary(@CurrentCompany() companyId: string) {
@@ -69,5 +81,31 @@ export class AnalyticsController {
     @Param('projectId') projectId: string,
   ) {
     return this.analyticsService.getProjectCashflow(companyId, projectId);
+  }
+
+  @Get('export/excel')
+  async exportExcel(
+    @CurrentCompany() companyId: string,
+    @Query('company_name') companyName: string,
+    @Query('project_id') projectId: string,
+    @Res() res: Response,
+  ) {
+    const buffer =
+      await this.analyticsExportService.generateExcelReport(
+        companyId,
+        companyName || 'BM Build Manage',
+        projectId,
+      );
+
+    const filename = `reporte_bi_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+
+    res.send(buffer);
   }
 }

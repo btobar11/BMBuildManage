@@ -62,15 +62,8 @@ export class BimApuLinkController {
    * Link BIM element to budget item
    */
   @Post()
-  async linkElement(
-    @CurrentUser() user: any,
-    @Body() dto: LinkElementDto,
-  ) {
-    const link = await this.service.linkElement(
-      user.company_id,
-      dto,
-      user.id,
-    );
+  async linkElement(@CurrentUser() user: any, @Body() dto: LinkElementDto) {
+    const link = await this.service.linkElement(user.company_id, dto, user.id);
 
     return {
       success: true,
@@ -106,10 +99,7 @@ export class BimApuLinkController {
     @CurrentUser() user: any,
     @Param('item_id') itemId: string,
   ) {
-    const links = await this.service.getLinksByItem(
-      user.company_id,
-      itemId,
-    );
+    const links = await this.service.getLinksByItem(user.company_id, itemId);
 
     return {
       success: true,
@@ -146,10 +136,7 @@ export class BimApuLinkController {
     @CurrentUser() user: any,
     @Param('project_id') projectId: string,
   ) {
-    const status = await this.service.getSyncStatus(
-      user.company_id,
-      projectId,
-    );
+    const status = await this.service.getSyncStatus(user.company_id, projectId);
 
     return {
       success: true,
@@ -165,10 +152,7 @@ export class BimApuLinkController {
     @CurrentUser() user: any,
     @Param('link_id') linkId: string,
   ) {
-    await this.service.unlinkElement(
-      user.company_id,
-      linkId,
-    );
+    await this.service.unlinkElement(user.company_id, linkId);
 
     return {
       success: true,

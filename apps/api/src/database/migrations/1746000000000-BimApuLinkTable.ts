@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
 /**
  * Migration: Create bim_apu_links table
- * 
+ *
  * Enables automated BIM-to-APU quantity takeoff synchronization.
  * Maps IFC elements to budget items (APU).
  */

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -285,10 +289,7 @@ export class BimApuLinkService {
   /**
    * Sync single item quantity from linked BIM elements
    */
-  async syncItemQuantity(
-    link: BimApuLink,
-    item: Item,
-  ): Promise<SyncResult> {
+  async syncItemQuantity(link: BimApuLink, item: Item): Promise<SyncResult> {
     const oldQuantity = Number(item.quantity);
     const newQuantity = this.calculateBimQuantity(link);
 
@@ -376,10 +377,7 @@ export class BimApuLinkService {
   /**
    * Unlink BIM element from item
    */
-  async unlinkElement(
-    companyId: string,
-    linkId: string,
-  ): Promise<void> {
+  async unlinkElement(companyId: string, linkId: string): Promise<void> {
     const link = await this.bimApuLinkRepo.findOne({
       where: { id: linkId, company_id: companyId },
     });
@@ -409,13 +407,16 @@ export class BimApuLinkService {
     const autoSyncEnabled = links.filter((l) => l.auto_sync_enabled).length;
     const uniqueItems = new Set(links.map((l) => l.item_id)).size;
 
-    const lastSync = links.reduce((latest, link) => {
-      if (!link.last_synced_at) return latest;
-      if (!latest || link.last_synced_at > latest) {
-        return link.last_synced_at;
-      }
-      return latest;
-    }, null as Date | null);
+    const lastSync = links.reduce(
+      (latest, link) => {
+        if (!link.last_synced_at) return latest;
+        if (!latest || link.last_synced_at > latest) {
+          return link.last_synced_at;
+        }
+        return latest;
+      },
+      null as Date | null,
+    );
 
     return {
       total_links: links.length,

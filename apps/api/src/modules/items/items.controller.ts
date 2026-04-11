@@ -30,6 +30,14 @@ export class ItemsController {
     return this.itemsService.findAllByStage(stageId);
   }
 
+  @Get('budget/:project_id')
+  findAllByProject(
+    @Param('project_id') projectId: string,
+    @Query('search') search?: string,
+  ) {
+    return this.itemsService.findAllByProject(projectId, search);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.itemsService.findOne(id);

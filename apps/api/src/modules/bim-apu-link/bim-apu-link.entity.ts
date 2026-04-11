@@ -13,7 +13,7 @@ import { Project } from '../projects/project.entity';
 
 /**
  * BIM-APU Link Entity
- * 
+ *
  * Maps IFC elements to budget items (APU).
  * Enables automated quantity takeoff synchronization.
  */

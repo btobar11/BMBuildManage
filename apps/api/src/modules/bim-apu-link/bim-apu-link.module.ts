@@ -8,14 +8,7 @@ import { Stage } from '../stages/stage.entity';
 import { Budget } from '../budgets/budget.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      BimApuLink,
-      Item,
-      Stage,
-      Budget,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([BimApuLink, Item, Stage, Budget])],
   providers: [BimApuLinkService],
   controllers: [BimApuLinkController],
   exports: [BimApuLinkService],
