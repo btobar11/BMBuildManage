@@ -58,16 +58,16 @@ import { BimModelsModule } from './modules/bim-models/bim-models.module';
           );
         }
 
+        // Production: use explicit migrations only
         return {
           type: 'postgres',
           url: configService.get<string>('DATABASE_URL'),
           autoLoadEntities: true,
-          synchronize,
+          synchronize: false, // A2: Explicitly disabled - migrations required
           logging: isProduction ? false : true,
           ssl: isProduction ? { rejectUnauthorized: false } : false,
-          // Production: use explicit migrations only
           migrationsRun: false,
-          migrations: [],
+          migrations: ['src/database/migrations/*{.ts,.js}'],
         };
       },
       inject: [ConfigService],
