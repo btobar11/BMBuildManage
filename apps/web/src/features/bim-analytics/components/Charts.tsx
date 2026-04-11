@@ -391,7 +391,7 @@ export function QualityMetricsRadar({ data, loading }: QualityChartProps) {
               border: '1px solid var(--border)',
               borderRadius: '8px',
             }}
-            formatter={(value) => [`${typeof value === 'number' ? value.toFixed(1) : '0'}%`, '']}}
+            formatter={(value) => [`${typeof value === 'number' ? value.toFixed(1) : '0'}%`, '']}
           />
           <Bar dataKey="value" fill={COLORS.info} radius={[0, 4, 4, 0]} />
         </BarChart>
