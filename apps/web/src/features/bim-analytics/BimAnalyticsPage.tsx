@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useAllBIMAnalytics } from '../../hooks/useBIMAnalytics';
 import { MetricCard } from '../../components/ui/Card/MetricCard';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import {
@@ -46,24 +46,9 @@ function LoadingState() {
 }
 
 function MetricsGrid({ 
-  progressAnalysis, 
-  qualityMetrics, 
-  clashAnalysis,
   summaryInsights,
   loading 
 }: {
-  progressAnalysis?: {
-    byStorey: Record<string, { total: number; completed: number; percentage: number; volume: number }>;
-    progressPercentage: number;
-    totalElements: number;
-    completedElements: number;
-  };
-  qualityMetrics?: {
-    qualityScore: number;
-  };
-  clashAnalysis?: {
-    activeClashes: number;
-  };
   summaryInsights?: {
     totalElements: number;
     totalVolume: number;
@@ -306,6 +291,8 @@ function ProgressTab({
   progressAnalysis?: {
     byStorey: Record<string, { total: number; completed: number; percentage: number; volume: number }>;
     progressPercentage: number;
+    totalElements: number;
+    completedElements: number;
   };
   loading?: boolean;
 }) {

@@ -11,7 +11,7 @@ import {
   type SortingState,
   type PaginationState,
 } from '@tanstack/react-table';
-import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
+import { Card, CardContent } from '../../../components/ui/Card';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import {
   ChevronUp,
@@ -188,10 +188,8 @@ function DataTable<T extends Record<string, unknown>>({
 interface CostAnalysisTableProps {
   data: Array<{
     ifcType: string;
-    elementCount: number;
-    totalVolume: number;
-    totalArea: number;
     totalCost: number;
+    totalVolume: number;
     costPerM3: number;
     executionProgress: number;
   }>;
@@ -204,10 +202,6 @@ export function CostAnalysisTable({ data, loading }: CostAnalysisTableProps) {
       columnHelper.accessor('ifcType', {
         header: 'Tipo IFC',
         cell: (info) => (info.getValue() as string)?.replace('Ifc', '') || '-',
-      }),
-      columnHelper.accessor('elementCount', {
-        header: 'Elementos',
-        cell: (info) => (info.getValue() as number)?.toLocaleString('es-CL') || '0',
       }),
       columnHelper.accessor('totalVolume', {
         header: 'Volumen (m³)',
@@ -408,26 +402,7 @@ export function ProgressByStoreyTable({ data, loading }: ProgressByStoreyTablePr
         header: 'Avance (%)',
         cell: (info) => {
           const val = info.getValue() as number;
-          return (
-            <div className="flex items-center gap-2">
-              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={cn(
-                    'h-full rounded-full',
-                    val >= 90
-                      ? 'bg-success-500'
-                      : val >= 70
-                        ? 'bg-primary-500'
-                        : val >= 50
-                          ? 'bg-warning-500'
-                          : 'bg-danger-500'
-                  )}
-                  style={{ width: `${Math.min(val, 100)}%` }}
-                />
-              </div>
-              <span className="text-xs">{val?.toFixed(1) || '0'}%</span>
-            </div>
-          );
+          return val ? `${val.toFixed(1)}%` : '0%';
         },
       }),
       columnHelper.accessor('volume', {
