@@ -16,12 +16,26 @@ import { RfisPage } from './features/rfis/RfisPage';
 import { SubmittalsPage } from './features/submittals/SubmittalsPage';
 import { PunchListPage } from './features/punch-list/PunchListPage';
 import { SchedulePage } from './features/schedule/SchedulePage';
-import { BimLibraryPage } from './features/bim/BimLibraryPage';
 import { MainLayout } from './components/layout/MainLayout';
 import { ConfigWarning } from './components/ConfigWarning';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { VectorAI } from './components/AIAssistant';
+import { lazy, Suspense } from 'react';
+
+// Lazy load BIM pages (Three.js / ThatOpen are heavy ~2MB)
+const BimLibraryPage = lazy(() => import('./features/bim/BimLibraryPage').then(m => ({ default: m.BimLibraryPage })));
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-slate-600">Cargando módulo 3D...</p>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const { token, isLoading, isConfigured } = useAuth();
@@ -104,7 +118,7 @@ function App() {
         />
         <Route 
           path="/bim" 
-          element={isAuthenticated ? <MainLayout><BimLibraryPage /></MainLayout> : <Navigate to="/login" />} 
+          element={isAuthenticated ? <MainLayout><Suspense fallback={<LoadingFallback />}><BimLibraryPage /></Suspense></MainLayout> : <Navigate to="/login" />} 
         />
         <Route 
           path="/company-settings" 

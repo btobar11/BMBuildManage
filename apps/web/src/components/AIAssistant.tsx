@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Cpu, User, ChevronDown, Loader2, Zap, Command } from 'lucide-react';
 import api from '../lib/api';
-import { useAuth } from '../context/AuthContext';
 
 interface Message {
   id: string;
@@ -50,8 +49,8 @@ export function VectorAI() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [showCapabilities, setShowCapabilities] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // Auth context available via context if needed
-  void useAuth;
+// Auth context available via context if needed
+// useAuth; // Evitar advertencia de variable no utilizada
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
