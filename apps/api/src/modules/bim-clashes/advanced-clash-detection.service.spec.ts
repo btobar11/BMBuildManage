@@ -1625,14 +1625,26 @@ describe('AdvancedClashDetectionService', () => {
         { severity: 'high', clash_type: 'hard', status: 'pending' },
       ];
 
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockReturnValue({ data: mockClashes, error: null }),
-        from: jest.fn().mockReturnThis(),
-      };
+      const mockModels = [
+        { id: 'model-1' },
+      ];
 
-      mockSupabase.from.mockReturnValue(mockQueryBuilder);
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'bim_models') {
+          return {
+            select: () => ({
+              eq: () => ({ data: mockModels, error: null }),
+            }),
+          };
+        }
+        return {
+          select: () => ({
+            eq: () => ({
+              in: () => ({ data: mockClashes, error: null }),
+            }),
+          }),
+        };
+      });
 
       const result = await service.getClashDetectionStats(
         'company-1',
@@ -1640,7 +1652,6 @@ describe('AdvancedClashDetectionService', () => {
       );
 
       expect(result.totalClashes).toBe(1);
-      expect(mockQueryBuilder.in).toHaveBeenCalled();
     });
   });
 
