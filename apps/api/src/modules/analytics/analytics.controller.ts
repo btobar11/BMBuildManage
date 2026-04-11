@@ -57,4 +57,17 @@ export class AnalyticsController {
   ) {
     return this.analyticsService.getProjectClashHealth(companyId, projectId);
   }
+
+  @Get('cashflow')
+  async getCashflow(@CurrentCompany() companyId: string) {
+    return this.analyticsService.getCashflow(companyId);
+  }
+
+  @Get('cashflow/:projectId')
+  async getProjectCashflow(
+    @CurrentCompany() companyId: string,
+    @Param('projectId') projectId: string,
+  ) {
+    return this.analyticsService.getProjectCashflow(companyId, projectId);
+  }
 }

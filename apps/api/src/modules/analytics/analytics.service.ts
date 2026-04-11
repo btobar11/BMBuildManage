@@ -47,6 +47,33 @@ export interface ClashHealth {
   calculated_at: Date;
 }
 
+export interface CashflowPoint {
+  week: string;
+  week_start: Date;
+  week_end: Date;
+  budget_total: number;
+  expenses_total: number;
+  worker_payments_total: number;
+  accumulated_budget: number;
+  accumulated_spent: number;
+  available: number;
+  utilization_percent: number;
+}
+
+export interface CashflowSummary {
+  company_id: string;
+  project_id: string;
+  project_name: string;
+  total_budgeted: number;
+  total_expenses: number;
+  total_worker_payments: number;
+  total_spent: number;
+  available: number;
+  utilization_percent: number;
+  time_series: CashflowPoint[];
+  calculated_at: Date;
+}
+
 @Injectable()
 export class AnalyticsService {
   constructor(private readonly dataSource: DataSource) {}
@@ -212,5 +239,238 @@ export class AnalyticsService {
     ]);
 
     return { financial, physical, clash };
+  }
+
+  async getCashflow(companyId: string): Promise<CashflowSummary[]> {
+    // Query optimizada para flujo de caja a nivel company
+    const query = `
+      WITH project_budgets AS (
+        SELECT 
+          p.company_id,
+          p.id AS project_id,
+          p.name AS project_name,
+          COALESCE(SUM(b.total_estimated_price), 0) AS total_budget
+        FROM projects p
+        LEFT JOIN budgets b ON b.project_id = p.id AND b.is_active = true
+        WHERE p.company_id = $1 AND p.status IN ('in_progress', 'approved')
+        GROUP BY p.id, p.company_id, p.name
+      ),
+      project_expenses AS (
+        SELECT 
+          company_id,
+          project_id,
+          SUM(amount) AS total_expenses
+        FROM expenses
+        WHERE company_id = $1
+        GROUP BY company_id, project_id
+      ),
+      project_worker_payments AS (
+        SELECT 
+          wp.company_id,
+          wp.project_id,
+          SUM(amount) AS total_worker_payments
+        FROM worker_payments wp
+        WHERE wp.company_id = $1
+        GROUP BY wp.company_id, wp.project_id
+      )
+      SELECT 
+        pb.company_id,
+        pb.project_id,
+        pb.project_name,
+        pb.total_budget AS total_budgeted,
+        COALESCE(pe.total_expenses, 0) AS total_expenses,
+        COALESCE(pwp.total_worker_payments, 0) AS total_worker_payments,
+        COALESCE(pe.total_expenses, 0) + COALESCE(pwp.total_worker_payments, 0) AS total_spent,
+        pb.total_budget - COALESCE(pe.total_expenses, 0) - COALESCE(pwp.total_worker_payments, 0) AS available,
+        CASE 
+          WHEN pb.total_budget > 0 
+          THEN ((COALESCE(pe.total_expenses, 0) + COALESCE(pwp.total_worker_payments, 0)) / pb.total_budget * 100)
+          ELSE 0 
+        END AS utilization_percent,
+        NOW() AS calculated_at
+      FROM project_budgets pb
+      LEFT JOIN project_expenses pe ON pe.project_id = pb.project_id
+      LEFT JOIN project_worker_payments pwp ON pwp.project_id = pb.project_id
+      WHERE pb.total_budget > 0
+      ORDER BY pb.project_name ASC
+    `;
+
+    const results = await this.dataSource.query(query, [companyId]);
+
+    // Para cada proyecto, generamos time-series semanal
+    const summaries: CashflowSummary[] = [];
+    for (const row of results) {
+      const timeSeries = await this.generateCashflowTimeSeries(
+        companyId,
+        row.project_id,
+      );
+      summaries.push({
+        company_id: row.company_id,
+        project_id: row.project_id,
+        project_name: row.project_name,
+        total_budgeted: Number(row.total_budgeted),
+        total_expenses: Number(row.total_expenses),
+        total_worker_payments: Number(row.total_worker_payments),
+        total_spent: Number(row.total_spent),
+        available: Number(row.available),
+        utilization_percent: Number(row.utilization_percent),
+        time_series: timeSeries,
+        calculated_at: row.calculated_at,
+      });
+    }
+
+    return summaries;
+  }
+
+  async getProjectCashflow(
+    companyId: string,
+    projectId: string,
+  ): Promise<CashflowSummary | null> {
+    // Query para un proyecto específico
+    const query = `
+      WITH budget AS (
+        SELECT 
+          COALESCE(SUM(total_estimated_price), 0) AS total_budget
+        FROM budgets
+        WHERE project_id = $1 AND is_active = true
+      ),
+      expenses AS (
+        SELECT COALESCE(SUM(amount), 0) AS total_expenses
+        FROM expenses
+        WHERE project_id = $1 AND company_id = $2
+      ),
+      worker_payments AS (
+        SELECT COALESCE(SUM(amount), 0) AS total_worker_payments
+        FROM worker_payments
+        WHERE project_id = $1 AND company_id = $2
+      ),
+      project_info AS (
+        SELECT name FROM projects WHERE id = $1
+      )
+      SELECT 
+        $2 AS company_id,
+        $1 AS project_id,
+        (SELECT name FROM project_info) AS project_name,
+        (SELECT total_budget FROM budget) AS total_budgeted,
+        (SELECT total_expenses FROM expenses) AS total_expenses,
+        (SELECT total_worker_payments FROM worker_payments) AS total_worker_payments,
+        (SELECT total_expenses FROM expenses) + (SELECT total_worker_payments FROM worker_payments) AS total_spent,
+        (SELECT total_budget FROM budget) - (SELECT total_expenses FROM expenses) - (SELECT total_worker_payments FROM worker_payments) AS available,
+        CASE 
+          WHEN (SELECT total_budget FROM budget) > 0 
+          THEN ((SELECT total_expenses FROM expenses) + (SELECT total_worker_payments FROM worker_payments)) / (SELECT total_budget FROM budget) * 100
+          ELSE 0 
+        END AS utilization_percent,
+        NOW() AS calculated_at
+    `;
+
+    const results = await this.dataSource.query(query, [projectId, companyId]);
+    if (results.length === 0) return null;
+
+    const row = results[0];
+    const timeSeries = await this.generateCashflowTimeSeries(
+      companyId,
+      projectId,
+    );
+
+    return {
+      company_id: row.company_id,
+      project_id: row.project_id,
+      project_name: row.project_name,
+      total_budgeted: Number(row.total_budgeted),
+      total_expenses: Number(row.total_expenses),
+      total_worker_payments: Number(row.total_worker_payments),
+      total_spent: Number(row.total_spent),
+      available: Number(row.available),
+      utilization_percent: Number(row.utilization_percent),
+      time_series: timeSeries,
+      calculated_at: row.calculated_at,
+    };
+  }
+
+  private async generateCashflowTimeSeries(
+    companyId: string,
+    projectId: string,
+  ): Promise<CashflowPoint[]> {
+    // Genera time-series semanal para el proyecto
+    const query = `
+      WITH project_period AS (
+        SELECT 
+          start_date,
+          CURRENT_DATE AS end_date,
+          EXTRACT(WEEK FROM start_date)::int AS start_week,
+          EXTRACT(YEAR FROM start_date)::int AS start_year
+        FROM projects
+        WHERE id = $1 AND company_id = $2
+      ),
+      weekly_expenses AS (
+        SELECT 
+          DATE_TRUNC('week', date)::date AS week_start,
+          SUM(amount) AS weekly_expenses
+        FROM expenses
+        WHERE project_id = $1 AND company_id = $2
+        GROUP BY DATE_TRUNC('week', date)
+      ),
+      weekly_worker_payments AS (
+        SELECT 
+          DATE_TRUNC('week', date)::date AS week_start,
+          SUM(amount) AS weekly_payments
+        FROM worker_payments
+        WHERE project_id = $1 AND company_id = $2
+        GROUP BY DATE_TRUNC('week', date)
+      )
+      SELECT 
+        TO_CHAR(week_start, 'IYYY-IW') AS week,
+        week_start,
+        week_start + INTERVAL '6 days' AS week_end,
+        0 AS budget_total,
+        COALESCE(we.weekly_expenses, 0) AS expenses_total,
+        COALESCE(wwp.weekly_payments, 0) AS worker_payments_total,
+        0 AS accumulated_budget,
+        0 AS accumulated_spent,
+        0 AS available,
+        0 AS utilization_percent
+      FROM generate_series(
+        (SELECT start_date FROM project_period),
+        (SELECT end_date FROM project_period),
+        INTERVAL '1 week'
+      ) AS week_start
+      LEFT JOIN weekly_expenses we ON we.week_start = week_start
+      LEFT JOIN weekly_worker_payments wwp ON wwp.week_start = week_start
+      ORDER BY week_start ASC
+    `;
+
+    const rows = await this.dataSource.query(query, [projectId, companyId]);
+
+    // Calcular acumulados
+    const accumulatedBudget = 0;
+    let accumulatedSpent = 0;
+    const budgetTotal = rows.reduce(
+      (sum: number, r: any) =>
+        sum + Number(r.expenses_total) + Number(r.worker_payments_total),
+      0,
+    );
+
+    return rows.map((row: any, index: number) => {
+      const weekExpenses = Number(row.expenses_total);
+      const weekPayments = Number(row.worker_payments_total);
+      const weekSpent = weekExpenses + weekPayments;
+
+      accumulatedSpent += weekSpent;
+
+      return {
+        week: row.week,
+        week_start: row.week_start,
+        week_end: row.week_end,
+        budget_total: budgetTotal, // Asumimos budget evenly distributed
+        expenses_total: weekExpenses,
+        worker_payments_total: weekPayments,
+        accumulated_budget: budgetTotal, // Total proyectado
+        accumulated_spent: accumulatedSpent,
+        available: budgetTotal - accumulatedSpent,
+        utilization_percent:
+          budgetTotal > 0 ? (accumulatedSpent / budgetTotal) * 100 : 0,
+      };
+    });
   }
 }
