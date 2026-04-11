@@ -1,11 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-
-export interface RequestUser {
-  id: string;
-  email: string;
-  company_id: string;
-  role: string;
-}
+import { RequestUser } from './current-user.decorator';
 
 /**
  * Parameter decorator to extract the company_id from authenticated user.
