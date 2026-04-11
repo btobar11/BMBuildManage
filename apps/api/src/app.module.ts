@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -72,6 +73,23 @@ import { BimModelsModule } from './modules/bim-models/bim-models.module';
       },
       inject: [ConfigService],
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 60000,
+        limit: 100,
+      },
+      {
+        name: 'medium',
+        ttl: 600000,
+        limit: 300,
+      },
+      {
+        name: 'long',
+        ttl: 3600000,
+        limit: 1000,
+      },
+    ]),
     AuthModule,
     CompaniesModule,
     ClientsModule,
@@ -106,6 +124,12 @@ import { BimModelsModule } from './modules/bim-models/bim-models.module';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: 'APP_GUARD',
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
