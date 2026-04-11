@@ -1629,21 +1629,27 @@ describe('AdvancedClashDetectionService', () => {
         { id: 'model-1' },
       ];
 
+      // Mock that properly chains select().eq().in() for clash query
+      const mockClashQuery = {
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            in: jest.fn().mockReturnValue({ data: mockClashes, error: null }),
+          }),
+        }),
+      };
+
+      // Mock for bim_models query (no .in() needed, returns directly)
+      const mockModelQuery = {
+        select: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({ data: mockModels, error: null }),
+        }),
+      };
+
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'bim_models') {
-          return {
-            select: () => ({
-              eq: () => ({ data: mockModels, error: null }),
-            }),
-          };
+          return mockModelQuery;
         }
-        return {
-          select: () => ({
-            eq: () => ({
-              in: () => ({ data: mockClashes, error: null }),
-            }),
-          }),
-        };
+        return mockClashQuery;
       });
 
       const result = await service.getClashDetectionStats(
