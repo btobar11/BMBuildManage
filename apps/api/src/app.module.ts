@@ -37,6 +37,7 @@ import { ScheduleModule } from './modules/schedule/schedule.module';
 import { SubcontractorsModule } from './modules/subcontractors/subcontractors.module';
 import { BimModelsModule } from './modules/bim-models/bim-models.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { BimApuLinkModule } from './modules/bim-apu-link/bim-apu-link.module';
 
 @Module({
   imports: [
@@ -124,6 +125,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     BimModelsModule,
     UsersModule,
     AnalyticsModule,
+    BimApuLinkModule,
   ],
   controllers: [AppController],
   providers: [
