@@ -173,9 +173,97 @@ export function safeValidateClashJob(data: unknown): ClashJobInput | undefined {
   return result.success ? result.data : undefined;
 }
 
+// ==============================================================================
+// ANALYTICS - DASHBOARD ENDPOINTS
+// ==============================================================================
+
+export const analyticsDashboardKpisSchema = z.object({
+  physicalProgress: z.number().min(0).max(100),
+  projectedMargin: z.number().min(0),
+  clashResolved: z.number().int().min(0),
+  clashPending: z.number().int().min(0),
+  totalBudget: z.number().min(0),
+  actualSpent: z.number().min(0),
+  scheduleVariance: z.number(),
+});
+
+export const analyticsProjectSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  status: z.enum(['draft', 'sent', 'approved', 'in_progress', 'completed']),
+  progress: z.number().min(0).max(100),
+  budget: z.number().min(0),
+  spent: z.number().min(0),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+});
+
+export const analyticsBudgetSchema = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  version: z.number().int().positive(),
+  status: z.enum(['draft', 'sent', 'approved', 'rejected', 'revision']),
+  totalCost: z.number().min(0),
+  totalPrice: z.number().min(0),
+  executedAmount: z.number().min(0),
+  margin: z.number(),
+  lastUpdated: z.string(),
+});
+
+export const analyticsClashSchema = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  severity: z.enum(['warning', 'error', 'critical']),
+  status: z.enum(['new', 'reviewed', 'approved', 'resolved']),
+  description: z.string(),
+  elementAId: z.string().nullable(),
+  elementBId: z.string().nullable(),
+  detectedAt: z.string(),
+  resolvedAt: z.string().nullable(),
+});
+
+export const sCurveDataPointSchema = z.object({
+  month: z.string(),
+  planned: z.number().min(0),
+  actual: z.number().min(0).nullable(),
+  baseline: z.number().min(0),
+});
+
+// ==============================================================================
+// TYPE INFERENCE - Strict TypeScript Types
+// ==============================================================================
+
+export type AnalyticsDashboardKPIs = z.infer<typeof analyticsDashboardKpisSchema>;
+export type AnalyticsProject = z.infer<typeof analyticsProjectSchema>;
+export type AnalyticsBudget = z.infer<typeof analyticsBudgetSchema>;
+export type AnalyticsClash = z.infer<typeof analyticsClashSchema>;
+export type SCurveDataPoint = z.infer<typeof sCurveDataPointSchema>;
+
 // Build validation constant - typecheck will fail if schemas are out of sync
 export const SCHEMAS = {
   project: createProjectSchema,
   budget: createBudgetSchema,
   clashJob: createClashJobSchema,
+  dashboardKPIs: analyticsDashboardKpisSchema,
+  analyticsProject: analyticsProjectSchema,
+  analyticsBudget: analyticsBudgetSchema,
+  analyticsClash: analyticsClashSchema,
+  sCurvePoint: sCurveDataPointSchema,
 } as const;
+
+// Type guard functions - returns false if data doesn't match schema
+export function isAnalyticsDashboardKPIs(data: unknown): data is AnalyticsDashboardKPIs {
+  return analyticsDashboardKpisSchema.safeParse(data).success;
+}
+
+export function isAnalyticsProject(data: unknown): data is AnalyticsProject {
+  return analyticsProjectSchema.safeParse(data).success;
+}
+
+export function isAnalyticsBudget(data: unknown): data is AnalyticsBudget {
+  return analyticsBudgetSchema.safeParse(data).success;
+}
+
+export function isAnalyticsClash(data: unknown): data is AnalyticsClash {
+  return analyticsClashSchema.safeParse(data).success;
+}
