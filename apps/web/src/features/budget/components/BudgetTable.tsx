@@ -9,7 +9,6 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
-  GripVertical,
   Calculator,
   Box,
   Ruler,
@@ -17,8 +16,10 @@ import {
   Info,
   X,
   Sigma,
-  TriangleAlert
+  TriangleAlert,
+  Layers
 } from 'lucide-react';
+import { EmptyState } from '../../../components/ui/EmptyState';
 import { ApuPickerModal } from '../../apu/components/ApuPickerModal';
 import type { ApuTemplate } from '../../apu/components/ApuPickerModal';
 import { CubicacionModal } from './CubicacionModal';
@@ -606,19 +607,16 @@ export function BudgetTable({
   return (
     <div className="flex-1 min-w-0">
       {stages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
-            <GripVertical size={28} className="text-blue-400" />
-          </div>
-          <h3 className="text-xl font-bold text-foreground mb-2">Comienza a construir</h3>
-          <p className="text-muted-foreground text-sm mb-8 max-w-xs">Crea tu primera etapa del proyecto para empezar a añadir partidas de obra.</p>
-          <button
-            onClick={() => { onAddStage(); toast.success('Primera etapa creada'); }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-600/30"
-          >
-            <Plus size={16} /> Crear Primera Etapa
-          </button>
-        </div>
+        <EmptyState
+          icon={Layers}
+          title="Comienza a construir"
+          description="Crea tu primera etapa del proyecto para empezar a añadir partidas de obra."
+          size="lg"
+          action={{
+            label: 'Crear Primera Etapa',
+            onClick: () => { onAddStage(); toast.success('Primera etapa creada'); }
+          }}
+        />
       ) : (
         <div className="space-y-6">
           {stages.map((stage) => (

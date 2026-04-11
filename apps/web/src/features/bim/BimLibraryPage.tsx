@@ -4,7 +4,6 @@ import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Box, 
-  Upload, 
   Trash2, 
   Eye, 
   Download, 
@@ -12,6 +11,7 @@ import {
   Loader2,
   TestTube
 } from 'lucide-react';
+import { EmptyState } from '../../components/ui/EmptyState';
 import { useNavigate } from 'react-router-dom';
 import { BimViewerTest } from './components/BimViewerTest';
 
@@ -100,20 +100,16 @@ export function BimLibraryPage() {
           <Loader2 size={32} className="animate-spin text-indigo-500" />
         </div>
       ) : models?.length === 0 ? (
-        <div className="bg-card rounded-xl border border-border p-12 text-center">
-          <Box size={48} className="mx-auto text-muted-foreground mb-4" />
-          <h3 className="font-medium text-lg mb-2">Sin modelos BIM</h3>
-          <p className="text-muted-foreground mb-4">
-            Este proyecto no tiene modelos BIM cargados
-          </p>
-          <button 
-            onClick={() => document.getElementById('bim-upload')?.click()}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            <Upload size={18} />
-            Subir Modelo IFC
-          </button>
-        </div>
+        <EmptyState
+          icon={Box}
+          title="Sin modelos BIM"
+          description="Este proyecto no tiene modelos BIM cargados. Sube un modelo IFC para comenzar."
+          size="lg"
+          action={{
+            label: 'Subir Modelo IFC',
+            onClick: () => document.getElementById('bim-upload')?.click()
+          }}
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {models?.map((model) => (

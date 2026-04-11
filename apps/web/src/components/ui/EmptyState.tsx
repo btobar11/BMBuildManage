@@ -75,11 +75,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <div className={cn(
           'flex items-center justify-center rounded-2xl mb-6',
           config.icon,
-          'bg-primary-100 dark:bg-primary-900/20'
+          'bg-emerald-100 dark:bg-emerald-900/30'
         )}>
           <Icon 
             size={config.iconSize} 
-            className="text-primary-600 dark:text-primary-400" 
+            className="text-emerald-600 dark:text-emerald-400" 
           />
         </div>
       )}
