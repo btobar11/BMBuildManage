@@ -20,7 +20,7 @@
     "@csstools/css-parser-algorithms": "^4.0.0",
     "esbuild": "^0.28.0"
   },
-  "peerDependencies": {
+  "overrides": {
     "typescript": "^5.7.0"
   }
 }
