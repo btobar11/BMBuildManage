@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Loader2 } from 'lucide-react';
 import api from '../../../lib/api';
+import { projectSchema, type ProjectInput } from '../../../lib/schemas';
 
 export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess: (budgetId: string) => void }) => {
   const [formData, setFormData] = useState({

@@ -1625,9 +1625,7 @@ describe('AdvancedClashDetectionService', () => {
         { severity: 'high', clash_type: 'hard', status: 'pending' },
       ];
 
-      const mockModels = [
-        { id: 'model-1' },
-      ];
+      const mockModels = [{ id: 'model-1' }];
 
       // Mock that properly chains select().eq().in() for clash query
       const mockClashQuery = {

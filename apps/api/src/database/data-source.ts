@@ -11,7 +11,10 @@ export default new DataSource({
   url: process.env.DATABASE_URL,
   synchronize: false,
   logging: false,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
   entities: [path.join(process.cwd(), 'src/modules/**/*.entity.ts')],
   migrations: [path.join(process.cwd(), 'src/database/migrations/*.{ts,js}')],
   migrationsTableName: 'typeorm_migrations',

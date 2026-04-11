@@ -323,14 +323,30 @@ export class InitialSchema1744312800000 implements MigrationInterface {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
 
     // Crear índices para mejorar rendimiento
-    await queryRunner.query(`CREATE INDEX "IDX_users_company_id" ON "users" ("company_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_clients_company_id" ON "clients" ("company_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_projects_company_id" ON "projects" ("company_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_budgets_company_id" ON "budgets" ("company_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_stages_company_id" ON "stages" ("company_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_items_company_id" ON "items" ("company_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_expenses_company_id" ON "expenses" ("company_id")`);
-    await queryRunner.query(`CREATE INDEX "IDX_invoices_company_id" ON "invoices" ("company_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_users_company_id" ON "users" ("company_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_clients_company_id" ON "clients" ("company_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_projects_company_id" ON "projects" ("company_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_budgets_company_id" ON "budgets" ("company_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_stages_company_id" ON "stages" ("company_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_items_company_id" ON "items" ("company_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_expenses_company_id" ON "expenses" ("company_id")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_invoices_company_id" ON "invoices" ("company_id")`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

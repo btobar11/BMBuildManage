@@ -5,7 +5,8 @@
       "Bash(npm run:*)",
       "WebSearch",
       "Bash(supabase db:*)",
-      "Bash(npx supabase:*)"
+      "Bash(npx supabase:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

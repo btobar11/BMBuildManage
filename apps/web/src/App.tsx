@@ -22,6 +22,8 @@ import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { VectorAI } from './components/AIAssistant';
 import { lazy, Suspense } from 'react';
+import BimAnalyticsPage from './features/bim-analytics/BimAnalyticsPage';
+import AnalyticsDashboard from './features/bim-analytics/AnalyticsDashboard';
 
 // Lazy load BIM pages (Three.js / ThatOpen are heavy ~2MB)
 const BimLibraryPage = lazy(() => import('./features/bim/BimLibraryPage').then(m => ({ default: m.BimLibraryPage })));
@@ -119,6 +121,14 @@ function App() {
         <Route 
           path="/bim" 
           element={isAuthenticated ? <MainLayout><Suspense fallback={<LoadingFallback />}><BimLibraryPage /></Suspense></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/bim-analytics" 
+          element={isAuthenticated ? <MainLayout><BimAnalyticsPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/bi-dashboard" 
+          element={isAuthenticated ? <MainLayout><AnalyticsDashboard /></MainLayout> : <Navigate to="/login" />} 
         />
         <Route 
           path="/company-settings" 

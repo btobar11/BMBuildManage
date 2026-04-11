@@ -15,7 +15,8 @@ import {
   Box,
   FileQuestion,
   FileText,
-  ClipboardCheck
+  ClipboardCheck,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -27,12 +28,14 @@ interface MainLayoutProps {
 
 const NAV_ITEMS = [
   { label: 'Proyectos', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
+  { label: 'BI Dashboard', icon: <BarChart3 size={20} />, path: '/bi-dashboard' },
   { label: 'RFIs', icon: <FileQuestion size={20} />, path: '/rfis' },
   { label: 'Submittals', icon: <FileText size={20} />, path: '/submittals' },
   { label: 'Punch List', icon: <ClipboardCheck size={20} />, path: '/punch-list' },
   { label: 'Recursos', icon: <Package size={20} />, path: '/resources' },
   { label: 'APU', icon: <Calculator size={20} />, path: '/apu-library' },
   { label: 'Modelos BIM', icon: <Box size={20} />, path: '/bim' },
+  { label: 'Analítica BIM', icon: <BarChart3 size={20} />, path: '/bim-analytics' },
   { label: 'Trabajadores', icon: <Users size={20} />, path: '/workers' },
   { label: 'Gastos', icon: <DollarSign size={20} />, path: '/invoices' },
   { label: 'Empresa', icon: <Settings size={20} />, path: '/company-settings' },
