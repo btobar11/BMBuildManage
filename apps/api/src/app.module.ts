@@ -36,6 +36,7 @@ import { AIModule } from './modules/ai/ai.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
 import { SubcontractorsModule } from './modules/subcontractors/subcontractors.module';
 import { BimModelsModule } from './modules/bim-models/bim-models.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { BimModelsModule } from './modules/bim-models/bim-models.module';
     SubcontractorsModule,
     BimModelsModule,
     UsersModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [
