@@ -392,11 +392,11 @@ export function ProgressByStoreyTable({ data, loading }: ProgressByStoreyTablePr
       }),
       columnHelper.accessor('totalElements', {
         header: 'Total Elementos',
-        cell: (info) => info.getValue()?.toLocaleString('es-CL') || '0',
+        cell: (info) => (info.getValue() as number | undefined)?.toLocaleString('es-CL') || '0',
       }),
       columnHelper.accessor('completedElements', {
         header: 'Completados',
-        cell: (info) => info.getValue()?.toLocaleString('es-CL') || '0',
+        cell: (info) => (info.getValue() as number | undefined)?.toLocaleString('es-CL') || '0',
       }),
       columnHelper.accessor('progress', {
         header: 'Avance (%)',
@@ -444,7 +444,7 @@ export function QualityIssuesTable({ data, loading }: QualityIssuesTableProps) {
       }),
       columnHelper.accessor('count', {
         header: 'Cantidad',
-        cell: (info) => info.getValue()?.toLocaleString('es-CL') || '0',
+        cell: (info) => (info.getValue() as number | undefined)?.toLocaleString('es-CL') || '0',
       }),
       columnHelper.accessor('impact', {
         header: 'Impacto',
@@ -507,11 +507,11 @@ export function ResourceOptimizationTable({ data, loading }: ResourceOptimizatio
       }),
       columnHelper.accessor('plannedHours', {
         header: 'Horas Planificadas',
-        cell: (info) => info.getValue()?.toLocaleString('es-CL') || '0',
+        cell: (info) => (info.getValue() as number | undefined)?.toLocaleString('es-CL') || '0',
       }),
       columnHelper.accessor('actualHours', {
         header: 'Horas Reales',
-        cell: (info) => info.getValue()?.toLocaleString('es-CL') || '0',
+        cell: (info) => (info.getValue() as number | undefined)?.toLocaleString('es-CL') || '0',
       }),
       columnHelper.accessor('efficiency', {
         header: 'Eficiencia',

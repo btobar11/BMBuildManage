@@ -60,7 +60,7 @@ function ChartCard({ title, children, className, loading }: ChartCardProps) {
 }
 
 interface CostAnalysisChartProps {
-  data: Array<{
+  data?: Array<{
     ifcType: string;
     totalCost: number;
     totalVolume: number;
