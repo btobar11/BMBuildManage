@@ -1,15 +1,14 @@
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useAllBIMAnalytics } from '../../hooks/useBIMAnalytics';
 import { MetricCard } from '../../components/ui/Card/MetricCard';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import {
   CostAnalysisBarChart,
   CostVolumeComboChart,
-  ProgressPieChart,
   ClashSeverityChart,
   ClashTypeChart,
   ProgressByStoreyChart,
@@ -20,7 +19,6 @@ import {
 } from './components/Charts';
 import {
   CostAnalysisTable,
-  ClashTable,
   ProgressByStoreyTable,
   QualityIssuesTable,
   ResourceOptimizationTable,
@@ -32,13 +30,10 @@ import {
   Clock,
   Zap,
   Target,
-  BarChart3,
   TrendingUp,
   Layers,
   Gauge,
-  Users,
 } from 'lucide-react';
-import { Progress } from '../../components/ui/Progress';
 
 function LoadingState() {
   return (
@@ -58,8 +53,10 @@ function MetricsGrid({
   loading 
 }: {
   progressAnalysis?: {
-    totalElements: number;
+    byStorey: Record<string, { total: number; completed: number; percentage: number; volume: number }>;
     progressPercentage: number;
+    totalElements: number;
+    completedElements: number;
   };
   qualityMetrics?: {
     qualityScore: number;
@@ -217,10 +214,8 @@ function CostTab({
 }: { 
   costAnalysis?: Array<{
     ifcType: string;
-    elementCount: number;
-    totalVolume: number;
-    totalArea: number;
     totalCost: number;
+    totalVolume: number;
     costPerM3: number;
     executionProgress: number;
   }>;
@@ -247,6 +242,9 @@ function ClashTab({
 }: { 
   clashAnalysis?: {
     totalClashes: number;
+    resolvedPercentage: number;
+    avgResolutionTime: number;
+    criticalUnresolved: number;
     bySeverity: { critical: number; high: number; medium: number; low: number };
     byType: { hard: number; soft: number; clearance: number };
   };

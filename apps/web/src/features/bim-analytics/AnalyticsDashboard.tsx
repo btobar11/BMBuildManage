@@ -7,7 +7,6 @@
 
 import { Suspense } from 'react';
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -17,7 +16,6 @@ import {
   Legend,
   Area,
   AreaChart,
-  ReferenceLine,
 } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
@@ -258,9 +256,10 @@ const SCurveChart = ({
                 borderRadius: '8px',
                 fontSize: '12px',
               }}
-              formatter={(value: number) => [
-                `$${value.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`,
-              ]}
+              formatter={(value) => {
+                const numValue = typeof value === 'number' ? value : 0;
+                return [`$${numValue.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`];
+              }}
             />
             <Legend
               wrapperStyle={{ fontSize: '12px' }}
@@ -466,14 +465,14 @@ function AnalyticsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <EmeraldMetricCard
             title="Avance Físico"
-            value={`${kpis?.physicalProgress.toFixed(1) || '0.0'}%`}
+            value={`${(kpis?.physicalProgress ?? 0).toFixed(1)}%`}
             subtitle="Progreso ejecutado"
-            trend={kpis?.physicalProgress >= 70 ? 'up' : kpis?.physicalProgress >= 50 ? 'neutral' : 'down'}
+            trend={(kpis?.physicalProgress ?? 0) >= 70 ? 'up' : (kpis?.physicalProgress ?? 0) >= 50 ? 'neutral' : 'down'}
             icon={Activity}
             variant={
-              kpis?.physicalProgress >= 70
+              (kpis?.physicalProgress ?? 0) >= 70
                 ? 'success'
-                : kpis?.physicalProgress >= 50
+                : (kpis?.physicalProgress ?? 0) >= 50
                 ? 'warning'
                 : 'danger'
             }

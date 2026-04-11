@@ -11,7 +11,7 @@ import {
   type SortingState,
   type PaginationState,
 } from '@tanstack/react-table';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
 import { Skeleton } from '../../../components/ui/Skeleton';
 import {
   ChevronUp,
@@ -19,7 +19,6 @@ import {
   ChevronsUpDown,
   ChevronLeft,
   ChevronRight,
-  ArrowUpDown,
 } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 
@@ -204,11 +203,11 @@ export function CostAnalysisTable({ data, loading }: CostAnalysisTableProps) {
     () => [
       columnHelper.accessor('ifcType', {
         header: 'Tipo IFC',
-        cell: (info) => info.getValue()?.replace('Ifc', '') || '-',
+        cell: (info) => (info.getValue() as string)?.replace('Ifc', '') || '-',
       }),
       columnHelper.accessor('elementCount', {
         header: 'Elementos',
-        cell: (info) => info.getValue()?.toLocaleString('es-CL') || '0',
+        cell: (info) => (info.getValue() as number)?.toLocaleString('es-CL') || '0',
       }),
       columnHelper.accessor('totalVolume', {
         header: 'Volumen (m³)',

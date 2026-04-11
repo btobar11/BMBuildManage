@@ -94,7 +94,7 @@ export function CostAnalysisBarChart({ data, loading }: CostAnalysisChartProps) 
               border: '1px solid var(--border)',
               borderRadius: '8px',
             }}
-            formatter={(value: number) => [`$${value.toLocaleString('es-CL')}`, '']}
+            formatter={(value) => [`$${(typeof value === 'number' ? value : 0).toLocaleString('es-CL')}`, '']}
           />
           <Legend />
           <Bar dataKey="Costo" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
@@ -187,7 +187,7 @@ export function ProgressPieChart({
               border: '1px solid var(--border)',
               borderRadius: '8px',
             }}
-            formatter={(value: number) => [`${value.toFixed(1)}%`, 'Avance']}
+            formatter={(value) => [`${typeof value === 'number' ? value.toFixed(1) : '0'}%`, 'Avance']}
           />
           <Legend />
         </PieChart>
@@ -343,7 +343,7 @@ export function ProgressTrendChart({ data, loading }: ProgressAnalysisChartProps
               border: '1px solid var(--border)',
               borderRadius: '8px',
             }}
-            formatter={(value: number) => [`${value.toFixed(1)}%`, 'Avance']}
+            formatter={(value) => [`${typeof value === 'number' ? value.toFixed(1) : '0'}%`, 'Avance']}
           />
           <Area
             type="monotone"
@@ -391,7 +391,7 @@ export function QualityMetricsRadar({ data, loading }: QualityChartProps) {
               border: '1px solid var(--border)',
               borderRadius: '8px',
             }}
-            formatter={(value: number) => [`${value.toFixed(1)}%`, '']}
+            formatter={(value) => [`${typeof value === 'number' ? value.toFixed(1) : '0'}%`, '']}}
           />
           <Bar dataKey="value" fill={COLORS.info} radius={[0, 4, 4, 0]} />
         </BarChart>
@@ -461,7 +461,7 @@ export function EfficiencyTrendChart({ data, loading }: ResourceChartProps) {
               border: '1px solid var(--border)',
               borderRadius: '8px',
             }}
-            formatter={(value: number) => [`${value.toFixed(1)}%`, 'Eficiencia']}
+            formatter={(value) => [`${typeof value === 'number' ? value.toFixed(1) : '0'}%`, 'Eficiencia']}
           />
           <Line
             type="monotone"
