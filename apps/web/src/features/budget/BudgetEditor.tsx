@@ -117,7 +117,6 @@ export default function BudgetEditor() {
   );
   const { budget, financials } = budgetCtx;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: contingencies = [] } = useQuery<any[]>({
     queryKey: ['contingencies', serverBudget?.project_id],
     queryFn: () => api.get(`/contingencies/by-project/${serverBudget?.project_id}`).then((r) => r.data),

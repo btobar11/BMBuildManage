@@ -20,7 +20,6 @@ interface CubicationModalProps {
     formula: string; 
     geometry_data: { area: number; perimetro: number; layer: string }; 
   }) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any;
   itemName: string;
   unit: string;
@@ -64,7 +63,6 @@ export const CubicacionModal: React.FC<CubicationModalProps> = ({
 
   useEffect(() => {
     const val = evaluateFormula(params.formula, params);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResult(val);
   }, [params]);
 

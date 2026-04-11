@@ -474,7 +474,6 @@ function StageSection({
                                         <label className="text-[10px] text-muted-foreground mb-1 block uppercase">{dim.label}</label>
                                         <input
                                           type="number"
-                                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                           value={(row.original as any)[dim.key] || 0}
                                           onChange={(e) => {
                                             const val = parseFloat(e.target.value) || 0;

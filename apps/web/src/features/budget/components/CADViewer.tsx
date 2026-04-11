@@ -72,7 +72,6 @@ export const CADViewer: React.FC<CADViewerProps> = ({ dxfString, onSelectGeometr
         minY = Math.min(minY, y); maxY = Math.max(maxY, y);
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dxf.entities.forEach((entity: any) => {
         if (selectedLayer !== 'all' && entity.layer !== selectedLayer) return;
         foundLayers.add(entity.layer);
@@ -87,8 +86,7 @@ export const CADViewer: React.FC<CADViewerProps> = ({ dxfString, onSelectGeometr
             hasControls: false,
             hasBorders: true
           });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (fabricObj as any).data = entity;
+
           updateBounds(entity.vertices[0].x, entity.vertices[0].y);
           updateBounds(entity.vertices[1].x, entity.vertices[1].y);
         } else if (entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
@@ -101,8 +99,7 @@ export const CADViewer: React.FC<CADViewerProps> = ({ dxfString, onSelectGeometr
             hasControls: false,
             hasBorders: true
           });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (fabricObj as any).data = entity;
+
           points.forEach((p: { x: number; y: number }) => updateBounds(p.x, p.y));
         } else if (entity.type === 'CIRCLE') {
           fabricObj = new fabric.Circle({
@@ -117,8 +114,7 @@ export const CADViewer: React.FC<CADViewerProps> = ({ dxfString, onSelectGeometr
             originX: 'center',
             originY: 'center'
           });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (fabricObj as any).data = entity;
+
           updateBounds(entity.center.x - entity.radius, entity.center.y - entity.radius);
           updateBounds(entity.center.x + entity.radius, entity.center.y + entity.radius);
         }
@@ -128,7 +124,6 @@ export const CADViewer: React.FC<CADViewerProps> = ({ dxfString, onSelectGeometr
         }
       });
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLayers(['all', ...Array.from(foundLayers)]);
 
       if (objects.length > 0) {
@@ -148,7 +143,6 @@ export const CADViewer: React.FC<CADViewerProps> = ({ dxfString, onSelectGeometr
       }
 
       canvas.on('mouse:down', (options) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const target = options.target as any;
         if (target && target.data) {
           const entity = target.data as DxfEntity;

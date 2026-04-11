@@ -22,7 +22,6 @@ export interface LineItem {
   dim_count?: number;
   dim_holes?: number;
   formula?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   geometry_data?: any;
   ifc_global_id?: string;
   quantity_executed?: number;

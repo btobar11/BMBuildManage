@@ -34,7 +34,6 @@ export function ContingenciesTab({ projectId }: Props) {
   });
 
   const createMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: (data: any) => api.post('/contingencies', { ...data, project_id: projectId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contingencies', projectId] });
