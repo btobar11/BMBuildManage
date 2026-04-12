@@ -9,7 +9,6 @@ import {
   Settings,
   DollarSign,
   Menu,
-  Bell,
   Moon,
   Sun,
   Box,
@@ -242,13 +241,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               </button>
             </div>
 
-            {/* Notifications */}
-            <button className="relative p-2 hover:bg-muted rounded-lg transition-all duration-200 hover:scale-105 group"
-                    title="Notificaciones">
-              <Bell size={18} className="group-hover:text-primary-600 transition-colors duration-200" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger-500 rounded-full animate-pulse" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger-500 rounded-full animate-ping" />
-            </button>
+            
 
             {/* Quick Actions */}
             <div className="hidden lg:flex items-center border-l border-border pl-3 ml-1">

@@ -181,8 +181,6 @@ export const DashboardPage = () => {
         <MetricCard
           title="Presupuesto Total"
           value={`$${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(totalBudget)}`}
-          change={8.5}
-          previousValue={`$${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(totalBudget * 0.92)}`}
           icon={DollarSign}
           iconColor="success"
           description="En todos los proyectos"
@@ -191,8 +189,6 @@ export const DashboardPage = () => {
         <MetricCard
           title="Proyectos Activos"
           value={projects?.filter(p => p.status === 'in_progress').length || 0}
-          change={12.5}
-          previousValue={(projects?.filter(p => p.status === 'in_progress').length || 0) - 1}
           icon={Building2}
           iconColor="primary"
           description="En construcción"
@@ -209,7 +205,6 @@ export const DashboardPage = () => {
         <MetricCard
           title="Completados"
           value={projects?.filter(p => p.status === 'completed').length || 0}
-          change={5.2}
           icon={CheckCircle2}
           iconColor="info"
           description="Este año"
