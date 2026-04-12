@@ -10,6 +10,10 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_VERCEL_URL) {
     return `https://${import.meta.env.VITE_VERCEL_URL}/api/v1`;
   }
+
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return `/api/v1`;
+  }
   
   if (import.meta.env.PROD) {
     return `/api/v1`;
