@@ -86,9 +86,8 @@ export class SupabaseAuthGuard implements CanActivate {
     const finalCompanyId =
       companyId || (dbUserData.user_metadata?.company_id as string | undefined);
 
-    const isCompanyCreationRequest = 
-      request.method === 'POST' && 
-      request.path === '/api/v1/companies';
+    const isCompanyCreationRequest =
+      request.method === 'POST' && request.path === '/api/v1/companies';
 
     if (!finalCompanyId && !isCompanyCreationRequest) {
       throw new ForbiddenException(
