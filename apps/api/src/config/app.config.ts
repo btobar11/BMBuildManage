@@ -1,6 +1,7 @@
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://bm-build-manage-web.vercel.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
