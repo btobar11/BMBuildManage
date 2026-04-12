@@ -18,6 +18,7 @@ import {
   AreaChart,
 } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
+import { useHasRole } from '../../hooks/useHasRole';
 import api from '../../lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
@@ -415,6 +416,9 @@ function KPILoader() {
 function AnalyticsDashboard() {
   const { user } = useAuth();
   const companyId = user?.company_id || '';
+  
+  // RBAC: Only ADMIN can export Excel/PDF (massive data downloads)
+  const canExport = useHasRole(['admin']);
 
   // All data is strictly typed via Zod schemas
   const {
@@ -462,14 +466,17 @@ function AnalyticsDashboard() {
             Métricas y analítica en tiempo real
           </p>
         </div>
-        <ExportMenu
-          onExportExcel={async () => exportService.downloadExcel(companyId, 'dashboard')}
-          onExportPdf={async () => downloadDashboardPdf(
-            { progress: kpis?.physicalProgress ?? 0, margin: kpis?.projectedMargin ?? 0, clashes: kpis?.clashPending ?? 0, quality: kpis?.projectedMargin ? 75 : 0 },
-            []
-          )}
-          isLoading={kpisLoading || sCurveLoading}
-        />
+        {/* RBAC: Hide Export menu for non-admin users */}
+        {canExport && (
+          <ExportMenu
+            onExportExcel={async () => exportService.downloadExcel(companyId, 'dashboard')}
+            onExportPdf={async () => downloadDashboardPdf(
+              { progress: kpis?.physicalProgress ?? 0, margin: kpis?.projectedMargin ?? 0, clashes: kpis?.clashPending ?? 0, quality: kpis?.projectedMargin ? 75 : 0 },
+              []
+            )}
+            isLoading={kpisLoading || sCurveLoading}
+          />
+        )}
       </div>
 
       <Suspense fallback={<KPILoader />}>

@@ -1,11 +1,17 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
+/**
+ * User Roles - RBAC System
+ * Used for route protection and UI conditional rendering
+ */
+export type UserRole = 'admin' | 'manager' | 'engineer' | 'accounting' | 'user';
+
 interface User {
   id: string;
   email: string;
   name: string;
-  role?: string;
+  role: UserRole;
   company_id?: string;
 }
 

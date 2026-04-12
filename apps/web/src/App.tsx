@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { OnboardingPage } from './features/onboarding/OnboardingPage';
@@ -128,7 +129,11 @@ function App() {
         />
         <Route 
           path="/bi-dashboard" 
-          element={isAuthenticated ? <MainLayout><AnalyticsDashboard /></MainLayout> : <Navigate to="/login" />} 
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'manager']}>
+              <MainLayout><AnalyticsDashboard /></MainLayout>
+            </ProtectedRoute>
+          } 
         />
         <Route 
           path="/company-settings" 
