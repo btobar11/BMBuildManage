@@ -31,7 +31,7 @@ export function RegisterPage() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name, role: 'admin' } }
+        options: { data: { full_name: name, role: 'admin' } }
       });
 
       if (authError) throw authError;
