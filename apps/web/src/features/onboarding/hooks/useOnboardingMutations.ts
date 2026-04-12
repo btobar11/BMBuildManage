@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../../lib/api';
+import { supabase } from '../../../lib/supabase';
 import { useOnboardingStore } from '../store/useOnboardingStore';
 import type { CompanySetupData, InviteTeamData, GlobalSettingsData } from '../schemas/onboarding.schema';
 
@@ -32,7 +33,7 @@ export function useCreateCompany() {
       setSaving(true);
       setError(null);
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Store company ID in the onboarding store
       setCompanyData({
         ...useOnboardingStore.getState().companyData!,
@@ -40,6 +41,9 @@ export function useCreateCompany() {
         rut: data.rut,
       } as CompanySetupData);
       setSaving(false);
+      
+      // Force session refresh to inject new company_id into JWT before navigation
+      await supabase.auth.refreshSession();
     },
     onError: (error: unknown) => {
       setSaving(false);
