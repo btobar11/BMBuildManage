@@ -39,6 +39,9 @@ export class Company {
   @Column({ length: 100, nullable: true })
   country: string;
 
+  @Column({ length: 20, nullable: true })
+  rut: string;
+
   @Column({ length: 50, nullable: true })
   tax_id: string;
 
@@ -53,6 +56,9 @@ export class Company {
 
   @Column({ nullable: true })
   phone: string;
+
+  @Column({ length: 20, nullable: true })
+  size: string;
 
   @Column({
     type: 'enum',

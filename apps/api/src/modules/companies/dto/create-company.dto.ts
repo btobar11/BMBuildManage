@@ -1,4 +1,5 @@
 import { IsString, IsOptional, MaxLength, IsUUID } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateCompanyDto {
   @IsString()
@@ -25,6 +26,12 @@ export class CreateCompanyDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(20)
+  rut?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUUID()
   tax_id?: string;
 
   @IsOptional()
@@ -36,6 +43,7 @@ export class CreateCompanyDto {
   logo_url?: string;
 
   @IsOptional()
+  @IsString()
   @IsUUID()
   created_by_user_id?: string;
 
@@ -48,4 +56,11 @@ export class CreateCompanyDto {
   @IsString()
   @MaxLength(500)
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  size?: string;
 }
+
+export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {}

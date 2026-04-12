@@ -6,6 +6,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface OnboardingData {
   companyName: string;
+  rut: string;
+  industry: string;
+  companySize?: string;
+  phone?: string;
   specialty: string;
   painPoint: string;
 }
@@ -23,10 +27,13 @@ export const useOnboardingSeeding = () => {
       
       const userId = session.user.id;
       
-      // 1. Create Company via API
+      // 1. Create Company via API - include RUT and all company data
       const companyResponse = await api.post('/companies', { 
         name: data.companyName,
-        industry: data.specialty,
+        rut: data.rut,  // Include RUT from form
+        industry: data.industry,
+        size: data.companySize,
+        phone: data.phone,
         description: `Especialidad: ${data.specialty}. Reto principal: ${data.painPoint}`
       });
       const newCompany = companyResponse.data;

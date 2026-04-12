@@ -21,6 +21,10 @@ type OnboardingStep = 1 | 2 | 3;
 
 interface OnboardingState {
   companyName: string;
+  rut: string;
+  industry: string;
+  companySize: string;
+  phone: string;
   specialty: string;
   painPoint: string;
 }
@@ -46,6 +50,10 @@ export function OnboardingPage() {
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [data, setData] = useState<OnboardingState>({
     companyName: '',
+    rut: '',
+    industry: 'construction',
+    companySize: '1-10',
+    phone: '',
     specialty: '',
     painPoint: ''
   });
@@ -61,9 +69,15 @@ export function OnboardingPage() {
   }, [step]);
 
   const handleNext = () => {
-    if (step === 1 && !data.companyName.trim()) {
-      toast.error('Ingresa el nombre de tu empresa');
-      return;
+    if (step === 1) {
+      if (!data.companyName.trim()) {
+        toast.error('Ingresa el nombre de tu empresa');
+        return;
+      }
+      if (!data.rut.trim()) {
+        toast.error('Ingresa el RUT de tu empresa');
+        return;
+      }
     }
     setDirection('forward');
     setAnimationKey(prev => prev + 1);
@@ -83,6 +97,10 @@ export function OnboardingPage() {
     }
     onboardingMutation.mutate({
       companyName: data.companyName,
+      rut: data.rut,
+      industry: data.industry,
+      companySize: data.companySize,
+      phone: data.phone,
       specialty: data.specialty,
       painPoint: data.painPoint
     });
@@ -140,18 +158,81 @@ export function OnboardingPage() {
               <p className="text-sm text-muted-foreground mb-6">
                 Configuraremos tu espacio de trabajo con este nombre.
               </p>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Ej: Constructora Horizon SpA"
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
-                value={data.companyName}
-                onChange={(e) => setData({ ...data, companyName: e.target.value })}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleNext(); }}
-              />
+              
+              {/* Company Name */}
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-medium text-foreground">Nombre de la Empresa</label>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Ej: Constructora Horizon SpA"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                  value={data.companyName}
+                  onChange={(e) => setData({ ...data, companyName: e.target.value })}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleNext(); }}
+                />
+              </div>
+              
+              {/* RUT */}
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-medium text-foreground">RUT Empresa</label>
+                <input
+                  type="text"
+                  placeholder="12.345.678-9"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                  value={data.rut}
+                  onChange={(e) => setData({ ...data, rut: e.target.value })}
+                />
+              </div>
+              
+              {/* Industry & Size Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Rubro</label>
+                  <select
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    value={data.industry}
+                    onChange={(e) => setData({ ...data, industry: e.target.value })}
+                  >
+                    <option value="construction">Construcción</option>
+                    <option value="engineering">Ingeniería</option>
+                    <option value="architecture">Arquitectura</option>
+                    <option value="real_estate">Bienes Raíces</option>
+                    <option value="other">Otro</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Tamaño</label>
+                  <select
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    value={data.companySize}
+                    onChange={(e) => setData({ ...data, companySize: e.target.value })}
+                  >
+                    <option value="1-10">1-10 empleados</option>
+                    <option value="11-50">11-50 empleados</option>
+                    <option value="51-200">51-200 empleados</option>
+                    <option value="201-500">201-500 empleados</option>
+                    <option value="500+">500+ empleados</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Phone */}
+              <div className="space-y-2 mb-6">
+                <label className="text-sm font-medium text-foreground">Teléfono (opcional)</label>
+                <input
+                  type="tel"
+                  placeholder="+56 9 1234 5678"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                  value={data.phone}
+                  onChange={(e) => setData({ ...data, phone: e.target.value })}
+                />
+              </div>
+              
               <button 
                 onClick={handleNext}
-                className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                disabled={!data.companyName.trim() || !data.rut.trim()}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               >
                 Continuar <ArrowRight size={18} />
               </button>
