@@ -117,7 +117,9 @@ export const useOnboardingSeeding = () => {
       navigate('/dashboard');
     },
     onError: (error: any) => {
-      toast.error(`Error en el onboarding: ${error.message}`);
+      const backendMessage = error.response?.data?.message;
+      const displayMessage = backendMessage || error.message || 'Error desconocido';
+      toast.error(`Error en el onboarding: ${displayMessage}`);
     }
   });
 };

@@ -38,4 +38,14 @@ export class CreateCompanyDto {
   @IsOptional()
   @IsUUID()
   created_by_user_id?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  industry?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string;
 }
