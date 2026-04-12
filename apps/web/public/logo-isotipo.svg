@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Emerald Cube Isotipo -->
+  <!-- Isometric wireframe cube integrating B and M letters -->
+  
+  <!-- Back cube outline (dashed for depth) -->
+  <path d="M50 15 L80 30 L80 70 L50 85 L20 70 L20 30 Z" 
+        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+  
+  <!-- Vertical center line (creates isometric depth) -->
+  <path d="M50 15 L50 85" stroke="#10B981" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Left lateral face - Letter B suggestion -->
+  <path d="M20 30 L50 45 L50 55 L20 70 Z" 
+        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+  
+  <!-- Right lateral face - Letter M suggestion -->
+  <path d="M50 45 L80 30 L80 70 L50 55 Z" 
+        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+  
+  <!-- Top face highlight -->
+  <path d="M20 30 L50 15 L80 30 L50 45 Z" 
+        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+
+</svg>

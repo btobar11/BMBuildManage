@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- BM Build Manage - Stacked/Vertical Logo -->
+  
+  <!-- Isotipo: centered, 64x64 -->
+  <g transform="translate(28, 8)">
+    <!-- Isometric wireframe cube -->
+    <path d="M32 0 L64 16 L64 56 L32 72 L0 56 L0 16 Z" 
+          stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+    <path d="M32 0 L32 72" stroke="#10B981" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M0 56 L32 36 L64 56 L32 72 Z" 
+          stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+    <path d="M0 16 L32 36 L64 16 L32 0 Z" 
+          stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Text: BM -->
+  <text x="60" y="92" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" 
+        font-size="22" font-weight="800" fill="#0F172A">
+    BM
+  </text>
+  
+  <!-- Text: BUILD MANAGE -->
+  <text x="60" y="108" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" 
+        font-size="10" font-weight="700" fill="#10B981" letter-spacing="3">
+    BUILD MANAGE
+  </text>
+
+</svg>

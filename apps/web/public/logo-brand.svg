@@ -1,55 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- BM Build Manage - Brand Logo -->
+  <!-- Emerald Cube Isotipo with B and M integration -->
+  
+  <!-- Background -->
   <rect width="200" height="200" fill="#ffffff"/>
   
-  <!-- Logo Mark: BM Monogram as architectural structure + arrow + gaucho hat hint -->
-  <g transform="translate(100, 95)">
+  <!-- Isotipo: Isometric Cube - 120x120 centered -->
+  <g transform="translate(40, 30)">
+    <!-- Outer hexagon perimeter -->
+    <path d="M60 0 L120 30 L120 90 L60 120 L0 90 L0 30 Z" 
+          stroke="#10B981" stroke-width="4" fill="none" stroke-linejoin="round"/>
     
-    <!-- Main Structure - Emerald Teal (#047857) -->
-    <!-- Vertical left pillar (B left side) -->
-    <path d="M-35 -50 L-35 50 L-25 50 L-25 -50 Z" fill="#047857"/>
+    <!-- Center vertical line (isometric axis) -->
+    <path d="M60 0 L60 120" stroke="#10B981" stroke-width="4" fill="none" stroke-linecap="round"/>
     
-    <!-- Horizontal beam (M top + arrow) -->
-    <path d="M-25 -50 L60 -50 L60 -40 L-25 -40 Z" fill="#047857"/>
+    <!-- Left face (B suggestion) -->
+    <path d="M0 30 L60 60 L60 90 L0 120 L0 30 Z" 
+          stroke="#10B981" stroke-width="3" fill="none" stroke-linejoin="round"/>
     
-    <!-- Right pillar (M right side) -->
-    <path d="M50 -50 L60 -50 L60 50 L50 50 Z" fill="#047857"/>
+    <!-- Right face (M suggestion) -->
+    <path d="M60 60 L120 30 L120 90 L60 120 L60 60 Z" 
+          stroke="#10B981" stroke-width="3" fill="none" stroke-linejoin="round"/>
     
-    <!-- Vertical middle (B/M connection) -->
-    <path d="M-5 -50 L15 -50 L15 50 L-5 50 Z" fill="#047857"/>
+    <!-- Top face -->
+    <path d="M0 30 L60 0 L120 30 L60 60 L0 30 Z" 
+          stroke="#10B981" stroke-width="3" fill="none" stroke-linejoin="round"/>
     
-    <!-- Upward Arrow - Emerald Green (#10b981) accent lines -->
-    <!-- Arrow pointing up (growth symbol) -->
-    <path d="M17 -50 L32 -70 L47 -50 L37 -50 L37 -50 L17 -50 Z" fill="#10b981"/>
-    
-    <!-- Flow/sync lines - Emerald Green (#10b981) -->
-    <!-- Horizontal flow line 1 -->
-    <path d="M-25 -30 L50 -30 L50 -27 L-25 -27 Z" fill="#10b981"/>
-    
-    <!-- Horizontal flow line 2 -->
-    <path d="M-25 -10 L50 -10 L50 -7 L-25 -7 Z" fill="#10b981"/>
-    
-    <!-- Horizontal flow line 3 -->
-    <path d="M-25 10 L50 10 L50 13 L-25 13 Z" fill="#10b981"/>
-    
-    <!-- Vertical flow line left (B curves suggestion) -->
-    <path d="M-35 -30 L-25 -30 L-25 -7 L-35 -7 Z" fill="#10b981"/>
-    
-    <!-- Vertical flow line right (M diagonal suggestion) -->
-    <path d="M15 -30 L25 -30 L25 -7 L15 -7 Z" fill="#10b981"/>
-    
-    <!-- Gaucho hat subtle silhouette in negative space (between B and M) -->
-    <!-- Minimal hat outline in negative area -->
-    <path d="M-5 -15 L-5 -5 L15 -5 L15 -15 Z" fill="#ffffff"/>
-    
-    <!-- Hat brim suggestion -->
-    <path d="M-8 -5 L18 -5 L18 -2 L-8 -2 Z" fill="#ffffff"/>
-    
-    <!-- Hat top (faceless suggestion) -->
-    <path d="M-2 -15 L-2 -20 L12 -20 L12 -15 Z" fill="#ffffff"/>
-    
+    <!-- Accent: Inner geometry lines for depth -->
+    <path d="M30 45 L60 60 L90 45" 
+          stroke="#10B981" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M30 75 L60 90 L90 75" 
+          stroke="#10B981" stroke-width="1.5" fill="none" stroke-linecap="round"/>
   </g>
   
   <!-- Wordmark -->
-  <text x="100" y="170" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#047857" letter-spacing="1">BM BUILD MANAGE</text>
+  <text x="100" y="175" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" 
+        font-size="14" font-weight="700" fill="#0F172A" letter-spacing="3">
+    BM BUILD MANAGE
+  </text>
   
 </svg>
