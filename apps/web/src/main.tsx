@@ -8,6 +8,7 @@ import { compress, decompress } from 'lz-string'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { NotificationsProvider } from './context/NotificationsContext'
+import { GlobalErrorBoundary } from './components/error-boundary/GlobalErrorBoundary'
 import './index.css'
 import App from './App'
 
@@ -129,7 +130,9 @@ try {
           <ThemeProvider>
             <NotificationsProvider>
               <BrowserRouter>
-                <App />
+                <GlobalErrorBoundary>
+                  <App />
+                </GlobalErrorBoundary>
               </BrowserRouter>
             </NotificationsProvider>
           </ThemeProvider>

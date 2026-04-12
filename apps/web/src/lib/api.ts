@@ -36,7 +36,28 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('[API] Error:', error.config?.url, error.message);
+    const status = error.response?.status;
+    const url = error.config?.url;
+
+    console.error('[API] Error:', url, error.message, 'Status:', status);
+
+    // Handle 401/403 - redirect to login silently
+    if (status === 401 || status === 403) {
+      console.warn('[API] Auth error detected, clearing token and redirecting to login');
+      
+      // Clear auth tokens
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('DEV_TOKEN');
+      
+      // Check if we're not already on login page to avoid redirect loops
+      if (!window.location.pathname.includes('/login')) {
+        // Use setTimeout to avoid interfering with the current request
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
+      }
+    }
+
     if (error.code === 'ECONNABORTED') {
       return Promise.reject(new Error('Tiempo de espera agotado'));
     }
