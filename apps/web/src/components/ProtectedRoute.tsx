@@ -59,6 +59,15 @@ export function ProtectedRoute({
     }
   }
 
+  // If user has company_id but tries to access /onboarding, redirect to dashboard
+  // (Onboarding is only for users without a company)
+  if (user.company_id) {
+    const currentPath = window.location.pathname;
+    if (currentPath === '/onboarding') {
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+
   if (!allowedRoles.includes(user.role)) {
     return (
       <AccessDenied 

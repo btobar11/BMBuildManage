@@ -58,6 +58,7 @@ export function SubmittalsPage() {
   const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: () => api.get('/projects', { params: { company_id: user?.company_id } }).then(r => r.data),
+    enabled: !!user?.company_id,
   });
 
   const { data: submittals, isLoading } = useQuery({

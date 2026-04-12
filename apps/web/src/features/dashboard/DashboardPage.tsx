@@ -79,6 +79,7 @@ export const DashboardPage = () => {
       });
       return response.data;
     },
+    enabled: !!user?.company_id,
     placeholderData: (previousData: Project[] | undefined) => previousData,
     retry: 1,
     retryDelay: 1000,

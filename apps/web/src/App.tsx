@@ -41,7 +41,7 @@ function LoadingFallback() {
 }
 
 function App() {
-  const { token, isLoading, isConfigured } = useAuth();
+  const { user, token, isLoading, isConfigured } = useAuth();
   console.log('[DEBUG App] isLoading:', isLoading, 'isConfigured:', isConfigured, 'hasToken:', !!token);
   const isAuthenticated = !!token;
 
@@ -73,9 +73,15 @@ function App() {
           path="/register" 
           element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />} 
         />
+        
+        {/* Onboarding Route - Only accessible if authenticated and NO company_id */}
         <Route 
           path="/onboarding" 
-          element={isAuthenticated ? <OnboardingPage /> : <Navigate to="/login" />} 
+          element={
+            isAuthenticated 
+              ? (user?.company_id ? <Navigate to="/dashboard" replace /> : <OnboardingPage />)
+              : <Navigate to="/login" />
+          } 
         />
         
         {/* Protected routes with MainLayout */}

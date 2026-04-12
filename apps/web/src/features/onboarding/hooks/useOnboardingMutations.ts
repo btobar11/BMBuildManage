@@ -175,8 +175,11 @@ export function useCompleteOnboarding() {
       setSaving(true);
       setError(null);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setSaving(false);
+      
+      // Force session refresh to ensure JWT has the new company_id
+      await supabase.auth.refreshSession();
       
       // Invalidate all queries to refresh dashboard data
       queryClient.invalidateQueries({ queryKey: ['projects'] });

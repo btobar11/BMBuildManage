@@ -37,7 +37,7 @@ export function PunchListPage() {
   const [search, setSearch] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
 
-  const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: () => api.get('/projects', { params: { company_id: user?.company_id } }).then(r => r.data) });
+  const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: () => api.get('/projects', { params: { company_id: user?.company_id } }).then(r => r.data), enabled: !!user?.company_id });
   const { data: items, isLoading } = useQuery({ queryKey: ['punch-items', selectedProject], queryFn: () => api.get('/punch-items', { params: { project_id: selectedProject } }).then(r => r.data), enabled: !!selectedProject });
 
   const createMutation = useMutation({ mutationFn: (data: any) => api.post('/punch-items', data), onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['punch-items'] }); setShowForm(false); } });
