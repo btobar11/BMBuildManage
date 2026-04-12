@@ -28,8 +28,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  console.log('[DEBUG AuthContext] Initializing, isSupabaseConfigured:', isSupabaseConfigured);
+  
   const [user, setUser] = useState<User | null>(() => {
     if (!isSupabaseConfigured) {
+      console.log('[DEBUG AuthContext] Demo mode - user initialized in state');
       return {
         id: 'dev-user-id',
         email: 'demo@bmbuild.com',
@@ -61,10 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
+  console.log('[DEBUG AuthContext] State - user:', !!user, 'token:', !!token, 'isLoading:', isLoading);
+
   useEffect(() => {
-    // Check if Supabase is configured
+    console.log('[DEBUG AuthContext] useEffect running, isSupabaseConfigured:', isSupabaseConfigured);
+    
     if (!isSupabaseConfigured) {
-      console.warn('Supabase not configured - running in demo mode');
+      console.log('[DEBUG AuthContext] Demo mode - setting isLoading false immediately');
       setToken('dev-token');
       setUser({
         id: 'dev-user-id',
@@ -79,10 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const checkAuth = async () => {
+      console.log('[DEBUG AuthContext] checkAuth - fetching session');
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('[DEBUG AuthContext] Session:', session ? 'found' : 'none');
         if (session) {
-          // If we have a real session, clean up any ghost dev tokens
           localStorage.removeItem('DEV_TOKEN');
           setToken(session.access_token);
           setUser({
@@ -100,7 +107,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Auth error:', error);
       }
 
-      // Fallback to dev token ONLY if no real session exists
       const devToken = localStorage.getItem('DEV_TOKEN');
       if (devToken) {
         setToken(devToken);
@@ -112,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           company_id: '77777777-7777-7777-7777-777777777777'
         });
       }
+      console.log('[DEBUG AuthContext] Setting isLoading false at end');
       setIsLoading(false);
       setIsAuthReady(true);
     };

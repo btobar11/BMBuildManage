@@ -42,14 +42,17 @@ function LoadingFallback() {
 
 function App() {
   const { token, isLoading, isConfigured } = useAuth();
+  console.log('[DEBUG App] isLoading:', isLoading, 'isConfigured:', isConfigured, 'hasToken:', !!token);
   const isAuthenticated = !!token;
 
   // Si Supabase no está configurado, mostrar warning
   if (!isConfigured && !isLoading) {
+    console.log('[DEBUG App] Not configured, showing ConfigWarning');
     return <ConfigWarning />;
   }
 
   if (isLoading) {
+    console.log('[DEBUG App] Loading - showing spinner');
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -57,6 +60,7 @@ function App() {
     );
   }
 
+  console.log('[DEBUG App] Rendering routes');
   return (
     <ErrorBoundary>
       <Toaster position="top-right" />

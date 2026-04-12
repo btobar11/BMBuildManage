@@ -71,6 +71,9 @@ export class Company {
   @Column({ length: 10, nullable: true, default: 'CL-RM' })
   region_code: string;
 
+  @Column({ length: 10, nullable: true, default: 'CLP' })
+  currency: string;
+
   @Column({ type: 'boolean', default: false })
   library_seeded: boolean;
 

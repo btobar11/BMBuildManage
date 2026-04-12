@@ -2,28 +2,21 @@ import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { supabase } from './supabase';
 
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    const baseUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, '');
+  const envUrl = import.meta.env.VITE_API_URL;
+  console.log('[DEBUG] VITE_API_URL:', envUrl);
+  
+  if (envUrl) {
+    const baseUrl = envUrl.replace(/\/+$/, '');
+    console.log('[DEBUG] Using VITE_API_URL:', `${baseUrl}/api/v1`);
     return `${baseUrl}/api/v1`;
   }
   
-  if (import.meta.env.VITE_VERCEL_URL) {
-    return `https://${import.meta.env.VITE_VERCEL_URL}/api/v1`;
-  }
-
-  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    return `/api/v1`;
-  }
-  
-  if (import.meta.env.PROD) {
-    return `/api/v1`;
-  }
-  
-  return 'http://localhost:3001/api/v1';
+  const defaultUrl = 'http://localhost:3001/api/v1';
+  console.log('[DEBUG] Using default:', defaultUrl);
+  return defaultUrl;
 };
 
 const API_BASE_URL = getApiBaseUrl();
-console.log('[API] Base URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
