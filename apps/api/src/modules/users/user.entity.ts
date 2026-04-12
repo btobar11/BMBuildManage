@@ -17,6 +17,8 @@ export enum UserRole {
   SITESUPERVISOR = 'site_supervisor',
   FOREMAN = 'foreman',
   ACCOUNTING = 'accounting',
+  VIEWER = 'viewer',
+  WORKER = 'worker',
 }
 
 @Entity('users')

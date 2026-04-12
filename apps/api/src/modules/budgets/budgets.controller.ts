@@ -19,8 +19,8 @@ import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { PDFExportService } from './pdf-export.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 
 @Controller('budgets')
@@ -33,6 +33,7 @@ export class BudgetsController {
   ) {}
 
   @Get(':id/export/pdf')
+  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
   async exportPdf(
     @Param('id') id: string,
     @Req() req: any,
@@ -69,16 +70,19 @@ export class BudgetsController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
   findAll(@Query('project_id') projectId: string) {
     return this.budgetsService.findAllByProject(projectId);
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.budgetsService.findOne(id, req.user?.company_id);
   }
 
   @Get('project/:projectId/summary')
+  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
   getSummary(@Param('projectId') projectId: string, @Req() req: any) {
     return this.budgetsService.getSummary(projectId, req.user?.company_id);
   }
@@ -115,6 +119,7 @@ export class BudgetsController {
   }
 
   @Get(':id/export/excel')
+  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.ACCOUNTING)
   async exportExcel(
     @Param('id') id: string,
     @Req() req: any,
