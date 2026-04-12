@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, LayoutDashboard, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -7,12 +7,26 @@ import { BMLogo } from '../../components/ui/BMLogo';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { signInDemo } = useAuth();
+  const { signInDemo, isAuthReady } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDemoLogin, setPendingDemoLogin] = useState(false);
+
+  // Navigate to dashboard once auth is ready after demo login
+  useEffect(() => {
+    if (pendingDemoLogin && isAuthReady) {
+      navigate('/dashboard');
+      setPendingDemoLogin(false);
+    }
+  }, [pendingDemoLogin, isAuthReady, navigate]);
+
+  const handleDemoLogin = () => {
+    signInDemo();
+    setPendingDemoLogin(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,18 +37,14 @@ export function LoginPage() {
       const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) throw authError;
       localStorage.removeItem('DEV_TOKEN');
-      navigate('/dashboard');
+      // Wait for auth state to update before navigating
+      setTimeout(() => navigate('/dashboard'), 100);
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : (err as { message?: string }).message || 'Error al iniciar sesión';
       setError(errorMsg);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    signInDemo();
-    navigate('/dashboard');
   };
 
   return (

@@ -19,6 +19,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
+  isAuthReady: boolean;
   signOut: () => Promise<void>;
   signInDemo: () => void;
   isConfigured: boolean;
@@ -58,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   useEffect(() => {
     // Check if Supabase is configured
@@ -72,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         company_id: '77777777-7777-7777-7777-777777777777'
       });
       setIsLoading(false);
+      setIsAuthReady(true);
       return;
     }
 
@@ -90,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             company_id: session.user.user_metadata.company_id
           });
           setIsLoading(false);
+          setIsAuthReady(true);
           return;
         }
       } catch (error) {
@@ -109,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
       setIsLoading(false);
+      setIsAuthReady(true);
     };
 
     checkAuth();
@@ -159,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, signOut, signInDemo, isLoading, isConfigured: isSupabaseConfigured }}>
+    <AuthContext.Provider value={{ user, token, signOut, signInDemo, isLoading, isAuthReady, isConfigured: isSupabaseConfigured }}>
       {children}
     </AuthContext.Provider>
   );

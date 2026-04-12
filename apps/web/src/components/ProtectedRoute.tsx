@@ -28,9 +28,11 @@ export function ProtectedRoute({
   allowedRoles,
   fallbackPath = '/dashboard',
 }: ProtectedRouteProps) {
-  const { user, isLoading, isConfigured } = useAuth();
+  const { user, isLoading, isAuthReady, isConfigured } = useAuth();
 
-  if (isLoading) {
+  // Wait for auth initialization before making any routing decisions
+  // This prevents the infinite redirect loop between /login and protected routes
+  if (!isAuthReady) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -38,6 +40,12 @@ export function ProtectedRoute({
     );
   }
 
+  // If not configured (demo mode), allow access
+  if (!isConfigured) {
+    return <>{children}</>;
+  }
+
+  // Only redirect to login after auth is ready and user is confirmed null
   if (!user) {
     return <Navigate to="/login" replace />;
   }
