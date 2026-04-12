@@ -16,35 +16,48 @@ export const useOnboardingSeeding = () => {
 
   return useMutation({
     mutationFn: async (data: OnboardingData) => {
-      // Refresh session to get latest user metadata with company_id
-      const { data: sessionData, error: refreshError } = await supabase.auth.refreshSession();
+      // Get current session to get user ID (no refresh needed yet - company will be created)
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData?.session;
+      if (!session) throw new Error('Usuario no autenticado');
+      
+      const userId = session.user.id;
+      
+      // 1. Create Company via API
+      const companyResponse = await api.post('/companies', { 
+        name: data.companyName,
+        industry: data.specialty,
+        description: `Especialidad: ${data.specialty}. Reto principal: ${data.painPoint}`
+      });
+      const newCompany = companyResponse.data;
+
+      // 2. Update user metadata with company_id BEFORE refreshing session
+      await supabase.auth.updateUser({ 
+        data: { company_id: newCompany.id }
+      });
+
+      // 3. Refresh session to get JWT with new company_id claim
+      const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
         console.warn('Session refresh failed:', refreshError);
       }
       
-      const session = sessionData?.session;
-      if (!session) throw new Error('Usuario no autenticado');
-
-      // Get company_id from the refreshed session
-      const userMeta = session.user.user_metadata;
-      const companyId = userMeta?.company_id;
-      
-      if (!companyId) {
-        throw new Error('No se encontró company_id. Por favor inicia sesión novamente.');
+      if (!refreshedSession?.session) {
+        throw new Error('No se pudo actualizar la sesión');
       }
       
-      // 2. Create Demo Project
+      // 4. Create Demo Project with the new company_id
       const projectPayload = {
         name: `Proyecto Demo - ${data.companyName}`,
         status: 'planning',
         description: `Especialidad: ${data.specialty}. Reto principal: ${data.painPoint}`,
-        company_id: companyId,
+        company_id: newCompany.id,
       };
 
       const projectResponse = await api.post('/projects', projectPayload);
       const newProject = projectResponse.data;
 
-      // 3. Create Demo Budget
+      // 5. Create Demo Budget
       const budgetResponse = await api.post('/budgets', {
         project_id: newProject.id,
         version: 1,
@@ -54,7 +67,7 @@ export const useOnboardingSeeding = () => {
       });
       const newBudget = budgetResponse.data;
 
-      // 4. Inject Seed Data (3 sub-items) into a Stage using PATCH
+      // 6. Inject Seed Data (3 sub-items) into a Stage using PATCH
       const patchPayload = {
         total_estimated_cost: 0,
         total_estimated_price: 3500000,
@@ -94,16 +107,14 @@ export const useOnboardingSeeding = () => {
 
       await api.patch(`/budgets/${newBudget.id}`, patchPayload);
 
-      return { budgetId: newBudget.id };
+      return { budgetId: newBudget.id, companyId: newCompany.id };
     },
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success('¡Entorno de demostración autoconfigurado con éxito! 🎉', { duration: 5000 });
       
-      // Refresh session one more time to ensure JWT has all claims before navigating
-      await supabase.auth.refreshSession();
-      
-      navigate(`/budget/${data.budgetId}`); // Fixed route format since BudgetEditor reads ID
+      // Session is already refreshed in mutationFn - navigate to dashboard
+      navigate('/dashboard');
     },
     onError: (error: any) => {
       toast.error(`Error en el onboarding: ${error.message}`);

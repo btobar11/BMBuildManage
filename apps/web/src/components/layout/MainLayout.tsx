@@ -49,6 +49,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
+  // Global onboarding guard - redirect if user has no company_id
+  useEffect(() => {
+    if (user && !user.company_id && location.pathname !== '/onboarding') {
+      navigate('/onboarding', { replace: true });
+    }
+  }, [user, location.pathname, navigate]);
+
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
