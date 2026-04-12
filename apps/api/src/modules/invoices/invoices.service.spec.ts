@@ -61,7 +61,7 @@ describe('InvoicesService', () => {
       repository.create.mockReturnValue(invoice);
       repository.save.mockResolvedValue(invoice);
 
-      const result = await service.create(createDto);
+      const result = await service.create(createDto, 'company-1');
       expect(repository.create).toHaveBeenCalledWith(createDto);
       expect(repository.save).toHaveBeenCalledWith(invoice);
       expect(result).toEqual(invoice);
@@ -103,9 +103,9 @@ describe('InvoicesService', () => {
       const invoice = createMockInvoice();
       repository.findOne.mockResolvedValue(invoice);
 
-      const result = await service.findOne('invoice-1');
+      const result = await service.findOne('invoice-1', 'company-1');
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { id: 'invoice-1' },
+        where: { id: 'invoice-1', company_id: 'company-1' },
       });
       expect(result).toEqual(invoice);
     });
@@ -113,7 +113,7 @@ describe('InvoicesService', () => {
     it('should throw NotFoundException if invoice not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
+      await expect(service.findOne('nonexistent', 'company-1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -125,7 +125,7 @@ describe('InvoicesService', () => {
       repository.findOne.mockResolvedValue(invoice);
       repository.remove.mockResolvedValue(invoice);
 
-      const result = await service.remove('invoice-1');
+      const result = await service.remove('invoice-1', 'company-1');
       expect(repository.remove).toHaveBeenCalledWith(invoice);
       expect(result).toEqual({ deleted: true });
     });
