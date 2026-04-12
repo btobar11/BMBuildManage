@@ -1,9 +1,9 @@
 /**
  * Analytics DTOs - API Response Types
- * 
+ *
  * These DTOs mirror the SQL view results for type-safe API responses.
  * IMPORTANT: Must stay in sync with frontend Zod schemas in apps/web/src/lib/schemas/index.ts
- * 
+ *
  * Run: npm run typecheck (frontend) to verify sync
  */
 
@@ -83,7 +83,9 @@ export const dashboardSummaryResponseSchema = z.object({
   clash: z.array(clashHealthSchema),
 });
 
-export type DashboardSummaryResponse = z.infer<typeof dashboardSummaryResponseSchema>;
+export type DashboardSummaryResponse = z.infer<
+  typeof dashboardSummaryResponseSchema
+>;
 
 // ==============================================================================
 // ERROR RESPONSE
@@ -96,7 +98,9 @@ export const analyticsErrorResponseSchema = z.object({
   requestId: z.string().optional(),
 });
 
-export type AnalyticsErrorResponse = z.infer<typeof analyticsErrorResponseSchema>;
+export type AnalyticsErrorResponse = z.infer<
+  typeof analyticsErrorResponseSchema
+>;
 
 // ==============================================================================
 // FALLBACK RESPONSE (for error states)

@@ -5,10 +5,10 @@ import { InvoiceItem } from '../invoice-item.entity';
 
 /**
  * DTE XML Builder Service
- * 
+ *
  * Builds SII-compliant XML for Chilean Electronic Invoices (DTE).
  * @see https://www.sii.cl/factura_electronica/factura_ev.htm
- * 
+ *
  * Supported Document Types:
  * - 33: Factura Afecta
  * - 34: Factura Exenta
@@ -22,7 +22,7 @@ export class DteXmlBuilderService {
 
   /**
    * Build DTE XML from Invoice entity
-   * 
+   *
    * @throws BadRequestException if required fields are missing
    */
   buildDteXml(invoice: Invoice, items: InvoiceItem[]): string {
@@ -38,7 +38,7 @@ export class DteXmlBuilderService {
 
   /**
    * Validate invoice required fields
-   * 
+   *
    * @throws BadRequestException if validation fails
    */
   private validateInvoice(invoice: Invoice): void {
@@ -85,7 +85,7 @@ export class DteXmlBuilderService {
 
       if (Math.abs(invoice.monto_iva - expectedIva) > ivaTolerance) {
         errors.push(
-          `IVA inconsistente: $${invoice.monto_iva} esperado ~$${expectedIva.toFixed(2)}`
+          `IVA inconsistente: $${invoice.monto_iva} esperado ~$${expectedIva.toFixed(2)}`,
         );
       }
     }
@@ -209,10 +209,12 @@ export class DteXmlBuilderService {
 
     return items.map((item, index) => ({
       NroLineDet: index + 1,
-      CdgItem: item.codigo ? {
-        TpoCod: 'INT',
-        VlrCod: item.codigo,
-      } : undefined,
+      CdgItem: item.codigo
+        ? {
+            TpoCod: 'INT',
+            VlrCod: item.codigo,
+          }
+        : undefined,
       NmbItem: item.nombre || item.descripcion || 'Item',
       DescItem: item.descripcion || undefined,
       QtyItem: item.cantidad || 1,
@@ -258,7 +260,7 @@ export class DteXmlBuilderService {
       totals.MntNeto = this.round(invoice.monto_neto || 0, 2);
       totals.TasaIVA = this.round(
         invoice.tasa_iva || DteXmlBuilderService.IVA_RATE,
-        2
+        2,
       );
       totals.IVA = this.round(invoice.monto_iva || 0, 2);
     }
@@ -333,7 +335,7 @@ export class DteXmlBuilderService {
     }
 
     const clean = rut.replace(/[^0-9Kk]/g, '').toUpperCase();
-    
+
     if (clean.length < 2) {
       return false;
     }

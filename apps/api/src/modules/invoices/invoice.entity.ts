@@ -39,7 +39,7 @@ export enum InvoiceStatus {
 
 /**
  * Invoice Entity - Chilean Electronic Invoice (DTE)
- * 
+ *
  * Supports Factura Afecta (33), Factura Exenta (34),
  * Nota de Crédito (61), Nota de Débito (56)
  */
@@ -67,26 +67,26 @@ export class Invoice {
   project: Project;
 
   // ==================== LINE ITEMS ====================
-  
+
   @OneToMany(() => InvoiceItem, (item) => item.invoice, { cascade: true })
   items: InvoiceItem[];
 
   // ==================== DTE HEADER ====================
-  
+
   @Column({ length: 10, nullable: true })
   folio: string;
 
-  @Column({ 
-    type: 'enum', 
-    enum: DteType, 
-    default: DteType.FACTURA_AFECTA 
+  @Column({
+    type: 'enum',
+    enum: DteType,
+    default: DteType.FACTURA_AFECTA,
   })
   tipo_dte: DteType;
 
-  @Column({ 
-    type: 'enum', 
-    enum: InvoiceStatus, 
-    default: InvoiceStatus.DRAFT 
+  @Column({
+    type: 'enum',
+    enum: InvoiceStatus,
+    default: InvoiceStatus.DRAFT,
   })
   status: InvoiceStatus;
 
@@ -100,7 +100,7 @@ export class Invoice {
   fecha_sello: Date;
 
   // ==================== EMISOR (SELLER) ====================
-  
+
   @Column({ length: 12, nullable: true })
   rut_emisor: string;
 
@@ -120,7 +120,7 @@ export class Invoice {
   comuna_emisor: string;
 
   // ==================== RECEPTOR (BUYER) ====================
-  
+
   @Column({ length: 12, nullable: true })
   rut_receptor: string;
 
@@ -137,7 +137,7 @@ export class Invoice {
   comuna_receptor: string;
 
   // ==================== TOTALS ====================
-  
+
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   monto_neto: number;
 
@@ -155,19 +155,19 @@ export class Invoice {
   tasa_iva: number;
 
   // ==================== IVA RECLAMADO ====================
-  
+
   @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
   monto_iva_reclamado: number;
 
   // ==================== REFERENCES ====================
-  
+
   @Column({ length: 100, nullable: true })
   folio_referencia: string;
 
-  @Column({ 
-    type: 'enum', 
-    enum: DteType, 
-    nullable: true 
+  @Column({
+    type: 'enum',
+    enum: DteType,
+    nullable: true,
   })
   tipo_referencia: DteType;
 
@@ -175,7 +175,7 @@ export class Invoice {
   motivo_referencia: string;
 
   // ==================== SII TRACKING ====================
-  
+
   @Column({ length: 40, nullable: true })
   track_id: string;
 
@@ -195,7 +195,7 @@ export class Invoice {
   errores_sii: string;
 
   // ==================== LEGACY FIELDS (for backwards compatibility) ====================
-  
+
   @Column({ length: 300, nullable: true })
   supplier: string;
 

@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -26,21 +19,42 @@ export class AnalyticsController {
   // =========================================================================
   // READ-ONLY ENDPOINTS - Admin, Engineer, Architect, SiteSupervisor, Foreman, Accounting
   // =========================================================================
-  
+
   @Get('dashboard')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+    UserRole.ACCOUNTING,
+  )
   async getDashboardSummary(@CurrentCompany() companyId: string) {
     return this.analyticsService.getDashboardSummary(companyId);
   }
 
   @Get('financial')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+    UserRole.ACCOUNTING,
+  )
   async getFinancialSummary(@CurrentCompany() companyId: string) {
     return this.analyticsService.getFinancialSummary(companyId);
   }
 
   @Get('financial/:projectId')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+    UserRole.ACCOUNTING,
+  )
   async getProjectFinancialDetails(
     @CurrentCompany() companyId: string,
     @Param('projectId') projectId: string,
@@ -52,13 +66,25 @@ export class AnalyticsController {
   }
 
   @Get('physical')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+  )
   async getPhysicalProgress(@CurrentCompany() companyId: string) {
     return this.analyticsService.getPhysicalProgress(companyId);
   }
 
   @Get('physical/:projectId')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+  )
   async getProjectPhysicalDetails(
     @CurrentCompany() companyId: string,
     @Param('projectId') projectId: string,
@@ -111,12 +137,11 @@ export class AnalyticsController {
     @Query('project_id') projectId: string,
     @Res() res: Response,
   ) {
-    const buffer =
-      await this.analyticsExportService.generateExcelReport(
-        companyId,
-        companyName || 'BM Build Manage',
-        projectId,
-      );
+    const buffer = await this.analyticsExportService.generateExcelReport(
+      companyId,
+      companyName || 'BM Build Manage',
+      projectId,
+    );
 
     const filename = `reporte_bi_${new Date().toISOString().split('T')[0]}.xlsx`;
 

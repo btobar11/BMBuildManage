@@ -33,7 +33,14 @@ export class BudgetsController {
   ) {}
 
   @Get(':id/export/pdf')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+    UserRole.ACCOUNTING,
+  )
   async exportPdf(
     @Param('id') id: string,
     @Req() req: any,
@@ -70,19 +77,40 @@ export class BudgetsController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+    UserRole.ACCOUNTING,
+  )
   findAll(@Query('project_id') projectId: string) {
     return this.budgetsService.findAllByProject(projectId);
   }
 
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+    UserRole.ACCOUNTING,
+  )
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.budgetsService.findOne(id, req.user?.company_id);
   }
 
   @Get('project/:projectId/summary')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.SITESUPERVISOR, UserRole.FOREMAN, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+    UserRole.ACCOUNTING,
+  )
   getSummary(@Param('projectId') projectId: string, @Req() req: any) {
     return this.budgetsService.getSummary(projectId, req.user?.company_id);
   }
@@ -119,7 +147,12 @@ export class BudgetsController {
   }
 
   @Get(':id/export/excel')
-  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT, UserRole.ACCOUNTING)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.ARCHITECT,
+    UserRole.ACCOUNTING,
+  )
   async exportExcel(
     @Param('id') id: string,
     @Req() req: any,

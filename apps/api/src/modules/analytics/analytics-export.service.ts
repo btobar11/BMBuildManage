@@ -78,14 +78,20 @@ export class AnalyticsExportService {
 
     const metadataSheet = workbook.addWorksheet('Metadatos');
     metadataSheet.getCell('A1').value = 'REPORTE EJECUTIVO BI';
-    metadataSheet.getCell('A1').font = { bold: true, size: 16, color: { argb: 'FF1E3A5F' } };
+    metadataSheet.getCell('A1').font = {
+      bold: true,
+      size: 16,
+      color: { argb: 'FF1E3A5F' },
+    };
     metadataSheet.getCell('A2').value = 'Empresa:';
     metadataSheet.getCell('B2').value = companyName;
     metadataSheet.getCell('A3').value = 'Fecha de Generación:';
     metadataSheet.getCell('B3').value = new Date();
     metadataSheet.getCell('B3').numFmt = 'yyyy-mm-dd hh:mm:ss';
     metadataSheet.getCell('A4').value = 'Tipo de Reporte:';
-    metadataSheet.getCell('B4').value = projectId ? 'Detalle por Proyecto' : 'Resumen General';
+    metadataSheet.getCell('B4').value = projectId
+      ? 'Detalle por Proyecto'
+      : 'Resumen General';
     metadataSheet.getColumn(1).width = 20;
     metadataSheet.getColumn(2).width = 30;
 
@@ -99,7 +105,11 @@ export class AnalyticsExportService {
       pattern: 'solid',
       fgColor: { argb: 'FF1E3A5F' },
     };
-    financialSheet.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+    financialSheet.getCell('A1').font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FFFFFFFF' },
+    };
 
     const fHeaders = [
       'Proyecto',
@@ -127,7 +137,8 @@ export class AnalyticsExportService {
       financialSheet.getCell(rowNum, 2).value = Number(row.total_budgeted);
       financialSheet.getCell(rowNum, 3).value = Number(row.total_spent);
       financialSheet.getCell(rowNum, 4).value = Number(row.variance);
-      financialSheet.getCell(rowNum, 5).value = Number(row.percent_executed) / 100;
+      financialSheet.getCell(rowNum, 5).value =
+        Number(row.percent_executed) / 100;
       financialSheet.getCell(rowNum, 6).value = Number(row.material_budgeted);
       financialSheet.getCell(rowNum, 7).value = Number(row.labor_budgeted);
       financialSheet.getCell(rowNum, 8).value = Number(row.equipment_budgeted);
@@ -157,7 +168,11 @@ export class AnalyticsExportService {
       pattern: 'solid',
       fgColor: { argb: 'FF1E3A5F' },
     };
-    clashSheet.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } };
+    clashSheet.getCell('A1').font = {
+      bold: true,
+      size: 14,
+      color: { argb: 'FFFFFFFF' },
+    };
 
     const cHeaders = [
       'Proyecto',
@@ -186,7 +201,8 @@ export class AnalyticsExportService {
       clashSheet.getCell(rowNum, 4).value = Number(row.accepted_clashes);
       clashSheet.getCell(rowNum, 5).value = Number(row.resolved_clashes);
       clashSheet.getCell(rowNum, 6).value = Number(row.ignored_clashes);
-      clashSheet.getCell(rowNum, 7).value = Number(row.resolution_rate_percent) / 100;
+      clashSheet.getCell(rowNum, 7).value =
+        Number(row.resolution_rate_percent) / 100;
       clashSheet.getCell(rowNum, 8).value = Number(row.critical_count);
       clashSheet.getCell(rowNum, 9).value = Number(row.high_count);
       clashSheet.getCell(rowNum, 10).value = Number(row.medium_count);
@@ -235,7 +251,7 @@ export class AnalyticsExportService {
       ORDER BY project_name ASC
     `;
 
-    return this.dataSource.query(query, params) as Promise<FinancialRow[]>;
+    return this.dataSource.query(query, params);
   }
 
   private async getClashData(
@@ -268,6 +284,6 @@ export class AnalyticsExportService {
       ORDER BY total_clashes DESC
     `;
 
-    return this.dataSource.query(query, params) as Promise<ClashRow[]>;
+    return this.dataSource.query(query, params);
   }
 }

@@ -210,7 +210,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-muted-foreground">
                   <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-                  <path d="21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2"/>
                 </svg>
               </div>
             </div>

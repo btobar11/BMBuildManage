@@ -338,7 +338,7 @@ export class CashflowEngine1746100000000 implements MigrationInterface {
     // ------------------------------------------------------------------------
     // 5. RLS Policies - Seguridad Multi-Tenant
     // ------------------------------------------------------------------------
-    
+
     // Enable RLS on views (they inherit from base tables but we add policy checks)
     await queryRunner.query(`
       -- View bi_cashflow_dashboard RLS
@@ -506,19 +506,35 @@ export class CashflowEngine1746100000000 implements MigrationInterface {
     await queryRunner.query(`DROP VIEW IF EXISTS bi_cashflow_time_series`);
     await queryRunner.query(`DROP VIEW IF EXISTS bi_cashflow_dashboard`);
     await queryRunner.query(`DROP VIEW IF EXISTS bi_financial_summary`);
-    
+
     // Drop functions
-    await queryRunner.query(`DROP FUNCTION IF EXISTS calculate_profit_margin(UUID, UUID)`);
-    await queryRunner.query(`DROP FUNCTION IF EXISTS get_cumulative_vs_projected(UUID, UUID, INTEGER)`);
-    await queryRunner.query(`DROP FUNCTION IF EXISTS get_project_cashflow_summary(UUID)`);
-    
+    await queryRunner.query(
+      `DROP FUNCTION IF EXISTS calculate_profit_margin(UUID, UUID)`,
+    );
+    await queryRunner.query(
+      `DROP FUNCTION IF EXISTS get_cumulative_vs_projected(UUID, UUID, INTEGER)`,
+    );
+    await queryRunner.query(
+      `DROP FUNCTION IF EXISTS get_project_cashflow_summary(UUID)`,
+    );
+
     // Drop policies
-    await queryRunner.query(`DROP POLICY IF EXISTS "cashflow_dashboard_select_policy" ON bi_cashflow_dashboard`);
-    await queryRunner.query(`DROP POLICY IF EXISTS "cashflow_time_series_select_policy" ON bi_cashflow_time_series`);
-    
+    await queryRunner.query(
+      `DROP POLICY IF EXISTS "cashflow_dashboard_select_policy" ON bi_cashflow_dashboard`,
+    );
+    await queryRunner.query(
+      `DROP POLICY IF EXISTS "cashflow_time_series_select_policy" ON bi_cashflow_time_series`,
+    );
+
     // Drop indexes
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_expenses_company_month"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_worker_payments_company_month"`);
-    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_budgets_company_status"`);
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_expenses_company_month"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_worker_payments_company_month"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX IF EXISTS "IDX_budgets_company_status"`,
+    );
   }
 }

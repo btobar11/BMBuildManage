@@ -18,7 +18,7 @@ const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/favicon.svg',
-  '/logo-icon.png',
+  '/app-icon.svg',
 ];
 
 // API patterns to cache
@@ -367,8 +367,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'BM Build Manage', {
       body: data.body || 'Nueva actualizacion',
-      icon: '/logo-icon.png',
-      badge: '/logo-icon.png',
+      icon: '/app-icon.svg',
+      badge: '/app-icon.svg',
       vibrate: [100, 50, 100],
       data: data.data,
     })
