@@ -41,21 +41,12 @@ api.interceptors.response.use(
 
     console.error('[API] Error:', url, error.message, 'Status:', status);
 
-    // Handle 401/403 - redirect to login silently
+    // Handle 401/403 - just reject, don't redirect
+    // Let the components handle auth errors gracefully
     if (status === 401 || status === 403) {
-      console.warn('[API] Auth error detected, clearing token and redirecting to login');
-      
-      // Clear auth tokens
+      console.warn('[API] Auth error detected (401/403)');
+      // Clear auth tokens - but don't redirect - let React handle it
       localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('DEV_TOKEN');
-      
-      // Check if we're not already on login page to avoid redirect loops
-      if (!window.location.pathname.includes('/login')) {
-        // Use setTimeout to avoid interfering with the current request
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 100);
-      }
     }
 
     if (error.code === 'ECONNABORTED') {
@@ -77,16 +68,16 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     
     // Only allow dev token in development environment
     if (import.meta.env.PROD) {
-      console.error('[API] 🚨 DEV_TOKEN not allowed in production! Removing...');
+      // In production, just don't use the dev token - don't reload
+      console.warn('[API] 🚨 DEV_TOKEN ignored in production');
+      // Remove it to prevent future issues
       localStorage.removeItem('DEV_TOKEN');
-      window.location.reload();
-      return config;
+    } else {
+      if (config.headers) {
+        config.headers.Authorization = `Bearer ${devToken}`;
+      }
+      console.log('[API] Using dev token (development only)');
     }
-    
-    if (config.headers) {
-      config.headers.Authorization = `Bearer ${devToken}`;
-    }
-    console.log('[API] Using dev token (development only)');
     return config;
   }
 
