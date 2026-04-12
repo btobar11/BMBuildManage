@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Building2, ArrowRight, ShieldCheck, BarChart3, HardHat, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, Building2, ArrowRight, ShieldCheck, BarChart3, HardHat, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import api from '../../lib/api';
 import { BMLogo } from '../../components/ui/BMLogo';
@@ -10,6 +10,33 @@ const benefits = [
   { icon: <ShieldCheck size={20} />, title: 'Audit Log', desc: 'Historial completo de cambios' },
   { icon: <HardHat size={20} />, title: 'Control de Campo', desc: 'Gestiona cuadrillas eficientemente' },
 ];
+
+// Password validation rules
+const passwordRequirements = [
+  { key: 'length', label: 'Mínimo 8 caracteres', test: (p: string) => p.length >= 8 },
+  { key: 'uppercase', label: 'Al menos una mayúscula', test: (p: string) => /[A-Z]/.test(p) },
+  { key: 'lowercase', label: 'Al menos una minúscula', test: (p: string) => /[a-z]/.test(p) },
+  { key: 'number', label: 'Al menos un número', test: (p: string) => /[0-9]/.test(p) },
+  { key: 'special', label: 'Al menos un carácter especial (!@#$%^&*)', test: (p: string) => /[!@#$%^&*]/.test(p) },
+];
+
+// Calculate password strength
+function getPasswordStrength(password: string): { score: number; level: string; color: string } {
+  const passed = passwordRequirements.filter(req => req.test(password)).length;
+  const score = Math.round((passed / passwordRequirements.length) * 100);
+  
+  if (score <= 20) return { score, level: 'Muy débil', color: 'bg-red-500' };
+  if (score <= 40) return { score, level: 'Débil', color: 'bg-orange-500' };
+  if (score <= 60) return { score, level: 'Media', color: 'bg-yellow-500' };
+  if (score <= 80) return { score, level: 'Fuerte', color: 'bg-green-500' };
+  return { score, level: 'Muy fuerte', color: 'bg-emerald-500' };
+}
+
+// Validate email format
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -21,11 +48,51 @@ export function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  // Validation states
+  const [emailError, setEmailError] = useState<string | null>(null);
+  
+  // Computed values
+  const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
+  const passwordRequirementsMet = useMemo(() => 
+    passwordRequirements.map(req => ({ ...req, passed: req.test(password) })), 
+    [password]
+  );
+  
+  // Validate email on blur
+  const handleEmailBlur = () => {
+    if (email && !isValidEmail(email)) {
+      setEmailError('Ingresa un correo electrónico válido');
+    } else {
+      setEmailError(null);
+    }
+  };
+  
+  // Check if form is valid
+  const isFormValid = useMemo(() => {
+    const allPasswordReqsMet = passwordRequirements.every(req => req.test(password));
+    const isEmailValid = isValidEmail(email);
+    return name.trim() && companyName.trim() && isEmailValid && allPasswordReqsMet;
+  }, [name, companyName, email, password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    
+    // Final validation before submit
+    if (!isValidEmail(email)) {
+      setError('Por favor ingresa un correo electrónico válido');
+      setLoading(false);
+      return;
+    }
+    
+    const allPasswordReqsMet = passwordRequirements.every(req => req.test(password));
+    if (!allPasswordReqsMet) {
+      setError('La contraseña no cumple con todos los requisitos de seguridad');
+      setLoading(false);
+      return;
+    }
     
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -182,11 +249,19 @@ export function RegisterPage() {
                     type="email"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                    onChange={(e) => { setEmail(e.target.value); setEmailError(null); }}
+                    onBlur={handleEmailBlur}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-background border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all ${
+                      emailError ? 'border-red-500 focus:border-red-500' : 'border-border focus:border-emerald-500'
+                    }`}
                     placeholder="nombre@empresa.com"
                   />
                 </div>
+                {emailError && (
+                  <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle size={12} /> {emailError}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -196,7 +271,7 @@ export function RegisterPage() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    minLength={6}
+                    minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-10 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
@@ -210,12 +285,47 @@ export function RegisterPage() {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                
+                {/* Password Strength Meter */}
+                {password && (
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Fortaleza:</span>
+                      <span className={`text-xs font-medium ${passwordStrength.color.replace('bg-', 'text-').replace('-500', '-600')}`}>
+                        {passwordStrength.level}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${passwordStrength.color} transition-all duration-300`}
+                        style={{ width: `${passwordStrength.score}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Password Requirements */}
+                {password && (
+                  <div className="mt-2 space-y-1">
+                    {passwordRequirementsMet.map((req) => (
+                      <div 
+                        key={req.key} 
+                        className={`flex items-center gap-1.5 text-xs ${
+                          req.passed ? 'text-emerald-600' : 'text-muted-foreground'
+                        }`}
+                      >
+                        <CheckCircle2 size={12} className={req.passed ? 'opacity-100' : 'opacity-30'} />
+                        {req.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                disabled={loading || !isFormValid}
+                className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
