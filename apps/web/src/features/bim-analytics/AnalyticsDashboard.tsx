@@ -38,6 +38,9 @@ import {
   TrendingDown,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { ExportMenu } from '../analytics/components/ExportMenu';
+import { exportService } from '../analytics/services/exportService';
+import { downloadDashboardPdf } from '../analytics/components/DashboardPdfTemplate';
 
 const BRAND_COLORS = {
   emerald: '#10b981',
@@ -459,6 +462,14 @@ function AnalyticsDashboard() {
             Métricas y analítica en tiempo real
           </p>
         </div>
+        <ExportMenu
+          onExportExcel={async () => exportService.downloadExcel(companyId, 'dashboard')}
+          onExportPdf={async () => downloadDashboardPdf(
+            { progress: kpis?.physicalProgress ?? 0, margin: kpis?.projectedMargin ?? 0, clashes: kpis?.clashPending ?? 0, quality: kpis?.projectedMargin ? 75 : 0 },
+            []
+          )}
+          isLoading={kpisLoading || sCurveLoading}
+        />
       </div>
 
       <Suspense fallback={<KPILoader />}>
