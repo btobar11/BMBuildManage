@@ -16,7 +16,8 @@ import {
   FileQuestion,
   FileText,
   ClipboardCheck,
-  BarChart3
+  BarChart3,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -259,6 +260,16 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 Nuevo Proyecto
               </button>
             </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-950/20 rounded-lg transition-all duration-200"
+              title="Cerrar sesión"
+            >
+              <LogOut size={18} />
+              <span className="hidden md:inline">Cerrar Sesión</span>
+            </button>
           </div>
         </header>
 
