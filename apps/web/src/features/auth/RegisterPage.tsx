@@ -57,6 +57,12 @@ export function RegisterPage() {
         id: authData.user.id, email, name, role: 'admin', company_id: newCompany.id,
       });
       
+      // Refresh session to get updated JWT with company_id
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.warn('Session refresh failed, continuing anyway:', refreshError);
+      }
+      
       localStorage.removeItem('DEV_TOKEN');
       navigate('/onboarding');
     } catch (err: unknown) {

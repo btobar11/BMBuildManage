@@ -16,19 +16,29 @@ export const useOnboardingSeeding = () => {
 
   return useMutation({
     mutationFn: async (data: OnboardingData) => {
-      const { data: { session } } = await supabase.auth.getSession();
+      // Refresh session to get latest user metadata with company_id
+      const { data: sessionData, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.warn('Session refresh failed:', refreshError);
+      }
+      
+      const session = sessionData?.session;
       if (!session) throw new Error('Usuario no autenticado');
 
-      // 1. Update company settings if endpoint is available, otherwise just use the data
-      // For MVP, we pass it along or just continue to Demo Project creation
+      // Get company_id from the refreshed session
       const userMeta = session.user.user_metadata;
+      const companyId = userMeta?.company_id;
+      
+      if (!companyId) {
+        throw new Error('No se encontró company_id. Por favor inicia sesión novamente.');
+      }
       
       // 2. Create Demo Project
       const projectPayload = {
         name: `Proyecto Demo - ${data.companyName}`,
         status: 'planning',
         description: `Especialidad: ${data.specialty}. Reto principal: ${data.painPoint}`,
-        company_id: userMeta?.company_id,
+        company_id: companyId,
       };
 
       const projectResponse = await api.post('/projects', projectPayload);
@@ -86,9 +96,13 @@ export const useOnboardingSeeding = () => {
 
       return { budgetId: newBudget.id };
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success('¡Entorno de demostración autoconfigurado con éxito! 🎉', { duration: 5000 });
+      
+      // Refresh session one more time to ensure JWT has all claims before navigating
+      await supabase.auth.refreshSession();
+      
       navigate(`/budget/${data.budgetId}`); // Fixed route format since BudgetEditor reads ID
     },
     onError: (error: any) => {
