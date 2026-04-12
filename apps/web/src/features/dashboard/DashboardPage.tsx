@@ -74,21 +74,15 @@ export const DashboardPage = () => {
   const { data: projects, isLoading, isError, error } = useQuery<Project[]>({
     queryKey: ['projects'],
     queryFn: async () => {
-      console.log('[DEBUG Dashboard] Fetching projects for company:', user?.company_id);
       const response = await api.get('/projects', {
         params: { company_id: user?.company_id }
       });
-      console.log('[DEBUG Dashboard] Projects response:', response.data?.length, 'projects');
       return response.data;
     },
     placeholderData: (previousData: Project[] | undefined) => previousData,
     retry: 1,
     retryDelay: 1000,
   });
-
-  if (isError) {
-    console.error('[DEBUG Dashboard] Error loading projects:', error);
-  }
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

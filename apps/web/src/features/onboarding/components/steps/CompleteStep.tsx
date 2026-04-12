@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOnboardingStore } from '../../store/useOnboardingStore';
 import { useCompleteOnboarding } from '../../hooks/useOnboardingMutations';
+import { supabase } from '../../../../lib/supabase';
 import { Loader2, AlertCircle, CheckCircle, Sparkles, LayoutDashboard } from 'lucide-react';
 import { cn } from '../../../../utils/cn';
 
@@ -16,12 +17,25 @@ export function CompleteStep() {
       await completeOnboarding();
       setIsCompleted(true);
       
-      // Short delay before redirect
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.id) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (userData?.company_id) {
+          window.location.reload();
+          return;
+        }
+      }
+      
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
     } catch (error) {
-      // Error is handled by the mutation
+      console.error('Error completing onboarding:', error);
     }
   };
 

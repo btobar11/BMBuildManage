@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsUUID } from 'class-validator';
 
 export class CreateCompanyDto {
   @IsString()
@@ -34,4 +34,8 @@ export class CreateCompanyDto {
   @IsOptional()
   @IsString()
   logo_url?: string;
+
+  @IsOptional()
+  @IsUUID()
+  created_by_user_id?: string;
 }

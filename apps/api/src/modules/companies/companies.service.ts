@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company, CompanySpecialty, SeismicZone } from './company.entity';
+import { User } from '../users/user.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { SeedCompanyLibraryDto } from './dto/seed-company-library.dto';
@@ -26,6 +27,8 @@ export class CompaniesService {
   constructor(
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private configService: ConfigService,
   ) {
     this.supabase = createClient(
@@ -38,9 +41,17 @@ export class CompaniesService {
     );
   }
 
-  create(createCompanyDto: CreateCompanyDto) {
+  async create(createCompanyDto: CreateCompanyDto, createdByUserId?: string) {
     const company = this.companyRepository.create(createCompanyDto);
-    return this.companyRepository.save(company);
+    const savedCompany = await this.companyRepository.save(company);
+
+    if (createdByUserId) {
+      await this.userRepository.update(createdByUserId, {
+        company_id: savedCompany.id,
+      });
+    }
+
+    return savedCompany;
   }
 
   findAll() {

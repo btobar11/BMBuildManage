@@ -50,6 +50,15 @@ export function ProtectedRoute({
     return <Navigate to="/login" replace />;
   }
 
+  // Redirect to onboarding if user has no company_id (onboarding incomplete)
+  // But allow access to /onboarding itself
+  if (!user.company_id) {
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/onboarding') {
+      return <Navigate to="/onboarding" replace />;
+    }
+  }
+
   if (!allowedRoles.includes(user.role)) {
     return (
       <AccessDenied 
