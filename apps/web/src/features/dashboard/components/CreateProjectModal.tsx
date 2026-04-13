@@ -12,6 +12,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     commune: '',
     type: ['residential'] as string[],
     estimated_price: '',
+    estimated_surface: '',
     description: '',
     start_date: '',
     end_date: '',
@@ -49,6 +50,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         type: formData.type || undefined,
         status: 'draft',
         estimated_price: formData.estimated_price ? Number(formData.estimated_price) : undefined,
+        estimated_area: formData.estimated_surface ? parseFloat(formData.estimated_surface) : undefined,
         description: formData.description || undefined,
         start_date: formData.start_date || undefined,
         end_date: formData.end_date || undefined,
@@ -75,7 +77,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   });
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], estimated_price: '', description: '', start_date: '', end_date: '' });
+    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], estimated_price: '', estimated_surface: '', description: '', start_date: '', end_date: '' });
   };
 
   const handleClose = () => {
@@ -223,6 +225,18 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                 placeholder="Dejar en blanco si no se sabe aún"
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-muted-foreground">Superficie Estimada (m²)</label>
+            <input 
+              type="number" 
+              value={formData.estimated_surface}
+              onChange={(e) => setFormData({ ...formData, estimated_surface: e.target.value })}
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Valor estimativo para la fase inicial del proyecto."
+            />
+            <p className="text-xs text-muted-foreground">Valor estimativo para la fase inicial del proyecto.</p>
           </div>
 
           <div className="space-y-1.5">

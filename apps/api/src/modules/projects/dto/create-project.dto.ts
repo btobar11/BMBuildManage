@@ -65,4 +65,9 @@ export class CreateProjectDto {
   @IsNumber()
   @Min(0)
   estimated_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  estimated_area?: number;
 }

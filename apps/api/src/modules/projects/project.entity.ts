@@ -83,6 +83,9 @@ export class Project {
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   estimated_price: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  estimated_area: number;
+
   @OneToMany(() => Budget, (budget) => budget.project)
   budgets: Budget[];
 
