@@ -1,4 +1,4 @@
-import { RefreshCw, AlertCircle, CheckCircle, WifiOff, Loader2 } from 'lucide-react';
+import { RefreshCw, AlertCircle, CheckCircle, WifiOff, Loader2, Package, Calculator } from 'lucide-react';
 
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
@@ -188,6 +188,36 @@ interface EmptyStateProps {
   actionLabel?: string;
   onAction?: () => void;
   variant?: 'default' | 'compact' | 'full';
+}
+
+interface CatalogEmptyStateProps {
+  title?: string;
+  description?: string;
+  variant?: 'default' | 'compact' | 'full';
+}
+
+export function CatalogEmptyState({
+  title = 'Tu catálogo se está configurando',
+  description = 'Muy pronto tendrás acceso a los APUs base de la industria',
+  variant = 'default'
+}: CatalogEmptyStateProps) {
+  const sizes = {
+    compact: { wrapper: 'w-12 h-12', icon: 24 },
+    default: { wrapper: 'w-16 h-16', icon: 32 },
+    full: { wrapper: 'w-20 h-20', icon: 40 }
+  };
+  
+  const { wrapper, icon } = sizes[variant];
+  
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-8 text-center min-h-[200px]">
+      <div className={`${wrapper} bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 animate-pulse`}>
+        <RefreshCw size={icon} className="text-emerald-400" />
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
+      <p className="text-muted-foreground text-sm max-w-sm">{description}</p>
+    </div>
+  );
 }
 
 export function EmptyState({

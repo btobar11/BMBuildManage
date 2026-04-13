@@ -7,7 +7,7 @@ import {
   RefreshCw, Sparkles
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
-import { LoadingScreen, EmptyState, ConnectionError } from '../../components/common/LoadingStates';
+import { LoadingScreen, EmptyState, ConnectionError, CatalogEmptyState } from '../../components/common/LoadingStates';
 
 type ResourceType = 'material' | 'labor' | 'equipment';
 
@@ -446,14 +446,22 @@ export function ResourcesPage() {
       ) : isError ? (
         <ConnectionError onRetry={refetch} />
       ) : filtered.length === 0 ? (
-        <EmptyState
-          icon={Package}
-          title="No se encontraron recursos"
-          description={search ? `No hay resultados para "${search}" en la categoría seleccionada.` : 'La base de datos está vacía. Comienza agregando tu primer recurso.'}
-          actionLabel={!search ? 'Crear recurso' : undefined}
-          onAction={!search ? () => setShowForm(true) : undefined}
-          variant="full"
-        />
+        !search && !selectedCategory && resources.length === 0 ? (
+          <CatalogEmptyState
+            title="Tu catálogo de recursos se está configurando"
+            description="Muy pronto tendrás acceso a los recursos base de la industria. Mientras tanto, puedes importar del catálogo global."
+            variant="full"
+          />
+        ) : (
+          <EmptyState
+            icon={Package}
+            title="No se encontraron recursos"
+            description={search ? `No hay resultados para "${search}" en la categoría seleccionada.` : 'La base de datos está vacía. Comienza agregando tu primer recurso.'}
+            actionLabel={!search ? 'Crear recurso' : undefined}
+            onAction={!search ? () => setShowForm(true) : undefined}
+            variant="full"
+          />
+        )
       ) : (
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-full lg:w-64 space-y-6">

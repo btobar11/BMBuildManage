@@ -8,6 +8,9 @@ import {
   Delete,
   Request,
   UseGuards,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -20,14 +23,29 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto, @Request() req: any) {
-    createProjectDto.company_id = req.user.company_id;
-    return this.projectsService.create(createProjectDto);
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createProjectDto: CreateProjectDto, @Request() req: any) {
+    try {
+      createProjectDto.company_id = req.user.company_id;
+      return await this.projectsService.create(createProjectDto);
+    } catch (error) {
+      throw new BadRequestException({
+        message: error.message,
+        stack: error.stack,
+      });
+    }
   }
 
   @Get()
-  findAll(@Request() req: any) {
-    return this.projectsService.findAll(req.user.company_id);
+  async findAll(@Request() req: any) {
+    try {
+      return await this.projectsService.findAll(req.user.company_id);
+    } catch (error) {
+      throw new BadRequestException({
+        message: error.message,
+        stack: error.stack,
+      });
+    }
   }
 
   @Get(':id')

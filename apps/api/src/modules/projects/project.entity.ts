@@ -62,6 +62,12 @@ export class Project {
   @Column({ nullable: true })
   commune: string;
 
+  // Computed property for backward compatibility - combines address, region, commune
+  get location(): string {
+    const parts = [this.address, this.commune, this.region].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : '';
+  }
+
   @Column({ type: 'text', array: true, nullable: true })
   type: string[];
 

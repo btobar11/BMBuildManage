@@ -71,4 +71,41 @@ export class AIController {
   async generateReport(@Body() dto: ReportDto) {
     return this.aiService.generateProjectReport(dto.projectId, dto.type);
   }
+
+  // AI Analyze endpoints - mocks for frontend development
+  @Get('analyze/quality')
+  @UseGuards(SupabaseAuthGuard)
+  async analyzeQuality() {
+    return { status: 'pending', message: 'AI module in development' };
+  }
+
+  @Get('analyze/resources')
+  @UseGuards(SupabaseAuthGuard)
+  async analyzeResources() {
+    return { status: 'pending', message: 'AI module in development' };
+  }
+
+  @Get('analyze/summary')
+  @UseGuards(SupabaseAuthGuard)
+  async analyzeSummary() {
+    return { status: 'pending', message: 'AI module in development' };
+  }
+
+  @Get('analyze/progress')
+  @UseGuards(SupabaseAuthGuard)
+  async analyzeProgress() {
+    return { status: 'pending', message: 'AI module in development' };
+  }
+
+  @Get('analyze/clashes')
+  @UseGuards(SupabaseAuthGuard)
+  async analyzeClashes() {
+    return { status: 'pending', message: 'AI module in development' };
+  }
+
+  @Get('analyze/costs')
+  @UseGuards(SupabaseAuthGuard)
+  async analyzeCosts() {
+    return { status: 'pending', message: 'AI module in development' };
+  }
 }

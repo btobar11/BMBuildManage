@@ -8,7 +8,7 @@ import {
   TrendingUp, Layers, DollarSign, RefreshCw, Sparkles, ClipboardList, Download
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
-import { LoadingScreen, EmptyState } from '../../components/common/LoadingStates';
+import { LoadingScreen, EmptyState, CatalogEmptyState } from '../../components/common/LoadingStates';
 import { useAuth } from '../../context/AuthContext';
 
 type ResourceType = 'material' | 'labor' | 'equipment';
@@ -742,14 +742,22 @@ export function ApuLibraryPage() {
             {isLoading ? (
               <LoadingScreen message="Cargando partidas APU..." />
             ) : filteredApus.length === 0 ? (
-              <EmptyState
-                icon={Calculator}
-                title="No se encontraron partidas"
-                description={search || selectedCategory ? 'Ajuste sus filtros de búsqueda.' : 'Cree su primera partida APU para comenzar.'}
-                actionLabel={!search && !selectedCategory ? 'Crear partida' : undefined}
-                onAction={!search && !selectedCategory ? () => setShowEditor(true) : undefined}
-                variant="full"
-              />
+              !search && !selectedCategory && apus.length === 0 ? (
+                <CatalogEmptyState
+                  title="Tu catálogo de APUs se está configurando"
+                  description="Muy pronto tendrás acceso a las partidas base de la industria. Mientras tanto, puedes importar del catálogo global."
+                  variant="full"
+                />
+              ) : (
+                <EmptyState
+                  icon={Calculator}
+                  title="No se encontraron partidas"
+                  description={search || selectedCategory ? 'Ajuste sus filtros de búsqueda.' : 'Cree su primera partida APU para comenzar.'}
+                  actionLabel={!search && !selectedCategory ? 'Crear partida' : undefined}
+                  onAction={!search && !selectedCategory ? () => setShowEditor(true) : undefined}
+                  variant="full"
+                />
+              )
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredApus.map((apu) => (
