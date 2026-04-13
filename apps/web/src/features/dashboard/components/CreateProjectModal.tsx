@@ -11,6 +11,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     type: ['residential'] as string[],
     estimated_price: '',
     description: '',
+    start_date: '',
+    end_date: '',
   });
 
   const projectTypes = [
@@ -42,6 +44,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         status: 'draft',
         estimated_price: formData.estimated_price ? Number(formData.estimated_price) : undefined,
         description: formData.description || undefined,
+        start_date: formData.start_date || undefined,
+        end_date: formData.end_date || undefined,
       };
 
       const projectResponse = await api.post('/projects', projectPayload);
@@ -65,7 +69,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   });
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', commune: '', type: ['residential'], estimated_price: '', description: '' });
+    setFormData({ name: '', address: '', commune: '', type: ['residential'], estimated_price: '', description: '', start_date: '', end_date: '' });
   };
 
   const handleClose = () => {
@@ -76,6 +80,16 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name) return;
+
+    if (formData.start_date && formData.end_date) {
+      const start = new Date(formData.start_date);
+      const end = new Date(formData.end_date);
+      if (end < start) {
+        alert('La fecha de término no puede ser anterior a la fecha de inicio');
+        return;
+      }
+    }
+
     createProjectMutation.mutate();
   };
 
@@ -147,6 +161,28 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                   {pt.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-muted-foreground">Fecha de Inicio Estimada</label>
+              <input 
+                type="date" 
+                value={formData.start_date}
+                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-muted-foreground">Fecha de Término Estimada</label>
+              <input 
+                type="date" 
+                value={formData.end_date}
+                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                min={formData.start_date}
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
 
