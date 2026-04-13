@@ -10,6 +10,7 @@ import {
   Min,
   Max,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ProjectStatus } from '../project.entity';
 
 export class CreateProjectDto {
@@ -52,27 +53,32 @@ export class CreateProjectDto {
 
   @IsOptional()
   @IsDateString()
+  @Type(() => Date)
   start_date?: string;
 
   @IsOptional()
   @IsDateString()
+  @Type(() => Date)
   end_date?: string;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(999999999999)
+  @Type(() => Number)
   estimated_budget?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(999999999999)
+  @Type(() => Number)
   estimated_price?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(999999)
+  @Type(() => Number)
   estimated_area?: number;
 }

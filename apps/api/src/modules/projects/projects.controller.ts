@@ -33,6 +33,7 @@ export class ProjectsController {
       return await this.projectsService.create(createProjectDto);
     } catch (error) {
       // Log detallado de errores de validación
+      console.error('[Project Create Error]', JSON.stringify(error, null, 2));
       if (error.response?.error?.issues) {
         console.error(
           '[Validation Error]',

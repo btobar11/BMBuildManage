@@ -59,6 +59,20 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
   const createProjectMutation = useMutation({
     mutationFn: async () => {
+      // Sanitizar tipos antes de enviar a la API
+      const sanitizedStartDate = formData.start_date 
+        ? new Date(formData.start_date).toISOString() 
+        : undefined;
+      const sanitizedEndDate = formData.end_date 
+        ? new Date(formData.end_date).toISOString() 
+        : undefined;
+      const sanitizedBudget = formData.estimated_price 
+        ? Number(formData.estimated_price) 
+        : undefined;
+      const sanitizedArea = formData.estimated_surface 
+        ? parseFloat(formData.estimated_surface) 
+        : undefined;
+
       const projectPayload = {
         name: formData.name,
         address: formData.address || undefined,
@@ -66,11 +80,11 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         commune: formData.commune || undefined,
         type: formData.type || undefined,
         status: 'draft',
-        estimated_price: formData.estimated_price ? Number(formData.estimated_price) : undefined,
-        estimated_area: formData.estimated_surface ? parseFloat(formData.estimated_surface) : undefined,
+        budget: sanitizedBudget,
+        estimated_area: sanitizedArea,
         description: formData.description || undefined,
-        start_date: formData.start_date || undefined,
-        end_date: formData.end_date || undefined,
+        start_date: sanitizedStartDate,
+        end_date: sanitizedEndDate,
         client_id: formData.client_id || undefined,
       };
 
@@ -81,7 +95,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         project_id: newProject.id,
         version: 1,
         status: 'draft',
-        total_estimated_price: projectPayload.estimated_price || 0,
+        total_estimated_price: sanitizedBudget || 0,
         total_estimated_cost: 0,
       });
 
