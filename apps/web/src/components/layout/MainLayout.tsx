@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -44,13 +44,26 @@ const NAV_ITEMS = [
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isLoading: authLoading } = useAuth();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
+  // Global loading state - show spinner while auth is resolving
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Global onboarding guard - redirect if user has no company_id
   useEffect(() => {
+    // Double check user exists and has no company_id
     if (user && !user.company_id && location.pathname !== '/onboarding') {
       navigate('/onboarding', { replace: true });
     }
@@ -155,7 +168,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="p-2 border-t border-border">
           <div className="group relative flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-all duration-200 hover-lift"
                onClick={handleLogout}
-               title={`${user?.name} - Click to logout`}
+               title={`${user?.name || 'Usuario'} - Click to logout`}
           >
             {/* User Avatar with status indicator */}
             <div className="relative">
@@ -167,8 +180,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             
             {/* User Info */}
             <div className={`sidebar-label overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 w-0'}`}>
-              <p className="text-sm font-medium text-foreground truncate leading-tight">{user?.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              <p className="text-sm font-medium text-foreground truncate leading-tight">{user?.name || 'Usuario'}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email || 'Sin correo'}</p>
             </div>
             
             {/* Hover gradient effect */}
