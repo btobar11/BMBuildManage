@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, In } from 'typeorm';
 import { Project } from './project.entity';
@@ -19,8 +24,34 @@ export class ProjectsService {
   ) {}
 
   async create(createProjectDto: CreateProjectDto): Promise<Project> {
-    const project = this.projectRepository.create(createProjectDto);
-    return await this.projectRepository.save(project);
+    try {
+      const project = this.projectRepository.create(createProjectDto);
+      return await this.projectRepository.save(project);
+    } catch (error) {
+      console.error('[ProjectsService.create] Database error:', error.message);
+      console.error('[ProjectsService.create] Error details:', error.code, error.detail);
+
+      // Handle specific database errors
+      if (error.code === '23502') { // NOT NULL violation
+        throw new BadRequestException(
+          `Campo requerido faltante: ${error.column || '未知字段'}`,
+        );
+      }
+      if (error.code === '23505') { // UNIQUE violation
+        throw new BadRequestException('Ya existe un proyecto con estos datos.');
+      }
+      if (error.code === '22P01') { // Data type mismatch
+        throw new BadRequestException('El formato de los datos ingresados es inválido.');
+      }
+      if (error.code === '42804') { // Data type mismatch (explicit)
+        throw new BadRequestException('El tipo de dato no corresponde al esperado.');
+      }
+
+      // Generic error with message
+      throw new InternalServerErrorException(
+        `Error al crear proyecto: ${error.message}`,
+      );
+    }
   }
 
   async findAll(companyId: string): Promise<Project[]> {

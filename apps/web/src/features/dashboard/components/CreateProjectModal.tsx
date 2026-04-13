@@ -1,8 +1,19 @@
 import { useState, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, AlertCircle } from 'lucide-react';
 import api from '../../../lib/api';
 import { chileRegions, getRegionNames, getCommunesByRegion } from '../../../lib/chileLocationData';
+
+interface FormErrors {
+  name?: string;
+  address?: string;
+  region?: string;
+  commune?: string;
+  start_date?: string;
+  end_date?: string;
+  estimated_price?: string;
+  estimated_surface?: string;
+}
 
 export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess: (budgetId: string) => void }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +28,9 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     start_date: '',
     end_date: '',
   });
+
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const regionNames = useMemo(() => getRegionNames(), []);
   const communesForRegion = useMemo(() => formData.region ? getCommunesByRegion(formData.region) : [], [formData.region]);
@@ -78,6 +92,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
   const resetForm = () => {
     setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], estimated_price: '', estimated_surface: '', description: '', start_date: '', end_date: '' });
+    setErrors({});
+    setTouched({});
   };
 
   const handleClose = () => {
@@ -87,18 +103,52 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name) return;
-
+    
+    const newErrors: FormErrors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'El nombre del proyecto es requerido';
+    }
+    
+    if (!formData.address.trim()) {
+      newErrors.address = 'La dirección es requerida';
+    }
+    
+    if (!formData.region) {
+      newErrors.region = 'La región es requerida';
+    }
+    
+    if (!formData.commune) {
+      newErrors.commune = 'La comuna es requerida';
+    }
+    
     if (formData.start_date && formData.end_date) {
       const start = new Date(formData.start_date);
       const end = new Date(formData.end_date);
       if (end < start) {
-        alert('La fecha de término no puede ser anterior a la fecha de inicio');
-        return;
+        newErrors.end_date = 'La fecha de término no puede ser anterior a la fecha de inicio';
       }
+    }
+    
+    if (formData.estimated_surface && isNaN(parseFloat(formData.estimated_surface))) {
+      newErrors.estimated_surface = 'Debe ser un número válido';
+    }
+    
+    if (formData.estimated_price && isNaN(Number(formData.estimated_price))) {
+      newErrors.estimated_price = 'Debe ser un número válido';
+    }
+    
+    setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length > 0) {
+      return;
     }
 
     createProjectMutation.mutate();
+  };
+  
+  const handleInputBlur = (field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
   };
 
   if (!isOpen) return null;
@@ -117,34 +167,46 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-muted-foreground">Nombre del Proyecto</label>
             <input 
-              required
               autoFocus
               type="text" 
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onBlur={() => handleInputBlur('name')}
               className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Ej. Remodelación Casa Central"
             />
+            {touched.name && errors.name && (
+              <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                <AlertCircle size={12} />
+                <span>{errors.name}</span>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">Dirección de Obra</label>
               <input 
-                required
                 type="text" 
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                onBlur={() => handleInputBlur('address')}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Calle Freire #123"
+                placeholder="Freire 123"
               />
+              {touched.address && errors.address && (
+                <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                  <AlertCircle size={12} />
+                  <span>{errors.address}</span>
+                </div>
+              )}
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">Región</label>
               <select 
-                required
                 value={formData.region}
                 onChange={(e) => setFormData({ ...formData, region: e.target.value, commune: '' })}
+                onBlur={() => handleInputBlur('region')}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="">Seleccionar región</option>
@@ -152,16 +214,22 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                   <option key={region} value={region}>{region}</option>
                 ))}
               </select>
+              {touched.region && errors.region && (
+                <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                  <AlertCircle size={12} />
+                  <span>{errors.region}</span>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-muted-foreground">Comuna</label>
             <select 
-              required
               disabled={!formData.region}
               value={formData.commune}
               onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
+              onBlur={() => handleInputBlur('commune')}
               className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">{formData.region ? 'Seleccionar comuna' : 'Seleccione una región primero'}</option>
@@ -169,6 +237,12 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                 <option key={commune} value={commune}>{commune}</option>
               ))}
             </select>
+            {touched.commune && errors.commune && (
+              <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                <AlertCircle size={12} />
+                <span>{errors.commune}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -198,6 +272,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                 type="date" 
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                onBlur={() => handleInputBlur('start_date')}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -207,9 +282,16 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                 type="date" 
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                onBlur={() => handleInputBlur('end_date')}
                 min={formData.start_date}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              {touched.end_date && errors.end_date && (
+                <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                  <AlertCircle size={12} />
+                  <span>{errors.end_date}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -221,10 +303,17 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                 type="number" 
                 value={formData.estimated_price}
                 onChange={(e) => setFormData({ ...formData, estimated_price: e.target.value })}
+                onBlur={() => handleInputBlur('estimated_price')}
                 className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Dejar en blanco si no se sabe aún"
               />
             </div>
+            {touched.estimated_price && errors.estimated_price && (
+              <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                <AlertCircle size={12} />
+                <span>{errors.estimated_price}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -233,10 +322,16 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
               type="number" 
               value={formData.estimated_surface}
               onChange={(e) => setFormData({ ...formData, estimated_surface: e.target.value })}
+              onBlur={() => handleInputBlur('estimated_surface')}
               className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Valor estimativo para la fase inicial del proyecto."
+              placeholder="Ej. 150"
             />
-            <p className="text-xs text-muted-foreground">Valor estimativo para la fase inicial del proyecto.</p>
+            {touched.estimated_surface && errors.estimated_surface && (
+              <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                <AlertCircle size={12} />
+                <span>{errors.estimated_surface}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -259,7 +354,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
             </button>
             <button 
               type="submit" 
-              disabled={createProjectMutation.isPending || !formData.name}
+              disabled={createProjectMutation.isPending}
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-indigo-600/20"
             >
               {createProjectMutation.isPending && <Loader2 size={16} className="animate-spin" />}
