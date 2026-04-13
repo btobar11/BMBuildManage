@@ -19,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 interface Company {
   id: string;
   name: string;
+  rut: string;
   tax_id: string;
   address: string;
   phone: string;
@@ -26,12 +27,14 @@ interface Company {
   logo_url?: string;
   currency: string;
   country: string;
+  size?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 interface CompanyFormData {
   name: string;
+  rut: string;
   tax_id: string;
   address: string;
   phone: string;
@@ -39,18 +42,21 @@ interface CompanyFormData {
   logo_url?: string;
   currency: string;
   country: string;
+  size?: string;
 }
 
 function createEmptyCompany(): CompanyFormData {
   return {
     name: '',
+    rut: '',
     tax_id: '',
     address: '',
     phone: '',
     email: '',
     logo_url: '',
     currency: 'CLP',
-    country: 'Chile'
+    country: 'Chile',
+    size: ''
   };
 }
 
@@ -98,13 +104,15 @@ export function CompanySettingsPage() {
     
     const updateData: CompanyFormData = {
       name: company.name,
+      rut: company.rut,
       tax_id: company.tax_id,
       address: company.address,
       phone: company.phone,
       email: company.email,
       logo_url: company.logo_url,
       currency: company.currency,
-      country: company.country
+      country: company.country,
+      size: company.size
     };
     
     updateMutation.mutate(updateData);
@@ -284,8 +292,8 @@ export function CompanySettingsPage() {
                 </label>
                 <input 
                   type="text" 
-                  value={company.tax_id || ''}
-                  onChange={(e) => handleChange('tax_id', e.target.value)}
+                  value={company.rut || ''}
+                  onChange={(e) => handleChange('rut', e.target.value)}
                   className="w-full bg-background border border-border rounded-xl py-3 px-4 text-foreground focus:outline-none focus:border-blue-500 transition-colors"
                   placeholder="Ej: 76.543.210-K"
                 />
@@ -305,7 +313,7 @@ export function CompanySettingsPage() {
               </label>
               <input 
                 type="email" 
-                value={company.email || ''}
+                value={company.email || user?.email || ''}
                 onChange={(e) => handleChange('email', e.target.value)}
                 className="w-full bg-background border border-border rounded-xl py-3 px-4 text-foreground focus:outline-none focus:border-blue-500 transition-colors"
                 placeholder="contacto@empresa.com"
