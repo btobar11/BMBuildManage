@@ -33,6 +33,10 @@ export class CreateProjectDto {
 
   @IsString()
   @MaxLength(100)
+  region: string;
+
+  @IsString()
+  @MaxLength(100)
   commune: string;
 
   @IsOptional()

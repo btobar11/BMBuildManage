@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Loader2 } from 'lucide-react';
 import api from '../../../lib/api';
+import { chileRegions, getRegionNames, getCommunesByRegion } from '../../../lib/chileLocationData';
 
 export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess: (budgetId: string) => void }) => {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
+    region: '',
     commune: '',
     type: ['residential'] as string[],
     estimated_price: '',
@@ -14,6 +16,9 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     start_date: '',
     end_date: '',
   });
+
+  const regionNames = useMemo(() => getRegionNames(), []);
+  const communesForRegion = useMemo(() => formData.region ? getCommunesByRegion(formData.region) : [], [formData.region]);
 
   const projectTypes = [
     { value: 'residential', label: 'Residencial' },
@@ -39,6 +44,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
       const projectPayload = {
         name: formData.name,
         address: formData.address || undefined,
+        region: formData.region || undefined,
         commune: formData.commune || undefined,
         type: formData.type || undefined,
         status: 'draft',
@@ -69,7 +75,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   });
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', commune: '', type: ['residential'], estimated_price: '', description: '', start_date: '', end_date: '' });
+    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], estimated_price: '', description: '', start_date: '', end_date: '' });
   };
 
   const handleClose = () => {
@@ -132,16 +138,35 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">Comuna</label>
-              <input 
+              <label className="text-sm font-medium text-muted-foreground">Región</label>
+              <select 
                 required
-                type="text" 
-                value={formData.commune}
-                onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
+                value={formData.region}
+                onChange={(e) => setFormData({ ...formData, region: e.target.value, commune: '' })}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Santiago Centro"
-              />
+              >
+                <option value="">Seleccionar región</option>
+                {regionNames.map((region) => (
+                  <option key={region} value={region}>{region}</option>
+                ))}
+              </select>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-muted-foreground">Comuna</label>
+            <select 
+              required
+              disabled={!formData.region}
+              value={formData.commune}
+              onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
+              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">{formData.region ? 'Seleccionar comuna' : 'Seleccione una región primero'}</option>
+              {communesForRegion.map((commune) => (
+                <option key={commune} value={commune}>{commune}</option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-1.5">

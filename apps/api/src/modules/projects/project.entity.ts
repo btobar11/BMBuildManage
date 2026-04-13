@@ -57,6 +57,9 @@ export class Project {
   address: string;
 
   @Column({ nullable: true })
+  region: string;
+
+  @Column({ nullable: true })
   commune: string;
 
   @Column({ type: 'text', array: true, nullable: true })
