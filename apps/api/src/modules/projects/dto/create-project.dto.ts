@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsDateString,
   IsNumber,
+  IsArray,
   MaxLength,
   Min,
 } from 'class-validator';
@@ -28,11 +29,16 @@ export class CreateProjectDto {
 
   @IsOptional()
   @IsString()
-  location?: string;
+  address?: string;
 
   @IsOptional()
   @IsString()
-  type?: string;
+  commune?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  type?: string[];
 
   @IsOptional()
   @IsEnum(ProjectStatus)

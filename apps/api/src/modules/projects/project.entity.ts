@@ -54,10 +54,13 @@ export class Project {
   description: string;
 
   @Column({ nullable: true })
-  location: string;
+  address: string;
 
   @Column({ nullable: true })
-  type: string;
+  commune: string;
+
+  @Column({ type: 'text', array: true, nullable: true })
+  type: string[];
 
   @Column({ nullable: true })
   folder: string;

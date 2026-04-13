@@ -6,11 +6,29 @@ import api from '../../../lib/api';
 export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess: (budgetId: string) => void }) => {
   const [formData, setFormData] = useState({
     name: '',
-    location: '',
-    type: 'residential',
+    address: '',
+    commune: '',
+    type: ['residential'] as string[],
     estimated_price: '',
     description: '',
   });
+
+  const projectTypes = [
+    { value: 'residential', label: 'Residencial' },
+    { value: 'commercial', label: 'Comercial' },
+    { value: 'industrial', label: 'Industrial' },
+    { value: 'infrastructure', label: 'Infraestructura' },
+    { value: 'remodel', label: 'Remodelación' },
+  ];
+
+  const toggleType = (type: string) => {
+    setFormData(prev => ({
+      ...prev,
+      type: prev.type.includes(type)
+        ? prev.type.filter(t => t !== type)
+        : [...prev.type, type]
+    }));
+  };
 
   const queryClient = useQueryClient();
 
@@ -18,7 +36,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     mutationFn: async () => {
       const projectPayload = {
         name: formData.name,
-        location: formData.location || undefined,
+        address: formData.address || undefined,
+        commune: formData.commune || undefined,
         type: formData.type || undefined,
         status: 'draft',
         estimated_price: formData.estimated_price ? Number(formData.estimated_price) : undefined,
@@ -46,7 +65,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   });
 
   const resetForm = () => {
-    setFormData({ name: '', location: '', type: 'residential', estimated_price: '', description: '' });
+    setFormData({ name: '', address: '', commune: '', type: ['residential'], estimated_price: '', description: '' });
   };
 
   const handleClose = () => {
@@ -88,28 +107,44 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">Ubicación</label>
+              <label className="text-sm font-medium text-muted-foreground">Dirección de Obra</label>
               <input 
                 type="text" 
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Dirección, Comuna..."
+                placeholder="Calle Freire #123"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">Tipo de Obra</label>
-              <select 
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              <label className="text-sm font-medium text-muted-foreground">Comuna</label>
+              <input 
+                type="text" 
+                value={formData.commune}
+                onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="residential">Residencial</option>
-                <option value="commercial">Comercial</option>
-                <option value="industrial">Industrial</option>
-                <option value="infrastructure">Infraestructura</option>
-                <option value="remodel">Remodelación</option>
-              </select>
+                placeholder="Santiago Centro"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-muted-foreground">Tipo de Obra</label>
+            <div className="flex flex-wrap gap-2">
+              {projectTypes.map((pt) => (
+                <button
+                  key={pt.value}
+                  type="button"
+                  onClick={() => toggleType(pt.value)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                    formData.type.includes(pt.value)
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-background text-muted-foreground border-border hover:border-indigo-400'
+                  }`}
+                >
+                  {pt.label}
+                </button>
+              ))}
             </div>
           </div>
 
