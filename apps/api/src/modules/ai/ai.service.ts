@@ -1,6 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, In } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import OpenAI from 'openai';
 import { Project } from '../projects/project.entity';
 import { Budget } from '../budgets/budget.entity';
 import { Stage } from '../stages/stage.entity';
@@ -47,6 +53,8 @@ export interface NLPQueryResult {
 
 @Injectable()
 export class AIService {
+  private readonly logger = new Logger(AIService.name);
+  private readonly groqClient: OpenAI | null = null;
   private readonly RISK_THRESHOLDS = {
     budget: 0.15,
     schedule: 0.2,
@@ -67,7 +75,25 @@ export class AIService {
     private readonly dataSource: DataSource,
     private readonly financialService: FinancialService,
     private readonly bimAnalyticsService: BIMAnalyticsService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    const groqApiKey = this.configService.get<string>('GROQ_API_KEY');
+    const groqBaseUrl =
+      this.configService.get<string>('GROQ_BASE_URL') ||
+      'https://api.groq.com/openai/v1';
+
+    if (groqApiKey) {
+      this.groqClient = new OpenAI({
+        apiKey: groqApiKey,
+        baseURL: groqBaseUrl,
+      });
+      this.logger.log('Groq client initialized for AI Assistant');
+    } else {
+      this.logger.warn(
+        'GROQ_API_KEY not configured - AI Assistant will use fallback logic',
+      );
+    }
+  }
 
   async processNaturalLanguageQuery(
     userId: string,
@@ -1013,6 +1039,139 @@ export class AIService {
     } catch (error) {
       // Error logged internally
       return null;
+    }
+  }
+
+  async analyzeBudgetWithAI(budgetId: string, prompt?: string): Promise<any> {
+    if (!this.groqClient) {
+      this.logger.warn(
+        'Groq client not initialized - falling back to local analysis',
+      );
+      return this.analyzeBudgetDeviation(budgetId);
+    }
+
+    try {
+      const budget = await this.budgetRepository.findOne({
+        where: { id: budgetId },
+        relations: ['project', 'stages', 'stages.items'],
+      });
+
+      if (!budget) {
+        throw new Error('Presupuesto no encontrado');
+      }
+
+      let totalEstimated = 0;
+      let totalExecuted = 0;
+      const itemsData: any[] = [];
+
+      for (const stage of budget.stages || []) {
+        for (const item of stage.items || []) {
+          const estimated = Number(item.quantity) * Number(item.unit_cost);
+          const executed =
+            Number(item.quantity_executed) * Number(item.unit_cost);
+          totalEstimated += estimated;
+          totalExecuted += executed;
+
+          itemsData.push({
+            name: item.name,
+            stage: stage.name,
+            quantity: item.quantity,
+            unitCost: item.unit_cost,
+            unitPrice: item.unit_price,
+            executed: item.quantity_executed,
+            estimated,
+            executedCost: executed,
+            variance:
+              estimated > 0 ? ((executed - estimated) / estimated) * 100 : 0,
+          });
+        }
+      }
+
+      const budgetSummary = {
+        projectName: budget.project?.name || 'Sin proyecto',
+        budgetId: budget.id,
+        totalEstimated: Math.round(totalEstimated),
+        totalExecuted: Math.round(totalExecuted),
+        variance:
+          totalEstimated > 0
+            ? ((totalExecuted - totalEstimated) / totalEstimated) * 100
+            : 0,
+        items: itemsData,
+      };
+
+      const systemPrompt = `Eres un ingeniero civil experto en costos de construcción para Latinoamérica. 
+Tu tarea es analizar presupuestos de obra y proporcionar insights técnicos precisos en formato JSON.
+
+Analiza el siguiente presupuesto y devuelve un JSON con esta estructura exacta:
+{
+  "summary": "Resumen ejecutivo en 1-2 oraciones",
+  "healthStatus": "healthy|warning|critical",
+  "keyInsights": [
+    {
+      "type": "warning|opportunity|risk|recommendation",
+      "title": "Título corto",
+      "description": "Descripción detallada",
+      "impact": "high|medium|low"
+    }
+  ],
+  "varianceAnalysis": {
+    "totalVariance": number,
+    "overBudgetItems": number,
+    "underBudgetItems": number,
+    "criticalItems": []
+  },
+  "recommendations": [
+    "Recomendación 1",
+    "Recomendación 2"
+  ]
+}
+
+Responde ÚNICAMENTE con JSON válido, sin texto adicional.`;
+
+      const userMessage =
+        prompt ||
+        `Analiza este presupuesto:
+${JSON.stringify(budgetSummary, null, 2)}`;
+
+      const model =
+        this.configService.get<string>('AI_MODEL') || 'llama-3.1-70b-versatile';
+
+      const completion = await this.groqClient.chat.completions.create({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage },
+        ],
+        temperature: 0.2,
+        response_format: { type: 'json_object' },
+        max_tokens: 2000,
+      });
+
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No response from AI');
+      }
+
+      const parsed = JSON.parse(content);
+      this.logger.log(`AI analysis completed for budget ${budgetId}`);
+
+      return {
+        ...parsed,
+        budgetSummary: {
+          projectName: budgetSummary.projectName,
+          totalEstimated: budgetSummary.totalEstimated,
+          totalExecuted: budgetSummary.totalExecuted,
+          variance: budgetSummary.variance,
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to analyze budget with AI: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        'Error al analizar presupuesto con IA. Por favor intenta más tarde.',
+      );
     }
   }
 

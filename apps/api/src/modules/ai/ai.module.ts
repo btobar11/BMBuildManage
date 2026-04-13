@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AIService } from './ai.service';
 import { AIController } from './ai.controller';
 import { BIMAnalyticsService } from './bim-analytics.service';
@@ -16,6 +17,7 @@ import { ProjectContingency } from '../contingencies/project-contingency.entity'
 
 @Module({
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([
       Project,
       Budget,

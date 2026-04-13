@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { IsString, IsOptional, IsNotEmpty, IsUUID } from 'class-validator';
 import { AIService } from './ai.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
@@ -24,6 +32,15 @@ class ReportDto {
 
   @IsString()
   type!: 'executive' | 'financial' | 'technical';
+}
+
+class AnalyzeBudgetDto {
+  @IsUUID()
+  budgetId!: string;
+
+  @IsOptional()
+  @IsString()
+  prompt?: string;
 }
 
 @Controller('ai')
@@ -62,8 +79,22 @@ export class AIController {
 
   @Post('analyze-budget')
   @UseGuards(SupabaseAuthGuard)
-  async analyzeBudget(@Body('budgetId') budgetId: string) {
-    return this.aiService.analyzeBudgetDeviation(budgetId);
+  async analyzeBudget(
+    @CurrentUser() user: any,
+    @Body('budgetId') budgetId: string,
+    @Body('prompt') prompt?: string,
+  ) {
+    try {
+      return await this.aiService.analyzeBudgetWithAI(budgetId, prompt);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        error.message || 'Error al analizar presupuesto',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Post('report')
@@ -72,7 +103,16 @@ export class AIController {
     return this.aiService.generateProjectReport(dto.projectId, dto.type);
   }
 
-  // AI Analyze endpoints - mocks for frontend development
+  @Get('status')
+  @UseGuards(SupabaseAuthGuard)
+  getAIStatus() {
+    return {
+      available: true,
+      model: process.env.AI_MODEL || 'llama-3.1-70b-versatile',
+      provider: 'groq',
+    };
+  }
+
   @Get('analyze/quality')
   @UseGuards(SupabaseAuthGuard)
   async analyzeQuality() {
