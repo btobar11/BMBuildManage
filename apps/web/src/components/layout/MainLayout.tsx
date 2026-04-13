@@ -263,17 +263,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
             
 
-            {/* Quick Actions */}
-            <div className="hidden lg:flex items-center border-l border-border pl-3 ml-1">
-              <button 
-                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/20 rounded-lg transition-all duration-200"
-                title="Crear proyecto"
-              >
-                <div className="w-1.5 h-1.5 bg-primary-500 rounded-full" />
-                Nuevo Proyecto
-              </button>
-            </div>
-
             {/* Logout Button */}
             <button
               onClick={handleLogout}
