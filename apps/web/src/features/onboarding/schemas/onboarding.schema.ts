@@ -4,38 +4,50 @@ import { z } from 'zod';
 // ONBOARDING STEP SCHEMAS - Zod Validation
 // =====================================================================
 
+const LEGAL_TYPES = ['SpA', 'EIRL', 'Ltda.', 'S.A.', 'Empresa Individual'] as const;
+const INDUSTRY_TYPES = ['construction', 'engineering', 'architecture', 'real_estate', 'industrial'] as const;
+const CHALLENGES = ['budget_control', 'team_management', 'reporting', 'calculations', 'schedule_delays', 'material_waste'] as const;
+
+const CHILEAN_RUT_REGEX = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+
+function validateChileanRut(rut: string): boolean {
+  const cleanRut = rut.replace(/[.-]/g, '');
+  if (cleanRut.length < 7) return false;
+  const body = cleanRut.slice(0, -1);
+  const dv = cleanRut.slice(-1).toUpperCase();
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  const expectedDv = 11 - (sum % 11);
+  const calculatedDv = expectedDv === 11 ? '0' : expectedDv === 10 ? 'K' : String(expectedDv);
+  return dv === calculatedDv;
+}
+
 // Step 1: Company Setup - Requires valid Chilean RUT and company name
 export const companySetupSchema = z.object({
   companyName: z
     .string()
-    .min(2, 'El nombre de la empresa debe tener al menos 2 caracteres')
-    .max(100, 'El nombre no puede exceder 100 caracteres'),
+    .min(2, 'El nombre o razón social debe tener al menos 2 caracteres')
+    .max(200, 'El nombre no puede exceder 200 caracteres'),
   rut: z
     .string()
-    .min(7, 'RUT inválido')
+    .min(9, 'RUT inválido')
     .max(12, 'RUT inválido')
     .refine(
-      (rut) => {
-        // Chilean RUT validation (basic format check)
-        const cleanRut = rut.replace(/[.-]/g, '');
-        if (cleanRut.length < 7) return false;
-        const body = cleanRut.slice(0, -1);
-        const dv = cleanRut.slice(-1).toUpperCase();
-        let sum = 0;
-        let multiplier = 2;
-        for (let i = body.length - 1; i >= 0; i--) {
-          sum += parseInt(body[i]) * multiplier;
-          multiplier = multiplier === 7 ? 2 : multiplier + 1;
-        }
-        const expectedDv = 11 - (sum % 11);
-        const calculatedDv = expectedDv === 11 ? '0' : expectedDv === 10 ? 'K' : String(expectedDv);
-        return dv === calculatedDv;
-      },
-      { message: 'RUT inválido (formato chileno)' }
+      (rut) => CHILEAN_RUT_REGEX.test(rut) && validateChileanRut(rut),
+      { message: 'RUT inválido. Formato correcto: XX.XXX.XXX-X' }
     ),
+  legalType: z.enum(LEGAL_TYPES, { required_error: 'Selecciona el tipo de empresa' }),
+  address: z
+    .string()
+    .min(5, 'Ingresa la dirección de la casa matriz')
+    .max(300, 'La dirección no puede exceder 300 caracteres'),
   industry: z
-    .enum(['construction', 'engineering', 'architecture', 'real_estate', 'other'])
-    .default('construction'),
+    .array(z.enum(INDUSTRY_TYPES))
+    .min(1, 'Selecciona al menos un tipo de construcción'),
   companySize: z
     .enum(['1-10', '11-50', '51-200', '201-500', '500+'])
     .default('1-10'),

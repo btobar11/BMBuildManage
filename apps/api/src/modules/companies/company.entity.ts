@@ -21,11 +21,19 @@ export enum CompanySpecialty {
 }
 
 export enum SeismicZone {
-  E = 'E', // Zona sísmica E (menor riesgo)
-  D = 'D', // Zona sísmica D
-  C = 'C', // Zona sísmica C
-  B = 'B', // Zona sísmica B
-  A = 'A', // Zona sísmica A (mayor riesgo)
+  E = 'E',
+  D = 'D',
+  C = 'C',
+  B = 'B',
+  A = 'A',
+}
+
+export enum CompanyLegalType {
+  SPA = 'SpA',
+  EIRL = 'EIRL',
+  LTDA = 'Ltda.',
+  SA = 'S.A.',
+  EI = 'Empresa Individual',
 }
 
 @Entity('companies')
@@ -45,8 +53,17 @@ export class Company {
   @Column({ length: 50, nullable: true })
   tax_id: string;
 
+  @Column({ length: 50, nullable: true })
+  legal_type: string;
+
   @Column({ type: 'text', nullable: true })
   address: string;
+
+  @Column('text', { array: true, nullable: true })
+  industry: string[];
+
+  @Column('text', { array: true, nullable: true })
+  challenges: string[];
 
   @Column({ nullable: true })
   logo_url: string;

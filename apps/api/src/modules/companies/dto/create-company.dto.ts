@@ -1,5 +1,15 @@
-import { IsString, IsOptional, MaxLength, IsUUID } from 'class-validator';
+import { 
+  IsString, 
+  IsOptional, 
+  IsArray, 
+  MaxLength, 
+  IsUUID,
+  Matches,
+  ArrayMinSize,
+} from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
+
+export const CHILEAN_RUT_REGEX = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
 
 export class CreateCompanyDto {
   @IsString()
@@ -26,13 +36,17 @@ export class CreateCompanyDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(20)
+  @Matches(CHILEAN_RUT_REGEX, { message: 'RUT debe tener formato chileno: XX.XXX.XXX-X' })
   rut?: string;
 
   @IsOptional()
   @IsString()
   @IsUUID()
   tax_id?: string;
+
+  @IsOptional()
+  @IsString()
+  legal_type?: string;
 
   @IsOptional()
   @IsString()
@@ -48,9 +62,10 @@ export class CreateCompanyDto {
   created_by_user_id?: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  industry?: string;
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1, { message: 'Debes seleccionar al menos un tipo de construcción' })
+  industry?: string[];
 
   @IsOptional()
   @IsString()
@@ -61,6 +76,11 @@ export class CreateCompanyDto {
   @IsString()
   @MaxLength(50)
   size?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  challenges?: string[];
 }
 
 export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {}

@@ -13,7 +13,8 @@ import {
   Briefcase,
   Wrench,
   Ruler,
-  Truck
+  Truck,
+  MapPin
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -22,28 +23,77 @@ type OnboardingStep = 1 | 2 | 3;
 interface OnboardingState {
   companyName: string;
   rut: string;
-  industry: string;
+  legalType: string;
+  address: string;
+  industry: string[];
   companySize: string;
   phone: string;
   specialty: string;
-  painPoint: string;
+  challenges: string[];
 }
 
-const specialties = [
-  { icon: <Building2 size={20} />, label: 'Edificación' },
-  { icon: <Ruler size={20} />, label: 'Obras Civiles' },
-  { icon: <Wrench size={20} />, label: 'Industrial' },
-  { icon: <Truck size={20} />, label: 'Infraestructura' },
-  { icon: <Briefcase size={20} />, label: 'Remodelación' },
-  { icon: <Building2 size={20} />, label: 'Estructuras Metálicas' },
+const LEGAL_TYPES = [
+  { value: 'SpA', label: 'SpA (Sociedad por Acciones)' },
+  { value: 'EIRL', label: 'EIRL (Empresa Individual)' },
+  { value: 'Ltda.', label: 'Ltda. (Sociedad de Responsabilidad Limitada)' },
+  { value: 'S.A.', label: 'S.A. (Sociedad Anónima)' },
+  { value: 'Empresa Individual', label: 'Empresa Individual (sin constitución legal)' },
 ];
 
-const painPoints = [
-  { label: 'Descontrol en Presupuesto', desc: 'No sabes cuánto gastas realmente' },
-  { label: 'Pérdida de Cuadrillas', desc: 'Dificultad para gestionar trabajadores' },
-  { label: 'Reportes Confusos', desc: 'No tienes claridad del avance' },
-  { label: 'Cálculos Manuales', desc: 'Pierdes tiempo en Excel' },
+const INDUSTRIES = [
+  { value: 'construction', label: 'Construcción', icon: <Building2 size={20} /> },
+  { value: 'engineering', label: 'Ingeniería', icon: <Wrench size={20} /> },
+  { value: 'architecture', label: 'Arquitectura', icon: <Ruler size={20} /> },
+  { value: 'real_estate', label: 'Bienes Raíces', icon: <Briefcase size={20} /> },
+  { value: 'industrial', label: 'Industrial', icon: <Truck size={20} /> },
 ];
+
+const CHALLENGES = [
+  { value: 'budget_control', label: 'Descontrol en Presupuesto', desc: 'No sabes cuánto gastas realmente' },
+  { value: 'team_management', label: 'Pérdida de Cuadrillas', desc: 'Dificultad para gestionar trabajadores' },
+  { value: 'reporting', label: 'Reportes Confusos', desc: 'No tienes claridad del avance' },
+  { value: 'calculations', label: 'Cálculos Manuales', desc: 'Pierdes tiempo en Excel' },
+  { value: 'schedule_delays', label: 'Retrasos en Cronograma', desc: 'Dificultad para controlar plazos' },
+  { value: 'material_waste', label: 'Desperdicio de Materiales', desc: 'Sin control de desperdicio' },
+];
+
+const SPECIALTIES = [
+  { value: 'edificacion', label: 'Edificación' },
+  { value: 'obras_civiles', label: 'Obras Civiles' },
+  { value: 'industrial', label: 'Industrial' },
+  { value: 'infraestructura', label: 'Infraestructura' },
+  { value: 'remodelacion', label: 'Remodelación' },
+  { value: 'estructuras_metalicas', label: 'Estructuras Metálicas' },
+];
+
+const CHILEAN_RUT_REGEX = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+
+function formatRut(value: string): string {
+  const clean = value.replace(/[^kK0-9]/g, '');
+  if (clean.length <= 1) return clean;
+  if (clean.length <= 4) return clean;
+  if (clean.length <= 7) return clean.slice(0, -1) + '-' + clean.slice(-1);
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+  const formatted = body.replace(/(\d)(?=(\d{3})+$)/g, '$1.');
+  return formatted + '-' + dv;
+}
+
+function validateChileanRut(rut: string): boolean {
+  const cleanRut = rut.replace(/[.-]/g, '');
+  if (cleanRut.length < 7) return false;
+  const body = cleanRut.slice(0, -1);
+  const dv = cleanRut.slice(-1).toUpperCase();
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  const expectedDv = 11 - (sum % 11);
+  const calculatedDv = expectedDv === 11 ? '0' : expectedDv === 10 ? 'K' : String(expectedDv);
+  return dv === calculatedDv;
+}
 
 export function OnboardingPage() {
   const [step, setStep] = useState<OnboardingStep>(1);
@@ -51,11 +101,13 @@ export function OnboardingPage() {
   const [data, setData] = useState<OnboardingState>({
     companyName: '',
     rut: '',
-    industry: 'construction',
+    legalType: '',
+    address: '',
+    industry: [],
     companySize: '1-10',
     phone: '',
     specialty: '',
-    painPoint: ''
+    challenges: []
   });
   const [animationKey, setAnimationKey] = useState(0);
 
@@ -68,14 +120,44 @@ export function OnboardingPage() {
     }
   }, [step]);
 
+  const toggleIndustry = (value: string) => {
+    setData(prev => ({
+      ...prev,
+      industry: prev.industry.includes(value)
+        ? prev.industry.filter(i => i !== value)
+        : [...prev.industry, value]
+    }));
+  };
+
+  const toggleChallenge = (value: string) => {
+    setData(prev => ({
+      ...prev,
+      challenges: prev.challenges.includes(value)
+        ? prev.challenges.filter(c => c !== value)
+        : [...prev.challenges, value]
+    }));
+  };
+
   const handleNext = () => {
     if (step === 1) {
       if (!data.companyName.trim()) {
-        toast.error('Ingresa el nombre de tu empresa');
+        toast.error('Ingresa el nombre o razón social');
         return;
       }
-      if (!data.rut.trim()) {
-        toast.error('Ingresa el RUT de tu empresa');
+      if (!data.rut.trim() || !CHILEAN_RUT_REGEX.test(data.rut) || !validateChileanRut(data.rut)) {
+        toast.error('Ingresa un RUT válido (formato: XX.XXX.XXX-X)');
+        return;
+      }
+      if (!data.legalType) {
+        toast.error('Selecciona el tipo de empresa');
+        return;
+      }
+      if (!data.address.trim()) {
+        toast.error('Ingresa la dirección de la casa matriz');
+        return;
+      }
+      if (data.industry.length === 0) {
+        toast.error('Selecciona al menos un tipo de construcción');
         return;
       }
     }
@@ -91,18 +173,20 @@ export function OnboardingPage() {
   };
 
   const handleFinish = () => {
-    if (!data.painPoint) {
-      toast.error('Selecciona el desafío principal');
+    if (data.challenges.length === 0) {
+      toast.error('Selecciona al menos un desafío');
       return;
     }
     onboardingMutation.mutate({
       companyName: data.companyName,
       rut: data.rut,
+      legalType: data.legalType,
+      address: data.address,
       industry: data.industry,
       companySize: data.companySize,
       phone: data.phone,
       specialty: data.specialty,
-      painPoint: data.painPoint
+      challenges: data.challenges
     });
   };
 
@@ -143,7 +227,7 @@ export function OnboardingPage() {
             direction === 'forward' ? 'animate-fade-up' : ''
           }`}
         >
-          {/* Step 1 */}
+          {/* Step 1: Legal Data */}
           {step === 1 && (
             <div>
               <div className="flex items-center gap-3 mb-6">
@@ -152,16 +236,16 @@ export function OnboardingPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">Paso 1 de 3</p>
-                  <h2 className="text-xl font-semibold text-foreground">¿Cómo se llama tu empresa?</h2>
+                  <h2 className="text-xl font-semibold text-foreground">Datos Legales</h2>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Configuraremos tu espacio de trabajo con este nombre.
+                Ingresa los datos legales de tu empresa.
               </p>
               
-              {/* Company Name */}
+              {/* Company Name / Razón Social */}
               <div className="space-y-2 mb-4">
-                <label className="text-sm font-medium text-foreground">Nombre de la Empresa</label>
+                <label className="text-sm font-medium text-foreground">Nombre o Razón Social</label>
                 <input
                   ref={inputRef}
                   type="text"
@@ -173,7 +257,7 @@ export function OnboardingPage() {
                 />
               </div>
               
-              {/* RUT */}
+              {/* RUT with format mask */}
               <div className="space-y-2 mb-4">
                 <label className="text-sm font-medium text-foreground">RUT Empresa</label>
                 <input
@@ -181,26 +265,67 @@ export function OnboardingPage() {
                   placeholder="12.345.678-9"
                   className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
                   value={data.rut}
-                  onChange={(e) => setData({ ...data, rut: e.target.value })}
+                  onChange={(e) => setData({ ...data, rut: formatRut(e.target.value) })}
+                  maxLength={12}
                 />
               </div>
               
-              {/* Industry & Size Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Rubro</label>
-                  <select
-                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                    value={data.industry}
-                    onChange={(e) => setData({ ...data, industry: e.target.value })}
-                  >
-                    <option value="construction">Construcción</option>
-                    <option value="engineering">Ingeniería</option>
-                    <option value="architecture">Arquitectura</option>
-                    <option value="real_estate">Bienes Raíces</option>
-                    <option value="other">Otro</option>
-                  </select>
+              {/* Legal Type Dropdown */}
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-medium text-foreground">Tipo de Empresa</label>
+                <select
+                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                  value={data.legalType}
+                  onChange={(e) => setData({ ...data, legalType: e.target.value })}
+                >
+                  <option value="">Selecciona tipo legal...</option>
+                  {LEGAL_TYPES.map(lt => (
+                    <option key={lt.value} value={lt.value}>{lt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Address */}
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-medium text-foreground">Dirección Casa Matriz</label>
+                <div className="relative">
+                  <MapPin size={18} className="absolute left-3 top-3 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Av. Libertador Bernardo O''Higgins 1449"
+                    className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                    value={data.address}
+                    onChange={(e) => setData({ ...data, address: e.target.value })}
+                  />
                 </div>
+              </div>
+
+              {/* Industry Multi-select */}
+              <div className="space-y-2 mb-4">
+                <label className="text-sm font-medium text-foreground">Tipo de Construcción (selección múltiple)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {INDUSTRIES.map((ind) => (
+                    <button
+                      key={ind.value}
+                      type="button"
+                      onClick={() => toggleIndustry(ind.value)}
+                      className={`p-3 rounded-lg border text-left transition-all flex items-center gap-2 ${
+                        data.industry.includes(ind.value) 
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700' 
+                          : 'bg-background border-border hover:border-emerald-300'
+                      }`}
+                    >
+                      <span className={data.industry.includes(ind.value) ? 'text-emerald-600' : 'text-muted-foreground'}>
+                        {ind.icon}
+                      </span>
+                      <span className="text-sm font-medium">{ind.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Size & Phone Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Tamaño</label>
                   <select
@@ -215,23 +340,21 @@ export function OnboardingPage() {
                     <option value="500+">500+ empleados</option>
                   </select>
                 </div>
-              </div>
-              
-              {/* Phone */}
-              <div className="space-y-2 mb-6">
-                <label className="text-sm font-medium text-foreground">Teléfono (opcional)</label>
-                <input
-                  type="tel"
-                  placeholder="+56 9 1234 5678"
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
-                  value={data.phone}
-                  onChange={(e) => setData({ ...data, phone: e.target.value })}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Teléfono</label>
+                  <input
+                    type="tel"
+                    placeholder="+56 9 1234 5678"
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    value={data.phone}
+                    onChange={(e) => setData({ ...data, phone: e.target.value })}
+                  />
+                </div>
               </div>
               
               <button 
                 onClick={handleNext}
-                disabled={!data.companyName.trim() || !data.rut.trim()}
+                disabled={!data.companyName.trim() || !data.rut.trim() || !data.legalType || !data.address.trim() || data.industry.length === 0}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
               >
                 Continuar <ArrowRight size={18} />
@@ -239,7 +362,7 @@ export function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 2 */}
+          {/* Step 2: Specialty */}
           {step === 2 && (
             <div>
               <div className="flex items-center gap-3 mb-6">
@@ -255,22 +378,17 @@ export function OnboardingPage() {
                 Esto nos ayudará a mostrarte las mejores plantillas.
               </p>
               <div className="grid grid-cols-2 gap-3">
-                {specialties.map((spec) => (
+                {SPECIALTIES.map((spec) => (
                   <button
-                    key={spec.label}
-                    onClick={() => setData({ ...data, specialty: spec.label })}
+                    key={spec.value}
+                    onClick={() => setData({ ...data, specialty: spec.value })}
                     className={`p-4 rounded-lg border text-left transition-all ${
-                      data.specialty === spec.label 
+                      data.specialty === spec.value 
                         ? 'bg-emerald-50 border-emerald-500 text-emerald-700' 
                         : 'bg-background border-border hover:border-emerald-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className={data.specialty === spec.label ? 'text-emerald-600' : 'text-muted-foreground'}>
-                        {spec.icon}
-                      </span>
-                      <span className="text-sm font-medium">{spec.label}</span>
-                    </div>
+                    <span className="text-sm font-medium">{spec.label}</span>
                   </button>
                 ))}
               </div>
@@ -291,7 +409,7 @@ export function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 3 */}
+          {/* Step 3: Challenges Multi-select */}
           {step === 3 && (
             <div>
               <div className="flex items-center gap-3 mb-6">
@@ -304,30 +422,31 @@ export function OnboardingPage() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Personalizaremos tu Dashboard para mostrarte lo que necesitas.
+                Selecciona todos los desafíos que aplique (selección múltiple).
               </p>
               <div className="space-y-3">
-                {painPoints.map((pain) => (
+                {CHALLENGES.map((pain) => (
                   <button
-                    key={pain.label}
-                    onClick={() => setData({ ...data, painPoint: pain.label })}
+                    key={pain.value}
+                    type="button"
+                    onClick={() => toggleChallenge(pain.value)}
                     className={`w-full p-4 rounded-lg border text-left transition-all flex items-center gap-3 ${
-                      data.painPoint === pain.label 
+                      data.challenges.includes(pain.value) 
                         ? 'bg-emerald-50 border-emerald-500' 
                         : 'bg-background border-border hover:border-emerald-300'
                     }`}
                   >
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      data.painPoint === pain.label 
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                      data.challenges.includes(pain.value) 
                         ? 'border-emerald-500 bg-emerald-500' 
                         : 'border-slate-300'
                     }`}>
-                      {data.painPoint === pain.label && (
+                      {data.challenges.includes(pain.value) && (
                         <CheckCircle2 size={12} className="text-white" />
                       )}
                     </div>
                     <div>
-                      <p className={`text-sm font-medium ${data.painPoint === pain.label ? 'text-emerald-700' : 'text-foreground'}`}>
+                      <p className={`text-sm font-medium ${data.challenges.includes(pain.value) ? 'text-emerald-700' : 'text-foreground'}`}>
                         {pain.label}
                       </p>
                       <p className="text-xs text-muted-foreground">{pain.desc}</p>
@@ -345,7 +464,7 @@ export function OnboardingPage() {
                 </button>
                 <button 
                   onClick={handleFinish}
-                  disabled={onboardingMutation.isPending || !data.painPoint}
+                  disabled={onboardingMutation.isPending || data.challenges.length === 0}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed"
                 >
                   {onboardingMutation.isPending ? (

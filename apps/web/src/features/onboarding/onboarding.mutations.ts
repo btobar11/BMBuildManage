@@ -7,11 +7,13 @@ import { useNavigate } from 'react-router-dom';
 interface OnboardingData {
   companyName: string;
   rut: string;
-  industry: string;
+  legalType: string;
+  address: string;
+  industry: string[];
   companySize?: string;
   phone?: string;
   specialty: string;
-  painPoint: string;
+  challenges: string[];
 }
 
 export const useOnboardingSeeding = () => {
@@ -27,14 +29,17 @@ export const useOnboardingSeeding = () => {
       
       const userId = session.user.id;
       
-      // 1. Create Company via API - include RUT and all company data
+      // 1. Create Company via API - include RUT, legal type, address and multi-select fields
       const companyResponse = await api.post('/companies', { 
         name: data.companyName,
-        rut: data.rut,  // Include RUT from form
+        rut: data.rut,
+        legal_type: data.legalType,
+        address: data.address,
         industry: data.industry,
+        challenges: data.challenges,
         size: data.companySize,
         phone: data.phone,
-        description: `Especialidad: ${data.specialty}. Reto principal: ${data.painPoint}`
+        description: `Especialidad: ${data.specialty}. Desafíos: ${data.challenges.join(', ')}`
       });
       const newCompany = companyResponse.data;
 
