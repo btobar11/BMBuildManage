@@ -40,7 +40,8 @@ function isValidEmail(email: string): boolean {
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -72,8 +73,8 @@ export function RegisterPage() {
   const isFormValid = useMemo(() => {
     const allPasswordReqsMet = passwordRequirements.every(req => req.test(password));
     const isEmailValid = isValidEmail(email);
-    return name.trim() && companyName.trim() && isEmailValid && allPasswordReqsMet;
-  }, [name, companyName, email, password]);
+    return firstName.trim() && lastName.trim() && companyName.trim() && isEmailValid && allPasswordReqsMet;
+  }, [firstName, lastName, companyName, email, password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +100,12 @@ export function RegisterPage() {
         email,
         password,
         options: { 
-          data: { full_name: name, role: 'admin' },
+          data: { 
+            first_name: firstName, 
+            last_name: lastName,
+            full_name: `${firstName} ${lastName}`.trim(),
+            role: 'admin' 
+          },
           emailRedirectTo: `${window.location.origin}/login`
         }
       });
@@ -124,7 +130,11 @@ export function RegisterPage() {
 
       await supabase.auth.updateUser({ data: { company_id: newCompany.id } });
       await api.post('/users', {
-        id: authData.user.id, email, name, role: 'admin', company_id: newCompany.id,
+        id: authData.user.id, 
+        email, 
+        name: `${firstName} ${lastName}`.trim(), 
+        role: 'admin', 
+        company_id: newCompany.id,
       });
       
       // Refresh session to get updated JWT with company_id
@@ -211,18 +221,35 @@ export function RegisterPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Nombre</label>
-                <div className="relative">
-                  <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
-                    placeholder="Juan Pérez"
-                  />
+              {/* Name Fields Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Nombre</label>
+                  <div className="relative">
+                    <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      required
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                      placeholder="Juan"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Apellido</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+                      placeholder="Pérez"
+                    />
+                  </div>
                 </div>
               </div>
 

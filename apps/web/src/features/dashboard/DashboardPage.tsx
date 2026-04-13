@@ -148,6 +148,9 @@ export const DashboardPage = () => {
 
   const totalBudget = projects?.reduce((acc: number, p: Project) => acc + (p.estimated_budget || 0), 0) || 0;
 
+  // Get user display name - prefer first_name from metadata, fallback to name or email prefix
+  const displayName = user?.name || user?.email?.split('@')[0] || 'Usuario';
+
   return (
     <>
       <div className="space-y-6 animate-fade-up">
@@ -156,7 +159,7 @@ export const DashboardPage = () => {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Proyectos</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Bienvenido de nuevo, <span className="font-medium text-primary-600">{user?.name}</span>
+            Bienvenido de nuevo, <span className="font-medium text-primary-600">{displayName}</span>
           </p>
         </div>
         

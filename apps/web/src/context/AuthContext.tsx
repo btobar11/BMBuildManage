@@ -92,10 +92,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session) {
           localStorage.removeItem('DEV_TOKEN');
           setToken(session.access_token);
+          
+          // Get display name: prefer first_name + last_name, then full_name, then email prefix
+          const firstName = session.user.user_metadata?.first_name;
+          const lastName = session.user.user_metadata?.last_name;
+          const fullName = session.user.user_metadata?.full_name;
+          const emailPrefix = session.user.email?.split('@')[0];
+          
+          let displayName = emailPrefix || 'Usuario';
+          if (firstName && lastName) {
+            displayName = `${firstName} ${lastName}`;
+          } else if (fullName) {
+            displayName = fullName;
+          } else if (firstName) {
+            displayName = firstName;
+          }
+          
           setUser({
             id: session.user.id,
             email: session.user.email || '',
-            name: session.user.user_metadata.name || session.user.email?.split('@')[0] || 'Usuario',
+            name: displayName,
             role: session.user.user_metadata.role || 'manager',
             company_id: session.user.user_metadata.company_id
           });
@@ -132,10 +148,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (session) {
         setToken(session.access_token);
+        
+        // Get display name: prefer first_name + last_name, then full_name, then email prefix
+        const firstName = session.user.user_metadata?.first_name;
+        const lastName = session.user.user_metadata?.last_name;
+        const fullName = session.user.user_metadata?.full_name;
+        const emailPrefix = session.user.email?.split('@')[0];
+        
+        let displayName = emailPrefix || 'Usuario';
+        if (firstName && lastName) {
+          displayName = `${firstName} ${lastName}`;
+        } else if (fullName) {
+          displayName = fullName;
+        } else if (firstName) {
+          displayName = firstName;
+        }
+        
         setUser({
           id: session.user.id,
           email: session.user.email || '',
-          name: session.user.user_metadata.name || session.user.email?.split('@')[0] || 'Usuario',
+          name: displayName,
           role: session.user.user_metadata.role || 'manager',
           company_id: session.user.user_metadata.company_id
         });
