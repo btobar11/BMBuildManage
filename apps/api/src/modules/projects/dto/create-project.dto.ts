@@ -27,13 +27,13 @@ export class CreateProjectDto {
   @IsString()
   description?: string;
 
-  @IsOptional()
   @IsString()
-  address?: string;
+  @MaxLength(500)
+  address: string;
 
-  @IsOptional()
   @IsString()
-  commune?: string;
+  @MaxLength(100)
+  commune: string;
 
   @IsOptional()
   @IsArray()

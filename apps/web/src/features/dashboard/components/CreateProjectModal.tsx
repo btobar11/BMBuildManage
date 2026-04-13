@@ -109,6 +109,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">Dirección de Obra</label>
               <input 
+                required
                 type="text" 
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -119,6 +120,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">Comuna</label>
               <input 
+                required
                 type="text" 
                 value={formData.commune}
                 onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
