@@ -5,18 +5,20 @@ import {
   IsDateString,
   IsNumber,
   IsArray,
+  IsUUID,
   MaxLength,
   Min,
+  Max,
 } from 'class-validator';
 import { ProjectStatus } from '../project.entity';
 
 export class CreateProjectDto {
   @IsOptional()
-  @IsString()
+  @IsUUID()
   company_id?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUUID()
   client_id?: string;
 
   @IsString()
@@ -59,15 +61,18 @@ export class CreateProjectDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Max(999999999999)
   estimated_budget?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Max(999999999999)
   estimated_price?: number;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
+  @Max(999999)
   estimated_area?: number;
 }

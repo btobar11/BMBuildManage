@@ -21,6 +21,17 @@ export class ClientsService {
     return this.clientRepository.find({ where: { company_id: companyId } });
   }
 
+  search(companyId: string, searchTerm: string) {
+    return this.clientRepository
+      .createQueryBuilder('client')
+      .where('client.company_id = :companyId', { companyId })
+      .andWhere('LOWER(client.name) LIKE LOWER(:search)', {
+        search: `%${searchTerm}%`,
+      })
+      .take(10)
+      .getMany();
+  }
+
   async findOne(id: string, companyId: string) {
     const client = await this.clientRepository.findOne({
       where: { id, company_id: companyId },

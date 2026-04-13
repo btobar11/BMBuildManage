@@ -1,8 +1,15 @@
-import { IsString, IsOptional, IsEmail, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateClientDto {
-  @IsString()
-  company_id: string;
+  @IsOptional()
+  @IsUUID()
+  company_id?: string;
 
   @IsString()
   @MaxLength(200)

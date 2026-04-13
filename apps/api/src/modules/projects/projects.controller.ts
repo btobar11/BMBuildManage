@@ -24,14 +24,27 @@ export class ProjectsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createProjectDto: CreateProjectDto, @Request() req: any) {
+  async create(
+    @Body() createProjectDto: CreateProjectDto,
+    @Request() req: any,
+  ) {
     try {
       createProjectDto.company_id = req.user.company_id;
       return await this.projectsService.create(createProjectDto);
     } catch (error) {
+      // Log detallado de errores de validación
+      if (error.response?.error?.issues) {
+        console.error(
+          '[Validation Error]',
+          JSON.stringify(error.response.error.issues, null, 2),
+        );
+      } else if (error.response?.message) {
+        console.error('[Validation Error]', error.response.message);
+      }
       throw new BadRequestException({
         message: error.message,
-        stack: error.stack,
+        validationError:
+          error.response?.error?.issues || error.response?.message,
       });
     }
   }

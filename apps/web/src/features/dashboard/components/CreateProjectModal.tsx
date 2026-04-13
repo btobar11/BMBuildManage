@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Loader2, AlertCircle } from 'lucide-react';
 import api from '../../../lib/api';
 import { chileRegions, getRegionNames, getCommunesByRegion } from '../../../lib/chileLocationData';
+import { ClientAutocomplete } from './ClientAutocomplete';
 
 interface FormErrors {
   name?: string;
@@ -27,6 +28,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     description: '',
     start_date: '',
     end_date: '',
+    client_id: '' as string | null,
+    client_name: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -68,6 +71,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         description: formData.description || undefined,
         start_date: formData.start_date || undefined,
         end_date: formData.end_date || undefined,
+        client_id: formData.client_id || undefined,
       };
 
       const projectResponse = await api.post('/projects', projectPayload);
@@ -91,9 +95,17 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   });
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], estimated_price: '', estimated_surface: '', description: '', start_date: '', end_date: '' });
+    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], estimated_price: '', estimated_surface: '', description: '', start_date: '', end_date: '', client_id: '', client_name: '' });
     setErrors({});
     setTouched({});
+  };
+
+  const handleClientChange = (clientId: string | null, clientName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      client_id: clientId || '',
+      client_name: clientName,
+    }));
   };
 
   const handleClose = () => {
@@ -182,6 +194,11 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
               </div>
             )}
           </div>
+
+          <ClientAutocomplete
+            value={formData.client_name}
+            onChange={handleClientChange}
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
