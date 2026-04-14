@@ -1,19 +1,20 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { supabase } from './supabase';
 
-const getApiBaseUrl = () => {
+/**
+ * Get API base URL from environment.
+ * CRITICAL: Must be configured in ALL environments (dev + prod).
+ */
+const getApiBaseUrl = (): string => {
   const envUrl = import.meta.env.VITE_API_URL;
-  console.log('[DEBUG] VITE_API_URL:', envUrl);
   
-  if (envUrl) {
-    const baseUrl = envUrl.replace(/\/+$/, '');
-    console.log('[DEBUG] Using VITE_API_URL:', `${baseUrl}/api/v1`);
-    return `${baseUrl}/api/v1`;
+  if (!envUrl || !envUrl.trim()) {
+    throw new Error('[API] CRITICAL: VITE_API_URL not set. Configure it in .env file.');
   }
   
-  const defaultUrl = 'http://localhost:3001/api/v1';
-  console.log('[DEBUG] Using default:', defaultUrl);
-  return defaultUrl;
+  // Always use environment URL - never fallback to localhost
+  const baseUrl = envUrl.replace(/\/+$/, '');
+  return `${baseUrl}/api/v1`;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -25,24 +26,17 @@ const api = axios.create({
 
 api.interceptors.response.use(
   (response) => {
-    console.log('[API] Response:', response.config.url, response.status);
     if (typeof response.data === 'string' && response.data.trim().startsWith('<!DOCTYPE html>')) {
-      console.error('[API] Error: Got HTML instead of JSON from', response.config.url);
+      console.error('[API] Got HTML instead of JSON from', response.config.url);
       return Promise.reject(new Error('No se puede conectar con el servidor API'));
     }
     return response;
   },
   (error) => {
     const status = error.response?.status;
-    const url = error.config?.url;
-
-    console.error('[API] Error:', url, error.message, 'Status:', status);
 
     // Handle 401/403 - just reject, don't redirect
-    // Let the components handle auth errors gracefully
     if (status === 401 || status === 403) {
-      console.warn('[API] Auth error detected (401/403)');
-      // Clear auth tokens - but don't redirect - let React handle it
       localStorage.removeItem('supabase.auth.token');
     }
 
@@ -60,20 +54,14 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const devToken = localStorage.getItem('DEV_TOKEN');
   if (devToken) {
     // SECURITY WARNING: DEV_TOKEN causes multi-tenant issues
-    console.warn('[API] ⚠️  DEV_TOKEN detected! This causes multi-tenant security issues.');
-    console.warn('[API] All users will see the same data. Remove DEV_TOKEN to fix this.');
+    console.warn('[API] ⚠️  DEV_TOKEN detected - remove in production');
     
-    // Only allow dev token in development environment
     if (import.meta.env.PROD) {
-      // In production, just don't use the dev token - don't reload
-      console.warn('[API] 🚨 DEV_TOKEN ignored in production');
-      // Remove it to prevent future issues
       localStorage.removeItem('DEV_TOKEN');
     } else {
       if (config.headers) {
         config.headers.Authorization = `Bearer ${devToken}`;
       }
-      console.log('[API] Using dev token (development only)');
     }
     return config;
   }
@@ -81,11 +69,8 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
   
-  if (token) {
-    if (config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    console.log('[API] Using Supabase token');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });

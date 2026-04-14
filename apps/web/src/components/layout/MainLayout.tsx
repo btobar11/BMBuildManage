@@ -49,6 +49,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
+  // Global onboarding guard - redirect if user has no company_id
+  // MUST be called unconditionally (before any early returns)
+  useEffect(() => {
+    if (authLoading) return;
+    if (user && !user.company_id && location.pathname !== '/onboarding') {
+      navigate('/onboarding', { replace: true });
+    }
+  }, [user, location.pathname, navigate, authLoading]);
+
   // Global loading state - show spinner while auth is resolving
   if (authLoading) {
     return (
@@ -60,14 +69,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </div>
     );
   }
-
-  // Global onboarding guard - redirect if user has no company_id
-  useEffect(() => {
-    // Double check user exists and has no company_id
-    if (user && !user.company_id && location.pathname !== '/onboarding') {
-      navigate('/onboarding', { replace: true });
-    }
-  }, [user, location.pathname, navigate]);
 
   const handleLogout = async () => {
     await signOut();

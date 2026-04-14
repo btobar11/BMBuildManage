@@ -23,7 +23,9 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     region: '',
     commune: '',
     type: ['residential'] as string[],
+    status: 'draft' as string,
     estimated_price: '',
+    estimated_price_currency: 'CLP' as string,
     estimated_surface: '',
     description: '',
     start_date: '',
@@ -44,6 +46,17 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     { value: 'industrial', label: 'Industrial' },
     { value: 'infrastructure', label: 'Infraestructura' },
     { value: 'remodel', label: 'Remodelación' },
+  ];
+
+  const projectStatuses = [
+    { value: 'draft', label: 'En Estudio' },
+    { value: 'in_progress', label: 'En Ejecución' },
+    { value: 'on_hold', label: 'Paralizado' },
+  ];
+
+  const currencies = [
+    { value: 'CLP', label: 'CLP' },
+    { value: 'UF', label: 'UF' },
   ];
 
   const toggleType = (type: string) => {
@@ -79,7 +92,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         region: formData.region || undefined,
         commune: formData.commune || undefined,
         type: formData.type || undefined,
-        status: 'draft',
+        status: formData.status || 'draft',
         budget: sanitizedBudget,
         estimated_area: sanitizedArea,
         description: formData.description || undefined,
@@ -109,7 +122,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   });
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], estimated_price: '', estimated_surface: '', description: '', start_date: '', end_date: '', client_id: '', client_name: '' });
+    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], status: 'draft', estimated_price: '', estimated_price_currency: 'CLP', estimated_surface: '', description: '', start_date: '', end_date: '', client_id: '', client_name: '' });
     setErrors({});
     setTouched({});
   };
@@ -191,7 +204,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-muted-foreground">Nombre del Proyecto</label>
+            <label className="text-sm font-medium text-muted-foreground">Nombre del Proyecto <span className="text-red-500">*</span></label>
             <input 
               autoFocus
               type="text" 
@@ -216,7 +229,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">Dirección de Obra</label>
+              <label className="text-sm font-medium text-muted-foreground">Dirección de Obra <span className="text-red-500">*</span></label>
               <input 
                 type="text" 
                 value={formData.address}
@@ -233,7 +246,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
               )}
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">Región</label>
+              <label className="text-sm font-medium text-muted-foreground">Región <span className="text-red-500">*</span></label>
               <select 
                 value={formData.region}
                 onChange={(e) => setFormData({ ...formData, region: e.target.value, commune: '' })}
@@ -255,7 +268,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-muted-foreground">Comuna</label>
+            <label className="text-sm font-medium text-muted-foreground">Comuna <span className="text-red-500">*</span></label>
             <select 
               disabled={!formData.region}
               value={formData.commune}
@@ -277,7 +290,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-muted-foreground">Tipo de Obra</label>
+            <label className="text-sm font-medium text-muted-foreground">Tipo de Obra <span className="text-red-500">*</span></label>
             <div className="flex flex-wrap gap-2">
               {projectTypes.map((pt) => (
                 <button
@@ -291,6 +304,26 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                   }`}
                 >
                   {pt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-muted-foreground">Estado Inicial</label>
+            <div className="flex flex-wrap gap-2">
+              {projectStatuses.map((ps) => (
+                <button
+                  key={ps.value}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, status: ps.value }))}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                    formData.status === ps.value
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-background text-muted-foreground border-border hover:border-indigo-400'
+                  }`}
+                >
+                  {ps.label}
                 </button>
               ))}
             </div>
@@ -328,14 +361,29 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-muted-foreground">Presupuesto Estimado (Cliente)</label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+            <div className="flex gap-2">
+              <div className="flex rounded-xl overflow-hidden border border-border">
+                {currencies.map((curr) => (
+                  <button
+                    key={curr.value}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, estimated_price_currency: curr.value }))}
+                    className={`px-3 py-2.5 text-sm font-medium transition-all ${
+                      formData.estimated_price_currency === curr.value
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-background text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {curr.label}
+                  </button>
+                ))}
+              </div>
               <input 
                 type="number" 
                 value={formData.estimated_price}
                 onChange={(e) => setFormData({ ...formData, estimated_price: e.target.value })}
                 onBlur={() => handleInputBlur('estimated_price')}
-                className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Dejar en blanco si no se sabe aún"
               />
             </div>

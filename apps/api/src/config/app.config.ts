@@ -8,8 +8,10 @@ const ALLOWED_ORIGINS = [
 ].filter(Boolean);
 
 export const appCorsConfig = {
-  origin: ALLOWED_ORIGINS,
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  origin: process.env.NODE_ENV === 'production' 
+    ? 'https://bm-build-manage-web.vercel.app'
+    : ALLOWED_ORIGINS,
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
