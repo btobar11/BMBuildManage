@@ -13,7 +13,7 @@ import {
 import { BudgetsService } from './budgets.service';
 import { Budget, BudgetStatus } from './budget.entity';
 import { Stage } from '../stages/stage.entity';
-import { Item } from '../items/item.entity';
+import { Item, ItemType } from '../items/item.entity';
 import { Project } from '../projects/project.entity';
 import { FinancialService } from './financial.service';
 import { BusinessRulesService } from './business-rules.service';
@@ -467,7 +467,8 @@ describe('BudgetsService', () => {
             items: [],
             created_at: new Date(),
             updated_at: new Date(),
-          },
+            budget: existingBudget,
+          } as any,
         ],
       });
 
@@ -517,7 +518,7 @@ describe('BudgetsService', () => {
         },
       );
       budgetRepo._mockSave.mockRejectedValue(
-        new OptimisticLockVersionMismatchError(existingBudget, 1, 2),
+        new OptimisticLockVersionMismatchError('Budget', 1, 2),
       );
 
       await expect(
@@ -688,7 +689,7 @@ describe('BudgetsService', () => {
               {
                 id: 'item-1',
                 name: 'Original Item',
-                type: 'material',
+                type: ItemType.MATERIAL,
                 unit: 'kg',
                 quantity: 10,
                 unit_cost: 100,
@@ -696,7 +697,7 @@ describe('BudgetsService', () => {
                 position: 1,
                 total_cost: 1000,
                 total_price: 1500,
-              },
+              } as unknown as Item,
             ],
           },
         ],

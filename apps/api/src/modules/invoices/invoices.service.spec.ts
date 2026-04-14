@@ -183,7 +183,7 @@ describe('InvoicesService', () => {
       repository.findOne.mockResolvedValue(invoice);
       repository.remove.mockResolvedValue(invoice);
 
-      const result = await service.remove('invoice-1');
+      const result = await service.remove('invoice-1', 'company-1');
 
       expect(repository.remove).toHaveBeenCalledWith(invoice);
       expect(result).toEqual({ deleted: true });
@@ -192,7 +192,7 @@ describe('InvoicesService', () => {
     it('should throw NotFoundException when invoice not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent')).rejects.toThrow(
+      await expect(service.remove('nonexistent', 'company-1')).rejects.toThrow(
         NotFoundException,
       );
     });

@@ -88,7 +88,10 @@ describe('BudgetsController', () => {
       const mockBudget = { id: 'budget-1', ...createDto };
       mockBudgetsService.create.mockResolvedValue(mockBudget);
 
-      const result = await controller.create(createDto, mockAuthenticatedRequest());
+      const result = await controller.create(
+        createDto,
+        mockAuthenticatedRequest(),
+      );
 
       expect(mockBudgetsService.create).toHaveBeenCalledWith(
         createDto,
@@ -103,7 +106,10 @@ describe('BudgetsController', () => {
       const mockBudget = { id: 'budget-1', name: 'Test Budget' };
       mockBudgetsService.findOne.mockResolvedValue(mockBudget);
 
-      const result = await controller.findOne('budget-1', mockAuthenticatedRequest({ company_id: 'company-1' }));
+      const result = await controller.findOne(
+        'budget-1',
+        mockAuthenticatedRequest({ company_id: 'company-1' }),
+      );
 
       expect(mockBudgetsService.findOne).toHaveBeenCalledWith(
         'budget-1',
@@ -119,13 +125,17 @@ describe('BudgetsController', () => {
       const mockBudget = { id: 'budget-1', ...updateDto };
       mockBudgetsService.update.mockResolvedValue(mockBudget);
 
-      const result = await controller.update('budget-1', updateDto, mockAuthenticatedRequest());
+      const result = await controller.update(
+        'budget-1',
+        updateDto,
+        mockAuthenticatedRequest(),
+      );
 
       expect(mockBudgetsService.update).toHaveBeenCalledWith(
         'budget-1',
         updateDto,
         'user-1',
-        undefined,
+        'company-1',
       );
       expect(result).toEqual(mockBudget);
     });
@@ -149,12 +159,15 @@ describe('BudgetsController', () => {
         is_active: true,
       });
 
-      const result = await controller.setActive('budget-1', mockAuthenticatedRequest());
+      const result = await controller.setActive(
+        'budget-1',
+        mockAuthenticatedRequest(),
+      );
 
       expect(mockBudgetsService.setActiveVersion).toHaveBeenCalledWith(
         'budget-1',
         'user-1',
-        undefined,
+        'company-1',
       );
       expect(result).toEqual({ id: 'budget-1', is_active: true });
     });
@@ -165,7 +178,10 @@ describe('BudgetsController', () => {
       const summary = { total: 1000, items: 10 };
       mockBudgetsService.getSummary.mockResolvedValue(summary);
 
-      const result = await controller.getSummary('project-1', mockAuthenticatedRequest({ company_id: 'company-1' }));
+      const result = await controller.getSummary(
+        'project-1',
+        mockAuthenticatedRequest({ company_id: 'company-1' }),
+      );
 
       expect(mockBudgetsService.getSummary).toHaveBeenCalledWith(
         'project-1',
@@ -364,7 +380,10 @@ describe('BudgetsController', () => {
       const revision = { id: 'rev-1', budget_id: 'budget-1' };
       mockBudgetsService.createRevision.mockResolvedValue(revision);
 
-      const result = await controller.createRevision('budget-1', mockAuthenticatedRequest({ company_id: 'company-1' }));
+      const result = await controller.createRevision(
+        'budget-1',
+        mockAuthenticatedRequest({ company_id: 'company-1' }),
+      );
 
       expect(mockBudgetsService.createRevision).toHaveBeenCalledWith(
         'budget-1',
@@ -379,7 +398,10 @@ describe('BudgetsController', () => {
       mockBudgetsService.createRevision.mockRejectedValue(error);
 
       await expect(
-        controller.createRevision('budget-1', mockAuthenticatedRequest({ company_id: 'company-1' })),
+        controller.createRevision(
+          'budget-1',
+          mockAuthenticatedRequest({ company_id: 'company-1' }),
+        ),
       ).rejects.toThrow('Revision failed');
     });
 
@@ -390,7 +412,10 @@ describe('BudgetsController', () => {
       mockBudgetsService.createRevision.mockRejectedValue(error);
 
       await expect(
-        controller.createRevision('budget-1', mockAuthenticatedRequest({ company_id: 'company-1' })),
+        controller.createRevision(
+          'budget-1',
+          mockAuthenticatedRequest({ company_id: 'company-1' }),
+        ),
       ).rejects.toThrow();
     });
   });

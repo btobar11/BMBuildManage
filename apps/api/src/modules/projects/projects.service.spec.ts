@@ -15,17 +15,30 @@ const createMockProject = (overrides?: Partial<Project>): Project =>
     name: 'Project 1',
     description: 'Test project',
     status: 'planning',
-    location: 'Test location',
+    address: 'Test address',
+    region: 'Test region',
+    commune: 'Test commune',
+    type: ['construction'],
     start_date: new Date(),
-    end_date: null,
+    end_date: undefined,
     estimated_budget: 100000,
-    actual_cost: 0,
-    folder: null,
+    estimated_price: 120000,
+    estimated_area: 500,
+    folder: undefined,
     created_at: new Date(),
     updated_at: new Date(),
     budgets: [],
     expenses: [],
     documents: [],
+    stages: [],
+    items: [],
+    worker_assignments: [],
+    worker_payments: [],
+    project_payments: [],
+    get location() {
+      const parts = [this.address, this.commune, this.region].filter(Boolean);
+      return parts.length > 0 ? parts.join(', ') : '';
+    },
     ...overrides,
   }) as unknown as Project;
 
@@ -115,12 +128,18 @@ describe('ProjectsService', () => {
 
   describe('create', () => {
     it('should create a project', async () => {
-      const createDto = { company_id: 'company-1', name: 'Project 1' };
+      const createDto = {
+        company_id: 'company-1',
+        name: 'Project 1',
+        address: 'Test address',
+        region: 'Test region',
+        commune: 'Test commune',
+      };
       const project = createMockProject(createDto);
       projectRepo.create.mockReturnValue(project);
       projectRepo.save.mockResolvedValue(project);
 
-      const result = await service.create(createDto);
+      const result = await service.create(createDto as any);
       expect(projectRepo.create).toHaveBeenCalledWith(createDto);
       expect(projectRepo.save).toHaveBeenCalledWith(project);
       expect(result).toEqual(project);

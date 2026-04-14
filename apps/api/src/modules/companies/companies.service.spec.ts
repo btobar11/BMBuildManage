@@ -189,7 +189,10 @@ describe('CompaniesService', () => {
         error: null,
       });
 
-      companyRepository.update.mockResolvedValueOnce({ affected: 1, raw: [] } as any);
+      companyRepository.update.mockResolvedValueOnce({
+        affected: 1,
+        raw: [],
+      } as any);
 
       const seedDto = {
         specialty: CompanySpecialty.RESIDENTIAL,

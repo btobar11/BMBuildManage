@@ -284,7 +284,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as BIMScheduleElement),
+        Promise.resolve(e as any),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -305,7 +305,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as BIMScheduleElement),
+        Promise.resolve(e as any),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -321,7 +321,7 @@ describe('BIM4DService', () => {
       const element = createMockElement({ status: 'in_progress' });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as BIMScheduleElement),
+        Promise.resolve(e as any),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -344,7 +344,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as BIMScheduleElement),
+        Promise.resolve(e as any),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -364,7 +364,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as BIMScheduleElement),
+        Promise.resolve(e as any),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -392,7 +392,7 @@ describe('BIM4DService', () => {
       const element = createMockElement();
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as BIMScheduleElement),
+        Promise.resolve(e as any),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -414,7 +414,9 @@ describe('BIM4DService', () => {
         createMockElement({ status: 'not_started', progress_percentage: 0 }),
       ];
       scheduleElementRepository.find.mockResolvedValue(elements);
-      snapshotRepository.save.mockImplementation((s) => Promise.resolve(s));
+      snapshotRepository.save.mockImplementation((s) =>
+        Promise.resolve(s as any),
+      );
 
       const result = await service.create4DSnapshot('company-1', {
         project_id: 'project-1',
@@ -424,11 +426,11 @@ describe('BIM4DService', () => {
 
       expect(result.elements_state).toBeDefined();
       expect(result.elements_state.length).toBe(3);
-      expect(result.summary.total_elements).toBe(3);
-      expect(result.summary.completed).toBe(1);
-      expect(result.summary.in_progress).toBe(1);
-      expect(result.summary.not_started).toBe(1);
-      expect(result.summary.overall_progress).toBeCloseTo(50, 0);
+      expect(result.summary!.total_elements).toBe(3);
+      expect(result.summary!.completed).toBe(1);
+      expect(result.summary!.in_progress).toBe(1);
+      expect(result.summary!.not_started).toBe(1);
+      expect(result.summary!.overall_progress).toBeCloseTo(50, 0);
     });
 
     it('should calculate overall progress correctly', async () => {
@@ -438,20 +440,24 @@ describe('BIM4DService', () => {
         createMockElement({ progress_percentage: 0 }),
       ];
       scheduleElementRepository.find.mockResolvedValue(elements);
-      snapshotRepository.save.mockImplementation((s) => Promise.resolve(s));
+      snapshotRepository.save.mockImplementation((s) =>
+        Promise.resolve(s as any),
+      );
 
       const result = await service.create4DSnapshot('company-1', {
         project_id: 'project-1',
         snapshot_date: new Date(),
       });
 
-      expect(result.summary.overall_progress).toBe(50);
+      expect(result.summary!.overall_progress).toBe(50);
     });
 
     it('should include camera position when provided', async () => {
       const elements = [createMockElement()];
       scheduleElementRepository.find.mockResolvedValue(elements);
-      snapshotRepository.save.mockImplementation((s) => Promise.resolve(s));
+      snapshotRepository.save.mockImplementation((s) =>
+        Promise.resolve(s as any),
+      );
 
       const cameraPos = {
         x: 100,
@@ -550,8 +556,8 @@ describe('BIM4DService', () => {
 
       expect(result.phases.length).toBe(2);
       const foundation = result.phases.find((p) => p.phase === 'foundation');
-      expect(foundation.elements_count).toBe(2);
-      expect(foundation.progress).toBeCloseTo(90, 0);
+      expect(foundation!.elements_count).toBe(2);
+      expect(foundation!.progress).toBeCloseTo(90, 0);
     });
 
     it('should generate recommendations for delayed phases', async () => {

@@ -113,9 +113,9 @@ describe('BimModelsService', () => {
     it('should throw NotFoundException if model not found', async () => {
       modelRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.deleteModel('nonexistent', 'company-1')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.deleteModel('nonexistent', 'company-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });
