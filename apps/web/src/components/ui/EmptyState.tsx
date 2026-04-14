@@ -233,7 +233,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             </motion.p>
           )}
 
-          <!-- Botones -->
+          {/* Botones */}
           {(primaryAction || secondaryAction) && (
             <motion.div
               variants={fadeInUp}

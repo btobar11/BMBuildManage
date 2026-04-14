@@ -11,6 +11,8 @@ import { LandingPage } from './features/landing/LandingPage';
 import { ApuLibraryPage } from './features/apu/ApuLibraryPage';
 import { ResourcesPage } from './features/resources/ResourcesPage';
 import { WorkersPage } from './features/workers/WorkersPage';
+import { SubcontractorsPage } from './features/subcontractors/SubcontractorsPage';
+import { PurchaseOrdersPage } from './features/procurement/PurchaseOrdersPage';
 import { InvoicesPage } from './features/invoices/InvoicesPage';
 import { CompanySettingsPage } from './features/company/CompanySettingsPage';
 import { RfisPage } from './features/rfis/RfisPage';
@@ -42,17 +44,14 @@ function LoadingFallback() {
 
 function App() {
   const { user, token, isLoading, isConfigured } = useAuth();
-  console.log('[DEBUG App] isLoading:', isLoading, 'isConfigured:', isConfigured, 'hasToken:', !!token);
   const isAuthenticated = !!token;
 
   // Si Supabase no está configurado, mostrar warning
   if (!isConfigured && !isLoading) {
-    console.log('[DEBUG App] Not configured, showing ConfigWarning');
     return <ConfigWarning />;
   }
 
   if (isLoading) {
-    console.log('[DEBUG App] Loading - showing spinner');
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -60,7 +59,7 @@ function App() {
     );
   }
 
-  console.log('[DEBUG App] Rendering routes');
+
   return (
     <ErrorBoundary>
       <Toaster position="top-right" />
@@ -112,6 +111,14 @@ function App() {
         <Route 
           path="/workers" 
           element={isAuthenticated ? <MainLayout><WorkersPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/subcontractors" 
+          element={isAuthenticated ? <MainLayout><SubcontractorsPage /></MainLayout> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/procurement" 
+          element={isAuthenticated ? <MainLayout><PurchaseOrdersPage /></MainLayout> : <Navigate to="/login" />} 
         />
         <Route 
           path="/invoices" 

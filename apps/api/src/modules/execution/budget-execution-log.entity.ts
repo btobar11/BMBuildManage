@@ -11,9 +11,13 @@ import { Item } from '../items/item.entity';
 
 @Entity('budget_execution_logs')
 @Index(['budget_item_id'])
+@Index(['company_id'])
 export class BudgetExecutionLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   budget_item_id: string;

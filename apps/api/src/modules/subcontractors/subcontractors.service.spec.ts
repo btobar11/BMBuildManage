@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { SubcontractorsService } from './subcontractors.service';
 import {
   Subcontractor,
@@ -9,6 +9,7 @@ import {
   SubcontractorPayment,
   SubcontractorRAM,
 } from './subcontractor.entity';
+import { Document, DocumentType } from '../documents/document.entity';
 
 const createMockSubcontractor = (
   overrides?: Partial<Subcontractor>,
@@ -96,12 +97,20 @@ const mockRAMRepo = () => ({
   find: jest.fn(),
 });
 
+const mockDocumentRepo = () => ({
+  create: jest.fn(),
+  save: jest.fn(),
+  find: jest.fn(),
+  findOne: jest.fn(),
+});
+
 describe('SubcontractorsService', () => {
   let service: SubcontractorsService;
   let subcontractorRepo: jest.Mocked<Repository<Subcontractor>>;
   let contractRepo: jest.Mocked<Repository<SubcontractorContract>>;
   let paymentRepo: jest.Mocked<Repository<SubcontractorPayment>>;
   let ramRepo: jest.Mocked<Repository<SubcontractorRAM>>;
+  let documentRepo: jest.Mocked<Repository<Document>>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -123,6 +132,10 @@ describe('SubcontractorsService', () => {
           provide: getRepositoryToken(SubcontractorRAM),
           useFactory: mockRAMRepo,
         },
+        {
+          provide: getRepositoryToken(Document),
+          useFactory: mockDocumentRepo,
+        },
       ],
     }).compile();
 
@@ -131,6 +144,7 @@ describe('SubcontractorsService', () => {
     contractRepo = module.get(getRepositoryToken(SubcontractorContract));
     paymentRepo = module.get(getRepositoryToken(SubcontractorPayment));
     ramRepo = module.get(getRepositoryToken(SubcontractorRAM));
+    documentRepo = module.get(getRepositoryToken(Document));
   });
 
   describe('getAll', () => {
@@ -277,43 +291,48 @@ describe('SubcontractorsService', () => {
   });
 
   describe('createPayment', () => {
-    it('should create a payment and update contract paid_amount', async () => {
+    it('should create a payment when compliance doc exists', async () => {
       const payment = createMockPayment({ amount: 10000 });
-      const contract = createMockContract({ paid_amount: 50000 });
+      const contract = createMockContract({
+        paid_amount: 50000,
+        subcontractor_id: 'sub-1',
+      });
 
+      contractRepo.findOne.mockResolvedValue(contract);
+      documentRepo.findOne.mockResolvedValue({
+        id: 'doc-1',
+        type: DocumentType.LABOR_COMPLIANCE,
+        period: expect.any(String),
+      } as any);
       paymentRepo.create.mockReturnValue(payment);
       paymentRepo.save.mockResolvedValue(payment);
-      contractRepo.findOne.mockResolvedValue(contract);
       contractRepo.save.mockResolvedValue({ ...contract, paid_amount: 60000 });
 
       const result = await service.createPayment('contract-1', {
         amount: 10000,
       });
 
-      expect(paymentRepo.create).toHaveBeenCalledWith({
-        amount: 10000,
-        contract_id: 'contract-1',
-      });
       expect(paymentRepo.save).toHaveBeenCalled();
-      expect(contractRepo.findOne).toHaveBeenCalledWith({
-        where: { id: 'contract-1' },
-      });
       expect(contractRepo.save).toHaveBeenCalled();
       expect(result).toEqual(payment);
     });
 
-    it('should create payment even if contract not found', async () => {
-      const payment = createMockPayment({ amount: 10000 });
-
-      paymentRepo.create.mockReturnValue(payment);
-      paymentRepo.save.mockResolvedValue(payment);
+    it('should throw BadRequestException if contract not found', async () => {
       contractRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.createPayment('contract-1', {
-        amount: 10000,
-      });
+      await expect(
+        service.createPayment('contract-1', { amount: 10000 }),
+      ).rejects.toThrow(NotFoundException);
+    });
 
-      expect(result).toEqual(payment);
+    it('should throw BadRequestException if compliance doc missing', async () => {
+      const contract = createMockContract({ subcontractor_id: 'sub-1' });
+      contractRepo.findOne.mockResolvedValue(contract);
+      documentRepo.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.createPayment('contract-1', { amount: 10000 }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

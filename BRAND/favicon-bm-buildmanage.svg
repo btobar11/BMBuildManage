@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BMBuildManage Favicon - 32x32 Optimized
+  Uso: Web favicon, app icons, botones pequeños
+  Nota: SVG vectorial escalable, convertir a ICO/PNG según necesidad
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <style>
+      .stroke-emerald { fill: none; stroke: #10B981; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+      .fill-emerald { fill: #10B981; }
+      .fill-dark { fill: #0F172A; }
+    </style>
+  </defs>
+  
+  <!-- Fondo opcional: remover para transparencia -->
+  <!-- <rect width="32" height="32" rx="4" fill="#FFFFFF"/> -->
+  
+  <!-- Isotipo simplificado para favicon -->
+  <!-- Cubo isométrico -->
+  <g transform="translate(4, 4)">
+    <!-- Cara frontal izquierda -->
+    <polygon class="stroke-emerald" points="6,8 6,18 12,22 12,12" />
+    <!-- Cara frontal derecha -->
+    <polygon class="stroke-emerald" points="12,22 12,12 18,8 18,18" />
+    <!-- Cara superior -->
+    <polygon class="stroke-emerald" points="6,8 12,4 18,8 12,12" />
+    
+    <!-- Letra B integrada - simplificada -->
+    <line class="stroke-emerald" x1="8" y1="10" x2="8" y2="16" />
+    <path class="stroke-emerald" d="M 8 11 Q 10 11 10 13 Q 10 15 8 15" />
+    
+    <!-- Letra M integrada - simplificada -->
+    <line class="stroke-emerald" x1="16" y1="10" x2="16" y2="16" />
+    <path class="stroke-emerald" d="M 16 10 L 14 14 L 16 16" />
+  </g>
+</svg>

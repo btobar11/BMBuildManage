@@ -1,16 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- BM Short Wordmark - Just B and M -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 32" fill="none">
+  <!-- BM — Short Wordmark (B emerald, M adaptive) -->
+  <style>
+    .wm-text { fill: #0F172A; }
+    @media (prefers-color-scheme: dark) { .wm-text { fill: #F8FAFC; } }
+  </style>
   
-  <!-- Letter B -->
-  <text x="2" y="24" font-family="system-ui, -apple-system, sans-serif" 
+  <text x="1" y="24" font-family="system-ui, -apple-system, 'Inter', sans-serif" 
         font-size="24" font-weight="800" fill="#10B981">
     B
   </text>
   
-  <!-- Letter M (slightly offset) -->
-  <text x="18" y="24" font-family="system-ui, -apple-system, sans-serif" 
-        font-size="24" font-weight="800" fill="#10B981">
+  <text x="17" y="24" font-family="system-ui, -apple-system, 'Inter', sans-serif" 
+        font-size="24" font-weight="800" class="wm-text">
     M
   </text>
-
 </svg>

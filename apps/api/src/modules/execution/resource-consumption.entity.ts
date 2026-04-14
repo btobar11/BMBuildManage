@@ -15,9 +15,13 @@ import { Project } from '../projects/project.entity';
 @Index(['project_id'])
 @Index(['budget_item_id'])
 @Index(['resource_id'])
+@Index(['company_id'])
 export class ResourceConsumption {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   project_id: string;

@@ -7,9 +7,13 @@ import {
 } from 'typeorm';
 
 @Entity('materials')
+@Index(['company_id'])
 export class Material {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column({ length: 300 })
   name: string;

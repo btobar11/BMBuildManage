@@ -26,9 +26,13 @@ export enum TaskPriority {
 @Entity('schedule_tasks')
 @Index(['project_id'])
 @Index(['start_date'])
+@Index(['company_id'])
 export class ScheduleTask {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   project_id: string;
@@ -81,9 +85,13 @@ export class ScheduleTask {
 
 @Entity('schedule_milestones')
 @Index(['project_id'])
+@Index(['company_id'])
 export class ScheduleMilestone {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   project_id: string;
@@ -112,9 +120,13 @@ export class ScheduleMilestone {
 
 @Entity('schedule_resources')
 @Index(['project_id'])
+@Index(['company_id'])
 export class ScheduleResource {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   project_id: string;

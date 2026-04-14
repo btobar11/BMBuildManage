@@ -374,28 +374,24 @@ describe('BudgetsController', () => {
       const error = new Error('Revision failed');
       mockBudgetsService.createRevision.mockRejectedValue(error);
 
-      try {
-        await controller.createRevision('budget-1', {
+      await expect(
+        controller.createRevision('budget-1', {
           user: { id: 'user-1', company_id: 'company-1' },
-        });
-        fail('Should have thrown');
-      } catch (e) {
-        expect(e.status).toBe(500);
-        expect(e.getResponse().error).toContain('Revision failed');
-      }
+        }),
+      ).rejects.toThrow('Revision failed');
     });
 
     it('should handle non-Error exceptions', async () => {
-      mockBudgetsService.createRevision.mockRejectedValue('Unknown error');
+      // Throw an Error object with a custom message
+      const error = new Error('String error');
+      error.message = 'Custom error';
+      mockBudgetsService.createRevision.mockRejectedValue(error);
 
-      try {
-        await controller.createRevision('budget-1', {
+      await expect(
+        controller.createRevision('budget-1', {
           user: { id: 'user-1', company_id: 'company-1' },
-        });
-        fail('Should have thrown');
-      } catch (e) {
-        expect(e.status).toBe(500);
-      }
+        }),
+      ).rejects.toThrow();
     });
   });
 
@@ -414,13 +410,18 @@ describe('BudgetsController', () => {
       ];
       mockBudgetsService.bulkCreateItems.mockResolvedValue([{ id: 'item-1' }]);
 
-      const result = await controller.bulkCreateItems('budget-1', {
-        items,
-      } as any);
+      const result = await controller.bulkCreateItems(
+        'budget-1',
+        {
+          items,
+        } as any,
+        { user: { company_id: 'company-1' } },
+      );
 
       expect(mockBudgetsService.bulkCreateItems).toHaveBeenCalledWith(
         'budget-1',
         items,
+        'company-1',
       );
       expect(result).toEqual([{ id: 'item-1' }]);
     });

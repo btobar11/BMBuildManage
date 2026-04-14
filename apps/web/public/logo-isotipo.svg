@@ -1,24 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-  <!-- Emerald Cube Isotipo -->
-  <!-- Isometric wireframe cube integrating B and M letters -->
-  
-  <!-- Back cube outline (dashed for depth) -->
-  <path d="M50 15 L80 30 L80 70 L50 85 L20 70 L20 30 Z" 
-        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-  
-  <!-- Vertical center line (creates isometric depth) -->
-  <path d="M50 15 L50 85" stroke="#10B981" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  
-  <!-- Left lateral face - Letter B suggestion -->
-  <path d="M20 30 L50 45 L50 55 L20 70 Z" 
-        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-  
-  <!-- Right lateral face - Letter M suggestion -->
-  <path d="M50 45 L80 30 L80 70 L50 55 Z" 
-        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-  
-  <!-- Top face highlight -->
-  <path d="M20 30 L50 15 L80 30 L50 45 Z" 
-        stroke="#10B981" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110" fill="none">
+  <!-- BM Build Manage — Isotipo: Building + Crane (standalone) -->
+  <defs>
+    <linearGradient id="if" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="is" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="ir" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
 
+  <!-- Building -->
+  <path d="M14 38 L52 38 L52 100 L14 100 Z" fill="url(#if)"/>
+  <path d="M52 38 L86 22 L86 84 L52 100 Z" fill="url(#is)"/>
+  <path d="M14 38 L48 22 L86 22 L52 38 Z" fill="url(#ir)"/>
+  
+  <!-- Front windows -->
+  <rect x="19" y="46" width="9" height="12" rx="1" fill="#A7F3D0" opacity="0.45"/>
+  <rect x="32" y="46" width="9" height="12" rx="1" fill="#A7F3D0" opacity="0.45"/>
+  <rect x="45" y="46" width="4" height="12" rx="1" fill="#A7F3D0" opacity="0.35"/>
+  <rect x="19" y="64" width="9" height="12" rx="1" fill="#A7F3D0" opacity="0.3"/>
+  <rect x="32" y="64" width="9" height="12" rx="1" fill="#A7F3D0" opacity="0.3"/>
+  <rect x="32" y="82" width="9" height="18" rx="1.5" fill="#6EE7B7" opacity="0.35"/>
+  
+  <!-- Side windows -->
+  <path d="M56 46 L72 38 L72 48 L56 56 Z" fill="#A7F3D0" opacity="0.18"/>
+  <path d="M56 64 L72 56 L72 66 L56 74 Z" fill="#A7F3D0" opacity="0.12"/>
+  
+  <!-- Crane -->
+  <rect x="8" y="6" width="3" height="94" rx="1" fill="#047857" opacity="0.7"/>
+  <rect x="8" y="6" width="56" height="3" rx="1" fill="#047857" opacity="0.6"/>
+  <line x1="64" y1="9" x2="64" y2="20" stroke="#6EE7B7" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
+  <path d="M62 20 Q64 25 66 20" stroke="#6EE7B7" stroke-width="1.5" fill="none" opacity="0.5" stroke-linecap="round"/>
+  
+  <!-- Top edge highlight -->
+  <path d="M14 38 L52 38 L86 22" stroke="#6EE7B7" stroke-width="0.75" fill="none" opacity="0.4"/>
 </svg>

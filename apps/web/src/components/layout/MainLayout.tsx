@@ -14,6 +14,7 @@ import {
   Box,
   FileQuestion,
   FileText,
+  Truck,
   ClipboardCheck,
   BarChart3,
   LogOut
@@ -37,6 +38,8 @@ const NAV_ITEMS = [
   { label: 'Modelos BIM', icon: <Box size={20} />, path: '/bim' },
   { label: 'Analítica BIM', icon: <BarChart3 size={20} />, path: '/bim-analytics' },
   { label: 'Trabajadores', icon: <Users size={20} />, path: '/workers' },
+  { label: 'Subcontratos', icon: <Briefcase size={20} />, path: '/subcontractors' },
+  { label: 'Logística', icon: <Truck size={20} />, path: '/procurement' },
   { label: 'Gastos', icon: <DollarSign size={20} />, path: '/invoices' },
   { label: 'Empresa', icon: <Settings size={20} />, path: '/company-settings' },
 ];

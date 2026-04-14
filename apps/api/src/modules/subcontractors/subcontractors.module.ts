@@ -8,6 +8,7 @@ import {
   SubcontractorPayment,
   SubcontractorRAM,
 } from './subcontractor.entity';
+import { Document } from '../documents/document.entity';
 import { UsersModule } from '../users/users.module';
 
 @Module({
@@ -17,6 +18,7 @@ import { UsersModule } from '../users/users.module';
       SubcontractorContract,
       SubcontractorPayment,
       SubcontractorRAM,
+      Document,
     ]),
     forwardRef(() => UsersModule),
   ],

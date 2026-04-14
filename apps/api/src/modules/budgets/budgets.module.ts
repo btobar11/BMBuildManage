@@ -14,6 +14,7 @@ import { ProjectContingency } from '../contingencies/project-contingency.entity'
 import { Project } from '../projects/project.entity';
 import { BusinessRulesService } from './business-rules.service';
 import { PDFExportService } from './pdf-export.service';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PDFExportService } from './pdf-export.service';
       Project,
     ]),
     AuthModule,
+    AuditLogsModule,
   ],
   controllers: [BudgetsController],
   providers: [

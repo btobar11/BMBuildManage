@@ -29,11 +29,8 @@ export class DteXmlBuilderService {
     // Validate required fields before building XML
     this.validateInvoice(invoice);
 
-    // Build XML structure
-    const root = this.buildDocument(invoice, items);
-
-    // Convert to string
-    return root.end({ prettyPrint: true, xmlDecl: true });
+    // Build XML structure and convert to string
+    return this.buildDocument(invoice, items);
   }
 
   /**
@@ -101,11 +98,11 @@ export class DteXmlBuilderService {
   /**
    * Build Document element
    */
-  private buildDocument(invoice: Invoice, items: InvoiceItem[]): any {
+  private buildDocument(invoice: Invoice, items: InvoiceItem[]): string {
     const tipo = invoice.tipo_dte || DteType.FACTURA_AFECTA;
     const folio = invoice.folio || '0';
 
-    return create({
+    const doc = create({
       DTE: {
         '@version': DteXmlBuilderService.SII_VERSION,
         Documento: {
@@ -117,12 +114,14 @@ export class DteXmlBuilderService {
         },
       },
     });
+
+    return doc.end({ prettyPrint: true });
   }
 
   /**
    * Build Encabezado (Header) section
    */
-  private buildEncabezado(invoice: Invoice): any {
+  private buildEncabezado(invoice: Invoice): Record<string, unknown> {
     const fechaEmision = this.formatDate(invoice.fecha_emision);
     const fechaVencimiento = invoice.fecha_vencimiento
       ? this.formatDate(invoice.fecha_vencimiento)
@@ -144,7 +143,7 @@ export class DteXmlBuilderService {
   /**
    * Build Emisor (Seller) section
    */
-  private buildEmisor(invoice: Invoice): any {
+  private buildEmisor(invoice: Invoice): Record<string, unknown> {
     return {
       RUTEmisor: invoice.rut_emisor,
       RznSocEmisor: invoice.razon_social_emisor,
@@ -158,11 +157,9 @@ export class DteXmlBuilderService {
   /**
    * Build Receptor (Buyer) section
    */
-  private buildReceptor(invoice: Invoice): any {
+  private buildReceptor(invoice: Invoice): Record<string, unknown> {
     if (!invoice.rut_receptor) {
-      return {
-        // No receptor for some document types
-      };
+      return {};
     }
 
     return {
@@ -177,22 +174,21 @@ export class DteXmlBuilderService {
   /**
    * Build Transporte section (optional)
    */
-  private buildTransporte(invoice: Invoice): any | undefined {
+  private buildTransporte(
+    invoice: Invoice,
+  ): Record<string, unknown> | undefined {
     // Return undefined if no transport data
     if (!invoice.direccion_receptor) {
       return undefined;
     }
 
-    return {
-      // Placeholder for transport details
-      // Could be extended with carrier info
-    };
+    return {};
   }
 
   /**
    * Build Detalle (Line items) section
    */
-  private buildDetalle(items: InvoiceItem[]): any[] {
+  private buildDetalle(items: InvoiceItem[]): Record<string, unknown>[] {
     if (!items || items.length === 0) {
       // At least one item required
       return [
@@ -229,7 +225,9 @@ export class DteXmlBuilderService {
   /**
    * Build Referencias section
    */
-  private buildReferencias(invoice: Invoice): any[] | undefined {
+  private buildReferencias(
+    invoice: Invoice,
+  ): Record<string, unknown>[] | undefined {
     if (!invoice.folio_referencia) {
       return undefined;
     }
@@ -250,8 +248,8 @@ export class DteXmlBuilderService {
   /**
    * Build Totales section
    */
-  private buildTotales(invoice: Invoice): any {
-    const totals: any = {
+  private buildTotales(invoice: Invoice): Record<string, unknown> {
+    const totals: Record<string, unknown> = {
       MntTotal: this.round(invoice.monto_total || 0, 2),
     };
 

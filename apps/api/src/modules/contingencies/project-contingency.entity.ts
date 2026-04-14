@@ -13,9 +13,13 @@ import { Project } from '../projects/project.entity';
 
 @Entity('project_contingencies')
 @Index(['project_id'])
+@Index(['company_id'])
 export class ProjectContingency {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   project_id: string;

@@ -1,16 +1,16 @@
 const ALLOWED_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:3000',
   'https://bm-build-manage-web.vercel.app',
   'https://bmbuildmanage.vercel.app',
   'https://bm-build-manage-api.vercel.app',
   process.env.FRONTEND_URL,
-].filter(Boolean);
+];
+
+if (process.env.NODE_ENV !== 'production') {
+  ALLOWED_ORIGINS.push('http://localhost:5173', 'http://localhost:3000');
+}
 
 export const appCorsConfig = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://bm-build-manage-web.vercel.app'
-    : ALLOWED_ORIGINS,
+  origin: ALLOWED_ORIGINS.filter(Boolean),
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,

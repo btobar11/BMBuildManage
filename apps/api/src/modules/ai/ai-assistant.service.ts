@@ -572,4 +572,54 @@ Responde en formato JSON estructurado.`;
   isAvailable(): boolean {
     return this.groqClient !== null;
   }
+
+  /**
+   * Genera un análisis de construcción con IA
+   * @param prompt Prompt del usuario
+   * @param context Contexto adicional para el análisis
+   * @returns Análisis en formato JSON
+   */
+  async generateConstructionAnalysis(
+    prompt: string,
+    context: any,
+  ): Promise<any> {
+    if (!this.groqClient) {
+      throw new InternalServerErrorException(
+        'Servicio de IA no disponible. Verifica la configuración de GROQ_API_KEY.',
+      );
+    }
+
+    const model = this.model;
+
+    const systemPrompt = `Eres un Arquitecto e Ingeniero Civil experto en construcción con más de 20 años de experiencia en proyectos de construcción en Latinoamérica. Tu especialidad incluye análisis de costos, planificación de proyectos, gestión de presupuestos y análisis de viabilidad técnica. Debes responder STRICTAMENTE en formato JSON válido y puro, sin texto adicional antes o después del JSON.`;
+
+    try {
+      const completion = await this.groqClient.chat.completions.create({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          {
+            role: 'user',
+            content: `Contexto: ${JSON.stringify(context)}\n\nSolicitud: ${prompt}`,
+          },
+        ],
+        temperature: 0.2,
+        response_format: { type: 'json_object' as const },
+      });
+
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No se recibió respuesta de la API de IA');
+      }
+
+      return JSON.parse(content);
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Error al generar análisis de construcción: ${error.message}`,
+      );
+    }
+  }
 }

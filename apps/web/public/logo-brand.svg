@@ -1,42 +1,56 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <!-- BM Build Manage - Brand Logo -->
-  <!-- Emerald Cube Isotipo with B and M integration -->
-  
-  <!-- Background -->
-  <rect width="200" height="200" fill="#ffffff"/>
-  
-  <!-- Isotipo: Isometric Cube - 120x120 centered -->
-  <g transform="translate(40, 30)">
-    <!-- Outer hexagon perimeter -->
-    <path d="M60 0 L120 30 L120 90 L60 120 L0 90 L0 30 Z" 
-          stroke="#10B981" stroke-width="4" fill="none" stroke-linejoin="round"/>
+  <!-- BM Build Manage — Brand Logo Square (Light/Dark) -->
+  <style>
+    .b-text { fill: #0F172A; }
+    @media (prefers-color-scheme: dark) { .b-text { fill: #F8FAFC; } }
+  </style>
+  <defs>
+    <linearGradient id="bf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="bs" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="br" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Building large centered -->
+  <g transform="translate(28, 16)">
+    <path d="M16 46 L72 46 L72 146 L16 146 Z" fill="url(#bf)"/>
+    <path d="M72 46 L126 22 L126 122 L72 146 Z" fill="url(#bs)"/>
+    <path d="M16 46 L70 22 L126 22 L72 46 Z" fill="url(#br)"/>
     
-    <!-- Center vertical line (isometric axis) -->
-    <path d="M60 0 L60 120" stroke="#10B981" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <!-- Windows row 1 -->
+    <rect x="24" y="58" width="14" height="18" rx="1.5" fill="#A7F3D0" opacity="0.45"/>
+    <rect x="44" y="58" width="14" height="18" rx="1.5" fill="#A7F3D0" opacity="0.45"/>
+    <rect x="64" y="58" width="5" height="18" rx="1" fill="#A7F3D0" opacity="0.3"/>
     
-    <!-- Left face (B suggestion) -->
-    <path d="M0 30 L60 60 L60 90 L0 120 L0 30 Z" 
-          stroke="#10B981" stroke-width="3" fill="none" stroke-linejoin="round"/>
+    <!-- Windows row 2 -->
+    <rect x="24" y="84" width="14" height="18" rx="1.5" fill="#A7F3D0" opacity="0.35"/>
+    <rect x="44" y="84" width="14" height="18" rx="1.5" fill="#A7F3D0" opacity="0.35"/>
     
-    <!-- Right face (M suggestion) -->
-    <path d="M60 60 L120 30 L120 90 L60 120 L60 60 Z" 
-          stroke="#10B981" stroke-width="3" fill="none" stroke-linejoin="round"/>
+    <!-- Door -->
+    <rect x="44" y="112" width="14" height="34" rx="2" fill="#6EE7B7" opacity="0.4"/>
     
-    <!-- Top face -->
-    <path d="M0 30 L60 0 L120 30 L60 60 L0 30 Z" 
-          stroke="#10B981" stroke-width="3" fill="none" stroke-linejoin="round"/>
+    <!-- Side windows -->
+    <path d="M78 58 L104 46 L104 60 L78 72 Z" fill="#A7F3D0" opacity="0.15"/>
+    <path d="M78 84 L104 72 L104 86 L78 98 Z" fill="#A7F3D0" opacity="0.1"/>
     
-    <!-- Accent: Inner geometry lines for depth -->
-    <path d="M30 45 L60 60 L90 45" 
-          stroke="#10B981" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <path d="M30 75 L60 90 L90 75" 
-          stroke="#10B981" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- Crane -->
+    <rect x="6" y="8" width="5" height="138" rx="1.5" fill="#047857" opacity="0.7"/>
+    <rect x="6" y="8" width="80" height="5" rx="1.5" fill="#047857" opacity="0.6"/>
+    <line x1="86" y1="13" x2="86" y2="24" stroke="#6EE7B7" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+    <path d="M83 24 Q86 30 89 24" stroke="#6EE7B7" stroke-width="2" fill="none" opacity="0.5" stroke-linecap="round"/>
   </g>
   
   <!-- Wordmark -->
-  <text x="100" y="175" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" 
-        font-size="14" font-weight="700" fill="#0F172A" letter-spacing="3">
+  <text x="100" y="180" text-anchor="middle" font-family="system-ui, -apple-system, 'Inter', sans-serif" 
+        font-size="13" font-weight="700" fill="#10B981" letter-spacing="4">
     BM BUILD MANAGE
   </text>
-  
 </svg>

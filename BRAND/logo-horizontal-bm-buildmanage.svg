@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BMBuildManage Logotipo Horizontal
+  Primary Version - Isotipo + Texto en dos líneas
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" width="280" height="80">
+  <defs>
+    <style>
+      .emerald { fill: #10B981; }
+      .dark { fill: #0F172A; }
+      .gray { fill: #64748B; }
+      .stroke-emerald { fill: none; stroke: #10B981; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      .stroke-dark { fill: none; stroke: #0F172A; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  
+  <!-- ISOTIPO: Cubo isométrico 60x60 -->
+  <g transform="translate(10, 10)">
+    <!-- Cara frontal izquierda -->
+    <polygon class="stroke-emerald" points="15,20 15,55 30,65 30,30" />
+    <!-- Cara frontal derecha -->
+    <polygon class="stroke-emerald" points="30,65 30,30 45,20 45,55" />
+    <!-- Cara superior -->
+    <polygon class="stroke-emerald" points="15,20 30,10 45,20 30,30" />
+    
+    <!-- Letra B integrada - cara izquierda -->
+    <line class="stroke-emerald" x1="20" y1="25" x2="20" y2="50" />
+    <path class="stroke-emerald" d="M 20 28 Q 26 28 28 32 Q 30 36 28 39 Q 26 42 20 42" />
+    <path class="stroke-emerald" d="M 20 42 Q 27 42 29 47 Q 30 51 27 54 Q 22 56 20 54" />
+    
+    <!-- Letra M integrada - cara derecha -->
+    <line class="stroke-emerald" x1="40" y1="25" x2="40" y2="50" />
+    <line class="stroke-emerald" x1="40" y1="25" x2="33" y2="40" />
+    <line class="stroke-emerald" x1="33" y1="40" x2="40" y2="50" />
+  </g>
+  
+  <!-- TEXTO: BM en dos líneas -->
+  <text x="70" y="32" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="24" class="dark">BM</text>
+  <text x="70" y="55" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="14" class="gray">BUILD MANAGE</text>
+</svg>

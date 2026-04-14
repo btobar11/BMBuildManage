@@ -38,6 +38,16 @@ export enum InvoiceStatus {
 }
 
 /**
+ * Invoice Payment Status — Tracks procurement match state
+ */
+export enum InvoicePaymentStatus {
+  PENDING_RECEPTION = 'pending_reception',
+  PENDING_MATCH = 'pending_match',
+  READY_FOR_PAYMENT = 'ready_for_payment',
+  PAID = 'paid',
+}
+
+/**
  * Invoice Entity - Chilean Electronic Invoice (DTE)
  *
  * Supports Factura Afecta (33), Factura Exenta (34),
@@ -213,6 +223,19 @@ export class Invoice {
 
   @Column({ type: 'text', nullable: true })
   notes: string;
+
+  // ==================== PROCUREMENT MATCH ====================
+
+  @Column({ nullable: true })
+  purchase_order_id: string;
+
+  @Column({
+    type: 'enum',
+    enum: InvoicePaymentStatus,
+    default: InvoicePaymentStatus.PENDING_MATCH,
+    nullable: true,
+  })
+  payment_status: InvoicePaymentStatus;
 
   @CreateDateColumn()
   created_at: Date;

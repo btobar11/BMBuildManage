@@ -1,27 +1,56 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- BM Build Manage — App Icon (PWA): Building + Crane on dark -->
   <defs>
-    <linearGradient id="appGradTop" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="af" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#10B981"/>
       <stop offset="100%" stop-color="#059669"/>
     </linearGradient>
-    <linearGradient id="appGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="as" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#059669"/>
       <stop offset="100%" stop-color="#047857"/>
     </linearGradient>
-    <linearGradient id="appGradRight" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="ar" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#34D399"/>
       <stop offset="100%" stop-color="#10B981"/>
     </linearGradient>
   </defs>
   
+  <!-- Dark navy rounded background -->
   <rect width="256" height="256" rx="48" fill="#0F172A"/>
   
-  <g transform="translate(128, 128)">
-    <path d="M0 -72 L40 -24 L0 24 L-40 -24 Z" fill="url(#appGradTop)"/>
-    <path d="M-40 -24 L0 24 L0 88 L-40 40 Z" fill="url(#appGradLeft)"/>
-    <path d="M0 24 L40 -24 L40 40 L0 88 Z" fill="url(#appGradRight)"/>
-    
-    <path d="M-16 -4 L-16 16" stroke="#ECFDF5" stroke-width="4" stroke-linecap="round"/>
-    <path d="M16 -4 L16 16" stroke="#ECFDF5" stroke-width="4" stroke-linecap="round"/>
-  </g>
+  <!-- Building structure centered -->
+  <!-- Front face -->
+  <path d="M52 96 L140 96 L140 220 L52 220 Z" fill="url(#af)"/>
+  <!-- Side face -->
+  <path d="M140 96 L210 62 L210 186 L140 220 Z" fill="url(#as)"/>
+  <!-- Roof -->
+  <path d="M52 96 L122 62 L210 62 L140 96 Z" fill="url(#ar)"/>
+  
+  <!-- Windows front — row 1 -->
+  <rect x="62" y="112" width="20" height="24" rx="2" fill="#A7F3D0" opacity="0.45"/>
+  <rect x="90" y="112" width="20" height="24" rx="2" fill="#A7F3D0" opacity="0.45"/>
+  <rect x="118" y="112" width="14" height="24" rx="2" fill="#A7F3D0" opacity="0.35"/>
+  
+  <!-- Windows front — row 2 -->
+  <rect x="62" y="148" width="20" height="24" rx="2" fill="#A7F3D0" opacity="0.35"/>
+  <rect x="90" y="148" width="20" height="24" rx="2" fill="#A7F3D0" opacity="0.35"/>
+  <rect x="118" y="148" width="14" height="24" rx="2" fill="#A7F3D0" opacity="0.25"/>
+  
+  <!-- Door -->
+  <rect x="90" y="184" width="20" height="36" rx="3" fill="#6EE7B7" opacity="0.4"/>
+  
+  <!-- Side windows -->
+  <path d="M148 112 L182 97 L182 117 L148 132 Z" fill="#A7F3D0" opacity="0.18"/>
+  <path d="M148 148 L182 133 L182 153 L148 168 Z" fill="#A7F3D0" opacity="0.12"/>
+  
+  <!-- Crane mast -->
+  <rect x="34" y="28" width="6" height="192" rx="2" fill="#047857" opacity="0.75"/>
+  <!-- Crane jib -->
+  <rect x="34" y="28" width="130" height="6" rx="2" fill="#047857" opacity="0.65"/>
+  <!-- Counter-jib weight -->
+  <rect x="34" y="28" width="6" height="6" rx="1" fill="#34D399" opacity="0.8"/>
+  <!-- Cable -->
+  <line x1="164" y1="34" x2="164" y2="58" stroke="#6EE7B7" stroke-width="3" opacity="0.5" stroke-linecap="round"/>
+  <!-- Hook -->
+  <path d="M160 58 Q164 68 168 58" stroke="#6EE7B7" stroke-width="2.5" fill="none" opacity="0.5" stroke-linecap="round"/>
 </svg>

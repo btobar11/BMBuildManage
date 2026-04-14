@@ -1,8 +1,8 @@
-import { 
-  IsString, 
-  IsOptional, 
-  IsArray, 
-  MaxLength, 
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  MaxLength,
   IsUUID,
   Matches,
   ArrayMinSize,
@@ -36,7 +36,9 @@ export class CreateCompanyDto {
 
   @IsOptional()
   @IsString()
-  @Matches(CHILEAN_RUT_REGEX, { message: 'RUT debe tener formato chileno: XX.XXX.XXX-X' })
+  @Matches(CHILEAN_RUT_REGEX, {
+    message: 'RUT debe tener formato chileno: XX.XXX.XXX-X',
+  })
   rut?: string;
 
   @IsOptional()
@@ -64,7 +66,9 @@ export class CreateCompanyDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @ArrayMinSize(1, { message: 'Debes seleccionar al menos un tipo de construcción' })
+  @ArrayMinSize(1, {
+    message: 'Debes seleccionar al menos un tipo de construcción',
+  })
   industry?: string[];
 
   @IsOptional()

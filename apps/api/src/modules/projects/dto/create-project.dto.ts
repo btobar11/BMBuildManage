@@ -11,6 +11,7 @@ import {
   Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ProjectStatus } from '../project.entity';
 
 export class CreateProjectDto {
   @IsOptional()
@@ -47,8 +48,8 @@ export class CreateProjectDto {
   type?: string[];
 
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(ProjectStatus)
+  status?: ProjectStatus;
 
   @IsOptional()
   @IsDateString()
@@ -79,5 +80,5 @@ export class CreateProjectDto {
   @Min(0)
   @Max(999999)
   @Type(() => Number)
-  estimated_area?: number | null;
+  estimated_area?: number;
 }

@@ -172,6 +172,15 @@ export class SubcontractorPayment {
   @Column({ type: 'date', nullable: true })
   approved_date: Date;
 
+  @Column({ default: false })
+  compliance_verified: boolean;
+
+  @Column({ nullable: true })
+  compliance_document_id: string;
+
+  @Column({ length: 7, nullable: true })
+  payment_period: string;
+
   @CreateDateColumn()
   created_at: Date;
 }

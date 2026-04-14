@@ -38,6 +38,7 @@ import { SubcontractorsModule } from './modules/subcontractors/subcontractors.mo
 import { BimModelsModule } from './modules/bim-models/bim-models.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { BimApuLinkModule } from './modules/bim-apu-link/bim-apu-link.module';
+import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.module';
 
 @Module({
   imports: [
@@ -126,6 +127,7 @@ import { BimApuLinkModule } from './modules/bim-apu-link/bim-apu-link.module';
     UsersModule,
     AnalyticsModule,
     BimApuLinkModule,
+    PurchaseOrdersModule,
   ],
   controllers: [AppController],
   providers: [

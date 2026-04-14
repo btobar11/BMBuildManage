@@ -67,6 +67,14 @@ class CreateItemDto {
   @IsNumber()
   @Min(0)
   quantity_executed?: number;
+
+  @IsOptional()
+  @IsString()
+  formula?: string;
+
+  @IsOptional()
+  @IsString()
+  geometry_data?: string;
 }
 
 class CreateStageDto {

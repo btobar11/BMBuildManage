@@ -1,27 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Background: transparent for favicon -->
-  <rect width="32" height="32" fill="none"/>
+  <!-- BM Build Manage — Favicon: Building + Crane -->
+  <defs>
+    <linearGradient id="ff" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="fs" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="fr" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
   
-  <!-- Emerald Cube Isotipo Favicon -->
-  <g transform="translate(16, 16)">
-    <!-- Isometric wireframe cube (16x16 centered) -->
-    <!-- Outer hexagon -->
-    <path d="M0 -10 L10 0 L10 10 L0 20 L-10 10 L-10 0 Z" 
-          stroke="#10B981" stroke-width="2" fill="none" stroke-linejoin="round"/>
-    
-    <!-- Center vertical line -->
-    <path d="M0 -10 L0 20" stroke="#10B981" stroke-width="2" fill="none" stroke-linecap="round"/>
-    
-    <!-- Left face -->
-    <path d="M-10 0 L0 5 L0 15 L-10 10 Z" 
-          stroke="#10B981" stroke-width="2" fill="none" stroke-linejoin="round"/>
-    
-    <!-- Right face -->
-    <path d="M0 5 L10 0 L10 10 L0 15 Z" 
-          stroke="#10B981" stroke-width="2" fill="none" stroke-linejoin="round"/>
-    
-    <!-- Top face -->
-    <path d="M-10 0 L0 -10 L10 0 L0 5 Z" 
-          stroke="#10B981" stroke-width="2" fill="none" stroke-linejoin="round"/>
-  </g>
+  <!-- Building front -->
+  <path d="M5 12 L18 12 L18 29 L5 29 Z" fill="url(#ff)"/>
+  <!-- Building side -->
+  <path d="M18 12 L28 7 L28 24 L18 29 Z" fill="url(#fs)"/>
+  <!-- Roof -->
+  <path d="M5 12 L15 7 L28 7 L18 12 Z" fill="url(#fr)"/>
+  
+  <!-- Windows front -->
+  <rect x="7" y="15" width="3" height="4" rx="0.5" fill="#A7F3D0" opacity="0.45"/>
+  <rect x="12" y="15" width="3" height="4" rx="0.5" fill="#A7F3D0" opacity="0.45"/>
+  <rect x="7" y="21" width="3" height="4" rx="0.5" fill="#A7F3D0" opacity="0.3"/>
+  <rect x="12" y="22" width="3" height="7" rx="0.5" fill="#6EE7B7" opacity="0.35"/>
+  
+  <!-- Crane mast -->
+  <rect x="3" y="3" width="1.5" height="26" rx="0.5" fill="#047857" opacity="0.7"/>
+  <!-- Crane jib -->
+  <rect x="3" y="3" width="20" height="1.5" rx="0.5" fill="#047857" opacity="0.6"/>
+  <!-- Cable -->
+  <line x1="23" y1="4.5" x2="23" y2="9" stroke="#6EE7B7" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
 </svg>

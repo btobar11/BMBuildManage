@@ -2,13 +2,12 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Bot, Sparkles, Cpu, Loader2, Zap, User, ChevronDown } from 'lucide-react';
+import { X, Send, Bot, Sparkles, Zap, User, ChevronDown, Loader2 } from 'lucide-react';
 import { useAIChat } from '../hooks/useAIAssistant';
 import { useAuth } from '../context/AuthContext';
-import { AIChatSkeleton } from './AIChatSkeleton';
 
 // =====================================================
-// Types - Tipados estrictos
+// Types
 // =====================================================
 
 interface Message {
@@ -34,7 +33,7 @@ interface AIAssistantProps {
 }
 
 // =====================================================
-// Constantes
+// Constants
 // =====================================================
 
 const QUICK_ACTIONS = [
@@ -57,7 +56,50 @@ const VECTOR_CAPABILITIES = [
 ];
 
 // =====================================================
-// Componente Principal - AI Assistant (refactorizado)
+// Emerald Thinking Indicator
+// =====================================================
+
+function ThinkingIndicator() {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="relative flex items-center justify-center w-9 h-9">
+        {/* Outer glow ring */}
+        <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" style={{ animationDuration: '2s' }} />
+        {/* Inner icon */}
+        <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+          <Bot size={16} className="text-white" />
+        </div>
+      </div>
+      <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl rounded-bl-md px-4 py-3 border border-emerald-500/10">
+        <div className="flex items-center gap-2">
+          {/* Emerald wave dots */}
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-2 h-2 rounded-full bg-emerald-500"
+                animate={{
+                  scale: [1, 1.4, 1],
+                  opacity: [0.4, 1, 0.4],
+                }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  delay: i * 0.15,
+                  ease: 'easeInOut',
+                }}
+              />
+            ))}
+          </div>
+          <span className="text-xs text-emerald-400/80 font-medium ml-1">Analizando...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =====================================================
+// Main Component
 // =====================================================
 
 export function VectorAI({ budgetId, projectContext }: AIAssistantProps) {
@@ -68,17 +110,15 @@ export function VectorAI({ budgetId, projectContext }: AIAssistantProps) {
   const [showCapabilities, setShowCapabilities] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Obtener contexto de auth
   const { company } = useAuth();
 
-  // Mutation para chat con IA (usa React Query con handling de loading)
   const chatMutation = useAIChat({
     companyId: company?.id || '',
     projectId: projectContext?.id,
     budgetId,
   });
 
-  // Mensaje de bienvenida cuando se abre
+  // Welcome message
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setMessages([{
@@ -92,12 +132,12 @@ export function VectorAI({ budgetId, projectContext }: AIAssistantProps) {
     }
   }, [isOpen]);
 
-  // Scroll al final
+  // Scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Enviar mensaje usando el hook con React Query
+  // Send message
   const sendMessage = useCallback(async (overrideInput?: string) => {
     const messageText = overrideInput || input;
     if (!messageText.trim() || chatMutation.isPending) return;
@@ -150,7 +190,6 @@ export function VectorAI({ budgetId, projectContext }: AIAssistantProps) {
     }
   }, [input, chatMutation, company?.id]);
 
-  // Manejar Enter
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -158,228 +197,304 @@ export function VectorAI({ budgetId, projectContext }: AIAssistantProps) {
     }
   };
 
-  // Manejar click en acción rápida
   const handleQuickAction = (prompt: string) => {
     sendMessage(prompt);
   };
 
-  // Estado de carga
   const isLoading = chatMutation.isPending;
 
-  // Botón flotante cuando está cerrado
+  // ─── Floating Button ───────────────────────────────────────────────────
   if (!isOpen) {
     return (
-      <button
+      <motion.button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-all z-40 animate-pulse-slow"
-        style={{
-          boxShadow: '0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2)',
-        }}
+        className="fixed bottom-6 right-6 z-40 group"
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
       >
-        <Cpu size={28} className="animate-pulse" />
-      </button>
+        <div className="relative">
+          {/* Glow ring */}
+          <div className="absolute inset-0 rounded-full bg-emerald-500/30 blur-xl group-hover:bg-emerald-500/40 transition-colors" />
+          {/* Button */}
+          <div
+            className="relative w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full shadow-xl shadow-emerald-500/30 flex items-center justify-center text-white"
+          >
+            <Sparkles size={24} />
+          </div>
+          {/* Pulse ring */}
+          <div className="absolute inset-0 rounded-full border-2 border-emerald-500/30 animate-ping" style={{ animationDuration: '3s' }} />
+        </div>
+      </motion.button>
     );
   }
 
+  // ─── Chat Panel ────────────────────────────────────────────────────────
   return (
-    <div
-      className={`fixed bottom-6 right-6 w-[420px] bg-card border border-border/50 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden transition-all duration-300 ${
-        isMinimized ? 'h-16' : 'h-[600px]'
-      }`}
-      style={{
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(139, 92, 246, 0.1)',
-      }}
-    >
-      {/* Header */}
-      <div
-        className="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white cursor-pointer"
-        onClick={() => setIsMinimized(!isMinimized)}
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className={`fixed bottom-6 right-6 w-[420px] z-50 flex flex-col overflow-hidden transition-all duration-300 rounded-2xl ${
+          isMinimized ? 'h-16' : 'h-[600px]'
+        }`}
+        style={{
+          background: 'rgba(2, 6, 23, 0.85)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(16, 185, 129, 0.12)',
+          boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(16, 185, 129, 0.06), 0 0 40px rgba(16, 185, 129, 0.05)',
+        }}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-            <Cpu size={22} className="animate-pulse" />
+        {/* Header — Emerald Gradient */}
+        <div
+          className="flex items-center justify-between px-4 py-3.5 cursor-pointer select-none"
+          onClick={() => setIsMinimized(!isMinimized)}
+          style={{
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.08) 100%)',
+            borderBottom: '1px solid rgba(16, 185, 129, 0.1)',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Bot size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-white">Vector</h3>
+              <p className="text-[11px] text-emerald-400/70 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                Online • BM Build Manage
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-base">Vector</h3>
-            <p className="text-xs text-white/70 flex items-center gap-1">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              Online
-            </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowCapabilities(!showCapabilities);
+              }}
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-emerald-400/60 hover:text-emerald-400"
+              title="Capacidades"
+            >
+              <Zap size={16} />
+            </button>
+            <ChevronDown
+              size={16}
+              className={`text-slate-400 transition-transform duration-200 ${isMinimized ? 'rotate-180' : ''}`}
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-slate-400 hover:text-white"
+            >
+              <X size={16} />
+            </button>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowCapabilities(!showCapabilities);
-            }}
-            className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-            title="Capabilidades"
-          >
-            <Zap size={18} />
-          </button>
-          <ChevronDown
-            size={18}
-            className={`transition-transform ${isMinimized ? 'rotate-180' : ''}`}
-          />
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsOpen(false);
-            }}
-            className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-          >
-            <X size={18} />
-          </button>
-        </div>
-      </div>
 
-      {/* Capabilities Panel */}
-      {showCapabilities && !isMinimized && (
-        <div className="bg-gradient-to-r from-indigo-600/10 to-pink-500/10 p-4 border-b border-border">
-          <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-2">
-            <Zap size={12} />
-            Capacidades de Vector
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {VECTOR_CAPABILITIES.map((cap, idx) => (
-              <div key={idx} className="text-xs text-muted-foreground">
-                {cap}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!isMinimized && (
-        <>
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-background to-muted/20">
-            {messages.map((msg) => (
+        {/* Capabilities Panel */}
+        <AnimatePresence>
+          {showCapabilities && !isMinimized && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
               <div
-                key={msg.id}
-                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className="px-4 py-3"
+                style={{
+                  background: 'rgba(16, 185, 129, 0.04)',
+                  borderBottom: '1px solid rgba(16, 185, 129, 0.08)',
+                }}
               >
-                {msg.role === 'assistant' && !msg.isLoading && (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0">
-                    <Cpu size={16} className="text-white" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
-                    msg.role === 'user'
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-md'
-                      : msg.isLoading
-                        ? 'bg-muted/80 text-foreground rounded-bl-md border border-border/50'
-                        : 'bg-muted/80 text-foreground rounded-bl-md border border-border/50'
-                  }`}
+                <p className="text-[10px] font-semibold text-emerald-400/60 mb-2.5 uppercase tracking-widest flex items-center gap-1.5">
+                  <Zap size={10} />
+                  Capacidades
+                </p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {VECTOR_CAPABILITIES.map((cap, idx) => (
+                    <div key={idx} className="text-[11px] text-slate-400 px-2 py-1 rounded-md hover:bg-white/[0.03] transition-colors">
+                      {cap}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {!isMinimized && (
+          <>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 custom-scrollbar">
+              {messages.map((msg) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  {/* Skeleton cuando está cargando */}
-                  {msg.isLoading ? (
-                    <AIChatSkeleton />
-                  ) : (
-                    <>
-                      <div className="whitespace-pre-wrap leading-relaxed">{msg.content}</div>
-                      
-                      {/* Sugerencias */}
-                      {msg.role === 'assistant' && msg.suggestedActions && msg.suggestedActions.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-border/30">
-                          <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-                            Sugerencias:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {msg.suggestedActions.map((action, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => handleQuickAction(action)}
-                                className="text-xs px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 text-foreground border border-indigo-500/20 rounded-full transition-all hover:scale-105"
-                              >
-                                {action}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
+                  {/* Assistant avatar */}
+                  {msg.role === 'assistant' && !msg.isLoading && (
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-500/20 mt-0.5">
+                      <Bot size={14} className="text-white" />
+                    </div>
                   )}
-                </div>
-                {msg.role === 'user' && (
-                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    <User size={16} />
-                  </div>
-                )}
-              </div>
-            ))}
-            
-            {/* Loading indicator */}
-            {isLoading && (
-              <div className="flex gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                  <Cpu size={16} className="text-white animate-pulse" />
-                </div>
-                <div className="bg-muted/80 rounded-2xl rounded-bl-md px-4 py-3 border border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Loader2 size={14} className="animate-spin text-indigo-600" />
-                    <span className="text-xs text-muted-foreground">Analizando...</span>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
 
-          {/* Quick Actions */}
-          <div className="px-4 py-2 border-t border-border bg-muted/30">
-            <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-              <Zap size={12} className="text-indigo-500" />
-              Acciones rápidas:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {QUICK_ACTIONS.slice(0, 3).map((action, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleQuickAction(action.prompt)}
-                  disabled={isLoading}
-                  className="text-xs px-3 py-1.5 bg-card border border-border hover:border-indigo-500/50 hover:bg-indigo-500/5 rounded-full transition-all disabled:opacity-50"
-                >
-                  {action.label}
-                </button>
+                  {/* Message bubble */}
+                  <div
+                    className={`max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                      msg.role === 'user'
+                        ? 'rounded-br-md text-white'
+                        : 'rounded-bl-md text-slate-200'
+                    } ${msg.error ? 'border-red-500/20' : ''}`}
+                    style={
+                      msg.role === 'user'
+                        ? {
+                            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.95) 100%)',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
+                          }
+                        : {
+                            background: 'rgba(30, 41, 59, 0.5)',
+                            border: '1px solid rgba(51, 65, 85, 0.4)',
+                            backdropFilter: 'blur(8px)',
+                          }
+                    }
+                  >
+                    <div className="whitespace-pre-wrap">{msg.content}</div>
+
+                    {/* Suggested actions */}
+                    {msg.role === 'assistant' && msg.suggestedActions && msg.suggestedActions.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                        <p className="text-[10px] text-slate-500 mb-2 uppercase tracking-wider font-medium">
+                          Sugerencias
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {msg.suggestedActions.map((action, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleQuickAction(action)}
+                              className="text-[11px] px-3 py-1.5 rounded-lg text-emerald-400 transition-all duration-150 hover:scale-[1.02]"
+                              style={{
+                                background: 'rgba(16, 185, 129, 0.08)',
+                                border: '1px solid rgba(16, 185, 129, 0.15)',
+                              }}
+                            >
+                              {action}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* User avatar */}
+                  {msg.role === 'user' && (
+                    <div className="w-8 h-8 rounded-lg bg-slate-700/80 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <User size={14} className="text-slate-300" />
+                    </div>
+                  )}
+                </motion.div>
               ))}
-            </div>
-          </div>
 
-          {/* Input */}
-          <div className="p-4 border-t border-border bg-card">
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Pregunta a Vector..."
-                disabled={isLoading || !company?.id}
-                className="flex-1 px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all placeholder:text-muted-foreground/60 disabled:opacity-50"
-              />
-              <button
-                onClick={() => sendMessage()}
-                disabled={!input.trim() || isLoading || !company?.id}
-                className="w-12 h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-all"
-              >
-                {isLoading ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                  <Send size={18} />
-                )}
-              </button>
+              {/* Loading indicator */}
+              {isLoading && <ThinkingIndicator />}
+              <div ref={messagesEndRef} />
             </div>
-            <p className="text-xs text-muted-foreground mt-3 text-center flex items-center justify-center gap-2">
-              <Cpu size={12} className="text-indigo-500" />
-              Vector AI • BMBuildManage
-            </p>
-          </div>
-        </>
-      )}
-    </div>
+
+            {/* Quick Actions */}
+            <div
+              className="px-4 py-2.5"
+              style={{
+                borderTop: '1px solid rgba(51, 65, 85, 0.3)',
+                background: 'rgba(15, 23, 42, 0.4)',
+              }}
+            >
+              <p className="text-[10px] text-slate-500 mb-2 flex items-center gap-1.5 uppercase tracking-wider font-medium">
+                <Zap size={10} className="text-emerald-500/60" />
+                Acciones rápidas
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {QUICK_ACTIONS.slice(0, 3).map((action, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleQuickAction(action.prompt)}
+                    disabled={isLoading}
+                    className="text-[11px] px-3 py-1.5 rounded-lg text-slate-400 transition-all duration-150 disabled:opacity-30 hover:text-emerald-400"
+                    style={{
+                      background: 'rgba(30, 41, 59, 0.5)',
+                      border: '1px solid rgba(51, 65, 85, 0.4)',
+                    }}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Input */}
+            <div
+              className="p-4"
+              style={{
+                borderTop: '1px solid rgba(51, 65, 85, 0.3)',
+                background: 'rgba(15, 23, 42, 0.6)',
+              }}
+            >
+              <div className="flex gap-2.5">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Pregunta a Vector..."
+                  disabled={isLoading || !company?.id}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none transition-all duration-200 disabled:opacity-40"
+                  style={{
+                    background: 'rgba(30, 41, 59, 0.6)',
+                    border: '1px solid rgba(51, 65, 85, 0.4)',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.06)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(51, 65, 85, 0.4)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+                <motion.button
+                  onClick={() => sendMessage()}
+                  disabled={!input.trim() || isLoading || !company?.id}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-white transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.95) 100%)',
+                    boxShadow: input.trim() ? '0 4px 12px rgba(16, 185, 129, 0.25)' : 'none',
+                  }}
+                >
+                  {isLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Send size={16} />
+                  )}
+                </motion.button>
+              </div>
+              <p className="text-[10px] text-slate-600 mt-2.5 text-center flex items-center justify-center gap-1.5">
+                <Bot size={10} className="text-emerald-500/50" />
+                Vector AI • BMBuildManage
+              </p>
+            </div>
+          </>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

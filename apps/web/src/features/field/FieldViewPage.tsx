@@ -69,9 +69,8 @@ export function FieldViewPage() {
       setDailyProgress({});
       queryClient.invalidateQueries({ queryKey: ['budget', id] });
     },
-    onError: (err) => {
+    onError: () => {
       toast.error('Error al guardar los avances.');
-      console.error(err);
     }
   });
 

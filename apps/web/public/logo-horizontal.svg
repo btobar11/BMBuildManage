@@ -1,28 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 60" fill="none">
-  <!-- BM Build Manage - Horizontal Logo -->
-  
-  <!-- Isotipo: 48x48 square -->
-  <g transform="translate(6, 6)">
-    <!-- Isometric wireframe cube -->
-    <path d="M24 0 L48 12 L48 42 L24 54 L0 42 L0 12 Z" 
-          stroke="#10B981" stroke-width="2" fill="none" stroke-linejoin="round"/>
-    <path d="M24 0 L24 54" stroke="#10B981" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M0 42 L24 27 L48 42 L24 54 Z" 
-          stroke="#10B981" stroke-width="2" fill="none" stroke-linejoin="round"/>
-    <path d="M0 12 L24 27 L48 12 L24 0 Z" 
-          stroke="#10B981" stroke-width="2" fill="none" stroke-linejoin="round"/>
+  <!-- BM Build Manage — Horizontal Compact (Light/Dark) -->
+  <style>
+    .h-text { fill: #0F172A; }
+    @media (prefers-color-scheme: dark) { .h-text { fill: #F8FAFC; } }
+  </style>
+  <defs>
+    <linearGradient id="cf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="cs" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="cr" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Building compact -->
+  <g transform="translate(6, 5)">
+    <path d="M6 18 L28 18 L28 52 L6 52 Z" fill="url(#cf)"/>
+    <path d="M28 18 L46 10 L46 44 L28 52 Z" fill="url(#cs)"/>
+    <path d="M6 18 L24 10 L46 10 L28 18 Z" fill="url(#cr)"/>
+    <rect x="9" y="23" width="5" height="6" rx="0.5" fill="#A7F3D0" opacity="0.45"/>
+    <rect x="17" y="23" width="5" height="6" rx="0.5" fill="#A7F3D0" opacity="0.45"/>
+    <rect x="9" y="33" width="5" height="6" rx="0.5" fill="#A7F3D0" opacity="0.3"/>
+    <rect x="17" y="34" width="5" height="18" rx="1" fill="#6EE7B7" opacity="0.35"/>
+    <rect x="3" y="4" width="2" height="48" rx="0.5" fill="#047857" opacity="0.7"/>
+    <rect x="3" y="4" width="28" height="2" rx="0.5" fill="#047857" opacity="0.6"/>
   </g>
   
-  <!-- Text: BM -->
-  <text x="72" y="32" font-family="system-ui, -apple-system, sans-serif" 
-        font-size="26" font-weight="800" fill="#0F172A" letter-spacing="1">
+  <!-- BM -->
+  <text x="68" y="32" font-family="system-ui, -apple-system, 'Inter', sans-serif" 
+        font-size="26" font-weight="800" class="h-text" letter-spacing="1">
     BM
   </text>
   
-  <!-- Text: BUILD MANAGE -->
-  <text x="72" y="48" font-family="system-ui, -apple-system, sans-serif" 
+  <!-- BUILD MANAGE -->
+  <text x="68" y="48" font-family="system-ui, -apple-system, 'Inter', sans-serif" 
         font-size="11" font-weight="700" fill="#10B981" letter-spacing="3.5">
     BUILD MANAGE
   </text>
-
 </svg>

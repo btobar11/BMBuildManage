@@ -20,6 +20,10 @@ export enum DocumentType {
   PURCHASE_ORDER = 'purchase_order',
   PERMIT = 'permit',
   PHOTO = 'photo',
+  LABOR_COMPLIANCE = 'labor_compliance',
+  SOCIAL_SECURITY = 'social_security',
+  INSURANCE_POLICY = 'insurance_policy',
+  WORK_CONTRACT = 'work_contract',
   OTHER = 'other',
 }
 
@@ -53,6 +57,12 @@ export class Document {
 
   @Column({ type: 'enum', enum: DocumentType, default: DocumentType.OTHER })
   type: DocumentType;
+
+  @Column({ nullable: true })
+  subcontractor_id: string;
+
+  @Column({ length: 7, nullable: true })
+  period: string;
 
   @CreateDateColumn({ name: 'uploaded_at' })
   uploaded_at: Date;

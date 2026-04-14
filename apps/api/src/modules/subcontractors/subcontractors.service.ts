@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -7,6 +11,7 @@ import {
   SubcontractorPayment,
   SubcontractorRAM,
 } from './subcontractor.entity';
+import { Document, DocumentType } from '../documents/document.entity';
 
 @Injectable()
 export class SubcontractorsService {
@@ -19,6 +24,8 @@ export class SubcontractorsService {
     private readonly paymentRepo: Repository<SubcontractorPayment>,
     @InjectRepository(SubcontractorRAM)
     private readonly ramRepo: Repository<SubcontractorRAM>,
+    @InjectRepository(Document)
+    private readonly documentRepo: Repository<Document>,
   ) {}
 
   async getAll(companyId: string) {
@@ -77,21 +84,51 @@ export class SubcontractorsService {
   }
 
   async createPayment(contractId: string, data: Partial<SubcontractorPayment>) {
+    const contract = await this.contractRepo.findOne({
+      where: { id: contractId },
+      relations: ['subcontractor'],
+    });
+    if (!contract) throw new NotFoundException('Contrato no encontrado');
+
+    const period = (data as any).payment_period || this.getCurrentPeriod();
+
+    const complianceDoc = await this.documentRepo.findOne({
+      where: {
+        subcontractor_id: contract.subcontractor_id,
+        type: DocumentType.LABOR_COMPLIANCE,
+        period,
+      },
+    });
+
+    if (!complianceDoc) {
+      throw new BadRequestException(
+        `BLOQUEO DE PAGO: No existe certificado de cumplimiento laboral (F30-1) ` +
+          `para el subcontratista "${contract.subcontractor?.name || contract.subcontractor_id}" ` +
+          `en el período ${period}. El subcontratista debe subir su documentación ` +
+          `antes de procesar el estado de pago.`,
+      );
+    }
+
     const payment = this.paymentRepo.create({
       ...data,
       contract_id: contractId,
+      compliance_verified: true,
+      compliance_document_id: complianceDoc.id,
+      payment_period: period,
     });
     const saved = await this.paymentRepo.save(payment);
 
-    const contract = await this.contractRepo.findOne({
-      where: { id: contractId },
-    });
-    if (contract) {
-      contract.paid_amount = (contract.paid_amount || 0) + saved.amount;
-      await this.contractRepo.save(contract);
-    }
+    contract.paid_amount = (contract.paid_amount || 0) + saved.amount;
+    await this.contractRepo.save(contract);
 
     return saved;
+  }
+
+  private getCurrentPeriod(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
   }
 
   async getRAM(contractId: string) {

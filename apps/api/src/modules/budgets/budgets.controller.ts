@@ -10,9 +10,9 @@ import {
   Query,
   Res,
   Req,
-  HttpException,
+  BadRequestException,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 import { BudgetsService } from './budgets.service';
 import { ExportService } from './export.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
@@ -23,6 +23,35 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 
+// ─── DTOs ─────────────────────────────────────────────────────────────────
+
+interface BulkImportItemDto {
+  stage_id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  unit_cost: number;
+  unit_price: number;
+  position: number;
+}
+
+interface BulkImportBodyDto {
+  items: BulkImportItemDto[];
+}
+
+// ─── Authenticated request type ────────────────────────────────────────────
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    company_id?: string;
+    role: string;
+  };
+}
+
+// ─── Controller ────────────────────────────────────────────────────────────
+
 @Controller('budgets')
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 export class BudgetsController {
@@ -31,6 +60,8 @@ export class BudgetsController {
     private readonly exportService: ExportService,
     private readonly pdfExportService: PDFExportService,
   ) {}
+
+  // ─── PDF Export ──────────────────────────────────────────────────────────
 
   @Get(':id/export/pdf')
   @Roles(
@@ -43,9 +74,9 @@ export class BudgetsController {
   )
   async exportPdf(
     @Param('id') id: string,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Res() res: Response,
-  ) {
+  ): Promise<void> {
     const budget = await this.budgetsService.findOne(id, req.user?.company_id);
     const projectName = budget.project?.name || 'presupuesto';
     const safeName = projectName.replace(/[^a-zA-Z0-9_\-áéíóú]/g, '_');
@@ -60,21 +91,30 @@ export class BudgetsController {
     res.end(buffer);
   }
 
+  // ─── CREATE ──────────────────────────────────────────────────────────────
+
   @Post()
   @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT)
-  create(@Body() createBudgetDto: CreateBudgetDto, @Req() req: any) {
+  create(
+    @Body() createBudgetDto: CreateBudgetDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.budgetsService.create(createBudgetDto, req.user?.id);
   }
 
+  // ─── ACTIVATE ────────────────────────────────────────────────────────────
+
   @Post(':id/activate')
   @Roles(UserRole.ADMIN, UserRole.ENGINEER)
-  setActive(@Param('id') id: string, @Req() req: any) {
+  setActive(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     return this.budgetsService.setActiveVersion(
       id,
       req.user?.id,
       req.user?.company_id,
     );
   }
+
+  // ─── LIST ─────────────────────────────────────────────────────────────────
 
   @Get()
   @Roles(
@@ -89,6 +129,8 @@ export class BudgetsController {
     return this.budgetsService.findAllByProject(projectId);
   }
 
+  // ─── GET ONE ──────────────────────────────────────────────────────────────
+
   @Get(':id')
   @Roles(
     UserRole.ADMIN,
@@ -98,9 +140,11 @@ export class BudgetsController {
     UserRole.FOREMAN,
     UserRole.ACCOUNTING,
   )
-  findOne(@Param('id') id: string, @Req() req: any) {
+  findOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     return this.budgetsService.findOne(id, req.user?.company_id);
   }
+
+  // ─── SUMMARY ──────────────────────────────────────────────────────────────
 
   @Get('project/:projectId/summary')
   @Roles(
@@ -111,16 +155,21 @@ export class BudgetsController {
     UserRole.FOREMAN,
     UserRole.ACCOUNTING,
   )
-  getSummary(@Param('projectId') projectId: string, @Req() req: any) {
+  getSummary(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.budgetsService.getSummary(projectId, req.user?.company_id);
   }
+
+  // ─── UPDATE ───────────────────────────────────────────────────────────────
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT)
   update(
     @Param('id') id: string,
     @Body() updateBudgetDto: UpdateBudgetDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.budgetsService.update(
       id,
@@ -130,21 +179,22 @@ export class BudgetsController {
     );
   }
 
+  // ─── CREATE REVISION ──────────────────────────────────────────────────────
+  // No manual try/catch: AllExceptionsFilter handles all unhandled errors.
+  // Service throws typed HttpExceptions (NotFoundException, ForbiddenException)
+  // which HttpExceptionFilter converts to structured JSON responses.
+
   @Post(':id/revision')
   @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT)
-  async createRevision(@Param('id') id: string, @Req() req: any) {
-    try {
-      return await this.budgetsService.createRevision(
-        id,
-        req.user?.id,
-        req.user?.company_id,
-      );
-    } catch (e) {
-      const errorMsg =
-        e instanceof Error ? e.message + ' \n ' + e.stack : JSON.stringify(e);
-      throw new HttpException({ error: errorMsg }, 500);
-    }
+  createRevision(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.budgetsService.createRevision(
+      id,
+      req.user?.id,
+      req.user?.company_id,
+    );
   }
+
+  // ─── EXCEL EXPORT ─────────────────────────────────────────────────────────
 
   @Get(':id/export/excel')
   @Roles(
@@ -155,9 +205,9 @@ export class BudgetsController {
   )
   async exportExcel(
     @Param('id') id: string,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Res() res: Response,
-  ) {
+  ): Promise<void> {
     const budget = await this.budgetsService.findOne(id, req.user?.company_id);
     const projectName = budget.project?.name || 'presupuesto';
     const safeName = projectName.replace(/[^a-zA-Z0-9_\-áéíóú]/g, '_');
@@ -173,29 +223,35 @@ export class BudgetsController {
     res.end(buffer);
   }
 
+  // ─── DELETE ───────────────────────────────────────────────────────────────
+
   @Delete(':id')
   @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string) {
     return this.budgetsService.remove(id);
   }
 
+  // ─── BULK IMPORT ──────────────────────────────────────────────────────────
+  // Single request → Postgres RPC → atomic ACID transaction.
+  // If RPC not deployed, falls back to TypeORM transaction.
+
   @Post(':id/items/bulk')
   @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ARCHITECT)
   bulkCreateItems(
     @Param('id') budgetId: string,
-    @Body()
-    body: {
-      items: Array<{
-        stage_id: string;
-        name: string;
-        quantity: number;
-        unit: string;
-        unit_cost: number;
-        unit_price: number;
-        position: number;
-      }>;
-    },
+    @Body() body: BulkImportBodyDto,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.budgetsService.bulkCreateItems(budgetId, body.items);
+    if (!Array.isArray(body?.items)) {
+      throw new BadRequestException({
+        code: 'BULK_INVALID_BODY',
+        message: 'Request body must contain an "items" array',
+      });
+    }
+    return this.budgetsService.bulkCreateItems(
+      budgetId,
+      body.items,
+      req.user?.company_id,
+    );
   }
 }

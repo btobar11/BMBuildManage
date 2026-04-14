@@ -17,19 +17,23 @@ describe('Project Entity', () => {
       project.client_id = 'client-uuid-1';
       project.name = 'Building A';
       project.description = 'Office building';
-      project.location = 'Downtown';
-      project.type = 'Commercial';
+      project.address = '123 Main St';
+      project.region = 'Metropolitan';
+      project.commune = 'Santiago';
+      project.type = ['Commercial'];
       project.folder = '/projects/building-a';
       project.status = ProjectStatus.IN_PROGRESS;
       project.start_date = new Date('2024-01-01');
       project.end_date = new Date('2025-01-01');
       project.estimated_budget = 1000000;
       project.estimated_price = 1500000;
+      project.estimated_area = 5000;
 
       expect(project.id).toBe('uuid-1');
       expect(project.company_id).toBe('company-uuid-1');
       expect(project.name).toBe('Building A');
       expect(project.status).toBe(ProjectStatus.IN_PROGRESS);
+      expect(project.location).toBe('123 Main St, Santiago, Metropolitan');
     });
   });
 
@@ -127,7 +131,9 @@ describe('Project Entity', () => {
         'client_id',
         'name',
         'description',
-        'location',
+        'address',
+        'region',
+        'commune',
         'type',
         'folder',
         'status',
@@ -135,6 +141,7 @@ describe('Project Entity', () => {
         'end_date',
         'estimated_budget',
         'estimated_price',
+        'estimated_area',
         'created_at',
         'updated_at',
       ];
@@ -142,6 +149,12 @@ describe('Project Entity', () => {
       requiredFields.forEach((field) => {
         expect(project).toHaveProperty(field);
       });
+
+      // Test location getter (computed property)
+      project.address = 'Test Address';
+      project.region = 'Test Region';
+      project.commune = 'Test Commune';
+      expect(project.location).toBe('Test Address, Test Commune, Test Region');
     });
   });
 });

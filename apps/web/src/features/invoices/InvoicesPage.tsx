@@ -26,6 +26,8 @@ interface Invoice {
   invoice_number: string;
   amount: number;
   date: string;
+  payment_status: string;
+  purchase_order_id: string | null;
   file_url: string;
   created_at: string;
 }
@@ -137,6 +139,7 @@ export function InvoicesPage() {
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Proyecto</th>
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fecha</th>
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-right">Monto</th>
+                <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Match 3 Vías</th>
                 <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Archivo</th>
                 <th className="px-6 py-4 text-right"></th>
               </tr>
@@ -196,6 +199,27 @@ export function InvoicesPage() {
                       <span className="text-foreground font-black tabular-nums">
                         ${Number(invoice.amount).toLocaleString()}
                       </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex justify-center">
+                        {invoice.payment_status === 'approved' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-success-50 text-success-700 border border-success-200" title="Match exitoso con Guía de Despacho y OC">
+                            <CheckCircle2 size={12} /> OK
+                          </span>
+                        ) : invoice.payment_status === 'rejected' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-danger-50 text-danger-700 border border-danger-200" title="Factura rechazada (Sin recepción o excedida)">
+                            <AlertCircle size={12} /> RECHAZO
+                          </span>
+                        ) : invoice.payment_status === 'paid' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            PAGADA
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-warning-50 text-warning-700 border border-warning-200" title="Pendiente de Match Logístico">
+                            <Clock size={12} /> PENDIENTE
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex justify-center">

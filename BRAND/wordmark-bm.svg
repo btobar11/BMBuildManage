@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BMBuildManage Wordmark - Short Version
+  Solo las siglas BM con diseño minimalista
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 40" width="80" height="40">
+  <defs>
+    <style>
+      .emerald { fill: #10B981; }
+      .dark { fill: #0F172A; }
+    </style>
+  </defs>
+  
+  <!-- BM estilizado - letras geométricas -->
+  <text x="40" y="30" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="28" text-anchor="middle" class="emerald">BM</text>
+</svg>

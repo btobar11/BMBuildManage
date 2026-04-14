@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BMBuildManage OG Image (Social Media)
+  Tamaños: 1200x630px (estándar Open Graph / Twitter)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <style>
+      .emerald { fill: #10B981; }
+      .dark { fill: #0F172A; }
+      .white { fill: #FFFFFF; }
+      .gray { fill: #64748B; }
+      .stroke-emerald { fill: none; stroke: #10B981; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+      .stroke-dark { fill: none; stroke: #0F172A; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E293B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo con gradiente -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)" />
+  
+  <!-- Patrón de fondo (opcional: líneas de construcción sutiles) -->
+  <g opacity="0.05">
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="630" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="630" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="630" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="800" y1="0" x2="800" y2="630" stroke="#FFFFFF" stroke-width="1"/>
+    <line x1="1000" y1="0" x2="1000" y2="630" stroke="#FFFFFF" stroke-width="1"/>
+  </g>
+  
+  <!-- Logo principal centrado -->
+  <g transform="translate(600, 265)">
+    <!-- Isotipo grande -->
+    <g transform="translate(-120, -100)">
+      <!-- Cara frontal izquierda -->
+      <polygon class="stroke-emerald" points="30,40 30,110 60,130 60,60" />
+      <!-- Cara frontal derecha -->
+      <polygon class="stroke-emerald" points="60,130 60,60 90,40 90,110" />
+      <!-- Cara superior -->
+      <polygon class="stroke-emerald" points="30,40 60,20 90,40 60,60" />
+      
+      <!-- Letra B -->
+      <line class="stroke-emerald" x1="40" y1="50" x2="40" y2="100" />
+      <path class="stroke-emerald" d="M 40 56 Q 52 56 56 64 Q 60 72 56 78 Q 52 84 40 84" />
+      <path class="stroke-emerald" d="M 40 84 Q 54 84 58 94 Q 60 102 54 108 Q 44 112 40 108" />
+      
+      <!-- Letra M -->
+      <line class="stroke-emerald" x1="80" y1="50" x2="80" y2="100" />
+      <line class="stroke-emerald" x1="80" y1="50" x2="66" y2="80" />
+      <line class="stroke-emerald" x1="66" y1="80" x2="80" y2="100" />
+    </g>
+    
+    <!-- Texto -->
+    <text x="0" y="80" font-family="Inter, Arial, sans-serif" font-weight="700" font-size="56" fill="#FFFFFF" text-anchor="middle">BM</text>
+    <text x="0" y="125" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="28" fill="#94A3B8" text-anchor="middle">BUILD MANAGE</text>
+  </g>
+  
+  <!-- Tagline en la parte inferior -->
+  <text x="600" y="580" font-family="Inter, Arial, sans-serif" font-weight="400" font-size="20" fill="#64748B" text-anchor="middle">Construcción inteligente, ejecutada con precisión</text>
+  
+  <!-- Esquina decorativa -->
+  <g transform="translate(1100, 30)">
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#10B981" stroke-width="2" opacity="0.3"/>
+    <circle cx="0" cy="0" r="60" fill="none" stroke="#10B981" stroke-width="2" opacity="0.5"/>
+    <circle cx="0" cy="0" r="40" fill="none" stroke="#10B981" stroke-width="3" opacity="0.7"/>
+  </g>
+</svg>

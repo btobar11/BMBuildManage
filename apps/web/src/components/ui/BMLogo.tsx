@@ -7,111 +7,119 @@ export type BMLogoVariant = 'full' | 'compact' | 'icon';
 interface BMLogoProps {
   variant: BMLogoVariant;
   className?: string;
+  /** Force a specific mode regardless of system theme */
+  forceMode?: 'light' | 'dark';
 }
 
 /**
- * BMBuildManage Logo Component
+ * BMBuildManage Logo Component — Construction Identity
  * 
- * Brand Identity: Emerald Cube
- * - Isometric wireframe cube integrating letters B and M
- * - Minimalist monolinear style (constant line weight)
- * - Professional, modern SaaS aesthetic
+ * Brand Mark: Isometric building structure
+ * - Recognizable as a building/construction project
+ * - Three isometric faces with emerald gradients
+ * - Window grid pattern communicates "building"
+ * - Structural beam at top communicates "under construction"
+ * 
+ * Modes: Light (slate text) / Dark (white text)
  */
-export function BMLogo({ variant, className = '' }: BMLogoProps) {
+export function BMLogo({ variant, className = '', forceMode }: BMLogoProps) {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = forceMode ? forceMode === 'dark' : theme === 'dark';
   
-  // Brand colors
-  const emerald = '#10B981';
-  const darkNavy = '#0F172A';
-  const textColor = isDark ? '#F8FAFC' : darkNavy;
+  const textColor = isDark ? '#F8FAFC' : '#0F172A';
+  const subtitleColor = '#10B981';
   
-  // Isometric Cube Isotipo - The core brand mark
+  // Building Structure Isotipo
   const isotipo = (
     <svg
-      viewBox="0 0 80 80"
+      viewBox="0 0 80 88"
       className="shrink-0 w-full h-full"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      aria-label="BM Build Manage Logo"
     >
-      {/* Outer hexagon perimeter */}
-      <path 
-        d="M40 5 L75 25 L75 60 L40 80 L5 60 L5 25 Z" 
-        stroke={emerald} 
-        strokeWidth="3" 
-        fill="none" 
-        strokeLinejoin="round"
-      />
+      <defs>
+        {/* Front face — primary, brightest */}
+        <linearGradient id="bm-front" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#10B981" />
+          <stop offset="100%" stopColor="#059669" />
+        </linearGradient>
+        
+        {/* Side face — darker for depth */}
+        <linearGradient id="bm-side" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#059669" />
+          <stop offset="100%" stopColor="#047857" />
+        </linearGradient>
+        
+        {/* Roof / top — brightest highlight */}
+        <linearGradient id="bm-roof" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#34D399" />
+          <stop offset="100%" stopColor="#10B981" />
+        </linearGradient>
+      </defs>
+
+      {/* ─── Building Structure ──────────────────────────────── */}
       
-      {/* Center vertical line - isometric axis */}
-      <path 
-        d="M40 5 L40 80" 
-        stroke={emerald} 
-        strokeWidth="3" 
-        fill="none" 
-        strokeLinecap="round"
-      />
+      {/* Front face — main building facade */}
+      <path d="M8 28 L44 28 L44 82 L8 82 Z" fill="url(#bm-front)" />
       
-      {/* Left face (B suggestion) */}
-      <path 
-        d="M5 25 L40 42 L40 60 L5 80 L5 25 Z" 
-        stroke={emerald} 
-        strokeWidth="2.5" 
-        fill="none" 
-        strokeLinejoin="round"
-      />
+      {/* Right side face — isometric depth */}
+      <path d="M44 28 L72 14 L72 68 L44 82 Z" fill="url(#bm-side)" />
       
-      {/* Right face (M suggestion) */}
-      <path 
-        d="M40 42 L75 25 L75 60 L40 80 L40 42 Z" 
-        stroke={emerald} 
-        strokeWidth="2.5" 
-        fill="none" 
-        strokeLinejoin="round"
-      />
+      {/* Roof — top face */}
+      <path d="M8 28 L36 14 L72 14 L44 28 Z" fill="url(#bm-roof)" />
       
-      {/* Top face */}
-      <path 
-        d="M5 25 L40 5 L75 25 L40 42 L5 25 Z" 
-        stroke={emerald} 
-        strokeWidth="2.5" 
-        fill="none" 
-        strokeLinejoin="round"
-      />
+      {/* ─── Window Grid (front face) — communicates "building" */}
+      {/* Row 1 */}
+      <rect x="13" y="35" width="8" height="10" rx="1" fill="#A7F3D0" opacity="0.45" />
+      <rect x="25" y="35" width="8" height="10" rx="1" fill="#A7F3D0" opacity="0.45" />
+      <rect x="37" y="35" width="4" height="10" rx="1" fill="#A7F3D0" opacity="0.35" />
       
-      {/* Depth accent lines */}
-      <path 
-        d="M22 32 L40 42 L58 32" 
-        stroke={emerald} 
-        strokeWidth="1.5" 
-        fill="none" 
-        strokeLinecap="round"
-      />
-      <path 
-        d="M22 52 L40 62 L58 52" 
-        stroke={emerald} 
-        strokeWidth="1.5" 
-        fill="none" 
-        strokeLinecap="round"
-      />
+      {/* Row 2 */}
+      <rect x="13" y="50" width="8" height="10" rx="1" fill="#A7F3D0" opacity="0.35" />
+      <rect x="25" y="50" width="8" height="10" rx="1" fill="#A7F3D0" opacity="0.35" />
+      <rect x="37" y="50" width="4" height="10" rx="1" fill="#A7F3D0" opacity="0.25" />
+      
+      {/* Row 3 — entrance/door */}
+      <rect x="13" y="65" width="8" height="10" rx="1" fill="#A7F3D0" opacity="0.25" />
+      <rect x="25" y="66" width="8" height="16" rx="1.5" fill="#6EE7B7" opacity="0.35" />
+      
+      {/* ─── Side windows (perspective) */}
+      <path d="M48 35 L60 29 L60 37 L48 43 Z" fill="#A7F3D0" opacity="0.2" />
+      <path d="M48 50 L60 44 L60 52 L48 58 Z" fill="#A7F3D0" opacity="0.15" />
+      <path d="M48 65 L60 59 L60 67 L48 73 Z" fill="#A7F3D0" opacity="0.1" />
+      
+      {/* ─── Construction Crane Beam — "under construction" signal */}
+      {/* Vertical mast */}
+      <rect x="4" y="4" width="3" height="78" rx="1" fill="#047857" opacity="0.7" />
+      {/* Horizontal jib */}
+      <rect x="4" y="4" width="50" height="3" rx="1" fill="#047857" opacity="0.6" />
+      {/* Counter-jib */}
+      <rect x="4" y="4" width="3" height="3" rx="0.5" fill="#34D399" opacity="0.8" />
+      {/* Cable line */}
+      <line x1="54" y1="7" x2="54" y2="18" stroke="#6EE7B7" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
+      {/* Hook */}
+      <path d="M52 18 Q54 22 56 18" stroke="#6EE7B7" strokeWidth="1.5" fill="none" opacity="0.5" strokeLinecap="round" />
+      
+      {/* ─── Edge highlights */}
+      <path d="M8 28 L44 28 L72 14" stroke="#6EE7B7" strokeWidth="1" fill="none" opacity="0.4" strokeLinejoin="round" />
     </svg>
   );
   
-  // Text: BM (Extra Bold geometric sans)
+  // Text elements
   const textBM = (
     <span 
-      className="text-foreground font-extrabold text-lg leading-none tracking-tight"
+      className="font-extrabold text-lg leading-none tracking-tight"
       style={{ color: textColor }}
     >
       BM
     </span>
   );
   
-  // Text: BUILD MANAGE (Bold, wide tracking)
   const textBuildManage = (
     <span 
-      className="text-xs font-bold tracking-[0.25em] uppercase"
-      style={{ color: emerald }}
+      className="text-[10px] font-bold tracking-[0.2em] uppercase"
+      style={{ color: subtitleColor }}
     >
       BUILD MANAGE
     </span>
@@ -119,14 +127,14 @@ export function BMLogo({ variant, className = '' }: BMLogoProps) {
   
   // Layout configurations
   const containerClasses = {
-    full: 'flex items-center gap-3',
+    full: 'flex items-center gap-2.5',
     compact: 'flex items-center gap-2', 
     icon: 'flex items-center justify-center',
   };
   
   const textElements = {
     full: (
-      <div className="flex flex-col leading-none">
+      <div className="flex flex-col leading-none gap-0.5">
         {textBM}
         {textBuildManage}
       </div>
@@ -141,7 +149,7 @@ export function BMLogo({ variant, className = '' }: BMLogoProps) {
   
   // Size mapping
   const sizeClass = {
-    full: 'w-10 h-10',
+    full: 'w-9 h-9',
     compact: 'w-8 h-8',
     icon: 'w-7 h-7'
   }[variant];

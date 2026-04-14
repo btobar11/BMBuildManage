@@ -45,9 +45,13 @@ describe('ClientsController', () => {
       const expected = { id: 'client-1', ...createDto };
       mockClientsService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create(createDto, {
+        user: { company_id: 'company-1' },
+      });
 
-      expect(mockClientsService.create).toHaveBeenCalledWith(createDto);
+      expect(mockClientsService.create).toHaveBeenCalledWith(
+        expect.objectContaining({ company_id: 'company-1' }),
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -57,7 +61,9 @@ describe('ClientsController', () => {
       const expected = [{ id: 'client-1', name: 'Client A' }];
       mockClientsService.findAll.mockResolvedValue(expected);
 
-      const result = await controller.findAll('company-1');
+      const result = await controller.findAll({
+        user: { company_id: 'company-1' },
+      });
 
       expect(mockClientsService.findAll).toHaveBeenCalledWith('company-1');
       expect(result).toEqual(expected);
@@ -69,7 +75,9 @@ describe('ClientsController', () => {
       const expected = { id: 'client-1', name: 'Client A' };
       mockClientsService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('client-1', 'company-1');
+      const result = await controller.findOne('client-1', {
+        user: { company_id: 'company-1' },
+      });
 
       expect(mockClientsService.findOne).toHaveBeenCalledWith(
         'client-1',
@@ -85,11 +93,9 @@ describe('ClientsController', () => {
       const expected = { id: 'client-1', ...updateDto };
       mockClientsService.update.mockResolvedValue(expected);
 
-      const result = await controller.update(
-        'client-1',
-        'company-1',
-        updateDto,
-      );
+      const result = await controller.update('client-1', updateDto, {
+        user: { company_id: 'company-1' },
+      });
 
       expect(mockClientsService.update).toHaveBeenCalledWith(
         'client-1',
@@ -104,7 +110,9 @@ describe('ClientsController', () => {
     it('should remove a client', async () => {
       mockClientsService.remove.mockResolvedValue({ id: 'client-1' });
 
-      const result = await controller.remove('client-1', 'company-1');
+      const result = await controller.remove('client-1', {
+        user: { company_id: 'company-1' },
+      });
 
       expect(mockClientsService.remove).toHaveBeenCalledWith(
         'client-1',

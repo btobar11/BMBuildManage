@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from '../companies/company.entity';
@@ -16,6 +16,7 @@ import { User, UserRole } from '../users/user.entity';
 
 @Injectable()
 export class SeedService {
+  private readonly logger = new Logger(SeedService.name);
   constructor(
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
@@ -471,9 +472,11 @@ export class SeedService {
         message: 'Demo data seeded successfully with realistic projects',
       };
     } catch (error: any) {
-      console.error('Error seeding demo data:', error);
-      console.error('Stack trace:', error.stack);
-      if (error.detail) console.error('DB Detail:', error.detail);
+      this.logger.error(
+        `Error seeding demo data: ${error.message}`,
+        error.stack,
+      );
+      if (error.detail) this.logger.error(`DB Detail: ${error.detail}`);
       throw error;
     }
   }

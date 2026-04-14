@@ -48,9 +48,14 @@ describe('CompaniesController', () => {
       const expected = { id: 'company-1', ...createDto };
       mockCompaniesService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create(createDto, {
+        user: { id: 'user-1' },
+      });
 
-      expect(mockCompaniesService.create).toHaveBeenCalledWith(createDto);
+      expect(mockCompaniesService.create).toHaveBeenCalledWith(
+        createDto,
+        'user-1',
+      );
       expect(result).toEqual(expected);
     });
   });

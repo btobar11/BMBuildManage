@@ -5,6 +5,7 @@ import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CompaniesService } from './companies.service';
 import { Company, CompanySpecialty, SeismicZone } from './company.entity';
+import { User } from '../users/user.entity';
 
 const createMockCompany = (overrides?: Partial<Company>): Company =>
   ({
@@ -26,13 +27,17 @@ const createMockCompany = (overrides?: Partial<Company>): Company =>
     ...overrides,
   }) as unknown as Company;
 
-const mockRepository = () => ({
+const mockCompanyRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
   find: jest.fn(),
   findOne: jest.fn(),
   remove: jest.fn(),
   merge: jest.fn(),
+  update: jest.fn(),
+});
+
+const mockUserRepository = () => ({
   update: jest.fn(),
 });
 
@@ -60,20 +65,26 @@ const mockSupabase = {
 
 describe('CompaniesService', () => {
   let service: CompaniesService;
-  let repository: jest.Mocked<Repository<Company>>;
+  let companyRepository: jest.Mocked<Repository<Company>>;
+  let userRepository: jest.Mocked<Repository<User>>;
   let configService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CompaniesService,
-        { provide: getRepositoryToken(Company), useFactory: mockRepository },
+        {
+          provide: getRepositoryToken(Company),
+          useFactory: mockCompanyRepository,
+        },
+        { provide: getRepositoryToken(User), useFactory: mockUserRepository },
         { provide: ConfigService, useFactory: mockConfigService },
       ],
     }).compile();
 
     service = module.get<CompaniesService>(CompaniesService);
-    repository = module.get(getRepositoryToken(Company));
+    companyRepository = module.get(getRepositoryToken(Company));
+    userRepository = module.get(getRepositoryToken(User));
     configService = module.get<ConfigService>(ConfigService);
 
     // Mock the Supabase client
@@ -88,12 +99,12 @@ describe('CompaniesService', () => {
     it('should create a company', async () => {
       const createDto = { name: 'Company 1', country: 'US' };
       const company = createMockCompany(createDto);
-      repository.create.mockReturnValue(company);
-      repository.save.mockResolvedValue(company);
+      companyRepository.create.mockReturnValue(company);
+      companyRepository.save.mockResolvedValue(company);
 
       const result = await service.create(createDto);
-      expect(repository.create).toHaveBeenCalledWith(createDto);
-      expect(repository.save).toHaveBeenCalledWith(company);
+      expect(companyRepository.create).toHaveBeenCalledWith(createDto);
+      expect(companyRepository.save).toHaveBeenCalledWith(company);
       expect(result).toEqual(company);
     });
   });
@@ -104,10 +115,10 @@ describe('CompaniesService', () => {
         createMockCompany({ id: '1' }),
         createMockCompany({ id: '2' }),
       ];
-      repository.find.mockResolvedValue(companies);
+      companyRepository.find.mockResolvedValue(companies);
 
       const result = await service.findAll();
-      expect(repository.find).toHaveBeenCalled();
+      expect(companyRepository.find).toHaveBeenCalled();
       expect(result).toEqual(companies);
     });
   });
@@ -115,17 +126,17 @@ describe('CompaniesService', () => {
   describe('findOne', () => {
     it('should return a company by id', async () => {
       const company = createMockCompany();
-      repository.findOne.mockResolvedValue(company);
+      companyRepository.findOne.mockResolvedValue(company);
 
       const result = await service.findOne('company-1');
-      expect(repository.findOne).toHaveBeenCalledWith({
+      expect(companyRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'company-1' },
       });
       expect(result).toEqual(company);
     });
 
     it('should throw NotFoundException if company not found', async () => {
-      repository.findOne.mockResolvedValue(null);
+      companyRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findOne('nonexistent')).rejects.toThrow(
         NotFoundException,
@@ -137,9 +148,9 @@ describe('CompaniesService', () => {
     it('should update a company', async () => {
       const company = createMockCompany();
       const updated = { ...company, name: 'Updated Company' };
-      repository.findOne.mockResolvedValue(company);
-      repository.merge.mockReturnValue(updated);
-      repository.save.mockResolvedValue(updated);
+      companyRepository.findOne.mockResolvedValue(company);
+      companyRepository.merge.mockReturnValue(updated);
+      companyRepository.save.mockResolvedValue(updated);
 
       const result = await service.update('company-1', {
         name: 'Updated Company',
@@ -151,11 +162,11 @@ describe('CompaniesService', () => {
   describe('remove', () => {
     it('should remove a company', async () => {
       const company = createMockCompany();
-      repository.findOne.mockResolvedValue(company);
-      repository.remove.mockResolvedValue(company);
+      companyRepository.findOne.mockResolvedValue(company);
+      companyRepository.remove.mockResolvedValue(company);
 
       const result = await service.remove('company-1');
-      expect(repository.remove).toHaveBeenCalledWith(company);
+      expect(companyRepository.remove).toHaveBeenCalledWith(company);
       expect(result).toEqual({ deleted: true });
     });
   });
@@ -163,7 +174,7 @@ describe('CompaniesService', () => {
   describe('Library Seeding', () => {
     it('should seed company library successfully', async () => {
       const company = createMockCompany();
-      repository.findOne.mockResolvedValue(company);
+      companyRepository.findOne.mockResolvedValue(company);
 
       const mockSeedResult = {
         success: true,
@@ -177,7 +188,7 @@ describe('CompaniesService', () => {
         error: null,
       });
 
-      repository.update.mockResolvedValueOnce({ affected: 1 });
+      companyRepository.update.mockResolvedValueOnce({ affected: 1 });
 
       const seedDto = {
         specialty: CompanySpecialty.RESIDENTIAL,
@@ -194,7 +205,7 @@ describe('CompaniesService', () => {
         p_region_code: 'CL-RM',
       });
 
-      expect(repository.update).toHaveBeenCalledWith('company-1', {
+      expect(companyRepository.update).toHaveBeenCalledWith('company-1', {
         specialty: CompanySpecialty.RESIDENTIAL,
         seismic_zone: SeismicZone.C,
         region_code: 'CL-RM',
@@ -211,7 +222,7 @@ describe('CompaniesService', () => {
       const seededCompany = createMockCompany({
         library_seeded: true,
       });
-      repository.findOne.mockResolvedValue(seededCompany);
+      companyRepository.findOne.mockResolvedValue(seededCompany);
 
       const seedDto = {
         specialty: CompanySpecialty.RESIDENTIAL,
@@ -232,7 +243,7 @@ describe('CompaniesService', () => {
         seismic_zone: SeismicZone.C,
       });
 
-      repository.findOne.mockResolvedValue(seededCompany);
+      companyRepository.findOne.mockResolvedValue(seededCompany);
 
       const result = await service.getSeededLibraryStats('company-1');
 
