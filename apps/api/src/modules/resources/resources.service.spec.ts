@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource, IsNull } from 'typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ResourcesService } from './resources.service';
-import { Resource } from './resource.entity';
+import { Resource, ResourceType } from './resource.entity';
 import { ResourcePriceHistory } from './resource-price-history.entity';
 
 const createMockResource = (overrides?: Partial<Resource>): Resource =>
@@ -70,7 +70,7 @@ describe('ResourcesService', () => {
     it('should create a resource', async () => {
       const createDto = {
         name: 'Resource 1',
-        type: 'material',
+        type: ResourceType.MATERIAL,
         base_price: 100,
       };
       const resource = createMockResource(createDto);

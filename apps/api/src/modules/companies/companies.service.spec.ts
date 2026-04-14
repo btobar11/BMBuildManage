@@ -42,8 +42,8 @@ const mockUserRepository = () => ({
 });
 
 const mockConfigService = () => ({
-  get: jest.fn((key: string) => {
-    const config = {
+  get: jest.fn((key: string): string | undefined => {
+    const config: Record<string, string> = {
       'supabase.url': 'http://localhost:54321',
       'supabase.anonKey': 'test-anon-key',
     };
@@ -67,7 +67,8 @@ describe('CompaniesService', () => {
   let service: CompaniesService;
   let companyRepository: jest.Mocked<Repository<Company>>;
   let userRepository: jest.Mocked<Repository<User>>;
-  let configService: jest.Mocked<ConfigService>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let configService: any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -188,7 +189,7 @@ describe('CompaniesService', () => {
         error: null,
       });
 
-      companyRepository.update.mockResolvedValueOnce({ affected: 1 });
+      companyRepository.update.mockResolvedValueOnce({ affected: 1, raw: [] } as any);
 
       const seedDto = {
         specialty: CompanySpecialty.RESIDENTIAL,

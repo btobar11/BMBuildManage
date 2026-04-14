@@ -30,17 +30,17 @@ describe('BIM4DService', () => {
     activity_description: 'Build foundation',
     planned_start: new Date('2026-01-01'),
     planned_finish: new Date('2026-01-15'),
-    actual_start: null,
-    actual_finish: null,
+    actual_start: undefined,
+    actual_finish: undefined,
     progress_percentage: 0,
     status: 'not_started',
     construction_phase: 'foundation',
     work_package: 'pkg-1',
     sequence_order: 1,
     dependencies: { predecessors: [], successors: [] },
-    resources: null,
+    resources: undefined,
     planned_cost: 10000,
-    actual_cost: null,
+    actual_cost: undefined,
     created_at: new Date(),
     updated_at: new Date(),
     get is_critical_path() {
@@ -141,7 +141,7 @@ describe('BIM4DService', () => {
         quality_checkpoints: ['rebar inspection'],
       },
     ],
-    risk_factors: null,
+    risk_factors: undefined,
     is_active: true,
     created_at: new Date(),
     updated_at: new Date(),
@@ -284,7 +284,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -305,7 +305,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -321,7 +321,7 @@ describe('BIM4DService', () => {
       const element = createMockElement({ status: 'in_progress' });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -339,12 +339,12 @@ describe('BIM4DService', () => {
       futureDate.setFullYear(futureDate.getFullYear() + 1);
       const element = createMockElement({
         status: 'not_started',
-        actual_start: null,
+        actual_start: undefined,
         planned_finish: futureDate,
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -364,7 +364,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -392,7 +392,7 @@ describe('BIM4DService', () => {
       const element = createMockElement();
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {

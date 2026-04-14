@@ -8,21 +8,22 @@ import { Rfi, RfiStatus } from './rfi.entity';
 const mockRfi = (overrides = {}): Rfi => ({
   id: 'rfi-1',
   project_id: 'project-1',
+  company_id: 'company-1',
   title: 'Test RFI',
   question: 'What is the spec?',
-  answer: null,
+  answer: undefined,
   submitted_by: 'user-1',
-  answered_by: null,
+  answered_by: undefined,
   due_date: new Date('2026-12-31'),
-  answered_at: null,
-  status: RfiStatus.OPEN,
+  answered_at: undefined,
+  status: RfiStatus.SUBMITTED,
   priority: 'medium' as any,
   category: 'technical',
   created_at: new Date(),
   updated_at: new Date(),
   project: {} as any,
   ...overrides,
-});
+} as unknown as Rfi);
 
 const mockRepository = () => ({
   create: jest.fn(),
@@ -135,8 +136,8 @@ describe('RfisService', () => {
   describe('getStats', () => {
     it('should return correct stats', async () => {
       const rfis = [
-        mockRfi({ status: RfiStatus.OPEN, due_date: new Date('2026-12-31') }),
-        mockRfi({ status: RfiStatus.OPEN, due_date: new Date('2025-01-01') }),
+        mockRfi({ status: RfiStatus.SUBMITTED, due_date: new Date('2026-12-31') }),
+        mockRfi({ status: RfiStatus.SUBMITTED, due_date: new Date('2025-01-01') }),
         mockRfi({ status: RfiStatus.CLOSED }),
         mockRfi({ status: RfiStatus.UNDER_REVIEW }),
       ];

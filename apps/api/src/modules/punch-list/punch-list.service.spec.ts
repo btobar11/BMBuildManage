@@ -8,20 +8,21 @@ import { PunchItem, PunchItemStatus } from './punch-item.entity';
 const mockPunchItem = (overrides = {}): PunchItem => ({
   id: 'punch-1',
   project_id: 'project-1',
+  company_id: 'company-1',
   title: 'Fix wall crack',
   description: 'Crack in hallway',
   status: PunchItemStatus.OPEN,
   priority: 'medium' as any,
   location: 'Hallway',
   reported_by: 'user-1',
-  assigned_to: null,
-  due_date: null,
-  completed_date: null,
-  photo_url: null,
+  assigned_to: undefined,
+  due_date: undefined,
+  completed_date: undefined,
+  photo_url: undefined,
   created_at: new Date(),
   updated_at: new Date(),
   ...overrides,
-});
+} as unknown as PunchItem);
 
 const mockRepository = () => ({
   create: jest.fn(),
