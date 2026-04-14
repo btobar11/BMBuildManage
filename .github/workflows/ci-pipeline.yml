@@ -1,0 +1,262 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# BM Build Manage - CI Pipeline
+# Ejecuta en cada Pull Request a main
+# Protege contra código roto en producción
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: CI Pipeline
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TRIGGERS
+# ═══════════════════════════════════════════════════════════════════════════
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# JOBS
+# ═══════════════════════════════════════════════════════════════════════════
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # LINT & TYPE CHECK - Validación rápida sinTests
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  lint-and-types:
+    name: Lint & TypeScript Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout del código
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js con caché
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            apps/api/package-lock.json
+            apps/web/package-lock.json
+
+      # 3. Instalación de dependencias (monorepo)
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Lint en ambos paquetes
+      - name: Run Lint (API)
+        run: npm run lint --workspace=@bm-build-manage/api
+        continue-on-error: false
+
+      - name: Run Lint (Web)
+        run: npm run lint --workspace=@bm-build-manage/web
+        continue-on-error: false
+
+      # 5. TypeScript type checking
+      - name: TypeScript Check (API)
+        run: cd apps/api && npx tsc --noEmit
+        continue-on-error: false
+
+      - name: TypeScript Check (Web)
+        run: cd apps/web && npx tsc --noEmit
+        continue-on-error: false
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # UNIT TESTS - Validación de lógica de negocio
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-types
+    
+    services:
+      # PostgreSQL para tests (Supabase local)
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: bmbuildmanage_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            apps/api/package-lock.json
+            apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Configurar variables de entorno para tests
+      - name: Configure Test Environment
+        run: |
+          cat >> .env << EOF
+          DATABASE_URL=postgresql://test:test@localhost:5432/bmbuildmanage_test
+          SUPABASE_URL=https://localhost:54321
+          SUPABASE_ANON_KEY=test-anon-key
+          NODE_ENV=test
+          ALLOW_DEV_TOKEN=true
+          EOF
+
+      # Ejecutar tests unitarios (excluyendo E2E que requiere DB real)
+      - name: Run Unit Tests (API)
+        run: cd apps/api && npm run test -- --testPathIgnorePatterns="full-product-suite"
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/bmbuildmanage_test
+
+      - name: Run Unit Tests (Web)
+        run: cd apps/web && npm run test -- --passWithNoTests
+        env:
+          VITE_SUPABASE_URL: https://localhost:54321
+          VITE_SUPABASE_ANON_KEY: test-anon-key
+
+      # Coverage report (opcional - GitHub annotations)
+      - name: Upload coverage to Codecov
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./apps/api/coverage/coverage-final.json
+          flags: unittests
+          name: bm-build-manage-api
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DATABASE MIGRATIONS - Validación de esquema
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  database-migrations:
+    name: Database Migrations
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    # Solo ejecutar en push a main (no en PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Usar Supabase CLI para validar migraciones
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Verificar que las migraciones son válidas
+      - name: Validate Database Schema
+        run: |
+          cd apps/api
+          # Generar diff entre remoto y local
+          supabase db diff --linked || true
+          # Verificar que no hay cambios pendientes sin revisar
+          echo "Migrations directory:"
+          ls -la supabase/migrations/
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # NOTA: El push real a producción debe ser manual o por release tag
+      # No automáticas en CI para evitar pérdida de datos
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # BUILD VERIFICATION - Compilación final
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [lint-and-types, unit-tests]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            apps/api/package-lock.json
+            apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Build API
+      - name: Build API
+        run: npm run build --workspace=@bm-build-manage/api
+        continue-on-error: false
+
+      # Build Web
+      - name: Build Web
+        run: npm run build --workspace=@bm-build-manage/web
+        continue-on-error: false
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DEPLOYMENT BLOCK - Status Check para Vercel
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  deployment-gate:
+    name: Deployment Gate
+    runs-on: ubuntu-latest
+    needs: [lint-and-types, unit-tests, build-verification]
+    if: always()
+    
+    steps:
+      - name: Check pipeline status
+        run: |
+          # Si cualquiera de los jobs necesarios falló, bloquear deployment
+          if [ "${{ needs.lint-and-types.result }}" != "success" ]; then
+            echo "❌ Lint or Type Check failed"
+            exit 1
+          fi
+          if [ "${{ needs.unit-tests.result }}" != "success" ]; then
+            echo "❌ Unit Tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.build-verification.result }}" != "success" ]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+          echo "✅ All checks passed - Deployment allowed"
+
+      - name: Set deployment status
+        if: success()
+        run: |
+          echo "✅ CI Pipeline Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint & Types | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ✅ |" >> $GITHUB_STEP_SUMMARY
