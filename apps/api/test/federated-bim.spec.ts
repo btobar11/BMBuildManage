@@ -9,7 +9,7 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request, { type Response } from 'supertest';
 import { AppModule } from '../src/app.module';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -298,7 +298,7 @@ describe('Federated BIM System (e2e)', () => {
     it('should retrieve detected clashes', async () => {
       const response = await request(app.getHttpServer())
         .get('/bim-clashes/federated/clashes')
-        .query({ federationJobId })
+        .query({ federatedJobId })
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
@@ -319,7 +319,7 @@ describe('Federated BIM System (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/bim-clashes/federated/clashes')
         .query({
-          federationJobId,
+          federatedJobId,
           disciplineA: 'architecture',
           disciplineB: 'structure',
         })
@@ -344,7 +344,7 @@ describe('Federated BIM System (e2e)', () => {
       // Get a clash to work with
       const response = await request(app.getHttpServer())
         .get('/bim-clashes/federated/clashes')
-        .query({ federationJobId })
+        .query({ federatedJobId })
         .set('Authorization', `Bearer ${authToken}`);
 
       if (response.body.length > 0) {
@@ -511,7 +511,7 @@ describe('Federated BIM System (e2e)', () => {
 
       const responses = await Promise.all(jobs);
 
-      responses.forEach((response) => {
+      responses.forEach((response: Response) => {
         expect(response.status).toBe(201);
         expect(response.body.status).toBe('pending');
       });
