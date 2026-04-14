@@ -92,7 +92,7 @@ describe('UnitsService', () => {
     it('should seed defaults when count is 0', async () => {
       repository.count.mockResolvedValue(0);
       repository.create.mockImplementation((data) => data as Unit);
-      repository.save.mockResolvedValue([]);
+      repository.save.mockResolvedValue([] as any);
 
       await service.onModuleInit();
       expect(repository.save).toHaveBeenCalled();

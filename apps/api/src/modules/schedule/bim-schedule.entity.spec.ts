@@ -16,17 +16,17 @@ describe('BIMScheduleElement Entity', () => {
     element.activity_description = 'Build foundation';
     element.planned_start = new Date('2026-01-01');
     element.planned_finish = new Date('2026-01-15');
-    element.actual_start = null;
-    element.actual_finish = null;
+    element.actual_start = undefined;
+    element.actual_finish = undefined;
     element.progress_percentage = 0;
     element.status = 'not_started';
     element.construction_phase = 'foundation';
     element.work_package = 'pkg-1';
     element.sequence_order = 1;
     element.dependencies = { predecessors: [], successors: [] };
-    element.resources = null;
+    element.resources = undefined;
     element.planned_cost = 10000;
-    element.actual_cost = null;
+    element.actual_cost = undefined;
     return Object.assign(element, overrides);
   };
 

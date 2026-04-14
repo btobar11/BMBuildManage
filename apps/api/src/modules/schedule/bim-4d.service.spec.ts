@@ -284,7 +284,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as any),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -305,7 +305,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as any),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -321,7 +321,7 @@ describe('BIM4DService', () => {
       const element = createMockElement({ status: 'in_progress' });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as any),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -344,7 +344,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as any),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -364,7 +364,7 @@ describe('BIM4DService', () => {
       });
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as any),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -392,7 +392,7 @@ describe('BIM4DService', () => {
       const element = createMockElement();
       scheduleElementRepository.findOne.mockResolvedValue(element);
       scheduleElementRepository.save.mockImplementation((e) =>
-        Promise.resolve(e as any),
+        Promise.resolve(e as BIMScheduleElement),
       );
 
       const result = await service.update4DProgress('company-1', {
@@ -719,7 +719,9 @@ describe('BIM4DService', () => {
           },
         ],
       };
-      templateRepository.save.mockImplementation((t) => Promise.resolve(t));
+      templateRepository.save.mockImplementation((t) =>
+        Promise.resolve(t as any),
+      );
 
       const result = await service.createScheduleTemplate(
         'company-1',
@@ -895,7 +897,7 @@ describe('BIM4DService', () => {
         value: false,
         writable: true,
       });
-      mockElem2.dependencies = { successors: [] };
+      mockElem2.dependencies = { predecessors: [], successors: [] };
 
       const result = (service as any).calculateCriticalPath([
         mockElem1,
@@ -965,7 +967,7 @@ describe('BIM4DService', () => {
 
       const result = (service as any).analyzeRisks(elements);
 
-      expect(result.some((r) => r.risk.includes('Weather'))).toBe(true);
+      expect(result.some((r: any) => r.risk.includes('Weather'))).toBe(true);
     });
 
     it('should return empty array for no risks', () => {
@@ -984,13 +986,61 @@ describe('BIM4DService', () => {
   describe('generateRecommendations', () => {
     it('should recommend addressing delays when phases are delayed', () => {
       const elements = [createMockElement()];
-      const phases = [{ status: 'delayed', phase: 'foundation' }];
+      const phases: any[] = [{ status: 'delayed', phase: 'foundation' }];
 
       const result = (service as any).generateRecommendations(elements, phases);
 
-      expect(
-        result.some((r) => r.includes('delayed') || r.includes('phase')),
-      ).toBe(true);
+      expect(result.some((r: any) => r.includes('critical path'))).toBe(true);
+    });
+
+    it('should recommend investigating slow progress', () => {
+      const mockElem = createMockElement({
+        status: 'in_progress',
+        progress_percentage: 15,
+      });
+      const elements = [mockElem];
+      const phases: any[] = [];
+
+      const result = (service as any).generateRecommendations(elements, phases);
+
+      expect(result.some((r: any) => r.includes('slow-progressing'))).toBe(
+        true,
+      );
+    });
+
+    it('should recommend reviewing cost management for over-budget', () => {
+      const mockElem = createMockElement({
+        status: 'completed',
+        progress_percentage: 100,
+      });
+      Object.defineProperty(mockElem, 'budget_variance', {
+        value: -5000,
+        writable: true,
+      });
+      const elements = [mockElem as any];
+      const phases: any[] = [];
+
+      const result = (service as any).generateRecommendations(elements, phases);
+
+      expect(result.some((r: any) => r.includes('cost'))).toBe(true);
+    });
+
+    it('should return empty array for elements with no issues', () => {
+      const mockElem = createMockElement({
+        status: 'completed',
+        progress_percentage: 100,
+      });
+      Object.defineProperty(mockElem, 'budget_variance', {
+        value: 0,
+        writable: true,
+      });
+      mockElem.status = 'completed';
+      const elements = [mockElem];
+      const phases: any[] = [];
+
+      const result = (service as any).generateRecommendations(elements, phases);
+
+      expect(result.length).toBe(0);
     });
 
     it('should recommend focusing on critical path when delayed', () => {
@@ -1000,12 +1050,12 @@ describe('BIM4DService', () => {
         writable: true,
       });
       mockElem.status = 'delayed';
-      const elements = [mockElem];
-      const phases = [];
+      const elements = [mockElem as any];
+      const phases: any[] = [];
 
       const result = (service as any).generateRecommendations(elements, phases);
 
-      expect(result.some((r) => r.includes('critical path'))).toBe(true);
+      expect(result.some((r: any) => r.includes('critical path'))).toBe(true);
     });
 
     it('should recommend investigating slow progress', () => {
@@ -1013,12 +1063,12 @@ describe('BIM4DService', () => {
         status: 'in_progress',
         progress_percentage: 15,
       });
-      const elements = [mockElem];
-      const phases = [];
+      const elements = [mockElem as any];
+      const phases: any[] = [];
 
       const result = (service as any).generateRecommendations(elements, phases);
 
-      expect(result.some((r) => r.includes('slow-progressing'))).toBe(true);
+      expect(result.some((r: any) => r.includes('slow-progressing'))).toBe(true);
     });
 
     it('should recommend reviewing cost management for over-budget', () => {
@@ -1027,12 +1077,12 @@ describe('BIM4DService', () => {
         value: 20,
         writable: true,
       });
-      const elements = [mockElem];
-      const phases = [];
+      const elements = [mockElem as any];
+      const phases: any[] = [];
 
       const result = (service as any).generateRecommendations(elements, phases);
 
-      expect(result.some((r) => r.includes('cost management'))).toBe(true);
+      expect(result.some((r: any) => r.includes('cost management'))).toBe(true);
     });
 
     it('should return positive message when project is on track', () => {
@@ -1040,12 +1090,12 @@ describe('BIM4DService', () => {
         status: 'completed',
         progress_percentage: 100,
       });
-      const elements = [mockElem];
-      const phases = [{ status: 'completed', phase: 'foundation' }];
+      const elements = [mockElem as any];
+      const phases: any[] = [{ status: 'completed', phase: 'foundation' }];
 
       const result = (service as any).generateRecommendations(elements, phases);
 
-      expect(result.some((r) => r.includes('on track'))).toBe(true);
+      expect(result.some((r: any) => r.includes('on track'))).toBe(true);
     });
   });
 });

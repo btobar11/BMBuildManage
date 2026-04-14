@@ -14,31 +14,21 @@ const createMockProject = (overrides?: Partial<Project>): Project =>
     company_id: 'company-1',
     name: 'Project 1',
     description: 'Test project',
-    status: 'planning',
     address: 'Test address',
     region: 'Test region',
     commune: 'Test commune',
-    type: ['construction'],
+    status: 'planning' as any,
+    type: [],
     start_date: new Date(),
-    end_date: undefined,
+    end_date: null,
     estimated_budget: 100000,
-    estimated_price: 120000,
-    estimated_area: 500,
-    folder: undefined,
+    actual_cost: 0,
+    folder: null,
     created_at: new Date(),
     updated_at: new Date(),
     budgets: [],
     expenses: [],
     documents: [],
-    stages: [],
-    items: [],
-    worker_assignments: [],
-    worker_payments: [],
-    project_payments: [],
-    get location() {
-      const parts = [this.address, this.commune, this.region].filter(Boolean);
-      return parts.length > 0 ? parts.join(', ') : '';
-    },
     ...overrides,
   }) as unknown as Project;
 
@@ -139,7 +129,7 @@ describe('ProjectsService', () => {
       projectRepo.create.mockReturnValue(project);
       projectRepo.save.mockResolvedValue(project);
 
-      const result = await service.create(createDto as any);
+      const result = await service.create(createDto);
       expect(projectRepo.create).toHaveBeenCalledWith(createDto);
       expect(projectRepo.save).toHaveBeenCalledWith(project);
       expect(result).toEqual(project);
@@ -205,8 +195,8 @@ describe('ProjectsService', () => {
       const project = createMockProject();
       const updated = { ...project, name: 'Updated' };
       projectRepo.findOne.mockResolvedValue(project);
-      projectRepo.merge.mockReturnValue(updated);
-      projectRepo.save.mockResolvedValue(updated);
+      projectRepo.merge.mockReturnValue(updated as any);
+      projectRepo.save.mockResolvedValue(updated as any);
 
       const result = await service.update('test-id', 'company-1', {
         name: 'Updated',
@@ -218,8 +208,8 @@ describe('ProjectsService', () => {
   describe('remove', () => {
     it('should remove a project', async () => {
       const project = createMockProject();
-      projectRepo.findOne.mockResolvedValue(project);
-      projectRepo.remove.mockResolvedValue(project);
+      projectRepo.findOne.mockResolvedValue(project as any);
+      projectRepo.remove.mockResolvedValue(project as any);
 
       const result = await service.remove('test-id', 'company-1');
       expect(projectRepo.remove).toHaveBeenCalledWith(project);

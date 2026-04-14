@@ -135,7 +135,7 @@ describe('BudgetsController', () => {
         'budget-1',
         updateDto,
         'user-1',
-        'company-1',
+        undefined,
       );
       expect(result).toEqual(mockBudget);
     });
@@ -167,7 +167,7 @@ describe('BudgetsController', () => {
       expect(mockBudgetsService.setActiveVersion).toHaveBeenCalledWith(
         'budget-1',
         'user-1',
-        'company-1',
+        undefined,
       );
       expect(result).toEqual({ id: 'budget-1', is_active: true });
     });

@@ -11,42 +11,47 @@ import {
   TaskPriority,
 } from './schedule.entity';
 
-const mockTask = (overrides = {}): ScheduleTask => ({
-  id: 'task-1',
-  project_id: 'project-1',
-  name: 'Foundation work',
-  description: 'Build foundation',
-  start_date: new Date('2026-01-01'),
-  end_date: new Date('2026-01-15'),
-  progress: 50,
-  status: TaskStatus.IN_PROGRESS,
-  priority: TaskPriority.HIGH,
-  parent_id: null,
-  position: 1,
-  duration: 15,
-  dependency_days: 0,
-  assigned_to: null,
-  budget: null,
-  created_at: new Date(),
-  updated_at: new Date(),
-  ...overrides,
-});
+const mockTask = (overrides = {}): ScheduleTask =>
+  ({
+    id: 'task-1',
+    project_id: 'project-1',
+    name: 'Foundation work',
+    description: 'Build foundation',
+    start_date: new Date('2026-01-01'),
+    end_date: new Date('2026-01-15'),
+    progress: 50,
+    status: TaskStatus.IN_PROGRESS,
+    priority: TaskPriority.HIGH,
+    company_id: 'company-1',
+    parent_id: undefined as any,
+    position: 1,
+    duration: 15,
+    dependency_days: 0,
+    assigned_to: undefined as any,
+    budget: undefined as any,
+    created_at: new Date(),
+    updated_at: new Date(),
+    ...overrides,
+  }) as any;
 
-const mockMilestone = (overrides = {}): ScheduleMilestone => ({
-  id: 'milestone-1',
-  project_id: 'project-1',
-  name: 'Project Start',
-  description: 'Kickoff',
-  target_date: new Date('2026-01-01'),
-  completed: false,
-  completed_date: null,
-  position: 1,
-  created_at: new Date(),
-  ...overrides,
-});
+const mockMilestone = (overrides = {}): ScheduleMilestone =>
+  ({
+    id: 'milestone-1',
+    project_id: 'project-1',
+    name: 'Project Start',
+    description: 'Kickoff',
+    target_date: new Date('2026-01-01'),
+    completed: false,
+    completed_date: undefined as any,
+    position: 1,
+    company_id: 'company-1',
+    created_at: new Date(),
+    ...overrides,
+  }) as any;
 
 const mockResource = (overrides = {}): ScheduleResource => ({
   id: 'resource-1',
+  company_id: 'company-1',
   project_id: 'project-1',
   resource_id: 'worker-1',
   resource_type: 'worker',

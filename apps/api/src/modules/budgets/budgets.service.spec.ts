@@ -518,7 +518,11 @@ describe('BudgetsService', () => {
         },
       );
       budgetRepo._mockSave.mockRejectedValue(
-        new OptimisticLockVersionMismatchError('Budget', 1, 2),
+        new OptimisticLockVersionMismatchError(
+          'Budget' as any,
+          1 as any,
+          2 as any,
+        ),
       );
 
       await expect(
@@ -685,6 +689,9 @@ describe('BudgetsService', () => {
             budget_id: 'budget-1',
             total_cost: 1000,
             total_price: 1500,
+            budget: {} as any,
+            created_at: new Date(),
+            updated_at: new Date(),
             items: [
               {
                 id: 'item-1',
@@ -697,7 +704,7 @@ describe('BudgetsService', () => {
                 position: 1,
                 total_cost: 1000,
                 total_price: 1500,
-              } as unknown as Item,
+              } as any,
             ],
           },
         ],

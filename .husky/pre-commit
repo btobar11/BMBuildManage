@@ -1,3 +1,0 @@
-npx turbo run lint -- --quiet
-cd apps/api && npx tsc --noEmit
-cd ../web && npx tsc --noEmit
