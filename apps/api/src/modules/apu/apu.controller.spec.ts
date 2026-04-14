@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ApuController } from './apu.controller';
 import { ApuService } from './apu.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { ApuTemplate } from './apu-template.entity';
 
 const mockApuService = {
   create: jest.fn(),
@@ -94,7 +95,7 @@ describe('ApuController', () => {
     });
 
     it('should return all without filters', async () => {
-      const mockResults = [];
+      const mockResults: ApuTemplate[] = [];
       mockApuService.findAll.mockResolvedValue(mockResults);
 
       const result = await controller.findAll(undefined, undefined, undefined);

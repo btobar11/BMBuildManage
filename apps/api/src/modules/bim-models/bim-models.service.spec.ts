@@ -66,9 +66,9 @@ describe('BimModelsService', () => {
       const models = [createMockModel(), createMockModel({ id: 'model-2' })];
       modelRepo.find.mockResolvedValue(models);
 
-      const result = await service.getModelsByProject('project-1');
+      const result = await service.getModelsByProject('project-1', 'company-1');
       expect(modelRepo.find).toHaveBeenCalledWith({
-        where: { project_id: 'project-1' },
+        where: { project_id: 'project-1', company_id: 'company-1' },
         order: { created_at: 'DESC' },
       });
       expect(result).toEqual(models);
@@ -77,7 +77,7 @@ describe('BimModelsService', () => {
     it('should return empty array when no models', async () => {
       modelRepo.find.mockResolvedValue([]);
 
-      const result = await service.getModelsByProject('project-1');
+      const result = await service.getModelsByProject('project-1', 'company-1');
       expect(result).toEqual([]);
     });
   });
@@ -105,7 +105,7 @@ describe('BimModelsService', () => {
       modelRepo.findOne.mockResolvedValue(model);
       modelRepo.remove.mockResolvedValue(model);
 
-      const result = await service.deleteModel('model-1');
+      const result = await service.deleteModel('model-1', 'company-1');
       expect(modelRepo.remove).toHaveBeenCalledWith(model);
       expect(result).toEqual({ success: true });
     });
@@ -113,7 +113,7 @@ describe('BimModelsService', () => {
     it('should throw NotFoundException if model not found', async () => {
       modelRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.deleteModel('nonexistent')).rejects.toThrow(
+      await expect(service.deleteModel('nonexistent', 'company-1')).rejects.toThrow(
         NotFoundException,
       );
     });

@@ -226,8 +226,8 @@ describe('BIMReportsService', () => {
       );
 
       expect(structureOpportunity).toBeDefined();
-      expect(structureOpportunity.potentialSavings).toBeGreaterThan(0);
-      expect(structureOpportunity.actions).toContain(
+      expect(structureOpportunity!.potentialSavings).toBeGreaterThan(0);
+      expect(structureOpportunity!.actions).toContain(
         'Revisar especificaciones técnicas',
       );
     });

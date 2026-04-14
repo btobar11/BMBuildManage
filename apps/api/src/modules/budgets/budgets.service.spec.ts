@@ -42,7 +42,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
     estimated_utility: 15000,
     markup_percentage: 20,
     notes: 'Test budget',
-    rejection_reason: null,
+    rejection_reason: '',
     created_at: new Date('2024-01-01T00:00:00.000Z'),
     updated_at: new Date('2024-01-01T00:00:00.000Z'),
     stages: [],

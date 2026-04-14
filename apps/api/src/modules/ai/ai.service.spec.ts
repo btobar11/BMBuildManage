@@ -9,6 +9,8 @@ import { Budget, BudgetStatus } from '../budgets/budget.entity';
 import { Stage } from '../stages/stage.entity';
 import { Item } from '../items/item.entity';
 import { Worker } from '../workers/worker.entity';
+import { Company } from '../companies/company.entity';
+import { Client } from '../clients/client.entity';
 import { FinancialService } from '../budgets/financial.service';
 import { BIMAnalyticsService } from './bim-analytics.service';
 
@@ -20,25 +22,32 @@ const createMockProject = (overrides?: Partial<Project>): Project => {
   const project = {
     id: 'project-1',
     company_id: 'company-1',
-    company: null,
+    company: null as unknown as Company,
     name: 'Test Project',
     description: 'Test description',
     status: ProjectStatus.IN_PROGRESS,
     client_id: null,
-    client: null,
-    location: 'Test location',
+    client: null as unknown as Client,
+    address: 'Test address',
+    region: 'Test region',
+    commune: 'Test commune',
+    type: ['construction'],
+    folder: null,
     start_date: new Date('2024-01-01'),
     end_date: new Date('2024-12-31'),
     estimated_budget: 100000,
-    actual_cost: 50000,
-    folder: null,
-    created_at: new Date(),
-    updated_at: new Date(),
+    estimated_price: 120000,
+    estimated_area: 500,
     budgets: [],
     expenses: [],
     documents: [],
     stages: [],
     items: [],
+    worker_assignments: [],
+    worker_payments: [],
+    project_payments: [],
+    created_at: new Date(),
+    updated_at: new Date(),
     ...overrides,
   } as unknown as Project;
   return project;
@@ -691,10 +700,10 @@ describe('AIService', () => {
   // ═══════════════════════════════════════════════════════════════════════════
 
   describe('Data edge cases', () => {
-    it('should handle projects with null dates', async () => {
+    it('should handle projects with undefined dates', async () => {
       const projectWithNullDates = createMockProject({
-        start_date: null,
-        end_date: null,
+        start_date: undefined,
+        end_date: undefined,
       });
       projectRepo.find.mockResolvedValue([projectWithNullDates]);
 
@@ -710,7 +719,7 @@ describe('AIService', () => {
     it('should handle projects with zero budget', async () => {
       const projectWithZeroBudget = createMockProject({
         estimated_budget: 0,
-        actual_cost: 0,
+        estimated_price: 0,
       });
       projectRepo.find.mockResolvedValue([projectWithZeroBudget]);
 
