@@ -86,8 +86,14 @@ export class Project {
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   estimated_budget: number;
 
+  @Column({ type: 'varchar', default: 'CLP' })
+  budget_currency: string;
+
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   estimated_price: number;
+
+  @Column({ type: 'varchar', default: 'CLP' })
+  price_currency: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   estimated_area: number;

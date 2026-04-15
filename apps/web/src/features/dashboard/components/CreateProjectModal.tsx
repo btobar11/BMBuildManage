@@ -2,8 +2,9 @@ import { useState, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Loader2, AlertCircle, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import api from '../../../lib/api';
-import { chileRegions, getRegionNames, getCommunesByRegion } from '../../../lib/chileLocationData';
+import { getRegionNames, getCommunesByRegion } from '../../../lib/chileLocationData';
 import { ClientAutocomplete } from './ClientAutocomplete';
+import { useUFValue } from '../../../hooks/useUFValue';
 
 interface FormErrors {
   name?: string;
@@ -72,6 +73,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   };
 
   const queryClient = useQueryClient();
+  const { data: ufValue, isLoading: isLoadingUF } = useUFValue();
 
   const createProjectMutation = useMutation({
     mutationFn: async () => {
@@ -102,6 +104,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         start_date: sanitizedStartDate,
         end_date: sanitizedEndDate,
         client_id: formData.client_id || undefined,
+        budget_currency: formData.estimated_price_currency,
+        price_currency: formData.estimated_price_currency,
       };
 
       const projectResponse = await api.post('/projects', projectPayload);
@@ -479,6 +483,14 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       placeholder="Dejar en blanco si se desconoce"
                     />
                   </div>
+                  {formData.estimated_price_currency === 'UF' && formData.estimated_price && ufValue && (
+                    <div className="flex justify-end pr-2 pt-1">
+                      <p className="text-xs text-indigo-400 font-medium">
+                        ≈ {(Number(formData.estimated_price) * ufValue).toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })} CLP 
+                        <span className="text-muted-foreground ml-1">(UF hoy: {ufValue.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })})</span>
+                      </p>
+                    </div>
+                  )}
                   {touched.estimated_price && errors.estimated_price && (
                     <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
                       <AlertCircle size={12} /><span>{errors.estimated_price}</span>

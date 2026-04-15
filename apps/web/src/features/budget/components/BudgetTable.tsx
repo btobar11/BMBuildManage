@@ -490,7 +490,7 @@ const StageSection = memo(function StageSection({
                                         <label className="text-[10px] text-muted-foreground mb-1 block uppercase tracking-wide">{dim.label}</label>
                                         <input
                                           type="number"
-                                          value={(row.original as Record<string, unknown>)[dim.key] as number || 0}
+                                          value={(row.original as unknown as Record<string, unknown>)[dim.key] as number || 0}
                                           onChange={(e) => {
                                             const val = parseFloat(e.target.value) || 0;
                                             const next = { ...row.original, [dim.key]: val };
@@ -627,7 +627,7 @@ export function BudgetTable({
           title="Comienza a construir"
           description="Crea tu primera etapa del proyecto para empezar a añadir partidas de obra."
           size="lg"
-          action={{
+          primaryAction={{
             label: 'Crear Primera Etapa',
             onClick: () => { onAddStage(); toast.success('Primera etapa creada'); }
           }}

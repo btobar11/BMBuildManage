@@ -384,6 +384,64 @@ describe('private methods edge cases', () => {
     expect(result.elements.length).toBe(1);
   });
 
+  it('covers getPropertyTypeName completely', async () => {
+    // We send properties of types 1 through 7 and an unknown type 99 to ensure lines 552-570 are covered
+    const psetRelations = [
+      { value: 501 }, { value: 502 }, { value: 503 }, { value: 504 },
+      { value: 505 }, { value: 506 }, { value: 507 }, { value: 508 }
+    ];
+
+    const model = createMockModel({
+      100: { IsDefinedBy: [{ value: 200 }] },
+      200: { RelatingPropertyDefinition: { value: 300 } },
+      300: { Name: { value: 'PSet_Test' }, HasProperties: psetRelations },
+      501: { Name: { value: 'Prop1' }, type: 1, NominalValue: { value: 10 } },
+      502: { Name: { value: 'Prop2' }, type: 2, NominalValue: { value: 20 } },
+      503: { Name: { value: 'Prop3' }, type: 3, NominalValue: { value: 30 } },
+      504: { Name: { value: 'Prop4' }, type: 4, NominalValue: { value: 40 } },
+      505: { Name: { value: 'Prop5' }, type: 5, NominalValue: { value: 50 } },
+      506: { Name: { value: 'Prop6' }, type: 6, NominalValue: { value: 60 } },
+      507: { Name: { value: 'Prop7' }, type: 7, NominalValue: { value: 70 } },
+      508: { Name: { value: 'Prop8' }, type: 99, NominalValue: { value: 99 } },
+    }, {
+      [IFC_WALL]: {
+        100: { Name: { value: 'Wall_Props_Test' }, IsDefinedBy: [{ value: 200 }] },
+      },
+    });
+
+    const service = new IfcExtractionService(model);
+    const result = await service.extract();
+
+    expect(result.elements.length).toBe(1);
+    const properties = result.elements[0].properties;
+    expect(properties.find((p) => p.propertyType === 'IfcPropertySingleValue')).toBeDefined();
+    expect(properties.find((p) => p.propertyType === 'IfcPropertyBoundedValue')).toBeDefined();
+    expect(properties.find((p) => p.propertyType === 'IfcPropertyListValue')).toBeDefined();
+    expect(properties.find((p) => p.propertyType === 'IfcPropertyEnumerationValue')).toBeDefined();
+    expect(properties.find((p) => p.propertyType === 'IfcPropertyTableValue')).toBeDefined();
+    expect(properties.find((p) => p.propertyType === 'IfcPropertyReferenceValue')).toBeDefined();
+    expect(properties.find((p) => p.propertyType === 'IfcPropertyComplexValue')).toBeDefined();
+    expect(properties.find((p) => p.propertyType === 'PropertyType(99)')).toBeDefined();
+  });
+
+  it('handles spatial index and storey building errors gracefully', async () => {
+    const errorModel = {
+      modelID: 'error-model-spatial',
+      getProperties: vi.fn(async () => { throw new Error('Spatial relation error'); }),
+      getAllPropertiesOfType: vi.fn(async (type) => {
+        if (type === IFC_BUILDING || type === IFC_STOREY || type === 1449333159 || type === 3294025466) {
+           throw new Error('Storey query error');
+        }
+        return { 100: { Name: { value: 'Wall_Error_Test' } } };
+      }),
+    };
+
+    const service = new IfcExtractionService(errorModel as any);
+    const result = await service.extract();
+    expect(result.elements.length).toBe(1);
+    expect(result.spatialTree.children).toHaveLength(0);
+  });
+
   it('handles property with null values', async () => {
     const model = createMockModel({}, {
       [IFC_WALL]: {
@@ -403,31 +461,39 @@ describe('private methods edge cases', () => {
 
   it('extracts elements with multiple quantity types', async () => {
     const model = createMockModel({
+      100: { Name: { value: 'Wall' }, IsDefinedBy: [{ value: 200 }] },
+      200: { RelatingPropertyDefinition: { value: 500 } },
       500: {
-        Name: { value: 'PSet' },
-        Quantities: {
-          value: [
-            { value: 100, type: 2 }, // Length
-            { value: 200, type: 3 }, // Area
-            { value: 300, type: 4 }, // Volume
-          ],
-        },
+        Name: { value: 'Qto_WallBaseQuantities' },
+        Quantities: [
+          { value: 601 }, // Length
+          { value: 602 }, // Area
+          { value: 603 }, // Volume
+          { value: 604 }, // Count
+        ],
       },
+      601: { Name: { value: 'Length' }, LengthValue: { value: 10 } },
+      602: { Name: { value: 'NetSideArea' }, AreaValue: { value: 20 } },
+      603: { Name: { value: 'NetVolume' }, VolumeValue: { value: 30 } },
+      604: { Name: { value: 'Count' }, CountValue: { value: 5 } },
     }, {
       [IFC_WALL]: {
         100: {
           Name: { value: 'Wall' },
-          IsDefinedBy: [
-            { value: 500 }, // References PSet
-          ],
+          IsDefinedBy: [{ value: 200 }],
         },
       },
     });
+    // Let's log getProperties to see what happens
+    const spy = vi.spyOn(model, 'getProperties');
 
     const service = new IfcExtractionService(model);
     const result = await service.extract();
 
     expect(result.elements.length).toBe(1);
+    expect(result.elements[0].quantities.netSideArea).toBe(20);
+    expect(result.elements[0].quantities.netVolume).toBe(30);
+    expect(result.elements[0].quantities.length).toBe(10);
   });
 
   it('handles building without name', async () => {
@@ -453,7 +519,7 @@ describe('private methods edge cases', () => {
   it('handles getProperties returning undefined', async () => {
     const elementsByType: Record<number, Record<number, any>> = {
       [IFC_WALL]: {
-        100: { Name: { value: 'Wall' } },
+        100: { Name: { value: 'Wall' }, IsDefinedBy: [{ value: 9999 }] },
       },
     };
 

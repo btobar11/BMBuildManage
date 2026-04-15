@@ -33,7 +33,9 @@ import {
   TrendingUp,
   Layers,
   Gauge,
+  RefreshCcw,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 function LoadingState() {
   return (
@@ -518,22 +520,36 @@ export function BimAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Analítica BIM</h1>
-          <p className="text-muted-foreground">
-            Análisis y métricas de tus modelos BIM
-          </p>
+      {/* Header Premium */}
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="relative bg-card/40 backdrop-blur-md border border-border rounded-2xl p-6 overflow-hidden shadow-lg shadow-black/5"
+      >
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary-500/10 via-primary-500/5 to-transparent rounded-full blur-[80px] -z-10 translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-primary-500/20 text-white shrink-0">
+              <Activity size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-foreground tracking-tight">Centro de Analítica BIM 5D</h1>
+              <p className="text-sm font-medium text-muted-foreground">
+                Inteligencia de Datos, Volumetrías y Control de Clashes
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold bg-background/50 hover:bg-background border border-border rounded-xl transition-all disabled:opacity-50 shadow-sm"
+          >
+            <RefreshCcw size={16} className={isLoading ? 'animate-spin opacity-50' : ''} />
+            {isLoading ? 'Sincronizando...' : 'Sincronizar Datos'}
+          </button>
         </div>
-        <button
-          onClick={() => refetch()}
-          disabled={isLoading}
-          className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-lg transition-colors disabled:opacity-50"
-        >
-          {isLoading ? 'Actualizando...' : 'Actualizar'}
-        </button>
-      </div>
+      </motion.div>
 
       {/* Overview Metrics */}
       <MetricsGrid

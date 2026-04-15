@@ -59,6 +59,8 @@ export function useBimEngine(
   const [availablePlans, setAvailablePlans] = useState<any[]>([]);
   const [activePlanId, setActivePlanId] = useState<string | null>(null);
   
+  const cleanupFunctionsRef = useRef<Array<() => void>>([]);
+
   // Store options in ref so callbacks don't go stale
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -176,6 +178,7 @@ export function useBimEngine(
           const workerBlob = await fetchedUrl.blob();
           const workerFile = new File([workerBlob], 'worker.mjs', { type: 'text/javascript' });
           const workerUrl = URL.createObjectURL(workerFile);
+          cleanupFunctionsRef.current.push(() => URL.revokeObjectURL(workerUrl));
           
           fragments.init(workerUrl);
           console.log('[BimEngine] Fragments worker initialized via Blob.');
@@ -209,14 +212,20 @@ export function useBimEngine(
         grids.create(world);
 
         // Update fragments on camera movement
-        world.camera.controls.addEventListener('update', () => {
+        const onCameraUpdate = () => {
           if (!isDisposedRef.current) {
             fragments.core.update();
           }
+        };
+        world.camera.controls.addEventListener('update', onCameraUpdate);
+        cleanupFunctionsRef.current.push(() => {
+          try {
+            world.camera.controls.removeEventListener('update', onCameraUpdate);
+          } catch { /* ignore */ }
         });
 
         // When a model is loaded, add it to the scene
-        fragments.list.onItemSet.add(({ value: model }: { value: any }) => {
+        const onModelLoaded = ({ value: model }: { value: any }) => {
           if (isDisposedRef.current) return;
           model.useCamera(world.camera.three);
           world.scene.three.add(model.object);
@@ -244,15 +253,23 @@ export function useBimEngine(
               }
             }
           })();
+        };
+        fragments.list.onItemSet.add(onModelLoaded);
+        cleanupFunctionsRef.current.push(() => {
+          fragments.list.onItemSet.remove(onModelLoaded);
         });
 
         // Fix z-fighting
-        fragments.core.models.materials.list.onItemSet.add(({ value: material }: { value: any }) => {
+        const onMaterialSet = ({ value: material }: { value: any }) => {
           if (!('isLodMaterial' in material && material.isLodMaterial)) {
             material.polygonOffset = true;
             material.polygonOffsetUnits = 1;
             material.polygonOffsetFactor = Math.random();
           }
+        };
+        fragments.core.models.materials.list.onItemSet.add(onMaterialSet);
+        cleanupFunctionsRef.current.push(() => {
+          fragments.core.models.materials.list.onItemSet.remove(onMaterialSet);
         });
 
         // 4. Configure Highlighter with auto click-to-select
@@ -674,6 +691,10 @@ export function useBimEngine(
       // 8. Final Reset
       isInitializedRef.current = false;
       isInitializingRef.current = null;
+      
+      // Execute cleanup functions
+      cleanupFunctionsRef.current.forEach(fn => fn());
+      cleanupFunctionsRef.current = [];
 
       console.log('[BimEngine] Strict cleanup complete.');
     };

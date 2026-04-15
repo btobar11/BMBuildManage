@@ -111,11 +111,11 @@ const ProjectSkeleton = () => (
 // ─── Status Badge ──────────────────────────────────────────────────────────
 const ProjectStatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
-    draft: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-    sent: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400',
-    approved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    in_progress: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-    completed: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+    draft: 'bg-slate-50 text-slate-500 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700/50 dark:text-slate-400',
+    sent: 'bg-sky-50 text-sky-600 border border-sky-200 dark:bg-sky-900/20 dark:border-sky-800/50 dark:text-sky-400',
+    approved: 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/50 dark:text-blue-400',
+    in_progress: 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800/50 dark:text-emerald-400',
+    completed: 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:border-emerald-800/50 dark:text-emerald-300',
   };
 
   const labels: Record<string, string> = {
@@ -127,7 +127,7 @@ const ProjectStatusBadge = ({ status }: { status: string }) => {
   };
 
   return (
-    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide ${styles[status] || styles.draft}`}>
+    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${styles[status] || styles.draft}`}>
       {labels[status] || status}
     </span>
   );
@@ -383,17 +383,19 @@ export const DashboardPage = () => {
                   }}
                   className={`group ${selectedIds.includes(project.id) ? 'ring-2 ring-emerald-500/30 border-emerald-500' : ''}`}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <ProjectStatusBadge status={project.status} />
-                    <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 data-mono tracking-tight">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-bold text-lg text-foreground truncate pr-2">{project.name}</h3>
+                    <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 data-mono tracking-tight shrink-0">
                       ${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(project.estimated_budget || 0)}
                     </span>
                   </div>
 
-                  <h3 className="font-semibold text-lg text-foreground mb-2 truncate">{project.name}</h3>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                    <MapPin size={14} className="shrink-0" />
-                    <span className="truncate">{project.location || 'Sin ubicación'}</span>
+                  <div className="flex items-center justify-between mb-4">
+                    <ProjectStatusBadge status={project.status} />
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[50%]">
+                      <MapPin size={12} className="shrink-0" />
+                      <span className="truncate">{project.location || 'Sin ubicación'}</span>
+                    </div>
                   </div>
 
                   {project.description && (

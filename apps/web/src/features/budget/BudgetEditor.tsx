@@ -62,6 +62,8 @@ interface ServerBudget {
       email?: string;
       rut?: string;
     };
+    budget_currency?: string;
+    price_currency?: string;
   };
   stages?: Array<{
     id: string;
@@ -250,6 +252,7 @@ export default function BudgetEditor() {
         clientName: serverBudget.project?.client?.name || 'Cliente',
         status: (serverBudget.status as any) || 'editing',
         clientPrice: Number(serverBudget.total_estimated_price) || 0,
+        currency: serverBudget.project?.price_currency || 'CLP',
         professionalFeePercentage: (serverBudget as any).professional_fee_percentage ?? 10,
         estimatedUtility: (serverBudget as any).estimated_utility ?? 15,
         markupPercentage: (serverBudget as any).markup_percentage ?? 20,
@@ -376,13 +379,7 @@ export default function BudgetEditor() {
 
   return (
     <div className="h-full bg-background text-foreground relative">
-      {budget.status === 'draft' && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div className="bg-amber-500/20 border-2 border-amber-500/50 rounded-full px-6 py-2">
-            <span className="text-amber-400 font-black text-lg tracking-widest uppercase">BORRADOR</span>
-          </div>
-        </div>
-      )}
+
       {/* Top nav */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-between gap-4">

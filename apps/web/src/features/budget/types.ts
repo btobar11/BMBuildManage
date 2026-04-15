@@ -92,6 +92,7 @@ export interface Budget {
   clientName: string;
   status: 'draft' | 'editing' | 'sent' | 'approved' | 'rejected' | 'counter_offer';
   clientPrice: number;
+  currency?: string;
   professionalFeePercentage?: number;
   estimatedUtility?: number;
   markupPercentage?: number;

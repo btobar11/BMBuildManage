@@ -109,7 +109,7 @@ export class CreateProjectDto {
   end_date?: Date;
 
   @ApiPropertyOptional({
-    description: 'Presupuesto total en CLP',
+    description: 'Presupuesto total en CLP (u otra divisa)',
     example: 150000000,
     minimum: 0,
   })
@@ -121,7 +121,15 @@ export class CreateProjectDto {
   budget?: number;
 
   @ApiPropertyOptional({
-    description: 'Precio estimado de venta en CLP',
+    description: 'Moneda del presupuesto estimado (CLP, UF, etc)',
+    example: 'CLP',
+  })
+  @IsOptional()
+  @IsString()
+  budget_currency?: string;
+
+  @ApiPropertyOptional({
+    description: 'Precio estimado de venta',
     example: 180000000,
     minimum: 0,
   })
@@ -133,6 +141,14 @@ export class CreateProjectDto {
   })
   @Type(() => Number)
   estimated_price?: number;
+
+  @ApiPropertyOptional({
+    description: 'Moneda del precio estimado (CLP, UF, etc)',
+    example: 'CLP',
+  })
+  @IsOptional()
+  @IsString()
+  price_currency?: string;
 
   @ApiPropertyOptional({
     description: 'Superficie estimada en m²',
