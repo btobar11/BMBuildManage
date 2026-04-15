@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AIAssistant } from '../AIAssistant';
+import { AIAssistant } from './AIAssistant';
 import { CHILEAN_COSTS } from '../costLibrary';
 
 vi.mock('../costLibrary', () => ({
