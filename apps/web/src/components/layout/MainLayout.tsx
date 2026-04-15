@@ -115,7 +115,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-2 space-y-1 overflow-hidden">
+        <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto overflow-x-hidden slim-scrollbar">
           {NAV_ITEMS.map((item, index) => {
             const isActive = location.pathname === item.path;
             return (

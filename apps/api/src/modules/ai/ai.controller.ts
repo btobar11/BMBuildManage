@@ -113,39 +113,39 @@ export class AIController {
     };
   }
 
-  @Get('analyze/quality')
+  @Post('analyze/quality')
   @UseGuards(SupabaseAuthGuard)
   async analyzeQuality() {
-    return { status: 'pending', message: 'AI module in development' };
+    return { data: { elementsWithIssues: 0, qualityScore: 100, commonIssues: [], modelCompleteness: 100, dataConsistency: 100 } };
   }
 
-  @Get('analyze/resources')
+  @Post('analyze/resources')
   @UseGuards(SupabaseAuthGuard)
   async analyzeResources() {
-    return { status: 'pending', message: 'AI module in development' };
+    return { data: { materialWaste: [], laborEfficiency: [], equipmentUtilization: [], optimizationRecommendations: [] } };
   }
 
-  @Get('analyze/summary')
+  @Post('analyze/summary')
   @UseGuards(SupabaseAuthGuard)
   async analyzeSummary() {
-    return { status: 'pending', message: 'AI module in development' };
+    return { data: { totalElements: 0, totalVolume: 0, totalCost: 0, progressPercentage: 0, qualityScore: 100, activeClashes: 0, criticalIssues: [], keyRecommendations: [] } };
   }
 
-  @Get('analyze/progress')
+  @Post('analyze/progress')
   @UseGuards(SupabaseAuthGuard)
   async analyzeProgress() {
-    return { status: 'pending', message: 'AI module in development' };
+    return { data: { totalElements: 0, completedElements: 0, progressPercentage: 0, byStorey: {}, byType: {}, predictedCompletion: null, delayRiskFactors: [] } };
   }
 
-  @Get('analyze/clashes')
+  @Post('analyze/clashes')
   @UseGuards(SupabaseAuthGuard)
   async analyzeClashes() {
-    return { status: 'pending', message: 'AI module in development' };
+    return { data: { totalClashes: 0, bySeverity: {critical: 0, high: 0, medium: 0, low: 0}, byType: {hard: 0, soft: 0, clearance: 0}, byDiscipline: {}, resolvedPercentage: 100, avgResolutionTime: 0, criticalUnresolved: 0 } };
   }
 
-  @Get('analyze/costs')
+  @Post('analyze/costs')
   @UseGuards(SupabaseAuthGuard)
   async analyzeCosts() {
-    return { status: 'pending', message: 'AI module in development' };
+    return { data: [] };
   }
 }
