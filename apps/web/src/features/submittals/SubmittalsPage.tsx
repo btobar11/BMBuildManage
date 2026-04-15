@@ -110,9 +110,9 @@ export function SubmittalsPage() {
   return (
     <div className="p-8 pb-32">
       <PageHeader
-        title="Submittals"
+        title="Entregables"
         icon={<FileText size={22} />}
-        breadcrumbs={[{ label: 'Gestión de Proyecto' }, { label: 'Submittals', active: true }]}
+        breadcrumbs={[{ label: 'Gestión de Proyecto' }, { label: 'Entregables', active: true }]}
       />
 
       <div className="mb-6">
@@ -135,7 +135,7 @@ export function SubmittalsPage() {
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Buscar submittals..."
+                placeholder="Buscar entregables..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background"
@@ -160,7 +160,7 @@ export function SubmittalsPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium"
               >
                 <Plus size={18} />
-                Nuevo Submittal
+                Nuevo Entregable
               </button>
             </div>
           </div>
@@ -189,7 +189,7 @@ export function SubmittalsPage() {
           ) : filteredSubmittals?.length === 0 ? (
             <div className="text-center py-12">
               <FileText size={48} className="mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No hay submittals</p>
+              <p className="text-muted-foreground">No hay entregables registrados</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -262,18 +262,18 @@ export function SubmittalsPage() {
       ) : (
         <div className="text-center py-12">
           <FileText size={48} className="mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">Selecciona un proyecto para ver sus submittals</p>
+          <p className="text-muted-foreground">Selecciona un proyecto para ver sus entregables</p>
         </div>
       )}
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-foreground mb-4">Crear Nuevo Submittal</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">Crear Nuevo Entregable</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Título</label>
-                <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2 rounded-lg border border-border bg-background" placeholder="Título del submittal" />
+                <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2 rounded-lg border border-border bg-background" placeholder="Título del entregable" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Descripción</label>
@@ -303,7 +303,7 @@ export function SubmittalsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Sección de Spec</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Sección EETT</label>
                   <input type="text" value={formData.spec_section} onChange={(e) => setFormData({ ...formData, spec_section: e.target.value })} className="w-full px-4 py-2 rounded-lg border border-border bg-background" placeholder="ej: 09 29 00" />
                 </div>
                 <div>
@@ -314,7 +314,7 @@ export function SubmittalsPage() {
               <div className="flex gap-3 pt-4">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-muted">Cancelar</button>
                 <button type="submit" disabled={createMutation.isPending} className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50">
-                  {createMutation.isPending ? 'Creando...' : 'Crear Submittal'}
+                  {createMutation.isPending ? 'Creando...' : 'Crear Entregable'}
                 </button>
               </div>
             </form>

@@ -9,10 +9,13 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
+@ApiTags('invoices')
+@ApiBearerAuth()
 @Controller('invoices')
 @UseGuards(SupabaseAuthGuard)
 export class InvoicesController {

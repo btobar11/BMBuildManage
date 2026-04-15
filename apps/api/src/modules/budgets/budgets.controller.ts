@@ -23,6 +23,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+
 // ─── DTOs ─────────────────────────────────────────────────────────────────
 
 interface BulkImportItemDto {
@@ -52,6 +54,8 @@ interface AuthenticatedRequest extends Request {
 
 // ─── Controller ────────────────────────────────────────────────────────────
 
+@ApiTags('budgets')
+@ApiBearerAuth()
 @Controller('budgets')
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 export class BudgetsController {

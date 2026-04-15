@@ -12,11 +12,14 @@ import {
   HttpStatus,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
+@ApiTags('Projects')
+@ApiBearerAuth()
 @Controller('projects')
 @UseGuards(SupabaseAuthGuard)
 export class ProjectsController {
@@ -24,6 +27,7 @@ export class ProjectsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new project' })
   async create(
     @Body() createProjectDto: CreateProjectDto,
     @Request() req: any,

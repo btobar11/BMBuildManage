@@ -6,8 +6,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "docs:generate": "npx tsx scripts/generate-docs.ts",
-    "prepare": "husky"
+    "docs:generate": "npx tsx scripts/generate-docs.ts"
   },
   "workspaces": [
     "apps/*",

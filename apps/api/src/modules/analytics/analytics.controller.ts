@@ -1,4 +1,5 @@
 import { Controller, Get, Param, Query, Res, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -8,6 +9,8 @@ import { CurrentCompany } from '../../common/decorators/current-company.decorato
 import { AnalyticsService } from './analytics.service';
 import { AnalyticsExportService } from './analytics-export.service';
 
+@ApiTags('analytics')
+@ApiBearerAuth()
 @Controller('analytics')
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 export class AnalyticsController {
@@ -123,6 +126,31 @@ export class AnalyticsController {
     @Param('projectId') projectId: string,
   ) {
     return this.analyticsService.getProjectCashflow(companyId, projectId);
+  }
+
+  // =========================================================================
+  // LABOR PRODUCTIVITY KPIs
+  // =========================================================================
+
+  @Get('labor-productivity')
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.ENGINEER,
+    UserRole.SITESUPERVISOR,
+    UserRole.FOREMAN,
+  )
+  async getLaborProductivity(@CurrentCompany() companyId: string) {
+    return this.analyticsService.getLaborProductivity(companyId);
+  }
+
+  // =========================================================================
+  // SUBCONTRACTOR COMPLIANCE SUMMARY
+  // =========================================================================
+
+  @Get('compliance-summary')
+  @Roles(UserRole.ADMIN, UserRole.ENGINEER, UserRole.ACCOUNTING)
+  async getComplianceSummary(@CurrentCompany() companyId: string) {
+    return this.analyticsService.getComplianceSummary(companyId);
   }
 
   // =========================================================================

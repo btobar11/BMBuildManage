@@ -131,7 +131,7 @@ describe('BudgetsController', () => {
         mockAuthenticatedRequest(),
       );
 
-expect(mockBudgetsService.update).toHaveBeenCalledWith(
+      expect(mockBudgetsService.update).toHaveBeenCalledWith(
         'budget-1',
         updateDto,
         'user-1',
@@ -164,7 +164,7 @@ expect(mockBudgetsService.update).toHaveBeenCalledWith(
         mockAuthenticatedRequest(),
       );
 
-expect(mockBudgetsService.setActiveVersion).toHaveBeenCalledWith(
+      expect(mockBudgetsService.setActiveVersion).toHaveBeenCalledWith(
         'budget-1',
         'user-1',
         'company-1',

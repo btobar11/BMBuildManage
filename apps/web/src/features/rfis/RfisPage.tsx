@@ -101,9 +101,9 @@ export function RfisPage() {
   return (
     <div className="p-8 pb-32">
       <PageHeader
-        title="RFIs"
+        title="Solicitudes de Información (SDI)"
         icon={<FileQuestion size={22} />}
-        breadcrumbs={[{ label: 'Gestión de Proyecto' }, { label: 'RFIs', active: true }]}
+        breadcrumbs={[{ label: 'Gestión de Proyecto' }, { label: 'SDI', active: true }]}
       />
 
       {/* Project Selector */}
@@ -128,7 +128,7 @@ export function RfisPage() {
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Buscar RFIs..."
+                placeholder="Buscar solicitudes..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background"
@@ -152,7 +152,7 @@ export function RfisPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium"
               >
                 <Plus size={18} />
-                Nuevo RFI
+                Nueva SDI
               </button>
             </div>
           </div>
@@ -161,7 +161,7 @@ export function RfisPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-card border border-border rounded-lg p-4">
               <p className="text-2xl font-bold text-foreground">{rfis?.length || 0}</p>
-              <p className="text-sm text-muted-foreground">Total RFIs</p>
+              <p className="text-sm text-muted-foreground">Total SDI</p>
             </div>
             <div className="bg-card border border-border rounded-lg p-4">
               <p className="text-2xl font-bold text-blue-600">{rfis?.filter((r: Rfi) => r.status === 'submitted' || r.status === 'under_review').length || 0}</p>
@@ -183,7 +183,7 @@ export function RfisPage() {
           ) : filteredRfis?.length === 0 ? (
             <div className="text-center py-12">
               <FileQuestion size={48} className="mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No hay RFIs</p>
+              <p className="text-muted-foreground">No hay solicitudes de información</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -266,7 +266,7 @@ export function RfisPage() {
       ) : (
         <div className="text-center py-12">
           <FileQuestion size={48} className="mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground">Selecciona un proyecto para ver sus RFIs</p>
+          <p className="text-muted-foreground">Selecciona un proyecto para ver sus solicitudes de información</p>
         </div>
       )}
 
@@ -274,7 +274,7 @@ export function RfisPage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-lg">
-            <h2 className="text-xl font-bold text-foreground mb-4">Crear Nuevo RFI</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">Crear Nueva SDI</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Título</label>
@@ -284,7 +284,7 @@ export function RfisPage() {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-border bg-background"
-                  placeholder="Título del RFI"
+                  placeholder="Título de la solicitud"
                 />
               </div>
               <div>
@@ -348,7 +348,7 @@ export function RfisPage() {
                   disabled={createMutation.isPending}
                   className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
                 >
-                  {createMutation.isPending ? 'Creando...' : 'Crear RFI'}
+                  {createMutation.isPending ? 'Creando...' : 'Crear SDI'}
                 </button>
               </div>
             </form>
@@ -360,7 +360,7 @@ export function RfisPage() {
       {editingRfi && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-lg">
-            <h2 className="text-xl font-bold text-foreground mb-4">Responder RFI</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">Responder SDI</h2>
             <div className="mb-4 p-3 bg-muted rounded-lg">
               <p className="text-sm font-medium text-foreground">{editingRfi.title}</p>
               <p className="text-sm text-muted-foreground mt-2">{editingRfi.question}</p>

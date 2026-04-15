@@ -473,4 +473,94 @@ export class AnalyticsService {
       };
     });
   }
+
+  /**
+   * Labor Productivity KPIs — Resumen de productividad laboral por proyecto.
+   * Combina horas/jornadas trabajadas vs avance físico.
+   */
+  async getLaborProductivity(companyId: string): Promise<any[]> {
+    try {
+      const query = `
+        SELECT
+          p.id AS project_id,
+          p.name AS project_name,
+          COUNT(DISTINCT wa.worker_id) AS total_workers_assigned,
+          COALESCE(SUM(wp.amount), 0) AS total_labor_cost,
+          COALESCE(
+            (SELECT SUM(bel.quantity_executed) FROM budget_execution_logs bel
+             JOIN items i ON i.id = bel.item_id
+             JOIN stages s ON s.id = i.stage_id
+             JOIN budgets b ON b.id = s.budget_id
+             WHERE b.project_id = p.id AND b.is_active = true),
+            0
+          ) AS total_units_executed,
+          CASE
+            WHEN COALESCE(SUM(wp.amount), 0) > 0
+            THEN COALESCE(
+              (SELECT SUM(bel.quantity_executed) FROM budget_execution_logs bel
+               JOIN items i ON i.id = bel.item_id
+               JOIN stages s ON s.id = i.stage_id
+               JOIN budgets b ON b.id = s.budget_id
+               WHERE b.project_id = p.id AND b.is_active = true),
+              0
+            ) / (SUM(wp.amount) / 1000000)
+            ELSE 0
+          END AS productivity_index,
+          NOW() AS calculated_at
+        FROM projects p
+        LEFT JOIN worker_assignments wa ON wa.project_id = p.id AND wa.company_id = $1
+        LEFT JOIN worker_payments wp ON wp.project_id = p.id AND wp.company_id = $1
+        WHERE p.company_id = $1 AND p.status IN ('in_progress', 'approved')
+        GROUP BY p.id, p.name
+        ORDER BY p.name ASC
+      `;
+      return await this.dataSource.query(query, [companyId]);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Compliance Summary — Estado documental de subcontratistas por empresa.
+   * Resume cuántos subcontratos están al día vs bloqueados.
+   */
+  async getComplianceSummary(companyId: string): Promise<any> {
+    try {
+      const query = `
+        SELECT
+          COUNT(*) AS total_subcontractors,
+          COUNT(*) FILTER (WHERE compliance_status = 'compliant') AS compliant,
+          COUNT(*) FILTER (WHERE compliance_status = 'non_compliant') AS non_compliant,
+          COUNT(*) FILTER (WHERE compliance_status = 'pending_review') AS pending_review,
+          CASE
+            WHEN COUNT(*) > 0
+            THEN (COUNT(*) FILTER (WHERE compliance_status = 'compliant')::decimal / COUNT(*) * 100)
+            ELSE 0
+          END AS compliance_rate_percent,
+          NOW() AS calculated_at
+        FROM subcontractors
+        WHERE company_id = $1
+      `;
+      const results = await this.dataSource.query(query, [companyId]);
+      return results.length > 0
+        ? results[0]
+        : {
+            total_subcontractors: 0,
+            compliant: 0,
+            non_compliant: 0,
+            pending_review: 0,
+            compliance_rate_percent: 0,
+            calculated_at: new Date(),
+          };
+    } catch {
+      return {
+        total_subcontractors: 0,
+        compliant: 0,
+        non_compliant: 0,
+        pending_review: 0,
+        compliance_rate_percent: 0,
+        calculated_at: new Date(),
+      };
+    }
+  }
 }

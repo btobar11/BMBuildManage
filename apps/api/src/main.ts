@@ -24,6 +24,30 @@ export const createApp = async (expressInstance: any) => {
     app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
     app.useGlobalInterceptors(new LoggingInterceptor());
     app.setGlobalPrefix('api/v1');
+
+    const config = new DocumentBuilder()
+      .setTitle('BMBuildManage API')
+      .setDescription(
+        'SaaS B2B para gestión integral de construcción — Presupuestos, BIM, Logística, Compliance',
+      )
+      .setVersion('2.0')
+      .addBearerAuth()
+      .addTag('analytics', 'KPIs financieros, avance físico y flujo de caja')
+      .addTag('projects', 'CRUD de proyectos de construcción')
+      .addTag('budgets', 'Presupuestos y análisis de precios unitarios')
+      .addTag('invoices', 'Facturación electrónica y DTE')
+      .addTag('purchase-orders', 'Órdenes de compra y 3-way match')
+      .addTag('subcontractors', 'Gestión de subcontratistas y compliance F30-1')
+      .addTag('workers', 'Nómina de trabajadores y asignaciones')
+      .addTag('rfis', 'Solicitudes de información (SDI)')
+      .addTag('submittals', 'Entregables técnicos')
+      .addTag('punch-list', 'Lista de reparos')
+      .addTag('bim-models', 'Modelos BIM e interferencias')
+      .addTag('execution', 'Avance de ejecución y cubicaciones')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+
     await app.init();
     cachedServer = app;
   }
@@ -43,9 +67,20 @@ if (process.env.NODE_ENV !== 'production') {
     app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
     app.useGlobalInterceptors(new LoggingInterceptor());
     app.setGlobalPrefix('api/v1');
+
+    const config = new DocumentBuilder()
+      .setTitle('BMBuildManage API')
+      .setDescription('SaaS B2B para gestión de construcción')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+
     const port = process.env.PORT || 3001;
     await app.listen(port);
     console.log(`🚀 Local API running on http://localhost:${port}/api/v1`);
+    console.log(`📚 Swagger UI available at http://localhost:${port}/api`);
   };
   bootstrap();
 }
