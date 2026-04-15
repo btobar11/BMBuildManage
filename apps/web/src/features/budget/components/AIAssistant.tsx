@@ -367,4 +367,5 @@ export function AIAssistant({ budgetId: _budgetId, projectContext }: AIAssistant
   );
 }
 
+export { analyzeBudget, generateResponse };
 export default AIAssistant;
