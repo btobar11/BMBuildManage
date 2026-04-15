@@ -54,7 +54,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   const projectStatuses = [
     { value: 'draft', label: 'En Estudio' },
     { value: 'in_progress', label: 'En Ejecución' },
-    { value: 'on_hold', label: 'Paralizado' },
+    { value: 'completed', label: 'Terminado' },
   ];
 
   const currencies = [

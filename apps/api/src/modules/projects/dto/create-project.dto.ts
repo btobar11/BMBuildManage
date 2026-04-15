@@ -2,7 +2,7 @@ import {
   IsString,
   IsOptional,
   IsEnum,
-  IsDateString,
+  IsDate,
   IsNumber,
   IsArray,
   IsUUID,
@@ -95,18 +95,18 @@ export class CreateProjectDto {
     example: '2025-01-15',
   })
   @IsOptional()
-  @IsDateString({}, { message: 'Fecha de inicio inválida' })
+  @IsDate({ message: 'Fecha de inicio inválida' })
   @Type(() => Date)
-  start_date?: string;
+  start_date?: Date;
 
   @ApiPropertyOptional({
     description: 'Fecha de término estimada',
     example: '2026-12-31',
   })
   @IsOptional()
-  @IsDateString({}, { message: 'Fecha de término inválida' })
+  @IsDate({ message: 'Fecha de término inválida' })
   @Type(() => Date)
-  end_date?: string;
+  end_date?: Date;
 
   @ApiPropertyOptional({
     description: 'Presupuesto total en CLP',
