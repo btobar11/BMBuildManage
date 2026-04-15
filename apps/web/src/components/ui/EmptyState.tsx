@@ -12,9 +12,10 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useDropzone, type Accept } from 'react-dropzone';
-import type { LucideIcon, FileText, Upload, FolderOpen, Plus, ArrowRight, Package, FileSpreadsheet, Box, Sparkles } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Upload, FolderOpen, Plus, Package, FileSpreadsheet, Box } from 'lucide-react';
 import { Button } from './Button/Button';
 import { cn } from '../../utils/cn';
 
@@ -57,7 +58,7 @@ export interface EmptyStateProps {
 // ANIMACIONES - Framer Motion
 // ═══════════════════════════════════════════════════════════════════════════
 
-const fadeInUp = {
+const fadeInUp: Variants = {
   initial: { opacity: 0, y: 20 },
   animate: { 
     opacity: 1, 
@@ -74,20 +75,7 @@ const fadeInUp = {
   }
 };
 
-const dropzonePulse = {
-  idle: { 
-    scale: 1,
-    borderColor: 'rgba(51, 65, 85, 0.5)' // slate-700
-  },
-  dragActive: { 
-    scale: 1.02,
-    borderColor: '#10b981', // emerald-500
-    backgroundColor: 'rgba(16, 185, 129, 0.05)',
-    transition: { duration: 0.2 }
-  }
-};
-
-const iconBounce = {
+const iconBounce: Variants = {
   initial: { scale: 0.8, opacity: 0 },
   animate: { 
     scale: 1, 
