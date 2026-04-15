@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -50,6 +51,12 @@ export default defineConfig({
     })
   ],
 
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+
   // SEC-003: Strip console.* from production builds to prevent telemetry leaks
   esbuild: (() => {
     if (process.env.NODE_ENV === 'production') {
@@ -84,8 +91,17 @@ export default defineConfig({
           if (id.includes('node_modules/three/') || id.includes('node_modules/@thatopen/') || id.includes('node_modules/web-ifc/')) {
             return 'bim-vendor';
           }
-          if (id.includes('node_modules/pdfjs-dist/')) {
+          if (id.includes('node_modules/pdfjs-dist/') || id.includes('node_modules/pdfkit/')) {
             return 'pdf-vendor';
+          }
+          if (id.includes('node_modules/@react-pdf/')) {
+            return 'react-pdf-vendor';
+          }
+          if (id.includes('node_modules/framer-motion/')) {
+            return 'animation-vendor';
+          }
+          if (id.includes('node_modules/@supabase/')) {
+            return 'supabase-vendor';
           }
           return undefined;
         },

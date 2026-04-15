@@ -119,9 +119,9 @@ jobs:
           ALLOW_DEV_TOKEN=true
           EOF
 
-      # Ejecutar tests unitarios (excluyendo E2E que requiere DB real)
+      # Ejecutar tests unitarios (excluyendo E2E y main.spec.ts que requiere Supabase)
       - name: Run Unit Tests (API)
-        run: cd apps/api && npm run test -- --testPathIgnorePatterns="full-product-suite"
+        run: cd apps/api && npm run test -- --testPathIgnorePatterns="full-product-suite|main\.spec"
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/bmbuildmanage_test
 

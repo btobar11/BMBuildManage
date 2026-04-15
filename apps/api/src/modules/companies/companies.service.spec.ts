@@ -67,7 +67,7 @@ describe('CompaniesService', () => {
   let service: CompaniesService;
   let companyRepository: jest.Mocked<Repository<Company>>;
   let userRepository: jest.Mocked<Repository<User>>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let configService: any;
 
   beforeEach(async () => {

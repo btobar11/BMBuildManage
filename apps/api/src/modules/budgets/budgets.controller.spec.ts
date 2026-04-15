@@ -131,11 +131,11 @@ describe('BudgetsController', () => {
         mockAuthenticatedRequest(),
       );
 
-      expect(mockBudgetsService.update).toHaveBeenCalledWith(
+expect(mockBudgetsService.update).toHaveBeenCalledWith(
         'budget-1',
         updateDto,
         'user-1',
-        undefined,
+        'company-1',
       );
       expect(result).toEqual(mockBudget);
     });
@@ -164,10 +164,10 @@ describe('BudgetsController', () => {
         mockAuthenticatedRequest(),
       );
 
-      expect(mockBudgetsService.setActiveVersion).toHaveBeenCalledWith(
+expect(mockBudgetsService.setActiveVersion).toHaveBeenCalledWith(
         'budget-1',
         'user-1',
-        undefined,
+        'company-1',
       );
       expect(result).toEqual({ id: 'budget-1', is_active: true });
     });
