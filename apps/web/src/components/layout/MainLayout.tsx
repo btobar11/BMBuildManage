@@ -17,7 +17,8 @@ import {
   Truck,
   ClipboardCheck,
   BarChart3,
-  LogOut
+  LogOut,
+  Briefcase
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
