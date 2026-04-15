@@ -6,7 +6,7 @@ import {
   Star, 
   Phone, 
   MoreVertical, 
-  Briefcase,
+  Building2 as Briefcase,
   Award,
   DollarSign,
   Filter

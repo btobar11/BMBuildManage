@@ -24,8 +24,31 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  private handleReset = () => {
-    localStorage.removeItem('BM_QUERY_CACHE'); // Clear potentially corrupt cache
+  private handleReset = async () => {
+    // Clear all caches
+    localStorage.removeItem('BM_QUERY_CACHE');
+    localStorage.removeItem('supabase.auth.token');
+    sessionStorage.clear();
+    
+    // Unregister service workers to clear PWA cache
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+      } catch (e) {
+        console.error('Failed to unregister service workers:', e);
+      }
+    }
+    
+    // Clear all localStorage keys related to the app
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('BM_') || key.includes('cache') || key.includes('query')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
     window.location.reload();
   };
 

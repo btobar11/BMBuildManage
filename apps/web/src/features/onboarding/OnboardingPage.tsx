@@ -10,7 +10,7 @@ import {
   CheckCircle2, 
   Loader2,
   Sparkles,
-  Briefcase,
+  Building2 as Briefcase,
   Wrench,
   Ruler,
   Truck,
