@@ -55,52 +55,66 @@ const BRAND_COLORS = {
 /**
  * Type-Safe KPI Fetching
  * Uses Zod schema for runtime + compile-time validation
+ * Gracefully handles errors - returns null if AI is unavailable
  */
-async function fetchDashboardKPIs(companyId: string): Promise<AnalyticsDashboardKPIs> {
-  const response = await api.post<{ data: unknown }>('/ai/analyze/summary', {
-    companyId,
-  });
-  
-  const rawData = response.data?.data;
-  
-  // Zod validation - fails at runtime if schema mismatch
-  const validated = analyticsDashboardKpisSchema.parse(rawData);
-  
-  return validated;
+async function fetchDashboardKPIs(companyId: string): Promise<AnalyticsDashboardKPIs | null> {
+  try {
+    const response = await api.get<{ data: unknown }>('/ai/analyze/summary');
+    
+    // AI module not ready - return null to show skeleton
+    if (response.data?.status === 'pending') {
+      return null;
+    }
+    
+    const rawData = response.data?.data;
+    
+    // Zod validation - fails at runtime if schema mismatch
+    const validated = analyticsDashboardKpisSchema.parse(rawData);
+    
+    return validated;
+  } catch (error) {
+    console.warn('AI analyze/summary unavailable:', error);
+    return null;
+  }
 }
 
 /**
  * Type-Safe S-Curve Data Fetching
+ * Gracefully handles errors
  */
 async function fetchSCurveData(
   companyId: string
-): Promise<SCurveDataPoint[]> {
-  const response = await api.post<{ data: unknown }>('/ai/analyze/progress', {
-    companyId,
-  });
-  
-  const byStorey = (response.data?.data as { byStorey?: Record<string, { total: number; completed: number }> })?.byStorey || {};
-  
-  const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-  const currentMonth = new Date().getMonth();
-  
-  // Build S-Curve data points with strict typing
-  const dataPoints: SCurveDataPoint[] = months.map((month, i) => {
-    const monthlyBudget = 50000000;
-    const baseline = monthlyBudget * (i + 1);
-    const plannedProgress = i <= currentMonth ? 0.85 + Math.random() * 0.15 : 1;
-    const planned = baseline * plannedProgress;
+): Promise<SCurveDataPoint[] | null> {
+  try {
+    const response = await api.get<{ data: unknown }>('/ai/analyze/progress');
     
-    const storeysCount = Object.keys(byStorey).length;
-    const progressRatio = storeysCount > 0 
-      ? Object.values(byStorey).reduce((sum, s) => sum + s.completed, 0) / 
-        Object.values(byStorey).reduce((sum, s) => sum + s.total, 0)
-      : 0;
+    // AI module not ready - return null to show skeleton
+    if (response.data?.status === 'pending') {
+      return null;
+    }
     
-    const actual = i <= currentMonth 
+    const byStorey = (response.data?.data as { byStorey?: Record<string, { total: number; completed: number }> })?.byStorey || {};
+   
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const currentMonth = new Date().getMonth();
+    
+    // Build S-Curve data points with strict typing
+    const dataPoints: SCurveDataPoint[] = months.map((month, i) => {
+      const monthlyBudget = 50000000;
+      const baseline = monthlyBudget * (i + 1);
+      const plannedProgress = i <= currentMonth ? 0.85 + Math.random() * 0.15 : 1;
+      const planned = baseline * plannedProgress;
+      
+      const storeysCount = Object.keys(byStorey).length;
+      const progressRatio = storeysCount > 0 
+        ? Object.values(byStorey).reduce((sum, s) => sum + s.completed, 0) / 
+          Object.values(byStorey).reduce((sum, s) => sum + s.total, 0)
+        : 0;
+      
+const actual = i <= currentMonth 
       ? baseline * progressRatio * (0.9 + Math.random() * 0.2)
       : null;
-    
+     
     // Strict validation - each point must match schema
     return sCurveDataPointSchema.parse({
       month,
@@ -109,8 +123,12 @@ async function fetchSCurveData(
       actual: actual !== null ? Math.round(actual) : null,
     });
   });
-  
-  return dataPoints;
+   
+   return dataPoints;
+  } catch (error) {
+    console.warn('AI analyze/progress unavailable:', error);
+    return null;
+  }
 }
 
 /**
@@ -421,10 +439,11 @@ function AnalyticsDashboard() {
   const canExport = useHasRole(['admin']);
 
   // All data is strictly typed via Zod schemas
+  // Returns null when AI is unavailable - shows skeleton instead
   const {
     data: kpis,
     isLoading: kpisLoading,
-  } = useQuery<AnalyticsDashboardKPIs>({
+  } = useQuery<AnalyticsDashboardKPIs | null>({
     queryKey: ['dashboard', 'kpis', companyId],
     queryFn: () => fetchDashboardKPIs(companyId),
     enabled: !!companyId,
@@ -435,7 +454,7 @@ function AnalyticsDashboard() {
   const {
     data: sCurveData,
     isLoading: sCurveLoading,
-  } = useQuery<SCurveDataPoint[]>({
+  } = useQuery<SCurveDataPoint[] | null>({
     queryKey: ['dashboard', 'scurve', companyId],
     queryFn: () => fetchSCurveData(companyId),
     enabled: !!companyId,
