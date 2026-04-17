@@ -1,14 +1,40 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as Sentry from '@sentry/node';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { HttpExceptionFilter, AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor } from './common/interceptors';
 import { appCorsConfig, validationPipeConfig } from './config';
 import express from 'express';
+import helmet from 'helmet';
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV || 'development',
+  tracesSampleRate: 0.1,
+  integrations: [
+    Sentry.httpIntegration(),
+  ],
+});
 
 const server = express();
+
+server.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      fontSrc: ["'self'"],
+      connectSrc: ["'self'", "https://sfzkrnfyfwonxyceugya.supabase.co", "https://api.groq.com"],
+      frameSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
 
 let cachedServer: any;
 

@@ -1,9 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    @InjectDataSource() private readonly dataSource: DataSource,
+  ) {}
 
   @Get()
   getHello(): string {
@@ -11,7 +16,31 @@ export class AppController {
   }
 
   @Get('health')
-  getHealth() {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+  async getHealth() {
+    const start = Date.now();
+    let dbStatus = 'ok';
+    let dbLatency = 0;
+
+    try {
+      const dbStart = Date.now();
+      await this.dataSource.query('SELECT 1');
+      dbLatency = Date.now() - dbStart;
+    } catch {
+      dbStatus = 'error';
+    }
+
+    return {
+      status: dbStatus === 'ok' ? 'ok' : 'degraded',
+      timestamp: new Date().toISOString(),
+      services: {
+        database: {
+          status: dbStatus,
+          latency_ms: dbLatency,
+          host: process.env.DATABASE_URL?.split('@')[1]?.split(':')[0] || 'unknown',
+        },
+      },
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+    };
   }
 }
