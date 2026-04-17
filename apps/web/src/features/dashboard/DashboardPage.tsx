@@ -23,8 +23,6 @@ import {
   ChevronRight,
   Building2,
   Trash2,
-  Package,
-  Upload,
 } from 'lucide-react';
 import { EmptyState, EmptyStatePresets } from '../../components/ui/EmptyState';
 
@@ -161,12 +159,37 @@ export const DashboardPage = () => {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const toggleSelect = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setSelectedIds((prev: string[]) => 
       prev.includes(id) ? prev.filter((i: string) => i !== id) : [...prev, id]
     );
+  };
+
+  const handleSingleDelete = (project: Project) => {
+    setProjectToDelete(project);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmSingleDelete = async () => {
+    if (!projectToDelete) return;
+    setShowDeleteConfirm(false);
+    setIsProcessing(true);
+    
+    toast.promise(api.delete(`/projects/${projectToDelete.id}`), {
+      loading: 'Eliminando...',
+      success: () => {
+        queryClient.invalidateQueries({ queryKey: ['projects'] });
+        setProjectToDelete(null);
+        return 'Proyecto eliminado';
+      },
+      error: () => {
+        setIsProcessing(false);
+        return 'Error al eliminar proyecto';
+      },
+    });
   };
 
   const handleBulkDelete = () => {
@@ -384,7 +407,21 @@ export const DashboardPage = () => {
                   className={`group ${selectedIds.includes(project.id) ? 'ring-2 ring-emerald-500/30 border-emerald-500' : ''}`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-lg text-foreground truncate pr-2">{project.name}</h3>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <h3 className="font-bold text-lg text-foreground truncate">{project.name}</h3>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSingleDelete(project);
+                        }}
+                        className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-all"
+                        title="Eliminar proyecto"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                     <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 data-mono tracking-tight shrink-0">
                       ${new Intl.NumberFormat('es-CL', { notation: 'compact' }).format(project.estimated_budget || 0)}
                     </span>
@@ -477,10 +514,14 @@ export const DashboardPage = () => {
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={confirmBulkDelete}
-        title="Eliminar proyectos"
-        message={<span>¿Eliminar <strong>{selectedIds.length}</strong> proyecto{selectedIds.length > 1 ? 's' : ''}?</span>}
+        onClose={() => { setShowDeleteConfirm(false); setProjectToDelete(null); }}
+        onConfirm={projectToDelete ? confirmSingleDelete : confirmBulkDelete}
+        title={projectToDelete ? "Eliminar proyecto" : "Eliminar proyectos"}
+        message={
+          projectToDelete 
+            ? <span>¿Eliminar el proyecto <strong>"{projectToDelete.name}"</strong>?</span>
+            : <span>¿Eliminar <strong>{selectedIds.length}</strong> proyecto{selectedIds.length > 1 ? 's' : ''}?</span>
+        }
         confirmText="Eliminar"
         cancelText="Cancelar"
         variant="danger"

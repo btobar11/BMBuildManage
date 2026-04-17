@@ -1,20 +1,10 @@
 import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Star, 
-  Phone, 
-  MoreVertical, 
-  Building2 as Briefcase,
-  Award,
-  DollarSign,
-  Filter
-} from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../../lib/api';
 import { CreateWorkerModal } from './components/CreateWorkerModal';
 import { EditWorkerModal } from './components/EditWorkerModal';
 import { WorkerHistoryModal } from './components/WorkerHistoryModal';
+import { Trash2, Users, Plus, Search, Star, Phone, MoreVertical, Building2 as Briefcase, Award, DollarSign, Filter } from 'lucide-react';
 
 interface Worker {
   id: string;
@@ -38,6 +28,18 @@ export function WorkersPage() {
   const [selectedWorkerId, setSelectedWorkerId] = useState<string | null>(null);
   const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const deleteMutation = {
+    mutate: async (id: string) => {
+      try {
+        await api.delete(`/workers/${id}`);
+        toast.success('Trabajador eliminado');
+        fetchWorkers();
+      } catch (error) {
+        toast.error('Error al eliminar trabajador');
+      }
+    },
+  };
 
   useEffect(() => {
     fetchWorkers();
@@ -219,6 +221,17 @@ export function WorkersPage() {
                         className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:bg-blue-600 hover:text-foreground transition-colors"
                       >
                         Editar Perfil
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (confirm('¿Eliminar este trabajador?')) {
+                            deleteMutation.mutate(worker.id);
+                          }
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center gap-2"
+                      >
+                        <Trash2 size={14} />
+                        Eliminar
                       </button>
                     </div>
                   </div>

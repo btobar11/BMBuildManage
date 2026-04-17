@@ -7,7 +7,8 @@ import {
   DollarSign,
   CheckCircle2,
   XCircle,
-  ShieldAlert
+  ShieldAlert,
+  Trash2,
 } from 'lucide-react';
 import api from '../../lib/api';
 import toast from 'react-hot-toast';
@@ -53,6 +54,17 @@ export function SubcontractorsPage() {
     sub.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sub.rut?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`¿Eliminar subcontratista "${name}"?`)) return;
+    try {
+      await api.delete(`/subcontractors/${id}`);
+      toast.success('Subcontratista eliminado');
+      fetchSubcontractors();
+    } catch (error) {
+      toast.error('Error al eliminar subcontratista');
+    }
+  };
 
   if (loading) {
     return (
@@ -171,6 +183,13 @@ export function SubcontractorsPage() {
                           title="Subir F30-1 / Documentos Legales"
                         >
                           <FileText size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(sub.id, sub.name)}
+                          className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Eliminar subcontratista"
+                        >
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </td>
