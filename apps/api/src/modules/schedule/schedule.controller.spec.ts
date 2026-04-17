@@ -80,6 +80,12 @@ describe('ScheduleController', () => {
       );
       expect(result).toEqual(expected);
     });
+
+    it('should handle metrics error', async () => {
+      mockScheduleService.calculateScheduleMetrics.mockRejectedValue(new Error('DB error'));
+
+      await expect(controller.getMetrics('proj-1')).rejects.toThrow();
+    });
   });
 
   describe('POST /:projectId/tasks', () => {
@@ -97,6 +103,25 @@ describe('ScheduleController', () => {
       expect(mockScheduleService.createTask).toHaveBeenCalled();
       expect(result).toEqual(expected);
     });
+
+    it('should create task with priority conversion', async () => {
+      const dto = {
+        name: 'Task 1',
+        start_date: '2024-01-01',
+        end_date: '2024-01-31',
+        priority: 'HIGH' as any,
+      };
+      mockScheduleService.createTask.mockResolvedValue({ id: 'task-1' });
+
+      await controller.createTask('proj-1', dto);
+      expect(mockScheduleService.createTask).toHaveBeenCalled();
+    });
+
+    it('should handle create task error', async () => {
+      mockScheduleService.createTask.mockRejectedValue(new Error('Validation error'));
+
+      await expect(controller.createTask('proj-1', { name: 'Task', start_date: '2024-01-01', end_date: '2024-01-31' })).rejects.toThrow();
+    });
   });
 
   describe('PATCH /tasks/:taskId', () => {
@@ -112,6 +137,20 @@ describe('ScheduleController', () => {
         expect.any(Object),
       );
       expect(result).toEqual(expected);
+    });
+
+    it('should update task with status conversion', async () => {
+      const dto = { status: 'in_progress' as any };
+      mockScheduleService.updateTask.mockResolvedValue({ id: 'task-1' });
+
+      await controller.updateTask('task-1', dto);
+      expect(mockScheduleService.updateTask).toHaveBeenCalled();
+    });
+
+    it('should handle update task error', async () => {
+      mockScheduleService.updateTask.mockRejectedValue(new Error('Not found'));
+
+      await expect(controller.updateTask('fake-id', {})).rejects.toThrow();
     });
   });
 
@@ -152,6 +191,12 @@ describe('ScheduleController', () => {
         expect.any(Object),
       );
       expect(result).toEqual(expected);
+    });
+
+    it('should handle update milestone error', async () => {
+      mockScheduleService.updateMilestone.mockRejectedValue(new Error('Not found'));
+
+      await expect(controller.updateMilestone('fake-id', {})).rejects.toThrow();
     });
   });
 });

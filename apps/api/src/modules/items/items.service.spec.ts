@@ -49,6 +49,14 @@ const mockRepository = () => ({
   findOne: jest.fn(),
   remove: jest.fn(),
   merge: jest.fn(),
+  createQueryBuilder: jest.fn(() => ({
+    innerJoin: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    getMany: jest.fn().mockResolvedValue([]),
+  })),
 });
 
 const mockAuditLogsService = () => ({
@@ -104,6 +112,38 @@ describe('ItemsService', () => {
         where: { stage_id: 'stage-1' },
       });
       expect(result).toEqual(items);
+    });
+  });
+
+  describe('findAllByProject', () => {
+    it('should return items for a project', async () => {
+      const mockItem = { ...createMockItem(), stage: { name: 'Foundation' } };
+      (repository.createQueryBuilder as any).mockImplementation(() => ({
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockItem]),
+      }));
+
+      const result = await service.findAllByProject('project-1');
+      expect(result).toHaveLength(1);
+    });
+
+    it('should filter by search term', async () => {
+      const mockItem = { ...createMockItem(), stage: { name: 'Foundation' } };
+      (repository.createQueryBuilder as any).mockImplementation(() => ({
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockItem]),
+      }));
+
+      const result = await service.findAllByProject('project-1', 'cement');
+      expect(result).toHaveLength(1);
     });
   });
 

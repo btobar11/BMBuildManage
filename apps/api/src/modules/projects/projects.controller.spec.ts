@@ -74,6 +74,54 @@ describe('ProjectsController', () => {
       expect(mockProjectsService.create).toHaveBeenCalledWith(createDto);
       expect(result).toEqual(mockProject);
     });
+
+    it('should handle create error with validation issues', async () => {
+      const error = {
+        message: 'Validation failed',
+        response: {
+          error: { issues: [{ field: 'name', message: 'Required' }] },
+        },
+      };
+      mockProjectsService.create.mockRejectedValue(error);
+
+      await expect(
+        controller.create({ name: '' } as any, { user: { company_id: 'company-1' } }),
+      ).rejects.toThrow();
+    });
+
+    it('should handle create error with message', async () => {
+      const error = {
+        message: 'Bad request',
+        response: { message: 'Invalid data' },
+      };
+      mockProjectsService.create.mockRejectedValue(error);
+
+      await expect(
+        controller.create({ name: 'Test' } as any, { user: { company_id: 'company-1' } }),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return all projects for a company', async () => {
+      const mockProjects = [{ id: 'project-1' }, { id: 'project-2' }];
+      mockProjectsService.findAll.mockResolvedValue(mockProjects);
+
+      const result = await controller.findAll({
+        user: { company_id: 'company-1' },
+      });
+
+      expect(mockProjectsService.findAll).toHaveBeenCalledWith('company-1');
+      expect(result).toEqual(mockProjects);
+    });
+
+    it('should handle findAll error', async () => {
+      mockProjectsService.findAll.mockRejectedValue(new Error('DB error'));
+
+      await expect(
+        controller.findAll({ user: { company_id: 'company-1' } }),
+      ).rejects.toThrow();
+    });
   });
 
   describe('findOne', () => {

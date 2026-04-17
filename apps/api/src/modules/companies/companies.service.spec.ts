@@ -96,7 +96,7 @@ describe('CompaniesService', () => {
     jest.clearAllMocks();
   });
 
-  describe('create', () => {
+describe('create', () => {
     it('should create a company', async () => {
       const createDto = { name: 'Company 1', country: 'US' };
       const company = createMockCompany(createDto);
@@ -106,6 +106,55 @@ describe('CompaniesService', () => {
       const result = await service.create(createDto);
       expect(companyRepository.create).toHaveBeenCalledWith(createDto);
       expect(companyRepository.save).toHaveBeenCalledWith(company);
+      expect(result).toEqual(company);
+    });
+
+    it('should link user to company when createdByUserId provided', async () => {
+      const createDto = { name: 'Company 1', country: 'US' };
+      const company = createMockCompany({ id: 'new-company-1' });
+      companyRepository.create.mockReturnValue(company);
+      companyRepository.save.mockResolvedValue(company);
+      userRepository.update.mockResolvedValue({ affected: 1 } as any);
+
+      await service.create(createDto, 'user-1');
+      expect(userRepository.update).toHaveBeenCalledWith('user-1', { company_id: 'new-company-1' });
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a company by id', async () => {
+      const company = createMockCompany();
+      companyRepository.findOne.mockResolvedValue(company);
+
+      const result = await service.findOne('company-1');
+      expect(companyRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'company-1' },
+      });
+      expect(result).toEqual(company);
+    });
+
+    it('should throw NotFoundException if company not found', async () => {
+      companyRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw NotFoundException when companyId does not match', async () => {
+      const company = createMockCompany({ id: 'company-1' });
+      companyRepository.findOne.mockResolvedValue(company);
+
+      await expect(service.findOne('company-1', 'different-company-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+it('should allow access when companyId matches', async () => {
+      const company = createMockCompany({ id: 'company-1' });
+      companyRepository.findOne.mockResolvedValue(company);
+
+      const result = await service.findOne('company-1', 'company-1');
       expect(result).toEqual(company);
     });
   });
