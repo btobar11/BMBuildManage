@@ -370,9 +370,221 @@ describe('AIService', () => {
 
         expect(result.answer).toContain('Hola');
         expect(result.confidence).toBe(0.95);
-      });
+});
+  });
+
+  describe('handleBIMStoreysQuery', () => {
+    it('should handle BIM storeys query', async () => {
+      const mockBIMAnalytics = {
+        getBIMElements: jest.fn().mockResolvedValue([
+          { storey_name: 'Level 1' },
+        ]),
+      };
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          AIService,
+          {
+            provide: getRepositoryToken(Project),
+            useValue: projectRepo,
+          },
+          {
+            provide: getRepositoryToken(Budget),
+            useValue: budgetRepo,
+          },
+          {
+            provide: getRepositoryToken(Stage),
+            useValue: createStageRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Item),
+            useValue: createItemRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Worker),
+            useValue: createWorkerRepositoryMock(),
+          },
+          { provide: DataSource, useValue: createDataSourceMock() },
+          { provide: FinancialService, useValue: createFinancialServiceMock() },
+          {
+            provide: BIMAnalyticsService,
+            useValue: mockBIMAnalytics,
+          },
+          { provide: ConfigService, useValue: configService },
+        ],
+      }).compile();
+
+      const testService = module.get<AIService>(AIService);
+      const result = await (testService as any).handleBIMStoreysQuery('company-1', 'project-1', 'piso');
+      expect(result).toHaveProperty('answer');
     });
   });
+
+  describe('handleExpenseQuery', () => {
+    it('should handle expense query', async () => {
+      const mockDataSource = {
+        query: jest.fn().mockResolvedValue([[{ total: 10000 }]]),
+      };
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          AIService,
+          {
+            provide: getRepositoryToken(Project),
+            useValue: projectRepo,
+          },
+          {
+            provide: getRepositoryToken(Budget),
+            useValue: budgetRepo,
+          },
+          {
+            provide: getRepositoryToken(Stage),
+            useValue: createStageRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Item),
+            useValue: createItemRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Worker),
+            useValue: createWorkerRepositoryMock(),
+          },
+          { provide: DataSource, useValue: mockDataSource },
+          { provide: FinancialService, useValue: createFinancialServiceMock() },
+          {
+            provide: BIMAnalyticsService,
+            useValue: createBIMAnalyticsServiceMock(),
+          },
+          { provide: ConfigService, useValue: configService },
+        ],
+      }).compile();
+
+      const testService = module.get<AIService>(AIService);
+      const result = await (testService as any).handleExpenseQuery('company-1');
+      expect(result).toHaveProperty('answer');
+    });
+  });
+
+  describe('getAnswerFromGroq fallback', () => {
+    it('should return fallback when Groq fails', async () => {
+      const mockGroqClient = {
+        chat: {
+          completions: {
+            create: jest.fn().mockRejectedValue(new Error('Rate limit')),
+          },
+        },
+      };
+      (service as any).groqClient = mockGroqClient;
+
+      const result = await (service as any).getAnswerFromGroq('test prompt', []);
+      expect(result).toContain('Lo siento');
+    });
+  });
+
+  describe('processQueryContext', () => {
+    it('should extract project from budget context', async () => {
+      budgetRepo.findOne.mockResolvedValue(createMockBudget());
+      budgetRepo.find.mockResolvedValue([createMockBudget()]);
+
+      const result = await (service as any).processQueryContext('company-1', 'budget-1', 'budget');
+      expect(result).toHaveProperty('budget');
+    });
+
+    it('should handle no budget found', async () => {
+      budgetRepo.findOne.mockResolvedValue(null);
+
+      const result = await (service as any).processQueryContext('company-1', 'invalid', 'budget');
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('processQueryContext for stages', () => {
+    it('should extract stages from context', async () => {
+      const stageRepo = createStageRepositoryMock();
+      stageRepo.find.mockResolvedValue([createMockStage()]);
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          AIService,
+          {
+            provide: getRepositoryToken(Project),
+            useValue: projectRepo,
+          },
+          {
+            provide: getRepositoryToken(Budget),
+            useValue: budgetRepo,
+          },
+          {
+            provide: getRepositoryToken(Stage),
+            useValue: stageRepo,
+          },
+          {
+            provide: getRepositoryToken(Item),
+            useValue: createItemRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Worker),
+            useValue: createWorkerRepositoryMock(),
+          },
+          { provide: DataSource, useValue: createDataSourceMock() },
+          { provide: FinancialService, useValue: createFinancialServiceMock() },
+          {
+            provide: BIMAnalyticsService,
+            useValue: createBIMAnalyticsServiceMock(),
+          },
+          { provide: ConfigService, useValue: configService },
+        ],
+      }).compile();
+
+      const testService = module.get<AIService>(AIService);
+      const result = await (testService as any).processQueryContext('company-1', 'stage-1', 'stage');
+      expect(result).toHaveProperty('stage');
+    });
+  });
+
+  describe('processQueryContext for items', () => {
+    it('should extract items from context', async () => {
+      const itemRepo = createItemRepositoryMock();
+      itemRepo.find.mockResolvedValue([createMockItem()]);
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          AIService,
+          {
+            provide: getRepositoryToken(Project),
+            useValue: projectRepo,
+          },
+          {
+            provide: getRepositoryToken(Budget),
+            useValue: budgetRepo,
+          },
+          {
+            provide: getRepositoryToken(Stage),
+            useValue: createStageRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Item),
+            useValue: itemRepo,
+          },
+          {
+            provide: getRepositoryToken(Worker),
+            useValue: createWorkerRepositoryMock(),
+          },
+          { provide: DataSource, useValue: createDataSourceMock() },
+          { provide: FinancialService, useValue: createFinancialServiceMock() },
+          {
+            provide: BIMAnalyticsService,
+            useValue: createBIMAnalyticsServiceMock(),
+          },
+          { provide: ConfigService, useValue: configService },
+        ],
+      }).compile();
+
+      const testService = module.get<AIService>(AIService);
+      const result = await (testService as any).processQueryContext('company-1', 'item-1', 'item');
+      expect(result).toHaveProperty('item');
+    });
+  });
+});
 
   describe('generateRecommendations', () => {
     it('should return default insight when no projects', async () => {
