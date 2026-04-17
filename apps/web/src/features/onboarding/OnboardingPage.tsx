@@ -106,7 +106,7 @@ export function OnboardingPage() {
     industry: [],
     companySize: '1-10',
     phone: '',
-    specialty: '',
+    specialties: [],
     challenges: []
   });
   const [animationKey, setAnimationKey] = useState(0);
@@ -126,6 +126,15 @@ export function OnboardingPage() {
       industry: prev.industry.includes(value)
         ? prev.industry.filter(i => i !== value)
         : [...prev.industry, value]
+    }));
+  };
+
+  const toggleSpecialty = (value: string) => {
+    setData(prev => ({
+      ...prev,
+      specialties: prev.specialties.includes(value)
+        ? prev.specialties.filter(s => s !== value)
+        : [...prev.specialties, value]
     }));
   };
 
@@ -160,6 +169,10 @@ export function OnboardingPage() {
         toast.error('Selecciona al menos un tipo de construcción');
         return;
       }
+      if (data.specialties.length === 0) {
+        toast.error('Selecciona al menos una especialidad');
+        return;
+      }
     }
     setDirection('forward');
     setAnimationKey(prev => prev + 1);
@@ -185,7 +198,7 @@ export function OnboardingPage() {
       industry: data.industry,
       companySize: data.companySize,
       phone: data.phone,
-      specialty: data.specialty,
+      specialties: data.specialties,
       challenges: data.challenges
     });
   };
@@ -381,13 +394,22 @@ export function OnboardingPage() {
                 {SPECIALTIES.map((spec) => (
                   <button
                     key={spec.value}
-                    onClick={() => setData({ ...data, specialty: spec.value })}
-                    className={`p-4 rounded-lg border text-left transition-all ${
-                      data.specialty === spec.value 
+                    onClick={() => toggleSpecialty(spec.value)}
+                    className={`p-4 rounded-lg border text-left transition-all flex items-center gap-3 ${
+                      data.specialties.includes(spec.value) 
                         ? 'bg-emerald-50 border-emerald-500 text-emerald-700' 
                         : 'bg-background border-border hover:border-emerald-300'
                     }`}
                   >
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                      data.specialties.includes(spec.value) 
+                        ? 'border-emerald-500 bg-emerald-500' 
+                        : 'border-slate-300'
+                    }`}>
+                      {data.specialties.includes(spec.value) && (
+                        <CheckCircle2 size={10} className="text-white" />
+                      )}
+                    </div>
                     <span className="text-sm font-medium">{spec.label}</span>
                   </button>
                 ))}

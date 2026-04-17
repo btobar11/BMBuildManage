@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { Project } from './project.entity';
 import { ProjectPayment } from './project-payment.entity';
@@ -134,28 +138,42 @@ describe('ProjectsService', () => {
     });
 
     it('should throw BadRequestException for NOT NULL violation (23502)', async () => {
-      projectRepo.save.mockRejectedValue({ code: '23502', column: 'name', message: 'fail' });
-      await expect(service.create({} as any)).rejects.toThrow(BadRequestException);
+      projectRepo.save.mockRejectedValue({
+        code: '23502',
+        column: 'name',
+        message: 'fail',
+      });
+      await expect(service.create({} as any)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for UNIQUE violation (23505)', async () => {
       projectRepo.save.mockRejectedValue({ code: '23505', message: 'fail' });
-      await expect(service.create({} as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create({} as any)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for data type mismatch (22P01)', async () => {
       projectRepo.save.mockRejectedValue({ code: '22P01', message: 'fail' });
-      await expect(service.create({} as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create({} as any)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for dynamic type mismatch (42804)', async () => {
       projectRepo.save.mockRejectedValue({ code: '42804', message: 'fail' });
-      await expect(service.create({} as any)).rejects.toThrow(BadRequestException);
+      await expect(service.create({} as any)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw InternalServerErrorException for generic errors', async () => {
       projectRepo.save.mockRejectedValue(new Error('Generic Error'));
-      await expect(service.create({} as any)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.create({} as any)).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -168,8 +186,16 @@ describe('ProjectsService', () => {
     });
 
     it('should patch estimated_budget from latest budget version', async () => {
-      const budget1 = { id: 'b1', total_estimated_price: 100, version: 1 } as Budget;
-      const budget2 = { id: 'b2', total_estimated_price: 200, version: 2 } as Budget;
+      const budget1 = {
+        id: 'b1',
+        total_estimated_price: 100,
+        version: 1,
+      } as Budget;
+      const budget2 = {
+        id: 'b2',
+        total_estimated_price: 200,
+        version: 2,
+      } as Budget;
       const project = createMockProject({ budgets: [budget1, budget2] });
       projectRepo.find.mockResolvedValue([project]);
 
@@ -183,7 +209,9 @@ describe('ProjectsService', () => {
       const project = createMockProject();
       projectRepo.findOne.mockResolvedValue(project);
       projectRepo.save.mockResolvedValue(project);
-      const result = await service.update('test-id', 'company-1', { name: 'New' });
+      const result = await service.update('test-id', 'company-1', {
+        name: 'New',
+      });
       expect(result).toBeDefined();
     });
   });
@@ -205,12 +233,16 @@ describe('ProjectsService', () => {
         manager: {
           createQueryBuilder: jest.fn().mockImplementation(() => {
             throw new Error('Immediate Failure');
-          })
-        }
+          }),
+        },
       };
-      (service as any).dataSource.createQueryRunner.mockReturnValue(queryRunner);
+      (service as any).dataSource.createQueryRunner.mockReturnValue(
+        queryRunner,
+      );
 
-      await expect(service.bulkRemove(['1'], 'company-1')).rejects.toThrow('Immediate Failure');
+      await expect(service.bulkRemove(['1'], 'company-1')).rejects.toThrow(
+        'Immediate Failure',
+      );
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
     });
   });
@@ -226,7 +258,9 @@ describe('ProjectsService', () => {
 
     it('should throw NotFoundException when project not found', async () => {
       projectRepo.findOne.mockResolvedValue(null);
-      await expect(service.remove('non-existent', 'company-1')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('non-existent', 'company-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -240,7 +274,9 @@ describe('ProjectsService', () => {
 
     it('should throw NotFoundException when project not found', async () => {
       projectRepo.findOne.mockResolvedValue(null);
-      await expect(service.findOne('non-existent', 'company-1')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.findOne('non-existent', 'company-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -248,16 +284,26 @@ describe('ProjectsService', () => {
     it('should add a payment to a project', async () => {
       const project = createMockProject();
       projectRepo.findOne.mockResolvedValue(project);
-      const paymentData = { amount: 5000, date: new Date(), description: 'Payment 1' };
+      const paymentData = {
+        amount: 5000,
+        date: new Date(),
+        description: 'Payment 1',
+      };
       paymentsRepo.create.mockReturnValue(paymentData as any);
       paymentsRepo.save.mockResolvedValue(paymentData as any);
-      const result = await service.addPayment('test-id', 'company-1', paymentData);
+      const result = await service.addPayment(
+        'test-id',
+        'company-1',
+        paymentData,
+      );
       expect(result).toEqual(paymentData);
     });
 
     it('should throw NotFoundException when project not found', async () => {
       projectRepo.findOne.mockResolvedValue(null);
-      await expect(service.addPayment('non-existent', 'company-1', {})).rejects.toThrow(NotFoundException);
+      await expect(
+        service.addPayment('non-existent', 'company-1', {}),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -265,7 +311,10 @@ describe('ProjectsService', () => {
     it('should return payments for a project', async () => {
       const project = createMockProject();
       projectRepo.findOne.mockResolvedValue(project);
-      const payments = [createMockPayment({ id: 'p1' }), createMockPayment({ id: 'p2' })];
+      const payments = [
+        createMockPayment({ id: 'p1' }),
+        createMockPayment({ id: 'p2' }),
+      ];
       paymentsRepo.find.mockResolvedValue(payments);
       const result = await service.findPayments('test-id', 'company-1');
       expect(result).toEqual(payments);
@@ -273,7 +322,9 @@ describe('ProjectsService', () => {
 
     it('should throw NotFoundException when project not found', async () => {
       projectRepo.findOne.mockResolvedValue(null);
-      await expect(service.findPayments('non-existent', 'company-1')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.findPayments('non-existent', 'company-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -310,7 +361,9 @@ describe('ProjectsService', () => {
         },
       };
 
-      (service as any).dataSource.createQueryRunner.mockReturnValue(queryRunner);
+      (service as any).dataSource.createQueryRunner.mockReturnValue(
+        queryRunner,
+      );
 
       const result = await service.bulkRemove(['test-id'], 'company-1');
       expect(result.deleted).toBe(1);
@@ -340,7 +393,9 @@ describe('ProjectsService', () => {
         },
       };
 
-      (service as any).dataSource.createQueryRunner.mockReturnValue(queryRunner);
+      (service as any).dataSource.createQueryRunner.mockReturnValue(
+        queryRunner,
+      );
 
       const result = await service.bulkRemove(['test-id'], 'company-1');
       expect(result.deleted).toBe(1);
@@ -349,7 +404,11 @@ describe('ProjectsService', () => {
 
   describe('bulkUpdateFolder', () => {
     it('should update folder for multiple projects', async () => {
-      const result = await service.bulkUpdateFolder(['1', '2'], '/new-folder', 'company-1');
+      const result = await service.bulkUpdateFolder(
+        ['1', '2'],
+        '/new-folder',
+        'company-1',
+      );
       expect(result.updated).toBe(1);
     });
 

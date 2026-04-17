@@ -14,27 +14,31 @@ Sentry.init({
   dsn: process.env.SENTRY_DSN,
   environment: process.env.NODE_ENV || 'development',
   tracesSampleRate: 0.1,
-  integrations: [
-    Sentry.httpIntegration(),
-  ],
+  integrations: [Sentry.httpIntegration()],
 });
 
 const server = express();
 
-server.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      fontSrc: ["'self'"],
-      connectSrc: ["'self'", "https://sfzkrnfyfwonxyceugya.supabase.co", "https://api.groq.com"],
-      frameSrc: ["'none'"],
+server.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        fontSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          'https://sfzkrnfyfwonxyceugya.supabase.co',
+          'https://api.groq.com',
+        ],
+        frameSrc: ["'none'"],
+      },
     },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 let cachedServer: any;
 

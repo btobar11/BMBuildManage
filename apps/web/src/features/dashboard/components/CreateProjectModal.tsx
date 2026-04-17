@@ -73,7 +73,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   };
 
   const queryClient = useQueryClient();
-  const { data: ufValue, isLoading: isLoadingUF } = useUFValue();
+  const { data: ufValue } = useUFValue();
 
   const createProjectMutation = useMutation({
     mutationFn: async () => {

@@ -2,7 +2,11 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ScheduleModule } from './schedule.module';
 import { ScheduleService } from './schedule.service';
 import { ScheduleController } from './schedule.controller';
-import { ScheduleTask, ScheduleMilestone, ScheduleResource } from './schedule.entity';
+import {
+  ScheduleTask,
+  ScheduleMilestone,
+  ScheduleResource,
+} from './schedule.entity';
 
 describe('ScheduleModule', () => {
   it('should be defined', () => {

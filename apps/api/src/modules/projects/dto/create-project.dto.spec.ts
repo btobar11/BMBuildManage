@@ -1,4 +1,15 @@
-import { IsString, IsOptional, IsEnum, IsDate, IsNumber, IsArray, IsUUID, MaxLength, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsDate,
+  IsNumber,
+  IsArray,
+  IsUUID,
+  MaxLength,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProjectStatus } from '../project.entity';
 
@@ -31,7 +42,12 @@ describe('CreateProjectDto', () => {
   });
 
   it('should handle optional fields', () => {
-    const dto = { name: 'Test', address: 'Address', region: 'Region', commune: 'Commune' };
+    const dto = {
+      name: 'Test',
+      address: 'Address',
+      region: 'Region',
+      commune: 'Commune',
+    };
     expect(dto.name).toBe('Test');
   });
 
@@ -68,10 +84,10 @@ describe('UpdateProjectDto', () => {
   });
 
   it('should allow updating multiple fields', () => {
-    const dto = { 
-      name: 'Updated', 
+    const dto = {
+      name: 'Updated',
       description: 'New description',
-      status: ProjectStatus.IN_PROGRESS 
+      status: ProjectStatus.IN_PROGRESS,
     };
     expect(dto.name).toBe('Updated');
     expect(dto.status).toBe(ProjectStatus.IN_PROGRESS);

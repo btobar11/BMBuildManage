@@ -99,6 +99,18 @@ export class SeedService {
             base_price: 8500,
           },
           {
+            name: 'Porcelanato Gres Gris 60x60 Rectificado',
+            type: ResourceType.MATERIAL,
+            unit: getUnit('m2'),
+            base_price: 18500,
+          },
+          {
+            name: 'Interruptor Simple Legrand Niloé',
+            type: ResourceType.MATERIAL,
+            unit: getUnit('un'),
+            base_price: 4500,
+          },
+          {
             name: 'Arena Gruesa',
             type: ResourceType.MATERIAL,
             unit: getUnit('m3'),
@@ -109,6 +121,12 @@ export class SeedService {
             type: ResourceType.MATERIAL,
             unit: getUnit('m3'),
             base_price: 25000,
+          },
+          {
+            name: 'Maestro Albañil 1ra Especialista',
+            type: ResourceType.LABOR,
+            unit: getUnit('día'),
+            base_price: 65000,
           },
           {
             name: 'Enfierrador',
@@ -123,10 +141,10 @@ export class SeedService {
             base_price: 25000,
           },
           {
-            name: 'Maestro Albañil',
-            type: ResourceType.LABOR,
+            name: 'Nivel Láser Autonivelante 360 Bosch',
+            type: ResourceType.EQUIPMENT,
             unit: getUnit('día'),
-            base_price: 55000,
+            base_price: 12000,
           },
           {
             name: 'Betonera 150L',

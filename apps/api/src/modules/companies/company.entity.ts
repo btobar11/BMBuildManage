@@ -84,6 +84,9 @@ export class Company {
   })
   specialty: CompanySpecialty;
 
+  @Column('text', { array: true, nullable: true })
+  specialties: string[];
+
   @Column({
     type: 'enum',
     enum: SeismicZone,

@@ -1,6 +1,6 @@
 /**
  * OpenTelemetry Configuration
- * 
+ *
  * Tracing configuración para la API.
  * Requiere Jaeger o compatible endpoint.
  */
@@ -13,7 +13,8 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 
 const serviceName = process.env.SERVICE_NAME || 'bm-build-manage-api';
-const jaegerEndpoint = process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces';
+const jaegerEndpoint =
+  process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces';
 
 let tracingSDK: NodeSDK | null = null;
 
@@ -22,7 +23,7 @@ export function startTracing() {
 
   try {
     const exporter = new JaegerExporter({ endpoint: jaegerEndpoint });
-    
+
     tracingSDK = new NodeSDK({
       serviceName,
       traceExporter: exporter,

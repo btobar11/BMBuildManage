@@ -6,8 +6,10 @@ import {
   IsUUID,
   Matches,
   ArrayMinSize,
+  IsEnum,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
+import { CompanySpecialty } from '../company.entity';
 
 export const CHILEAN_RUT_REGEX = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
 
@@ -85,6 +87,18 @@ export class CreateCompanyDto {
   @IsArray()
   @IsString({ each: true })
   challenges?: string[];
+
+  @IsOptional()
+  @IsEnum(CompanySpecialty)
+  specialty?: CompanySpecialty;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1, {
+    message: 'Debes seleccionar al menos una especialidad',
+  })
+  specialties?: string[];
 }
 
 export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {}

@@ -96,7 +96,7 @@ describe('CompaniesService', () => {
     jest.clearAllMocks();
   });
 
-describe('create', () => {
+  describe('create', () => {
     it('should create a company', async () => {
       const createDto = { name: 'Company 1', country: 'US' };
       const company = createMockCompany(createDto);
@@ -117,7 +117,9 @@ describe('create', () => {
       userRepository.update.mockResolvedValue({ affected: 1 } as any);
 
       await service.create(createDto, 'user-1');
-      expect(userRepository.update).toHaveBeenCalledWith('user-1', { company_id: 'new-company-1' });
+      expect(userRepository.update).toHaveBeenCalledWith('user-1', {
+        company_id: 'new-company-1',
+      });
     });
   });
 
@@ -145,12 +147,12 @@ describe('create', () => {
       const company = createMockCompany({ id: 'company-1' });
       companyRepository.findOne.mockResolvedValue(company);
 
-      await expect(service.findOne('company-1', 'different-company-id')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.findOne('company-1', 'different-company-id'),
+      ).rejects.toThrow(NotFoundException);
     });
 
-it('should allow access when companyId matches', async () => {
+    it('should allow access when companyId matches', async () => {
       const company = createMockCompany({ id: 'company-1' });
       companyRepository.findOne.mockResolvedValue(company);
 

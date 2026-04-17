@@ -109,28 +109,40 @@ describe('AnalyticsController', () => {
 
   describe('getProjectFinancialDetails', () => {
     it('should return financial details for project', async () => {
-      const result = await controller.getProjectFinancialDetails('company-1', 'project-1');
+      const result = await controller.getProjectFinancialDetails(
+        'company-1',
+        'project-1',
+      );
       expect(result).toBeNull();
     });
   });
 
   describe('getProjectPhysicalDetails', () => {
     it('should return physical details for project', async () => {
-      const result = await controller.getProjectPhysicalDetails('company-1', 'project-1');
+      const result = await controller.getProjectPhysicalDetails(
+        'company-1',
+        'project-1',
+      );
       expect(result).toBeNull();
     });
   });
 
   describe('getProjectClashHealth', () => {
     it('should return clash health for project', async () => {
-      const result = await controller.getProjectClashHealth('company-1', 'project-1');
+      const result = await controller.getProjectClashHealth(
+        'company-1',
+        'project-1',
+      );
       expect(result).toBeNull();
     });
   });
 
   describe('getProjectCashflow', () => {
     it('should return cashflow for project', async () => {
-      const result = await controller.getProjectCashflow('company-1', 'project-1');
+      const result = await controller.getProjectCashflow(
+        'company-1',
+        'project-1',
+      );
       expect(result).toBeNull();
     });
   });

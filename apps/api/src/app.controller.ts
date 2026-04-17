@@ -36,7 +36,8 @@ export class AppController {
         database: {
           status: dbStatus,
           latency_ms: dbLatency,
-          host: process.env.DATABASE_URL?.split('@')[1]?.split(':')[0] || 'unknown',
+          host:
+            process.env.DATABASE_URL?.split('@')[1]?.split(':')[0] || 'unknown',
         },
       },
       uptime: process.uptime(),

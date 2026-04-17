@@ -12,7 +12,7 @@ interface OnboardingData {
   industry: string[];
   companySize?: string;
   phone?: string;
-  specialty: string;
+  specialties: string[];
   challenges: string[];
 }
 
@@ -39,7 +39,8 @@ export const useOnboardingSeeding = () => {
         challenges: data.challenges,
         size: data.companySize,
         phone: data.phone,
-        description: `Especialidad: ${data.specialty}. Desafíos: ${data.challenges.join(', ')}`
+        specialties: data.specialties,
+        description: `Especialidades: ${data.specialties.join(', ')}. Desafíos: ${data.challenges.join(', ')}`
       });
       const newCompany = companyResponse.data;
 
@@ -62,7 +63,7 @@ export const useOnboardingSeeding = () => {
       const projectPayload = {
         name: `Proyecto Demo - ${data.companyName}`,
         status: 'planning',
-        description: `Especialidad: ${data.specialty}. Reto principal: ${data.painPoint}`,
+        description: `Especialidades: ${data.specialties.join(', ')}. Reto principal: ${data.challenges[0] || 'Gestión'}`,
         company_id: newCompany.id,
       };
 

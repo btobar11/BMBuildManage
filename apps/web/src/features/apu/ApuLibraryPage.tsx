@@ -261,7 +261,7 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
             )}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-6">
             {entries.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 bg-muted/30 border-2 border-dashed border-border/50 rounded-3xl">
                 <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4">
@@ -270,50 +270,73 @@ function ApuEditor({ initial, resources, onSave, onCancel, isLoading, units }: A
                 <p className="text-muted-foreground text-sm">Busque y agregue recursos para calcular el costo</p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {entries.map((entry) => (
-                  <div
-                    key={entry.resource_id}
-                    className="flex items-center gap-4 bg-card/50 hover:bg-card/70 border border-border/50 rounded-2xl p-4 transition-all group"
-                  >
-                    <div className={`w-10 h-10 flex items-center justify-center rounded-xl border ${RES_TYPE_COLORS[entry.resource_type]} shrink-0`}>
-                      {RES_TYPE_ICONS[entry.resource_type]}
+              (['material', 'labor', 'equipment'] as ResourceType[]).map(type => {
+                const typeEntries = entries.filter(e => e.resource_type === type);
+                if (typeEntries.length === 0) return null;
+
+                return (
+                  <div key={type} className="space-y-3">
+                    <div className="flex items-center gap-2 px-1">
+                      <div className={`w-2 h-2 rounded-full ${type === 'material' ? 'bg-blue-500' : type === 'labor' ? 'bg-violet-500' : 'bg-amber-500'}`} />
+                      <h5 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        {type === 'material' ? 'Materiales' : type === 'labor' ? 'Mano de Obra' : 'Equipos'}
+                      </h5>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-foreground text-sm font-bold truncate">{entry.resource?.name}</p>
-                      <p className="text-muted-foreground text-[10px] uppercase font-semibold">{entry.resource?.unit?.symbol || '-'}</p>
+                    <div className="space-y-2">
+                      {typeEntries.map((entry) => (
+                        <div
+                          key={entry.resource_id}
+                          className="flex items-center gap-4 bg-card/50 hover:bg-card/70 border border-border/50 rounded-2xl p-4 transition-all group shadow-sm"
+                        >
+                          <div className={`w-10 h-10 flex items-center justify-center rounded-xl border ${RES_TYPE_COLORS[entry.resource_type]} shrink-0 shadow-inner`}>
+                            {RES_TYPE_ICONS[entry.resource_type]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-foreground text-sm font-bold truncate leading-tight">{entry.resource?.name}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <p className="text-muted-foreground text-[10px] uppercase font-bold tracking-tighter bg-muted px-1.5 py-0.5 rounded border border-border/50 shadow-inner">
+                                {entry.resource?.unit?.symbol || '-'}
+                              </p>
+                              <p className="text-muted-foreground text-[10px] font-medium italic">
+                                {formatCLP(Number(entry.resource?.base_price ?? 0))} base
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="w-32">
+                            <label className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-1 block px-1">Rendimiento</label>
+                            <div className="relative group/input">
+                              <input
+                                type="number"
+                                value={entry.coefficient}
+                                onChange={(e) => updateCoeff(entry.resource_id, parseFloat(e.target.value) || 0)}
+                                min={0}
+                                step={0.0001}
+                                className="bg-muted border border-border/50 rounded-xl px-3 py-2 text-foreground text-sm text-right outline-none focus:border-emerald-500/50 w-full tabular-nums transition-all font-bold"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="text-right min-w-[120px] bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-2">
+                            <p className="text-emerald-500/60 text-[9px] uppercase font-black tracking-widest mb-0.5">Subtotal</p>
+                            <p className="text-emerald-400 text-sm font-black tabular-nums">
+                              {formatCLP(Number(entry.resource?.base_price ?? 0) * entry.coefficient)}
+                            </p>
+                          </div>
+                          
+                          <button
+                            type="button"
+                            onClick={() => removeEntry(entry.resource_id)}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-right min-w-[100px]">
-                      <p className="text-muted-foreground text-[10px] uppercase opacity-50 mb-0.5">Precio</p>
-                      <p className="text-foreground text-sm font-bold tabular-nums">{formatCLP(Number(entry.resource?.base_price ?? 0))}</p>
-                    </div>
-                    <div className="w-28">
-                      <p className="text-muted-foreground text-[10px] uppercase opacity-50 mb-0.5 text-right">Rendimiento</p>
-                      <input
-                        type="number"
-                        value={entry.coefficient}
-                        onChange={(e) => updateCoeff(entry.resource_id, parseFloat(e.target.value) || 0)}
-                        min={0}
-                        step={0.001}
-                        className="bg-muted border border-border/50 rounded-xl px-3 py-1.5 text-foreground text-sm text-right outline-none focus:border-emerald-500/50 w-full tabular-nums transition-all"
-                      />
-                    </div>
-                    <div className="text-right min-w-[100px]">
-                      <p className="text-muted-foreground text-[10px] uppercase opacity-50 mb-0.5">Subtotal</p>
-                      <p className="text-emerald-400 text-sm font-bold tabular-nums">
-                        {formatCLP(Number(entry.resource?.base_price ?? 0) * entry.coefficient)}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeEntry(entry.resource_id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <X size={16} />
-                    </button>
                   </div>
-                ))}
-              </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -452,27 +475,43 @@ function ApuCard({
         </div>
 
         {expanded && (
-          <div className="mt-3 space-y-1.5 animate-fade-in">
+          <div className="mt-4 space-y-4 animate-fade-in border-t border-border/30 pt-4">
             {apu.apu_resources.length === 0 ? (
-              <p className="text-[10px] text-center text-muted-foreground py-3">Sin recursos</p>
+              <p className="text-[10px] text-center text-muted-foreground py-3 italic">Sin recursos configurados</p>
             ) : (
-              apu.apu_resources.slice(0, 10).map((r, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg border border-border/30">
-                  <span className={`w-6 h-6 flex items-center justify-center rounded-md border ${RES_TYPE_COLORS[r.resource_type]} shrink-0`}>
-                    {RES_TYPE_ICONS[r.resource_type]}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-foreground font-medium truncate">{r.resource?.name}</p>
-                    <p className="text-[9px] text-muted-foreground">×{Number(r.coefficient).toFixed(3)}</p>
+              (['material', 'labor', 'equipment'] as ResourceType[]).map(type => {
+                const typeEntries = apu.apu_resources.filter(r => r.resource_type === type);
+                if (typeEntries.length === 0) return null;
+                
+                return (
+                  <div key={type} className="space-y-1.5">
+                    <div className="flex items-center gap-1.5 px-1 mb-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${type === 'material' ? 'bg-blue-500' : type === 'labor' ? 'bg-violet-500' : 'bg-amber-500'}`} />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
+                        {type === 'material' ? 'Materiales' : type === 'labor' ? 'Mano de Obra' : 'Equipos'}
+                      </span>
+                    </div>
+                    {typeEntries.map((r, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-muted/20 hover:bg-muted/40 rounded-xl border border-border/30 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] text-foreground font-semibold truncate leading-tight">{r.resource?.name}</p>
+                          <p className="text-[9px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <span className="font-bold text-emerald-500/80">{Number(r.coefficient).toFixed(4)}</span>
+                            <span className="opacity-60">{r.resource?.unit?.symbol}</span>
+                            <span className="opacity-30">·</span>
+                            <span className="opacity-60">{formatCLP(Number(r.resource?.base_price ?? 0))} / {r.resource?.unit?.symbol}</span>
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[11px] text-foreground font-bold tabular-nums">
+                            {formatCLP(Number(r.resource?.base_price ?? 0) * Number(r.coefficient))}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <span className="text-[11px] text-emerald-400 font-bold tabular-nums shrink-0">
-                    {formatCLP(Number(r.resource?.base_price ?? 0) * Number(r.coefficient))}
-                  </span>
-                </div>
-              ))
-            )}
-            {apu.apu_resources.length > 10 && (
-              <p className="text-[10px] text-center text-muted-foreground py-1">+{apu.apu_resources.length - 10} más...</p>
+                );
+              })
             )}
           </div>
         )}

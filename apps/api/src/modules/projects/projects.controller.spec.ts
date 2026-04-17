@@ -85,7 +85,9 @@ describe('ProjectsController', () => {
       mockProjectsService.create.mockRejectedValue(error);
 
       await expect(
-        controller.create({ name: '' } as any, { user: { company_id: 'company-1' } }),
+        controller.create({ name: '' } as any, {
+          user: { company_id: 'company-1' },
+        }),
       ).rejects.toThrow();
     });
 
@@ -97,7 +99,9 @@ describe('ProjectsController', () => {
       mockProjectsService.create.mockRejectedValue(error);
 
       await expect(
-        controller.create({ name: 'Test' } as any, { user: { company_id: 'company-1' } }),
+        controller.create({ name: 'Test' } as any, {
+          user: { company_id: 'company-1' },
+        }),
       ).rejects.toThrow();
     });
   });

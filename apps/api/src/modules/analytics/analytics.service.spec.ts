@@ -122,7 +122,10 @@ describe('AnalyticsService', () => {
       ];
       mockDataSource.query.mockResolvedValueOnce(mockResult);
 
-      const result = await service.getProjectFinancialDetails('company-1', 'project-1');
+      const result = await service.getProjectFinancialDetails(
+        'company-1',
+        'project-1',
+      );
 
       expect(result).toEqual(mockResult[0]);
     });
@@ -130,7 +133,10 @@ describe('AnalyticsService', () => {
     it('should return null when no project found', async () => {
       mockDataSource.query.mockResolvedValueOnce([]);
 
-      const result = await service.getProjectFinancialDetails('company-1', 'project-1');
+      const result = await service.getProjectFinancialDetails(
+        'company-1',
+        'project-1',
+      );
 
       expect(result).toBeNull();
     });
@@ -167,7 +173,10 @@ describe('AnalyticsService', () => {
       ];
       mockDataSource.query.mockResolvedValueOnce(mockResult);
 
-      const result = await service.getProjectPhysicalDetails('company-1', 'project-1');
+      const result = await service.getProjectPhysicalDetails(
+        'company-1',
+        'project-1',
+      );
 
       expect(result).toEqual(mockResult[0]);
     });
@@ -175,7 +184,10 @@ describe('AnalyticsService', () => {
     it('should return null when no project found', async () => {
       mockDataSource.query.mockResolvedValueOnce([]);
 
-      const result = await service.getProjectPhysicalDetails('company-1', 'project-1');
+      const result = await service.getProjectPhysicalDetails(
+        'company-1',
+        'project-1',
+      );
 
       expect(result).toBeNull();
     });
@@ -194,7 +206,10 @@ describe('AnalyticsService', () => {
       ];
       mockDataSource.query.mockResolvedValueOnce(mockResult);
 
-      const result = await service.getProjectClashHealth('company-1', 'project-1');
+      const result = await service.getProjectClashHealth(
+        'company-1',
+        'project-1',
+      );
 
       expect(result).toEqual(mockResult[0]);
     });
@@ -202,7 +217,10 @@ describe('AnalyticsService', () => {
     it('should return null when no project found', async () => {
       mockDataSource.query.mockResolvedValueOnce([]);
 
-      const result = await service.getProjectClashHealth('company-1', 'project-1');
+      const result = await service.getProjectClashHealth(
+        'company-1',
+        'project-1',
+      );
 
       expect(result).toBeNull();
     });
@@ -234,7 +252,7 @@ describe('AnalyticsService', () => {
         },
       ];
       const mockTimeSeries: any[] = [];
-      
+
       mockDataSource.query
         .mockResolvedValueOnce(mockProjectResult)
         .mockResolvedValueOnce(mockTimeSeries);

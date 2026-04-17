@@ -6,6 +6,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../../lib/api';
 import { useUFValue } from '../../../hooks/useUFValue';
+import { ExportActionMenu } from '../report/BudgetPDFDocument';
 
 interface Props {
   budget: Budget;
@@ -70,36 +71,40 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
           </div>
         </div>
 
-        {/* Status Badge - Moved to a cleaner, smaller layout */}
-        <div className="relative mt-1 md:mt-0">
-          <button
-            onClick={() => setStatusOpen((o) => !o)}
-            className={`flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-lg border transition-all ${
+        {/* Action Menu & Status Badge */}
+        <div className="flex items-center gap-3 mt-1 md:mt-0 relative">
+          <ExportActionMenu budget={budget} financials={financials} />
+
+          <div className="relative">
+            <button
+              onClick={() => setStatusOpen((o) => !o)}
+              className={`flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-lg border transition-all ${
               statusOption.value === 'draft' ? 'text-amber-500 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10' :
               statusOption.value === 'editing' ? 'text-blue-500 border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10' :
               statusOption.value === 'approved' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10' :
               'text-foreground border-border bg-background/50 hover:bg-background'
             }`}
-          >
-            <div className={`w-1.5 h-1.5 rounded-full ${statusOption.value === 'draft' ? 'bg-amber-500' : statusOption.value === 'editing' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
-            {statusOption.label}
-            <ChevronDown size={12} className="opacity-50 ml-1" />
-          </button>
-          
-          {statusOpen && (
-            <div className="absolute top-full mt-1 right-0 w-40 bg-popover border border-border rounded-xl shadow-xl z-50 overflow-hidden py-1">
-              {STATUS_OPTIONS.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => { onUpdate({ status: s.value }); setStatusOpen(false); }}
-                  className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold hover:bg-muted transition-colors ${s.color}`}
-                >
-                  {s.label}
-                  {s.value === budget.status && <Check size={12} />}
-                </button>
-              ))}
-            </div>
-          )}
+            >
+              <div className={`w-1.5 h-1.5 rounded-full ${statusOption.value === 'draft' ? 'bg-amber-500' : statusOption.value === 'editing' ? 'bg-blue-500' : 'bg-emerald-500'}`} />
+              {statusOption.label}
+              <ChevronDown size={12} className="opacity-50 ml-1" />
+            </button>
+            
+            {statusOpen && (
+              <div className="absolute top-full mt-1 right-0 w-40 bg-popover border border-border rounded-xl shadow-xl z-50 overflow-hidden py-1">
+                {STATUS_OPTIONS.map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => { onUpdate({ status: s.value }); setStatusOpen(false); }}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold hover:bg-muted transition-colors ${s.color}`}
+                  >
+                    {s.label}
+                    {s.value === budget.status && <Check size={12} />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -82,7 +82,9 @@ describe('ScheduleController', () => {
     });
 
     it('should handle metrics error', async () => {
-      mockScheduleService.calculateScheduleMetrics.mockRejectedValue(new Error('DB error'));
+      mockScheduleService.calculateScheduleMetrics.mockRejectedValue(
+        new Error('DB error'),
+      );
 
       await expect(controller.getMetrics('proj-1')).rejects.toThrow();
     });
@@ -118,9 +120,17 @@ describe('ScheduleController', () => {
     });
 
     it('should handle create task error', async () => {
-      mockScheduleService.createTask.mockRejectedValue(new Error('Validation error'));
+      mockScheduleService.createTask.mockRejectedValue(
+        new Error('Validation error'),
+      );
 
-      await expect(controller.createTask('proj-1', { name: 'Task', start_date: '2024-01-01', end_date: '2024-01-31' })).rejects.toThrow();
+      await expect(
+        controller.createTask('proj-1', {
+          name: 'Task',
+          start_date: '2024-01-01',
+          end_date: '2024-01-31',
+        }),
+      ).rejects.toThrow();
     });
   });
 
@@ -194,7 +204,9 @@ describe('ScheduleController', () => {
     });
 
     it('should handle update milestone error', async () => {
-      mockScheduleService.updateMilestone.mockRejectedValue(new Error('Not found'));
+      mockScheduleService.updateMilestone.mockRejectedValue(
+        new Error('Not found'),
+      );
 
       await expect(controller.updateMilestone('fake-id', {})).rejects.toThrow();
     });

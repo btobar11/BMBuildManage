@@ -116,31 +116,77 @@ export class AIController {
   @Post('analyze/quality')
   @UseGuards(SupabaseAuthGuard)
   async analyzeQuality() {
-    return { data: { elementsWithIssues: 0, qualityScore: 100, commonIssues: [], modelCompleteness: 100, dataConsistency: 100 } };
+    return {
+      data: {
+        elementsWithIssues: 0,
+        qualityScore: 100,
+        commonIssues: [],
+        modelCompleteness: 100,
+        dataConsistency: 100,
+      },
+    };
   }
 
   @Post('analyze/resources')
   @UseGuards(SupabaseAuthGuard)
   async analyzeResources() {
-    return { data: { materialWaste: [], laborEfficiency: [], equipmentUtilization: [], optimizationRecommendations: [] } };
+    return {
+      data: {
+        materialWaste: [],
+        laborEfficiency: [],
+        equipmentUtilization: [],
+        optimizationRecommendations: [],
+      },
+    };
   }
 
   @Post('analyze/summary')
   @UseGuards(SupabaseAuthGuard)
   async analyzeSummary() {
-    return { data: { totalElements: 0, totalVolume: 0, totalCost: 0, progressPercentage: 0, qualityScore: 100, activeClashes: 0, criticalIssues: [], keyRecommendations: [] } };
+    return {
+      data: {
+        totalElements: 0,
+        totalVolume: 0,
+        totalCost: 0,
+        progressPercentage: 0,
+        qualityScore: 100,
+        activeClashes: 0,
+        criticalIssues: [],
+        keyRecommendations: [],
+      },
+    };
   }
 
   @Post('analyze/progress')
   @UseGuards(SupabaseAuthGuard)
   async analyzeProgress() {
-    return { data: { totalElements: 0, completedElements: 0, progressPercentage: 0, byStorey: {}, byType: {}, predictedCompletion: null, delayRiskFactors: [] } };
+    return {
+      data: {
+        totalElements: 0,
+        completedElements: 0,
+        progressPercentage: 0,
+        byStorey: {},
+        byType: {},
+        predictedCompletion: null,
+        delayRiskFactors: [],
+      },
+    };
   }
 
   @Post('analyze/clashes')
   @UseGuards(SupabaseAuthGuard)
   async analyzeClashes() {
-    return { data: { totalClashes: 0, bySeverity: {critical: 0, high: 0, medium: 0, low: 0}, byType: {hard: 0, soft: 0, clearance: 0}, byDiscipline: {}, resolvedPercentage: 100, avgResolutionTime: 0, criticalUnresolved: 0 } };
+    return {
+      data: {
+        totalClashes: 0,
+        bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
+        byType: { hard: 0, soft: 0, clearance: 0 },
+        byDiscipline: {},
+        resolvedPercentage: 100,
+        avgResolutionTime: 0,
+        criticalUnresolved: 0,
+      },
+    };
   }
 
   @Post('analyze/costs')
