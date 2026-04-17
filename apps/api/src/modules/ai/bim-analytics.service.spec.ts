@@ -206,7 +206,7 @@ describe('BIMAnalyticsService', () => {
         },
       ];
 
-      mockSupabase.from.mockImplementation((table) => {
+      mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'bim_clashes') return createFluentMock(mockClashes);
         if (table === 'bim_models') return createFluentMock([{ id: 'm1' }]);
         return createFluentMock([]);

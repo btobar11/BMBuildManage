@@ -73,8 +73,6 @@ const createMockItem = (overrides?: Partial<Item>): Item => {
       position: 1,
       total_cost: 0,
       total_price: 0,
-      order: 1,
-      is_active: true,
       created_at: new Date('2024-01-01'),
       updated_at: new Date('2024-01-01'),
       budget: {
@@ -113,10 +111,9 @@ const createMockStage = (overrides?: Partial<Stage>): Stage => {
     id: 'stage-1',
     budget_id: 'budget-1',
     name: 'Stage 1',
-    description: '',
     position: 1,
-    order: 1,
-    is_active: true,
+    total_cost: 0,
+    total_price: 0,
     created_at: new Date('2024-01-01'),
     updated_at: new Date('2024-01-01'),
     budget: {
@@ -141,7 +138,7 @@ const createMockStage = (overrides?: Partial<Stage>): Stage => {
         name: 'Project 1',
         description: '',
         is_active: true,
-      } as Project,
+      } as unknown as Project,
       stages: [],
     } as Budget,
     items: [],
@@ -153,7 +150,6 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
   const base: Budget = {
     id: 'budget-1',
     project_id: 'project-1',
-    company_id: 'company-1',
     version: 1,
     status: 'DRAFT' as any,
     is_active: true,
@@ -172,7 +168,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
       name: 'Project 1',
       description: '',
       is_active: true,
-    } as Project,
+    } as unknown as Project,
     stages: [],
   };
   return { ...base, ...overrides } as Budget;
@@ -400,7 +396,7 @@ describe('BimApuLinkService', () => {
           name: 'Project 1',
           description: '',
           is_active: true,
-        } as Project,
+        } as unknown as Project,
       });
       const mockStageWithDifferentCompany = createMockStage({
         budget: mockBudgetWithDifferentCompany,

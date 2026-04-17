@@ -49,7 +49,7 @@ describe('DteXmlBuilderService', () => {
         monto_iva_reclamado: 0,
         created_at: new Date('2024-01-01'),
         updated_at: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       const items: InvoiceItem[] = [
         {
@@ -66,7 +66,7 @@ describe('DteXmlBuilderService', () => {
           unidad: 'und',
           created_at: new Date('2024-01-01'),
           updated_at: new Date('2024-01-01'),
-        } as InvoiceItem,
+        } as unknown as InvoiceItem,
       ];
 
       const result = service.buildDteXml(invoice, items);
@@ -87,7 +87,7 @@ describe('DteXmlBuilderService', () => {
         giro_emisor: 'Construccion',
         monto_total: 100000,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -104,7 +104,7 @@ describe('DteXmlBuilderService', () => {
         giro_emisor: 'Construccion',
         monto_total: 100000,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -121,7 +121,7 @@ describe('DteXmlBuilderService', () => {
         status: InvoiceStatus.DRAFT,
         monto_total: 100000,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -139,7 +139,7 @@ describe('DteXmlBuilderService', () => {
         status: InvoiceStatus.DRAFT,
         monto_total: 100000,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -157,7 +157,7 @@ describe('DteXmlBuilderService', () => {
         status: InvoiceStatus.DRAFT,
         monto_total: 100000,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       const result = service.buildDteXml(invoice, []);
 
@@ -174,7 +174,7 @@ describe('DteXmlBuilderService', () => {
         tipo_dte: DteType.FACTURA_AFECTA,
         status: InvoiceStatus.DRAFT,
         monto_total: 100000,
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -192,7 +192,7 @@ describe('DteXmlBuilderService', () => {
         status: InvoiceStatus.ELECTRONICALLY_SIGNED,
         monto_total: 100000,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -210,7 +210,7 @@ describe('DteXmlBuilderService', () => {
         status: InvoiceStatus.DRAFT,
         monto_total: 0,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -228,7 +228,7 @@ describe('DteXmlBuilderService', () => {
         status: InvoiceStatus.DRAFT,
         monto_total: -100,
         fecha_emision: new Date('2024-01-01'),
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -252,7 +252,7 @@ describe('DteXmlBuilderService', () => {
         rut_receptor: '87654321-0',
         razon_social_receptor: 'Cliente',
         giro_receptor: 'Mineria',
-      } as Invoice;
+      } as unknown as Invoice;
 
       expect(() => service.buildDteXml(invoice, [])).toThrow(
         BadRequestException,
@@ -276,7 +276,7 @@ describe('DteXmlBuilderService', () => {
         rut_receptor: '87654321-0',
         razon_social_receptor: 'Cliente',
         giro_receptor: 'Mineria',
-      } as Invoice;
+      } as unknown as Invoice;
 
       const result = service.buildDteXml(invoice, []);
 
@@ -300,7 +300,7 @@ describe('DteXmlBuilderService', () => {
         rut_receptor: '87654321-0',
         razon_social_receptor: 'Cliente',
         giro_receptor: 'Mineria',
-      } as Invoice;
+      } as unknown as Invoice;
 
       const result = service.buildDteXml(invoice, []);
 
@@ -327,7 +327,7 @@ describe('DteXmlBuilderService', () => {
         folio_referencia: '5',
         tipo_referencia: '33',
         motivo_referencia: 'Anulacion',
-      } as Invoice;
+      } as unknown as Invoice;
 
       const result = service.buildDteXml(invoice, []);
 
