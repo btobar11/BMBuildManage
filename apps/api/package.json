@@ -112,6 +112,7 @@
       "!**/index.ts",
       "main.ts",
       "telemetry.service.ts",
+      "tracing.ts",
       "**/config/**",
       "**/common/index.ts",
       "!**/*.module.ts",

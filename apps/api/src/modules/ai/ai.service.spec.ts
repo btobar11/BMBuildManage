@@ -732,4 +732,169 @@ describe('AIService', () => {
       expect(result).toHaveProperty('answer');
     });
   });
+
+  describe('handleBudgetQuery', () => {
+    it('should return budgets when budgetId provided', async () => {
+      const mockBudget = createMockBudget({
+        stages: [createMockStage({ items: [createMockItem()] })],
+        project: { name: 'Test Project' } as any,
+      });
+      budgetRepo.findOne.mockResolvedValue(mockBudget);
+
+      const result = await (service as any).handleBudgetQuery('company-1', undefined, 'budget-1');
+      expect(result).toHaveProperty('answer');
+    });
+
+    it('should return budgets when projectId provided', async () => {
+      const mockBudget = createMockBudget({
+        stages: [createMockStage({ items: [createMockItem()] })],
+        project: { name: 'Test Project' } as any,
+      });
+      budgetRepo.findOne.mockResolvedValue(mockBudget);
+
+      const result = await (service as any).handleBudgetQuery('company-1', 'project-1');
+      expect(result).toHaveProperty('answer');
+    });
+
+    it('should return empty when no budgets found', async () => {
+      budgetRepo.findOne.mockResolvedValue(null);
+
+      const result = await (service as any).handleBudgetQuery('company-1', 'project-1');
+      expect(result.answer).toContain('No encontré');
+    });
+  });
+
+  describe('handleScheduleQuery', () => {
+    it('should return schedule analysis', async () => {
+      projectRepo.find.mockResolvedValue([createMockProject()]);
+
+      const result = await (service as any).handleScheduleQuery('company-1');
+      expect(result).toHaveProperty('answer');
+    });
+
+    it('should return empty when no projects', async () => {
+      projectRepo.find.mockResolvedValue([]);
+
+      const result = await (service as any).handleScheduleQuery('company-1');
+      expect(result.answer).toContain('No hay proyectos');
+    });
+  });
+
+  describe('handleWorkersQuery', () => {
+    it('should return worker analysis', async () => {
+      const workerMock = createWorkerRepositoryMock();
+      workerMock.find.mockResolvedValue([createMockWorker()]);
+
+      // Replace the worker repo in the module
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          AIService,
+          {
+            provide: getRepositoryToken(Project),
+            useValue: projectRepo,
+          },
+          {
+            provide: getRepositoryToken(Budget),
+            useValue: budgetRepo,
+          },
+          {
+            provide: getRepositoryToken(Stage),
+            useValue: createStageRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Item),
+            useValue: createItemRepositoryMock(),
+          },
+          {
+            provide: getRepositoryToken(Worker),
+            useValue: workerMock,
+          },
+          { provide: DataSource, useValue: createDataSourceMock() },
+          { provide: FinancialService, useValue: createFinancialServiceMock() },
+          {
+            provide: BIMAnalyticsService,
+            useValue: createBIMAnalyticsServiceMock(),
+          },
+          { provide: ConfigService, useValue: configService },
+        ],
+      }).compile();
+
+      const testService = module.get<AIService>(AIService);
+      const result = await (testService as any).handleWorkersQuery('company-1');
+      expect(result).toHaveProperty('answer');
+    });
+  });
+
+  describe('generateRecommendations', () => {
+    it('should generate recommendations for projects', async () => {
+      const mockItem = createMockItem({ quantity: 100, quantity_executed: 50, unit_cost: 100 });
+      const mockStage = createMockStage({ items: [mockItem] });
+      const mockBudget = createMockBudget({ stages: [mockStage], status: 'active' as any });
+      const project = createMockProject({ budgets: [mockBudget], status: 'in_progress' as any });
+      projectRepo.find.mockResolvedValue([project]);
+
+      const result = await service.generateRecommendations('company-1');
+      expect(result).toHaveProperty('answer');
+      expect(result).toHaveProperty('data');
+    });
+
+    it('should return default insight when no projects', async () => {
+      projectRepo.find.mockResolvedValue([]);
+
+      const result = await service.generateRecommendations('company-1');
+      expect(result.answer).toContain('No hay recomendaciones');
+    });
+  });
+
+  describe('predictProjectOutcome', () => {
+    it('should predict project outcome', async () => {
+      const mockItem = createMockItem({ quantity: 100, quantity_executed: 30, unit_cost: 100 });
+      const mockStage = createMockStage({ items: [mockItem] });
+      const mockBudget = createMockBudget({ stages: [mockStage] });
+      const project = createMockProject({ budgets: [mockBudget], status: 'in_progress' as any });
+      projectRepo.find.mockResolvedValue([project]);
+
+      const result = await service.predictProjectOutcome('company-1');
+      expect(result).toHaveProperty('riskLevel');
+    });
+  });
+
+  describe('analyzeBudgetDeviation', () => {
+    it('should analyze budget deviation', async () => {
+      const mockItem = createMockItem({ quantity: 100, quantity_executed: 50, unit_cost: 100 });
+      const mockStage = createMockStage({ items: [mockItem] });
+      const mockBudget = createMockBudget({ stages: [mockStage] });
+      budgetRepo.findOne.mockResolvedValue(mockBudget);
+
+      const result = await service.analyzeBudgetDeviation('budget-1');
+      expect(result).toHaveProperty('deviationPercent');
+    });
+
+    it('should return null when budget not found', async () => {
+      budgetRepo.findOne.mockResolvedValue(null);
+
+      const result = await service.analyzeBudgetDeviation('invalid');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('generateProjectReport', () => {
+    it('should generate project report', async () => {
+      const mockItem = createMockItem({ quantity: 100, quantity_executed: 50, unit_cost: 100 });
+      const mockStage = createMockStage({ items: [mockItem] });
+      const mockBudget = createMockBudget({ stages: [mockStage], project: { name: 'Test' } as any });
+      const project = createMockProject({ budgets: [mockBudget] });
+      projectRepo.findOne.mockResolvedValue(project);
+
+      const result = await service.generateProjectReport('project-1', 'executive');
+      expect(result).toHaveProperty('summary');
+    });
+
+    it('should handle project not found', async () => {
+      projectRepo.findOne.mockResolvedValue(null);
+
+      const result = await service.generateProjectReport('invalid', 'financial');
+      expect(result).toBeNull();
+    });
+  });
 });
