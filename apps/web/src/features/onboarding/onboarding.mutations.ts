@@ -27,7 +27,7 @@ export const useOnboardingSeeding = () => {
       const session = sessionData?.session;
       if (!session) throw new Error('Usuario no autenticado');
       
-      const userId = session.user.id;
+      
       
       // 1. Create Company via API - include RUT, legal type, address and multi-select fields
       const companyResponse = await api.post('/companies', { 

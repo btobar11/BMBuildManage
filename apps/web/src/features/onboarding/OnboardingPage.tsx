@@ -28,7 +28,7 @@ interface OnboardingState {
   industry: string[];
   companySize: string;
   phone: string;
-  specialty: string;
+  specialties: string[];
   challenges: string[];
 }
 
@@ -121,28 +121,28 @@ export function OnboardingPage() {
   }, [step]);
 
   const toggleIndustry = (value: string) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
       industry: prev.industry.includes(value)
-        ? prev.industry.filter(i => i !== value)
+        ? prev.industry.filter((i: string) => i !== value)
         : [...prev.industry, value]
     }));
   };
 
   const toggleSpecialty = (value: string) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
       specialties: prev.specialties.includes(value)
-        ? prev.specialties.filter(s => s !== value)
+        ? prev.specialties.filter((s: string) => s !== value)
         : [...prev.specialties, value]
     }));
   };
 
   const toggleChallenge = (value: string) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
       challenges: prev.challenges.includes(value)
-        ? prev.challenges.filter(c => c !== value)
+        ? prev.challenges.filter((c: string) => c !== value)
         : [...prev.challenges, value]
     }));
   };
