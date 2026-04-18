@@ -231,7 +231,7 @@ describe('BimModelsService', () => {
       const mockManager = {
         query: jest.fn().mockResolvedValue([{ company_id: 'company-1' }]),
       };
-      (modelRepo as any).manager = mockManager as any;
+      Object.assign(modelRepo, { manager: mockManager });
       modelRepo.create.mockImplementation((data: any) => ({
         ...data,
         id: 'model-new',
@@ -258,7 +258,7 @@ describe('BimModelsService', () => {
       const mockManager = {
         query: jest.fn().mockResolvedValue([]),
       };
-      (modelRepo as any).manager = mockManager as any;
+      Object.assign(modelRepo, { manager: mockManager } as any);
 
       const mockFile = {
         originalname: 'test.ifc',
@@ -289,7 +289,7 @@ describe('BimModelsService', () => {
       const mockManager = {
         query: jest.fn().mockResolvedValue([{ company_id: 'company-1' }]),
       };
-      (modelRepo as any).manager = mockManager as any;
+      Object.assign(modelRepo, { manager: mockManager } as any);
 
       const mockFile = {
         originalname: 'test.ifc',
@@ -323,7 +323,7 @@ describe('BimModelsService', () => {
       const mockManager = {
         query: jest.fn().mockResolvedValue([{ company_id: 'company-1' }]),
       };
-      (modelRepo as any).manager = mockManager as any;
+      Object.assign(modelRepo, { manager: mockManager } as any);
       modelRepo.create.mockImplementation((data: any) => data);
       modelRepo.save.mockImplementation((data: any) => Promise.resolve(data));
 
@@ -363,7 +363,7 @@ describe('BimModelsService', () => {
       const mockManager = {
         query: jest.fn().mockResolvedValue([{ company_id: 'company-1' }]),
       };
-      (modelRepo as any).manager = mockManager as any;
+      Object.assign(modelRepo, { manager: mockManager } as any);
       modelRepo.create.mockImplementation((data: any) => data);
       modelRepo.save.mockImplementation((data: any) =>
         Promise.resolve({ ...data, id: 'model-1' }),
@@ -408,7 +408,7 @@ describe('BimModelsService', () => {
       const mockManager = {
         query: jest.fn().mockResolvedValue([{ company_id: 'company-1' }]),
       };
-      (modelRepo as any).manager = mockManager as any;
+      Object.assign(modelRepo, { manager: mockManager } as any);
       modelRepo.create.mockImplementation((data: any) => data);
       modelRepo.save.mockImplementation((data: any) =>
         Promise.resolve({ ...data, id: 'model-1' }),

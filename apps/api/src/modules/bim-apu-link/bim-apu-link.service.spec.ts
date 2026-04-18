@@ -119,7 +119,6 @@ const createMockStage = (overrides?: Partial<Stage>): Stage => {
     budget: {
       id: 'budget-1',
       project_id: 'project-1',
-      company_id: 'company-1',
       version: 1,
       status: 'DRAFT' as any,
       is_active: true,
@@ -140,10 +139,10 @@ const createMockStage = (overrides?: Partial<Stage>): Stage => {
         is_active: true,
       } as unknown as Project,
       stages: [],
-    } as Budget,
+    } as unknown as Budget,
     items: [],
   };
-  return { ...base, ...overrides } as Stage;
+  return { ...base, ...overrides } as unknown as Stage;
 };
 
 const createMockBudget = (overrides?: Partial<Budget>): Budget => {
@@ -171,7 +170,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
     } as unknown as Project,
     stages: [],
   };
-  return { ...base, ...overrides } as Budget;
+  return { ...base, ...overrides } as unknown as Budget;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

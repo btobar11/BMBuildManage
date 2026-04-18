@@ -206,9 +206,10 @@ describe('BIMAnalyticsService', () => {
         },
       ];
 
-      mockSupabase.from.mockImplementation((table: string) => {
-        if (table === 'bim_clashes') return createFluentMock(mockClashes);
-        if (table === 'bim_models') return createFluentMock([{ id: 'm1' }]);
+      const tableName = 'bim_clashes';
+      mockSupabase.from.mockImplementation((table: { toString(): string } | string) => {
+        if (table.toString() === tableName) return createFluentMock(mockClashes);
+        if (table.toString() === 'bim_models') return createFluentMock([{ id: 'm1' }]);
         return createFluentMock([]);
       });
 
