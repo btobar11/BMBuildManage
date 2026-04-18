@@ -111,8 +111,106 @@ export class ProjectsService {
 
   async remove(id: string, company_id: string): Promise<{ deleted: boolean }> {
     const project = await this.findOne(id, company_id);
-    await this.projectRepository.remove(project);
-    return { deleted: true };
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const budgets = await queryRunner.manager
+        .getRepository(Budget)
+        .find({ where: { project_id: id } });
+      const budgetIds = budgets.map((b) => b.id);
+
+      if (budgetIds.length > 0) {
+        const stages = await queryRunner.manager
+          .getRepository(Stage)
+          .find({ where: { budget_id: In(budgetIds) } });
+        const stageIds = stages.map((s) => s.id);
+
+        if (stageIds.length > 0) {
+          await queryRunner.manager
+            .createQueryBuilder()
+            .delete()
+            .from('budget_execution_logs')
+            .where(
+              'budget_item_id IN (SELECT id FROM items WHERE stage_id IN (:...stageIds))',
+              { stageIds },
+            )
+            .execute();
+          await queryRunner.manager
+            .createQueryBuilder()
+            .delete()
+            .from('resource_consumption')
+            .where('project_id = :id', { id })
+            .execute();
+          await queryRunner.manager
+            .createQueryBuilder()
+            .delete()
+            .from('items')
+            .where('stage_id IN (:...stageIds)', { stageIds })
+            .execute();
+        }
+
+        await queryRunner.manager
+          .createQueryBuilder()
+          .delete()
+          .from('stages')
+          .where('budget_id IN (:...budgetIds)', { budgetIds })
+          .execute();
+      }
+
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('budgets')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('project_contingencies')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('worker_assignments')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('project_payments')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('documents')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('invoices')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('expenses')
+        .where('project_id = :id', { id })
+        .execute();
+
+      await queryRunner.manager.remove(project);
+      await queryRunner.commitTransaction();
+      return { deleted: true };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async bulkRemove(
