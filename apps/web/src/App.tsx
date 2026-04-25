@@ -19,6 +19,9 @@ import { RfisPage } from './features/rfis/RfisPage';
 import { SubmittalsPage } from './features/submittals/SubmittalsPage';
 import { SchedulePage } from './features/schedule/SchedulePage';
 import { PricingPage } from './features/pricing/PricingPage';
+import { SuccessPage } from './features/billing/SuccessPage';
+import { FailurePage } from './features/billing/FailurePage';
+import { PendingPage } from './features/billing/PendingPage';
 import { PunchListPage } from './features/punch-list/PunchListPage';
 import { MainLayout } from './components/layout/MainLayout';
 import { ConfigWarning } from './components/ConfigWarning';
@@ -168,6 +171,9 @@ function App() {
           path="/pricing" 
           element={<PricingPage />} 
         />
+        <Route path="/billing/success" element={<SuccessPage />} />
+        <Route path="/billing/failure" element={<FailurePage />} />
+        <Route path="/billing/pending" element={<PendingPage />} />
         
         {/* Bypass Route for local BIM testing */}
         <Route 

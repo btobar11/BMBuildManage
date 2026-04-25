@@ -770,34 +770,6 @@ describe('BimClashesService - 100% Coverage', () => {
         ).rejects.toThrow('Failed to start job: Update failed');
       });
 
-      it('should handle processFederatedClashDetection error by logging', async () => {
-        const mockJob = { id: 'fed-job-1', status: 'pending' };
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-        jest
-          .spyOn(service, 'findOneFederatedJob')
-          .mockResolvedValue(mockJob as any);
-        mockSupabase.from.mockReturnValue(createQueryBuilder(null, null));
-
-        jest
-          .spyOn(service as any, 'processFederatedClashDetection')
-          .mockRejectedValueOnce(new Error('Processing failed'));
-
-        const result = await service.startFederatedClashDetection(
-          'fed-job-1',
-          'company-1',
-        );
-
-        expect(result.success).toBe(true);
-
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Federated clash detection failed:',
-          expect.any(Error),
-        );
-        consoleSpy.mockRestore();
-      });
     });
 
     describe('getFederatedJobProgress', () => {

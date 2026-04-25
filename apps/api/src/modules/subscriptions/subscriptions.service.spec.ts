@@ -39,8 +39,12 @@ const mockSubscription: Partial<Subscription> = {
 
 describe('SubscriptionsService', () => {
   let service: SubscriptionsService;
-  let subscriptionRepo: jest.Mocked<Repository<Subscription>>;
-  let planFeatureRepo: jest.Mocked<Repository<PlanFeature>>;
+  let subscriptionRepo: any;
+  let planFeatureRepo: any;
+  let addonRepo: any;
+  let companyAddonRepo: any;
+  let subscriptionAddonRepo: any;
+  let addonFeatureRepo: any;
   let billingService: BillingService;
 
   const mockMercadoPagoService = {
@@ -61,7 +65,7 @@ describe('SubscriptionsService', () => {
         {
           provide: getRepositoryToken(Subscription),
           useValue: {
-            findOne: jest.fn(),
+            findOne: jest.fn().mockResolvedValue(null),
             create: jest.fn(),
             save: jest.fn(),
           },
@@ -69,19 +73,22 @@ describe('SubscriptionsService', () => {
         {
           provide: getRepositoryToken(PlanFeature),
           useValue: {
-            findOne: jest.fn(),
+            findOne: jest.fn().mockResolvedValue(null),
+            find: jest.fn().mockResolvedValue([]),
           },
         },
         {
           provide: getRepositoryToken(UsageLimits),
           useValue: {
-            findOne: jest.fn(),
+            findOne: jest.fn().mockResolvedValue(null),
+            find: jest.fn().mockResolvedValue([]),
           },
         },
         {
           provide: getRepositoryToken(SubscriptionAddon),
           useValue: {
-            findOne: jest.fn(),
+            findOne: jest.fn().mockResolvedValue(null),
+            find: jest.fn().mockResolvedValue([]),
             create: jest.fn(),
             save: jest.fn(),
           },
@@ -89,7 +96,15 @@ describe('SubscriptionsService', () => {
         {
           provide: getRepositoryToken(AddonFeature),
           useValue: {
-            findOne: jest.fn(),
+            findOne: jest.fn().mockResolvedValue(null),
+            find: jest.fn().mockResolvedValue([]),
+            createQueryBuilder: jest.fn().mockReturnValue({
+              innerJoin: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              andWhere: jest.fn().mockReturnThis(),
+              getMany: jest.fn().mockResolvedValue([]),
+              getOne: jest.fn().mockResolvedValue(null),
+            }),
           },
         },
         {
@@ -110,7 +125,8 @@ describe('SubscriptionsService', () => {
         {
           provide: getRepositoryToken(CompanyAddon),
           useValue: {
-            findOne: jest.fn(),
+            findOne: jest.fn().mockResolvedValue(null),
+            find: jest.fn().mockResolvedValue([]),
             create: jest.fn(),
             save: jest.fn(),
           },
@@ -126,8 +142,8 @@ describe('SubscriptionsService', () => {
         {
           provide: getRepositoryToken(Addon),
           useValue: {
-            findOne: jest.fn(),
-            find: jest.fn(),
+            findOne: jest.fn().mockResolvedValue(null),
+            find: jest.fn().mockResolvedValue([]),
           },
         },
       ],
@@ -136,6 +152,10 @@ describe('SubscriptionsService', () => {
     service = module.get<SubscriptionsService>(SubscriptionsService);
     subscriptionRepo = module.get(getRepositoryToken(Subscription));
     planFeatureRepo = module.get(getRepositoryToken(PlanFeature));
+    addonRepo = module.get(getRepositoryToken(Addon));
+    companyAddonRepo = module.get(getRepositoryToken(CompanyAddon));
+    subscriptionAddonRepo = module.get(getRepositoryToken(SubscriptionAddon));
+    addonFeatureRepo = module.get(getRepositoryToken(AddonFeature));
     billingService = module.get<BillingService>(BillingService);
   });
 
@@ -204,17 +224,15 @@ describe('SubscriptionsService', () => {
     });
 
     it('should check plan_features table first', async () => {
-      subscriptionRepo.findOne.mockResolvedValue(
-        mockSubscription as Subscription,
-      );
+      jest.spyOn(service, 'findByCompany').mockResolvedValue(mockSubscription as Subscription);
       planFeatureRepo.findOne.mockResolvedValue({
         id: '1',
         plan: PlanTier.PRO,
-        feature_code: 'apu',
+        feature_code: 'bim_clashes',
         enabled: true,
       });
 
-      const result = await service.hasFeature('company-1', 'apu');
+      const result = await service.hasFeature('company-1', 'bim_clashes');
       expect(result).toBe(true);
       expect(planFeatureRepo.findOne).toHaveBeenCalled();
     });
@@ -269,6 +287,7 @@ describe('SubscriptionsService', () => {
       subscriptionRepo.findOne.mockResolvedValue(
         mockSubscription as Subscription,
       );
+      companyAddonRepo.find.mockResolvedValue([]);
       const status = await service.getSubscriptionStatus('company-1');
       expect(status.has_subscription).toBe(true);
       expect(status.plan).toBe(PlanTier.PRO);
@@ -280,6 +299,7 @@ describe('SubscriptionsService', () => {
       subscriptionRepo.findOne.mockResolvedValue(
         mockSubscription as Subscription,
       );
+      subscriptionAddonRepo.find.mockResolvedValue([]);
       subscriptionRepo.save.mockImplementation(async (s) => s as Subscription);
 
       const result = await service.changePlan(

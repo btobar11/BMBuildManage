@@ -120,6 +120,7 @@ describe('CompaniesService', () => {
       await service.create(createDto, 'user-1');
       expect(userRepository.update).toHaveBeenCalledWith('user-1', {
         company_id: 'new-company-1',
+        role: 'admin',
       });
     });
   });
@@ -163,16 +164,13 @@ describe('CompaniesService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all companies', async () => {
-      const companies = [
-        createMockCompany({ id: '1' }),
-        createMockCompany({ id: '2' }),
-      ];
-      companyRepository.find.mockResolvedValue(companies);
+    it('should return company for the user', async () => {
+      const company = createMockCompany({ id: 'company-1' });
+      companyRepository.findOne.mockResolvedValue(company);
 
-      const result = await service.findAll();
-      expect(companyRepository.find).toHaveBeenCalled();
-      expect(result).toEqual(companies);
+      const result = await service.findAll('company-1');
+      expect(companyRepository.findOne).toHaveBeenCalled();
+      expect(result).toEqual([company]);
     });
   });
 
@@ -218,7 +216,7 @@ describe('CompaniesService', () => {
       companyRepository.findOne.mockResolvedValue(company);
       companyRepository.remove.mockResolvedValue(company);
 
-      const result = await service.remove('company-1');
+      const result = await service.remove('company-1', 'company-1');
       expect(companyRepository.remove).toHaveBeenCalledWith(company);
       expect(result).toEqual({ deleted: true });
     });

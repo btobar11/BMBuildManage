@@ -58,7 +58,7 @@ const mockApuResourceRepository = () => ({
 });
 
 const mockResourceRepository = () => ({
-  find: jest.fn(),
+  find: jest.fn().mockResolvedValue([]),
 });
 
 const mockDataSource = () => ({
@@ -151,7 +151,7 @@ describe('ApuService', () => {
       } as any);
       apuTemplateRepo.save.mockResolvedValue(apuTemplate);
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
-
+      resourceRepo.find.mockResolvedValue([{} as any]);
       const result = await service.create(companyId, createDto);
 
       expect(apuTemplateRepo.create).toHaveBeenCalled();
@@ -351,7 +351,7 @@ describe('ApuService', () => {
       apuTemplateRepo.findOne
         .mockResolvedValueOnce(existingTemplate)
         .mockResolvedValueOnce(updatedTemplate);
-
+      resourceRepo.find.mockResolvedValue([{} as any]);
       await service.update(companyId, 'apu-template-1', {
         apu_resources: [
           {

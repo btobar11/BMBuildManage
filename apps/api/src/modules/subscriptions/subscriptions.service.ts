@@ -703,11 +703,18 @@ export class SubscriptionsService {
    * Process Mercado Pago Webhook (IPN/Notifications).
    */
   async processWebhook(payload: any): Promise<void> {
+    this.logger.log(`Received webhook: ${JSON.stringify(payload)}`);
+    
     // Mercado Pago notifications can be 'payment' or 'plan' etc.
     // We mainly care about 'payment'.
-    if (payload.type === 'payment' || payload.topic === 'payment') {
+    if (payload.type === 'payment' || payload.topic === 'payment' || payload.action?.startsWith('payment.')) {
       const paymentId = payload.data?.id || payload.id;
-      if (!paymentId) return;
+      if (!paymentId) {
+        this.logger.warn('Webhook received without payment ID');
+        return;
+      }
+
+      this.logger.log(`Processing payment ID: ${paymentId}`);
 
       const mpPaymentResponse = await this.mercadoPagoService.getPayment(Number(paymentId));
       
@@ -740,11 +747,14 @@ export class SubscriptionsService {
       }
 
       if (status === 'approved') {
+        this.logger.log(`Payment approved for company ${companyId}`);
         // 1. Update payment status
         if (localPayment) {
           localPayment.status = PaymentStatus.APPROVED;
           await this.paymentRepo.save(localPayment);
         }
+
+        this.logger.log(`Activating ${metadata.type}: ${metadata.plan || metadata.addon_code}`);
 
         // 2. Activate subscription or addon
         if (metadata.type === 'subscription') {
