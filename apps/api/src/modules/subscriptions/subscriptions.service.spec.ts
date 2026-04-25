@@ -300,7 +300,7 @@ describe('SubscriptionsService', () => {
         mockSubscription as Subscription,
       );
       subscriptionAddonRepo.find.mockResolvedValue([]);
-      subscriptionRepo.save.mockImplementation(async (s) => s as Subscription);
+      subscriptionRepo.save.mockImplementation(async (s: any) => s as Subscription);
 
       const result = await service.changePlan(
         'company-1',
@@ -329,7 +329,7 @@ describe('SubscriptionsService', () => {
       subscriptionRepo.findOne.mockResolvedValue(
         mockSubscription as Subscription,
       );
-      subscriptionRepo.save.mockImplementation(async (s) => s as Subscription);
+      subscriptionRepo.save.mockImplementation(async (s: any) => s as Subscription);
 
       const result = await service.cancelSubscription(
         'company-1',
