@@ -28,18 +28,11 @@ export class ProjectsService {
       const project = this.projectRepository.create(createProjectDto);
       return await this.projectRepository.save(project);
     } catch (error) {
-      console.error('[ProjectsService.create] Database error:', error.message);
-      console.error(
-        '[ProjectsService.create] Error details:',
-        error.code,
-        error.detail,
-      );
-
       // Handle specific database errors
       if (error.code === '23502') {
         // NOT NULL violation
         throw new BadRequestException(
-          `Campo requerido faltante: ${error.column || '未知字段'}`,
+          `Campo requerido faltante: ${error.column || 'campo desconocido'}`,
         );
       }
       if (error.code === '23505') {
@@ -91,7 +84,6 @@ export class ProjectsService {
   async findOne(id: string, companyId: string): Promise<Project> {
     const project = await this.projectRepository.findOne({
       where: { id, company_id: companyId },
-      relations: ['budgets', 'expenses', 'documents'],
     });
     if (!project) {
       throw new NotFoundException(`Project with ID ${id} not found`);
@@ -201,6 +193,72 @@ export class ProjectsService {
         .from('expenses')
         .where('project_id = :id', { id })
         .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('worker_payments')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('purchase_orders')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('subcontractors')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('project_models')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('bim_apu_links')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('schedule')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('bim_schedule')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('punch_items')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('submittals')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('rfis')
+        .where('project_id = :id', { id })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('audit_logs')
+        .where('project_id = :id', { id })
+        .execute();
 
       await queryRunner.manager.remove(project);
       await queryRunner.commitTransaction();
@@ -256,7 +314,67 @@ export class ProjectsService {
       await queryRunner.manager
         .createQueryBuilder()
         .delete()
-        .from('expenses')
+        .from('worker_payments')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('purchase_orders')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('subcontractors')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('project_models')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('bim_apu_links')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('schedule')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('bim_schedule')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('punch_items')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('submittals')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('rfis')
+        .where('project_id IN (:...ids)', { ids })
+        .execute();
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from('audit_logs')
         .where('project_id IN (:...ids)', { ids })
         .execute();
 
