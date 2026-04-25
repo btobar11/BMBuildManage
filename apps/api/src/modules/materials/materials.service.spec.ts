@@ -28,6 +28,7 @@ const mockRepository = () => ({
 describe('MaterialsService', () => {
   let service: MaterialsService;
   let repository: jest.Mocked<Repository<Material>>;
+  const companyId = 'test-company-id';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -50,13 +51,16 @@ describe('MaterialsService', () => {
         default_price: 0.5,
         supplier: 'Supplier 1',
       };
-      const material = createMockMaterial();
+      const material = createMockMaterial({ company_id: companyId });
       repository.create.mockReturnValue(material);
       repository.save.mockResolvedValue(material);
 
-      const result = await service.create(createDto);
+      const result = await service.create(companyId, createDto);
 
-      expect(repository.create).toHaveBeenCalledWith(createDto);
+      expect(repository.create).toHaveBeenCalledWith({
+        ...createDto,
+        company_id: companyId,
+      });
       expect(repository.save).toHaveBeenCalledWith(material);
       expect(result).toEqual(material);
     });
@@ -65,39 +69,48 @@ describe('MaterialsService', () => {
   describe('findAll', () => {
     it('should return all materials without search', async () => {
       const materials = [
-        createMockMaterial({ id: '1' }),
-        createMockMaterial({ id: '2' }),
+        createMockMaterial({ id: '1', company_id: companyId }),
+        createMockMaterial({ id: '2', company_id: companyId }),
       ];
       repository.find.mockResolvedValue(materials);
 
-      const result = await service.findAll();
+      const result = await service.findAll(companyId);
 
-      expect(repository.find).toHaveBeenCalledWith();
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { company_id: companyId },
+      });
       expect(result).toEqual(materials);
     });
 
     it('should return materials matching search term in name', async () => {
-      const materials = [createMockMaterial({ name: 'Cement' })];
+      const materials = [
+        createMockMaterial({ name: 'Cement', company_id: companyId }),
+      ];
       repository.find.mockResolvedValue(materials);
 
-      const result = await service.findAll('cement');
+      const result = await service.findAll(companyId, 'cement');
 
       expect(repository.find).toHaveBeenCalledWith({
-        where: [{ name: Like('%cement%') }, { category: Like('%cement%') }],
+        where: [
+          { company_id: companyId, name: Like('%cement%') },
+          { company_id: companyId, category: Like('%cement%') },
+        ],
       });
       expect(result).toEqual(materials);
     });
 
     it('should return materials matching search term in category', async () => {
-      const materials = [createMockMaterial({ category: 'construction' })];
+      const materials = [
+        createMockMaterial({ category: 'construction', company_id: companyId }),
+      ];
       repository.find.mockResolvedValue(materials);
 
-      const result = await service.findAll('construction');
+      const result = await service.findAll(companyId, 'construction');
 
       expect(repository.find).toHaveBeenCalledWith({
         where: [
-          { name: Like('%construction%') },
-          { category: Like('%construction%') },
+          { company_id: companyId, name: Like('%construction%') },
+          { company_id: companyId, category: Like('%construction%') },
         ],
       });
       expect(result).toEqual(materials);
@@ -106,13 +119,13 @@ describe('MaterialsService', () => {
 
   describe('findOne', () => {
     it('should return material by id', async () => {
-      const material = createMockMaterial();
+      const material = createMockMaterial({ company_id: companyId });
       repository.findOne.mockResolvedValue(material);
 
-      const result = await service.findOne('material-1');
+      const result = await service.findOne(companyId, 'material-1');
 
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { id: 'material-1' },
+        where: { id: 'material-1', company_id: companyId },
       });
       expect(result).toEqual(material);
     });
@@ -120,7 +133,7 @@ describe('MaterialsService', () => {
     it('should throw NotFoundException when material not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
+      await expect(service.findOne(companyId, 'nonexistent')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -128,11 +141,11 @@ describe('MaterialsService', () => {
 
   describe('remove', () => {
     it('should remove material', async () => {
-      const material = createMockMaterial();
+      const material = createMockMaterial({ company_id: companyId });
       repository.findOne.mockResolvedValue(material);
       repository.remove.mockResolvedValue(material);
 
-      const result = await service.remove('material-1');
+      const result = await service.remove(companyId, 'material-1');
 
       expect(repository.remove).toHaveBeenCalledWith(material);
       expect(result).toEqual({ deleted: true });
@@ -141,7 +154,7 @@ describe('MaterialsService', () => {
     it('should throw NotFoundException when removing nonexistent', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent')).rejects.toThrow(
+      await expect(service.remove(companyId, 'nonexistent')).rejects.toThrow(
         NotFoundException,
       );
     });

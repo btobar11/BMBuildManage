@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ApuService } from './apu.service';
 import { ApuTemplate } from './apu-template.entity';
 import { ApuResource } from './apu-resource.entity';
-import { ResourceType } from '../resources/resource.entity';
+import { Resource, ResourceType } from '../resources/resource.entity';
 
 const createMockApuTemplate = (overrides?: Partial<ApuTemplate>): ApuTemplate =>
   ({
@@ -57,6 +57,10 @@ const mockApuResourceRepository = () => ({
   delete: jest.fn(),
 });
 
+const mockResourceRepository = () => ({
+  find: jest.fn(),
+});
+
 const mockDataSource = () => ({
   query: jest.fn(),
 });
@@ -65,7 +69,9 @@ describe('ApuService', () => {
   let service: ApuService;
   let apuTemplateRepo: jest.Mocked<Repository<ApuTemplate>>;
   let apuResourceRepo: jest.Mocked<Repository<ApuResource>>;
+  let resourceRepo: jest.Mocked<Repository<Resource>>;
   let dataSource: jest.Mocked<DataSource>;
+  const companyId = 'company-1';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -80,6 +86,10 @@ describe('ApuService', () => {
           useFactory: mockApuResourceRepository,
         },
         {
+          provide: getRepositoryToken(Resource),
+          useFactory: mockResourceRepository,
+        },
+        {
           provide: DataSource,
           useFactory: mockDataSource,
         },
@@ -89,6 +99,7 @@ describe('ApuService', () => {
     service = module.get<ApuService>(ApuService);
     apuTemplateRepo = module.get(getRepositoryToken(ApuTemplate));
     apuResourceRepo = module.get(getRepositoryToken(ApuResource));
+    resourceRepo = module.get(getRepositoryToken(Resource));
     dataSource = module.get(DataSource);
   });
 
@@ -96,16 +107,22 @@ describe('ApuService', () => {
     it('should create an APU template without resources', async () => {
       const createDto = {
         name: 'New APU',
-        company_id: 'company-1',
       };
-      const apuTemplate = createMockApuTemplate({ ...createDto, unit_cost: 0 });
+      const apuTemplate = createMockApuTemplate({
+        company_id: companyId,
+        ...createDto,
+        unit_cost: 0,
+      });
       apuTemplateRepo.create.mockReturnValue(apuTemplate as any);
       apuTemplateRepo.save.mockResolvedValue(apuTemplate);
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
 
-      const result = await service.create(createDto);
+      const result = await service.create(companyId, createDto);
 
-      expect(apuTemplateRepo.create).toHaveBeenCalledWith(createDto);
+      expect(apuTemplateRepo.create).toHaveBeenCalledWith({
+        ...createDto,
+        company_id: companyId,
+      });
       expect(apuTemplateRepo.save).toHaveBeenCalled();
       expect(result.name).toBe('New APU');
     });
@@ -113,7 +130,6 @@ describe('ApuService', () => {
     it('should create an APU template with resources', async () => {
       const createDto = {
         name: 'New APU with Resources',
-        company_id: 'company-1',
         apu_resources: [
           {
             resource_id: 'resource-1',
@@ -124,7 +140,7 @@ describe('ApuService', () => {
       };
       const apuTemplate = createMockApuTemplate({
         name: 'New APU with Resources',
-        company_id: 'company-1',
+        company_id: companyId,
         unit_cost: 0,
       } as any);
       const apuResource = createMockApuResource();
@@ -136,7 +152,7 @@ describe('ApuService', () => {
       apuTemplateRepo.save.mockResolvedValue(apuTemplate);
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
 
-      const result = await service.create(createDto);
+      const result = await service.create(companyId, createDto);
 
       expect(apuTemplateRepo.create).toHaveBeenCalled();
       expect(result.name).toBe('New APU with Resources');
@@ -146,8 +162,16 @@ describe('ApuService', () => {
   describe('findAll', () => {
     it('should return all templates for a company', async () => {
       const templates = [
-        createMockApuTemplate({ id: '1', name: 'APU 1' }),
-        createMockApuTemplate({ id: '2', name: 'APU 2' }),
+        createMockApuTemplate({
+          id: '1',
+          name: 'APU 1',
+          company_id: companyId,
+        }),
+        createMockApuTemplate({
+          id: '2',
+          name: 'APU 2',
+          company_id: companyId,
+        }),
       ];
 
       const mockQueryBuilder = {
@@ -160,14 +184,16 @@ describe('ApuService', () => {
         mockQueryBuilder as any,
       );
 
-      const result = await service.findAll('company-1');
+      const result = await service.findAll(companyId);
 
       expect(mockQueryBuilder.getMany).toHaveBeenCalled();
       expect(result).toHaveLength(2);
     });
 
     it('should filter by search term', async () => {
-      const templates = [createMockApuTemplate({ name: 'Concrete' })];
+      const templates = [
+        createMockApuTemplate({ name: 'Concrete', company_id: companyId }),
+      ];
 
       const mockQueryBuilder = {
         leftJoinAndSelect: jest.fn().mockReturnThis(),
@@ -179,7 +205,7 @@ describe('ApuService', () => {
         mockQueryBuilder as any,
       );
 
-      const result = await service.findAll('company-1', 'concrete');
+      const result = await service.findAll(companyId, 'concrete');
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'apu.name ILIKE :search',
@@ -201,7 +227,7 @@ describe('ApuService', () => {
         mockQueryBuilder as any,
       );
 
-      const result = await service.findAll(undefined, undefined, 'global');
+      const result = await service.findAll(companyId, undefined, 'global');
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'apu.company_id IS NULL',
@@ -220,7 +246,7 @@ describe('ApuService', () => {
         mockQueryBuilder as any,
       );
 
-      const result = await service.findAll('company-1');
+      const result = await service.findAll(companyId);
 
       expect(result).toEqual([]);
     });
@@ -228,13 +254,19 @@ describe('ApuService', () => {
 
   describe('findOne', () => {
     it('should return an APU template by id', async () => {
-      const apuTemplate = createMockApuTemplate({ unit_cost: 0 });
+      const apuTemplate = createMockApuTemplate({
+        company_id: companyId,
+        unit_cost: 0,
+      });
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
 
-      const result = await service.findOne('apu-template-1');
+      const result = await service.findOne(companyId, 'apu-template-1');
 
       expect(apuTemplateRepo.findOne).toHaveBeenCalledWith({
-        where: { id: 'apu-template-1' },
+        where: [
+          { id: 'apu-template-1', company_id: companyId },
+          { id: 'apu-template-1', company_id: IsNull() },
+        ],
         relations: ['apu_resources', 'apu_resources.resource', 'unit'],
       });
       expect(result.name).toBe('Test APU');
@@ -243,13 +275,14 @@ describe('ApuService', () => {
     it('should throw NotFoundException if template not found', async () => {
       apuTemplateRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
+      await expect(service.findOne(companyId, 'nonexistent')).rejects.toThrow(
         NotFoundException,
       );
     });
 
     it('should calculate unit cost', async () => {
       const apuTemplate = createMockApuTemplate({
+        company_id: companyId,
         apu_resources: [
           createMockApuResource({
             coefficient: 2,
@@ -263,16 +296,19 @@ describe('ApuService', () => {
       });
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
 
-      const result = await service.findOne('apu-template-1');
+      const result = await service.findOne(companyId, 'apu-template-1');
 
       expect(result.unit_cost).toBe(350);
     });
 
     it('should return 0 unit cost when no resources', async () => {
-      const apuTemplate = createMockApuTemplate({ apu_resources: [] });
+      const apuTemplate = createMockApuTemplate({
+        company_id: companyId,
+        apu_resources: [],
+      });
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
 
-      const result = await service.findOne('apu-template-1');
+      const result = await service.findOne(companyId, 'apu-template-1');
 
       expect(result.unit_cost).toBe(0);
     });
@@ -280,8 +316,11 @@ describe('ApuService', () => {
 
   describe('update', () => {
     it('should update an APU template', async () => {
-      const existingTemplate = createMockApuTemplate();
-      const updatedTemplate = createMockApuTemplate({ name: 'Updated Name' });
+      const existingTemplate = createMockApuTemplate({ company_id: companyId });
+      const updatedTemplate = createMockApuTemplate({
+        company_id: companyId,
+        name: 'Updated Name',
+      });
 
       apuTemplateRepo.findOne.mockResolvedValue(existingTemplate);
       apuTemplateRepo.merge.mockReturnValue(updatedTemplate as any);
@@ -290,7 +329,7 @@ describe('ApuService', () => {
         .mockResolvedValueOnce(existingTemplate)
         .mockResolvedValueOnce(updatedTemplate);
 
-      const result = await service.update('apu-template-1', {
+      const result = await service.update(companyId, 'apu-template-1', {
         name: 'Updated Name',
       });
 
@@ -300,9 +339,10 @@ describe('ApuService', () => {
 
     it('should update APU resources', async () => {
       const existingTemplate = createMockApuTemplate({
+        company_id: companyId,
         apu_resources: [createMockApuResource()],
       });
-      const updatedTemplate = createMockApuTemplate();
+      const updatedTemplate = createMockApuTemplate({ company_id: companyId });
 
       apuTemplateRepo.findOne.mockResolvedValue(existingTemplate);
       apuResourceRepo.delete.mockResolvedValue({ affected: 1 } as any);
@@ -312,7 +352,7 @@ describe('ApuService', () => {
         .mockResolvedValueOnce(existingTemplate)
         .mockResolvedValueOnce(updatedTemplate);
 
-      await service.update('apu-template-1', {
+      await service.update(companyId, 'apu-template-1', {
         apu_resources: [
           {
             resource_id: 'new-resource',
@@ -331,7 +371,7 @@ describe('ApuService', () => {
       apuTemplateRepo.findOne.mockResolvedValue(null);
 
       await expect(
-        service.update('nonexistent', { name: 'Test' }),
+        service.update(companyId, 'nonexistent', { name: 'Test' }),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -339,18 +379,20 @@ describe('ApuService', () => {
   describe('duplicate', () => {
     it('should duplicate an APU template', async () => {
       const original = createMockApuTemplate({
+        company_id: companyId,
         name: 'Original APU',
         apu_resources: [createMockApuResource()],
       });
       apuTemplateRepo.findOne.mockResolvedValue(original);
       const newTemplate = createMockApuTemplate({
+        company_id: companyId,
         name: 'Original APU (copia)',
       });
       apuTemplateRepo.create.mockReturnValue(newTemplate as any);
       apuTemplateRepo.save.mockResolvedValue(newTemplate);
       apuTemplateRepo.findOne.mockResolvedValue(newTemplate);
 
-      const result = await service.duplicate('apu-template-1');
+      const result = await service.duplicate(companyId, 'apu-template-1');
 
       expect(apuTemplateRepo.create).toHaveBeenCalled();
       expect(result.name).toBe('Original APU (copia)');
@@ -375,7 +417,7 @@ describe('ApuService', () => {
       apuTemplateRepo.create.mockReturnValue({} as any);
       apuTemplateRepo.save.mockResolvedValue({} as any);
 
-      const result = await service.importGlobalLibrary('company-1');
+      const result = await service.importGlobalLibrary(companyId);
 
       expect(result.imported).toBe(1);
       expect(result.message).toContain('importaron');
@@ -384,7 +426,7 @@ describe('ApuService', () => {
     it('should return message when no global templates', async () => {
       apuTemplateRepo.find.mockResolvedValue([]);
 
-      const result = await service.importGlobalLibrary('company-1');
+      const result = await service.importGlobalLibrary(companyId);
 
       expect(result.imported).toBe(0);
       expect(result.message).toBe('No hay plantillas globales para importar');
@@ -400,7 +442,7 @@ describe('ApuService', () => {
         .mockResolvedValueOnce(globalTemplates[0] as any);
       apuTemplateRepo.findOne.mockResolvedValue(globalTemplates[0] as any);
 
-      const result = await service.importGlobalLibrary('company-1');
+      const result = await service.importGlobalLibrary(companyId);
 
       expect(result.imported).toBe(0);
     });
@@ -408,12 +450,12 @@ describe('ApuService', () => {
 
   describe('remove', () => {
     it('should remove an APU template', async () => {
-      const apuTemplate = createMockApuTemplate();
+      const apuTemplate = createMockApuTemplate({ company_id: companyId });
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
       dataSource.query.mockResolvedValue([]);
       apuTemplateRepo.remove.mockResolvedValue(apuTemplate);
 
-      const result = await service.remove('apu-template-1');
+      const result = await service.remove(companyId, 'apu-template-1');
 
       expect(apuTemplateRepo.remove).toHaveBeenCalledWith(apuTemplate);
       expect(result).toEqual({ deleted: true });
@@ -422,17 +464,17 @@ describe('ApuService', () => {
     it('should throw NotFoundException if template not found', async () => {
       apuTemplateRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent')).rejects.toThrow(
+      await expect(service.remove(companyId, 'nonexistent')).rejects.toThrow(
         NotFoundException,
       );
     });
 
     it('should throw BadRequestException if template is in use', async () => {
-      const apuTemplate = createMockApuTemplate();
+      const apuTemplate = createMockApuTemplate({ company_id: companyId });
       apuTemplateRepo.findOne.mockResolvedValue(apuTemplate);
       dataSource.query.mockResolvedValue([{ id: 'item-1' }]);
 
-      await expect(service.remove('apu-template-1')).rejects.toThrow(
+      await expect(service.remove(companyId, 'apu-template-1')).rejects.toThrow(
         BadRequestException,
       );
     });

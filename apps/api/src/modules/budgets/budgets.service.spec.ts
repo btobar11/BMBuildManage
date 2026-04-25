@@ -33,6 +33,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
   const base: Budget = {
     id: 'budget-1',
     project_id: 'project-1',
+    company_id: 'company-1',
     version: 1, // Version inicial requerida por @VersionColumn()
     status: BudgetStatus.DRAFT,
     is_active: true,
@@ -45,6 +46,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
     rejection_reason: '',
     created_at: new Date('2024-01-01T00:00:00.000Z'),
     updated_at: new Date('2024-01-01T00:00:00.000Z'),
+    company: { id: 'company-1', name: 'Company 1' } as any,
     stages: [],
     project: { id: 'project-1', company_id: 'company-1' } as Project,
   };
@@ -277,6 +279,10 @@ describe('BudgetsService', () => {
       const createDto = createMockCreateDto();
       const savedBudget = createMockBudget({ version: 1 });
 
+      projectRepo._mockFindOne.mockResolvedValue({
+        id: 'project-1',
+        company_id: 'company-1',
+      });
       budgetRepo._mockCreate.mockReturnValue(savedBudget);
       budgetRepo._mockSave.mockResolvedValue(savedBudget);
       budgetRepo._mockCount.mockResolvedValue(1);
@@ -298,6 +304,10 @@ describe('BudgetsService', () => {
       const createDto = createMockCreateDto();
       const savedBudget = createMockBudget({ is_active: true });
 
+      projectRepo._mockFindOne.mockResolvedValue({
+        id: 'project-1',
+        company_id: 'company-1',
+      });
       budgetRepo._mockCreate.mockReturnValue(savedBudget);
       budgetRepo._mockSave.mockResolvedValue({
         ...savedBudget,
@@ -318,6 +328,10 @@ describe('BudgetsService', () => {
       const createDto = createMockCreateDto();
       const savedBudget = createMockBudget();
 
+      projectRepo._mockFindOne.mockResolvedValue({
+        id: 'project-1',
+        company_id: 'company-1',
+      });
       budgetRepo._mockCreate.mockReturnValue(savedBudget);
       budgetRepo._mockSave.mockResolvedValue(savedBudget);
       budgetRepo._mockCount.mockResolvedValue(2); // Already has budgets
@@ -684,12 +698,14 @@ describe('BudgetsService', () => {
         stages: [
           {
             id: 'stage-1',
+            company_id: 'company-1',
             name: 'Original Stage',
             position: 1,
             budget_id: 'budget-1',
             total_cost: 1000,
             total_price: 1500,
             budget: {} as any,
+            company: {} as any,
             created_at: new Date(),
             updated_at: new Date(),
             items: [

@@ -45,9 +45,9 @@ describe('TemplatesController', () => {
       const expected = { id: 'template-1', ...createDto };
       mockService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create('company-1', createDto);
 
-      expect(mockService.create).toHaveBeenCalledWith(createDto);
+      expect(mockService.create).toHaveBeenCalledWith('company-1', createDto);
       expect(result).toEqual(expected);
     });
   });
@@ -69,7 +69,7 @@ describe('TemplatesController', () => {
       const expected = { id: 'template-1', name: 'Template A' };
       mockService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('template-1', 'company-1');
+      const result = await controller.findOne('company-1', 'template-1');
 
       expect(mockService.findOne).toHaveBeenCalledWith(
         'template-1',
@@ -86,8 +86,8 @@ describe('TemplatesController', () => {
       mockService.update.mockResolvedValue(expected);
 
       const result = await controller.update(
-        'template-1',
         'company-1',
+        'template-1',
         updateDto,
       );
 
@@ -104,7 +104,7 @@ describe('TemplatesController', () => {
     it('should remove a template', async () => {
       mockService.remove.mockResolvedValue({ id: 'template-1' });
 
-      const result = await controller.remove('template-1', 'company-1');
+      const result = await controller.remove('company-1', 'template-1');
 
       expect(mockService.remove).toHaveBeenCalledWith(
         'template-1',

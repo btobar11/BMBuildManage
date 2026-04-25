@@ -110,12 +110,14 @@ const createMockStage = (overrides?: Partial<Stage>): Stage => {
   const base: Stage = {
     id: 'stage-1',
     budget_id: 'budget-1',
+    company_id: 'company-1',
     name: 'Stage 1',
     position: 1,
     total_cost: 0,
     total_price: 0,
     created_at: new Date('2024-01-01'),
     updated_at: new Date('2024-01-01'),
+    company: { id: 'company-1', name: 'Company 1' } as any,
     budget: {
       id: 'budget-1',
       project_id: 'project-1',
@@ -131,6 +133,8 @@ const createMockStage = (overrides?: Partial<Stage>): Stage => {
       markup_percentage: 20,
       created_at: new Date('2024-01-01'),
       updated_at: new Date('2024-01-01'),
+      company_id: 'company-1',
+      company: { id: 'company-1', name: 'Company 1' } as any,
       project: {
         id: 'project-1',
         company_id: 'company-1',
@@ -149,6 +153,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
   const base: Budget = {
     id: 'budget-1',
     project_id: 'project-1',
+    company_id: 'company-1',
     version: 1,
     status: 'DRAFT' as any,
     is_active: true,
@@ -161,6 +166,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
     markup_percentage: 20,
     created_at: new Date('2024-01-01'),
     updated_at: new Date('2024-01-01'),
+    company: { id: 'company-1', name: 'Company 1' } as any,
     project: {
       id: 'project-1',
       company_id: 'company-1',

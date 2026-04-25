@@ -86,10 +86,11 @@ const mockDataSource = () => ({
         from: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         execute: jest.fn().mockResolvedValue({ affected: 1 }),
-        getRepository: jest.fn().mockReturnValue({
-          find: jest.fn().mockResolvedValue([]),
-        }),
       })),
+      getRepository: jest.fn().mockReturnValue({
+        find: jest.fn().mockResolvedValue([]),
+      }),
+      remove: jest.fn().mockResolvedValue({}),
     },
   })),
 });

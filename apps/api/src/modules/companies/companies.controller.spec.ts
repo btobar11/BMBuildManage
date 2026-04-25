@@ -65,9 +65,11 @@ describe('CompaniesController', () => {
       const expected = [{ id: 'company-1', name: 'Company A' }];
       mockCompaniesService.findAll.mockResolvedValue(expected);
 
-      const result = await controller.findAll();
+      const result = await controller.findAll({
+        user: { company_id: 'company-1' },
+      } as any);
 
-      expect(mockCompaniesService.findAll).toHaveBeenCalled();
+      expect(mockCompaniesService.findAll).toHaveBeenCalledWith('company-1');
       expect(result).toEqual(expected);
     });
   });
@@ -112,9 +114,14 @@ describe('CompaniesController', () => {
     it('should remove a company', async () => {
       mockCompaniesService.remove.mockResolvedValue({ id: 'company-1' });
 
-      const result = await controller.remove('company-1');
+      const result = await controller.remove('company-1', {
+        user: { company_id: 'company-1' },
+      } as any);
 
-      expect(mockCompaniesService.remove).toHaveBeenCalledWith('company-1');
+      expect(mockCompaniesService.remove).toHaveBeenCalledWith(
+        'company-1',
+        'company-1',
+      );
       expect(result).toEqual({ id: 'company-1' });
     });
   });

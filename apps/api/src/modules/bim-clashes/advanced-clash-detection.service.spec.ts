@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AdvancedClashDetectionService } from './advanced-clash-detection.service';
 
@@ -1568,15 +1569,15 @@ describe('AdvancedClashDetectionService', () => {
 
   describe('updateJobProgress (private method)', () => {
     it('should log progress correctly', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug');
 
       await (service as any).updateJobProgress(100, 50, 200);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(loggerDebugSpy).toHaveBeenCalledWith(
         'Progress: 50/200 checks completed (100 elements)',
       );
 
-      consoleSpy.mockRestore();
+      loggerDebugSpy.mockRestore();
     });
   });
 

@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { MachineryController } from './machinery.controller';
 import { MachineryService } from './machinery.service';
+import { UsersService } from '../users/users.service';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 describe('MachineryController', () => {
   let controller: MachineryController;
@@ -13,6 +16,22 @@ describe('MachineryController', () => {
     remove: jest.fn(),
   };
 
+  const mockUsersService = {
+    ensureUserFromAuth: jest.fn().mockResolvedValue({
+      id: 'user-1',
+      company_id: 'company-1',
+      role: 'admin',
+    }),
+  };
+
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      if (key === 'SUPABASE_URL') return 'http://localhost:54321';
+      if (key === 'SUPABASE_ANON_KEY') return 'test-key';
+      return null;
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MachineryController],
@@ -21,8 +40,19 @@ describe('MachineryController', () => {
           provide: MachineryService,
           useValue: mockMachineryService,
         },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(SupabaseAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<MachineryController>(MachineryController);
     service = module.get<MachineryService>(MachineryService);
@@ -38,9 +68,12 @@ describe('MachineryController', () => {
       const expected = { id: 'machinery-1', ...createDto };
       mockMachineryService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create('company-1', createDto);
 
-      expect(mockMachineryService.create).toHaveBeenCalledWith(createDto);
+      expect(mockMachineryService.create).toHaveBeenCalledWith(
+        'company-1',
+        createDto,
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -64,9 +97,12 @@ describe('MachineryController', () => {
       const expected = { id: 'machinery-1', name: 'Excavator' };
       mockMachineryService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('machinery-1');
+      const result = await controller.findOne('company-1', 'machinery-1');
 
-      expect(mockMachineryService.findOne).toHaveBeenCalledWith('machinery-1');
+      expect(mockMachineryService.findOne).toHaveBeenCalledWith(
+        'company-1',
+        'machinery-1',
+      );
       expect(result).toEqual(expected);
     });
   });
@@ -75,9 +111,12 @@ describe('MachineryController', () => {
     it('should remove machinery', async () => {
       mockMachineryService.remove.mockResolvedValue({ id: 'machinery-1' });
 
-      const result = await controller.remove('machinery-1');
+      const result = await controller.remove('company-1', 'machinery-1');
 
-      expect(mockMachineryService.remove).toHaveBeenCalledWith('machinery-1');
+      expect(mockMachineryService.remove).toHaveBeenCalledWith(
+        'company-1',
+        'machinery-1',
+      );
       expect(result).toEqual({ id: 'machinery-1' });
     });
   });

@@ -39,9 +39,9 @@ describe('ResourcesController', () => {
       const expected = { id: 'resource-1', ...createDto };
       mockService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create('company-1', createDto);
 
-      expect(mockService.create).toHaveBeenCalledWith(createDto);
+      expect(mockService.create).toHaveBeenCalledWith('company-1', createDto);
       expect(result).toEqual(expected);
     });
   });
@@ -52,9 +52,9 @@ describe('ResourcesController', () => {
       const expected = [{ id: 'resource-1' }, { id: 'resource-2' }];
       mockService.bulkCreate.mockResolvedValue(expected);
 
-      const result = await controller.bulkCreate(items);
+      const result = await controller.bulkCreate('company-1', items);
 
-      expect(mockService.bulkCreate).toHaveBeenCalledWith(items);
+      expect(mockService.bulkCreate).toHaveBeenCalledWith('company-1', items);
       expect(result).toEqual(expected);
     });
   });
@@ -79,9 +79,9 @@ describe('ResourcesController', () => {
       const expected = { id: 'resource-1', name: 'Resource A' };
       mockService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('resource-1');
+      const result = await controller.findOne('company-1', 'resource-1');
 
-      expect(mockService.findOne).toHaveBeenCalledWith('resource-1');
+      expect(mockService.findOne).toHaveBeenCalledWith('company-1', 'resource-1');
       expect(result).toEqual(expected);
     });
   });
@@ -91,9 +91,9 @@ describe('ResourcesController', () => {
       const expected = [{ id: 'history-1', action: 'created' }];
       mockService.findHistory.mockResolvedValue(expected);
 
-      const result = await controller.getHistory('resource-1');
+      const result = await controller.getHistory('company-1', 'resource-1');
 
-      expect(mockService.findHistory).toHaveBeenCalledWith('resource-1');
+      expect(mockService.findHistory).toHaveBeenCalledWith('company-1', 'resource-1');
       expect(result).toEqual(expected);
     });
   });
@@ -104,9 +104,9 @@ describe('ResourcesController', () => {
       const expected = { id: 'resource-1', ...updateDto };
       mockService.update.mockResolvedValue(expected);
 
-      const result = await controller.update('resource-1', updateDto);
+      const result = await controller.update('company-1', 'resource-1', updateDto);
 
-      expect(mockService.update).toHaveBeenCalledWith('resource-1', updateDto);
+      expect(mockService.update).toHaveBeenCalledWith('company-1', 'resource-1', updateDto);
       expect(result).toEqual(expected);
     });
   });
@@ -115,9 +115,9 @@ describe('ResourcesController', () => {
     it('should remove a resource', async () => {
       mockService.remove.mockResolvedValue({ id: 'resource-1' });
 
-      const result = await controller.remove('resource-1');
+      const result = await controller.remove('company-1', 'resource-1');
 
-      expect(mockService.remove).toHaveBeenCalledWith('resource-1');
+      expect(mockService.remove).toHaveBeenCalledWith('company-1', 'resource-1');
       expect(result).toEqual({ id: 'resource-1' });
     });
   });

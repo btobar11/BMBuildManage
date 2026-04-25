@@ -29,6 +29,7 @@ const mockRepository = () => ({
 describe('MachineryService', () => {
   let service: MachineryService;
   let repository: jest.Mocked<Repository<Machinery>>;
+  const companyId = 'company-1';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,8 +45,7 @@ describe('MachineryService', () => {
 
   describe('create', () => {
     it('should create machinery', async () => {
-      const createDto = {
-        company_id: 'company-1',
+      const createDto: any = {
         name: 'Excavator',
         category: 'heavy',
         price_per_hour: 150,
@@ -55,9 +55,12 @@ describe('MachineryService', () => {
       repository.create.mockReturnValue(machinery);
       repository.save.mockResolvedValue(machinery);
 
-      const result = await service.create(createDto);
+      const result = await service.create(companyId, createDto);
 
-      expect(repository.create).toHaveBeenCalledWith(createDto);
+      expect(repository.create).toHaveBeenCalledWith({
+        ...createDto,
+        company_id: companyId,
+      });
       expect(repository.save).toHaveBeenCalledWith(machinery);
       expect(result).toEqual(machinery);
     });
@@ -71,10 +74,10 @@ describe('MachineryService', () => {
       ];
       repository.find.mockResolvedValue(machineryList);
 
-      const result = await service.findAllByCompany('company-1');
+      const result = await service.findAllByCompany(companyId);
 
       expect(repository.find).toHaveBeenCalledWith({
-        where: { company_id: 'company-1' },
+        where: { company_id: companyId },
       });
       expect(result).toEqual(machineryList);
     });
@@ -85,10 +88,10 @@ describe('MachineryService', () => {
       const machinery = createMockMachinery();
       repository.findOne.mockResolvedValue(machinery);
 
-      const result = await service.findOne('machinery-1');
+      const result = await service.findOne(companyId, 'machinery-1');
 
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { id: 'machinery-1' },
+        where: { id: 'machinery-1', company_id: companyId },
       });
       expect(result).toEqual(machinery);
     });
@@ -96,7 +99,7 @@ describe('MachineryService', () => {
     it('should throw NotFoundException when machinery not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
+      await expect(service.findOne(companyId, 'nonexistent')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -108,7 +111,7 @@ describe('MachineryService', () => {
       repository.findOne.mockResolvedValue(machinery);
       repository.remove.mockResolvedValue(machinery);
 
-      const result = await service.remove('machinery-1');
+      const result = await service.remove(companyId, 'machinery-1');
 
       expect(repository.remove).toHaveBeenCalledWith(machinery);
       expect(result).toEqual({ deleted: true });
@@ -117,7 +120,7 @@ describe('MachineryService', () => {
     it('should throw NotFoundException when removing nonexistent', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('nonexistent')).rejects.toThrow(
+      await expect(service.remove(companyId, 'nonexistent')).rejects.toThrow(
         NotFoundException,
       );
     });

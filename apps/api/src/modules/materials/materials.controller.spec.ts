@@ -38,9 +38,9 @@ describe('MaterialsController', () => {
       const expected = { id: 'material-1', ...createDto };
       mockMaterialsService.create.mockResolvedValue(expected);
 
-      const result = await controller.create(createDto);
+      const result = await controller.create('company-1', createDto);
 
-      expect(mockMaterialsService.create).toHaveBeenCalledWith(createDto);
+      expect(mockMaterialsService.create).toHaveBeenCalledWith('company-1', createDto);
       expect(result).toEqual(expected);
     });
   });
@@ -50,9 +50,9 @@ describe('MaterialsController', () => {
       const expected = [{ id: 'material-1', name: 'Cement' }];
       mockMaterialsService.findAll.mockResolvedValue(expected);
 
-      const result = await controller.findAll('cement');
+      const result = await controller.findAll('company-1', 'cement');
 
-      expect(mockMaterialsService.findAll).toHaveBeenCalledWith('cement');
+      expect(mockMaterialsService.findAll).toHaveBeenCalledWith('company-1', 'cement');
       expect(result).toEqual(expected);
     });
   });
@@ -62,9 +62,9 @@ describe('MaterialsController', () => {
       const expected = { id: 'material-1', name: 'Cement' };
       mockMaterialsService.findOne.mockResolvedValue(expected);
 
-      const result = await controller.findOne('material-1');
+      const result = await controller.findOne('company-1', 'material-1');
 
-      expect(mockMaterialsService.findOne).toHaveBeenCalledWith('material-1');
+      expect(mockMaterialsService.findOne).toHaveBeenCalledWith('company-1', 'material-1');
       expect(result).toEqual(expected);
     });
   });
@@ -73,9 +73,9 @@ describe('MaterialsController', () => {
     it('should remove material', async () => {
       mockMaterialsService.remove.mockResolvedValue({ id: 'material-1' });
 
-      const result = await controller.remove('material-1');
+      const result = await controller.remove('company-1', 'material-1');
 
-      expect(mockMaterialsService.remove).toHaveBeenCalledWith('material-1');
+      expect(mockMaterialsService.remove).toHaveBeenCalledWith('company-1', 'material-1');
       expect(result).toEqual({ id: 'material-1' });
     });
   });

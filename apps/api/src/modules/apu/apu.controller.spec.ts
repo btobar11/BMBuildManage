@@ -43,9 +43,9 @@ describe('ApuController', () => {
       const mockResult = { id: 'apu-1', ...dto };
       mockApuService.create.mockResolvedValue(mockResult);
 
-      const result = await controller.create(dto);
+      const result = await controller.create('company-1', dto);
 
-      expect(mockApuService.create).toHaveBeenCalledWith(dto);
+      expect(mockApuService.create).toHaveBeenCalledWith('company-1', dto);
       expect(result).toEqual(mockResult);
     });
   });
@@ -58,7 +58,7 @@ describe('ApuController', () => {
         .mockResolvedValueOnce(mockResults[0])
         .mockResolvedValueOnce(mockResults[1]);
 
-      const result = await controller.importMany(dtos);
+      const result = await controller.importMany('company-1', dtos);
 
       expect(mockApuService.create).toHaveBeenCalledTimes(2);
       expect(result).toEqual(mockResults);
@@ -98,10 +98,10 @@ describe('ApuController', () => {
       const mockResults: ApuTemplate[] = [];
       mockApuService.findAll.mockResolvedValue(mockResults);
 
-      const result = await controller.findAll(undefined, undefined, undefined);
+      const result = await controller.findAll('company-1', undefined, undefined);
 
       expect(mockApuService.findAll).toHaveBeenCalledWith(
-        undefined,
+        'company-1',
         undefined,
         undefined,
       );
@@ -114,9 +114,9 @@ describe('ApuController', () => {
       const mockResult = { id: 'apu-1', name: 'Test APU' };
       mockApuService.findOne.mockResolvedValue(mockResult);
 
-      const result = await controller.findOne('apu-1');
+      const result = await controller.findOne('company-1', 'apu-1');
 
-      expect(mockApuService.findOne).toHaveBeenCalledWith('apu-1');
+      expect(mockApuService.findOne).toHaveBeenCalledWith('company-1', 'apu-1');
       expect(result).toEqual(mockResult);
     });
   });
@@ -126,9 +126,9 @@ describe('ApuController', () => {
       const mockResult = { id: 'apu-2', name: 'Test APU (copia)' };
       mockApuService.duplicate.mockResolvedValue(mockResult);
 
-      const result = await controller.duplicate('apu-1');
+      const result = await controller.duplicate('company-1', 'apu-1');
 
-      expect(mockApuService.duplicate).toHaveBeenCalledWith('apu-1');
+      expect(mockApuService.duplicate).toHaveBeenCalledWith('company-1', 'apu-1');
       expect(result).toEqual(mockResult);
     });
   });
@@ -139,9 +139,9 @@ describe('ApuController', () => {
       const mockResult = { id: 'apu-1', ...dto };
       mockApuService.update.mockResolvedValue(mockResult);
 
-      const result = await controller.update('apu-1', dto);
+      const result = await controller.update('company-1', 'apu-1', dto);
 
-      expect(mockApuService.update).toHaveBeenCalledWith('apu-1', dto);
+      expect(mockApuService.update).toHaveBeenCalledWith('company-1', 'apu-1', dto);
       expect(result).toEqual(mockResult);
     });
   });
@@ -151,9 +151,9 @@ describe('ApuController', () => {
       const mockResult = { deleted: true };
       mockApuService.remove.mockResolvedValue(mockResult);
 
-      const result = await controller.remove('apu-1');
+      const result = await controller.remove('company-1', 'apu-1');
 
-      expect(mockApuService.remove).toHaveBeenCalledWith('apu-1');
+      expect(mockApuService.remove).toHaveBeenCalledWith('company-1', 'apu-1');
       expect(result).toEqual(mockResult);
     });
   });

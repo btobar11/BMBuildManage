@@ -1,9 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { SeedController } from './seed.controller';
 import { SeedService } from './seed.service';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 const mockSeedService = {
   seedDemoData: jest.fn(),
+};
+
+const mockConfigService = {
+  get: jest.fn((key: string) => {
+    if (key === 'NODE_ENV') return 'development';
+    return null;
+  }),
 };
 
 describe('SeedController', () => {
@@ -12,8 +21,14 @@ describe('SeedController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SeedController],
-      providers: [{ provide: SeedService, useValue: mockSeedService }],
-    }).compile();
+      providers: [
+        { provide: SeedService, useValue: mockSeedService },
+        { provide: ConfigService, useValue: mockConfigService },
+      ],
+    })
+      .overrideGuard(SupabaseAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<SeedController>(SeedController);
     jest.clearAllMocks();

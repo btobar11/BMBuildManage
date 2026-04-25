@@ -4,6 +4,7 @@ import { BudgetsService } from './budgets.service';
 import { ExportService } from './export.service';
 import { PDFExportService } from './pdf-export.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 const mockBudgetsService = {
   create: jest.fn(),
@@ -26,6 +27,10 @@ const mockPdfExportService = {
 };
 
 const mockAuthGuard = {
+  canActivate: jest.fn().mockReturnValue(true),
+};
+
+const mockRolesGuard = {
   canActivate: jest.fn().mockReturnValue(true),
 };
 
@@ -59,6 +64,8 @@ describe('BudgetsController', () => {
     })
       .overrideGuard(SupabaseAuthGuard)
       .useValue(mockAuthGuard)
+      .overrideGuard(RolesGuard)
+      .useValue(mockRolesGuard)
       .compile();
 
     controller = module.get<BudgetsController>(BudgetsController);
@@ -73,10 +80,14 @@ describe('BudgetsController', () => {
       const mockBudgets = [{ id: 'budget-1' }, { id: 'budget-2' }];
       mockBudgetsService.findAllByProject.mockResolvedValue(mockBudgets);
 
-      const result = await controller.findAll('project-1');
+      const result = await controller.findAll(
+        'project-1',
+        mockAuthenticatedRequest(),
+      );
 
       expect(mockBudgetsService.findAllByProject).toHaveBeenCalledWith(
         'project-1',
+        'company-1',
       );
       expect(result).toEqual(mockBudgets);
     });
@@ -96,6 +107,7 @@ describe('BudgetsController', () => {
       expect(mockBudgetsService.create).toHaveBeenCalledWith(
         createDto,
         'user-1',
+        'company-1',
       );
       expect(result).toEqual(mockBudget);
     });

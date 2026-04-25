@@ -5,6 +5,16 @@ import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BimModelsService } from './bim-models.service';
 import { ProjectModel } from './project-model.entity';
+import * as WebIFC from 'web-ifc';
+
+jest.mock('web-ifc', () => ({
+  IfcAPI: jest.fn().mockImplementation(() => ({
+    Init: jest.fn().mockResolvedValue(true),
+    OpenModel: jest.fn().mockReturnValue(1),
+    GetMaxExpressID: jest.fn().mockReturnValue(100),
+    CloseModel: jest.fn(),
+  })),
+}));
 
 const createMockModel = (overrides?: Partial<ProjectModel>): ProjectModel =>
   ({
@@ -23,6 +33,7 @@ const mockModelRepository = () => ({
   find: jest.fn(),
   findOne: jest.fn(),
   remove: jest.fn(),
+  update: jest.fn(),
 });
 
 const mockConfigService = {
@@ -341,10 +352,7 @@ describe('BimModelsService', () => {
   });
 
   describe('processIfcFile', () => {
-    it('should cover processIfcFile with fake timers', async () => {
-      // Use fake timers to cover setTimeout in processIfcFile (lines 170-181)
-      jest.useFakeTimers();
-
+    it('should cover processIfcFile and update status', async () => {
       const mockSupabase = {
         storage: {
           from: jest.fn().mockImplementation(() => ({
@@ -368,7 +376,11 @@ describe('BimModelsService', () => {
       modelRepo.save.mockImplementation((data: any) =>
         Promise.resolve({ ...data, id: 'model-1' }),
       );
-      modelRepo.update = jest.fn().mockResolvedValue({});
+      modelRepo.update.mockResolvedValue({
+        raw: [],
+        affected: 1,
+        generatedMaps: [],
+      });
 
       const mockFile = {
         originalname: 'test.ifc',
@@ -379,17 +391,16 @@ describe('BimModelsService', () => {
 
       await service.uploadModel('project-1', mockFile);
 
-      // Advance timers to trigger setTimeout callback
-      jest.advanceTimersByTime(5000);
+      // Wait a tick for async processing to finish
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(modelRepo.update).toHaveBeenCalled();
-
-      jest.useRealTimers();
+      expect(modelRepo.update).toHaveBeenCalledWith(
+        'model-1',
+        expect.objectContaining({ processing_status: 'completed' }),
+      );
     });
 
     it('should handle processIfcFile update error gracefully', async () => {
-      jest.useFakeTimers();
-
       const mockSupabase = {
         storage: {
           from: jest.fn().mockImplementation(() => ({
@@ -413,8 +424,10 @@ describe('BimModelsService', () => {
       modelRepo.save.mockImplementation((data: any) =>
         Promise.resolve({ ...data, id: 'model-1' }),
       );
-      // Make update throw error - should be caught
-      modelRepo.update = jest.fn().mockRejectedValue(new Error('DB error'));
+      // Make update throw error - should be caught by catch block and result in processing_status: 'error'
+      modelRepo.update
+        .mockRejectedValueOnce(new Error('DB error'))
+        .mockResolvedValueOnce({ raw: [], affected: 1, generatedMaps: [] });
 
       const mockFile = {
         originalname: 'test2.ifc',
@@ -425,13 +438,11 @@ describe('BimModelsService', () => {
 
       await service.uploadModel('project-1', mockFile);
 
-      // Advance timers - error is caught internally
-      jest.advanceTimersByTime(5000);
+      // Wait a tick for async processing to finish
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Test passes - no exception thrown
       expect(service).toBeDefined();
-
-      jest.useRealTimers();
     });
   });
 

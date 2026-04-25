@@ -207,11 +207,15 @@ describe('BIMAnalyticsService', () => {
       ];
 
       const tableName = 'bim_clashes';
-      mockSupabase.from.mockImplementation((table: { toString(): string } | string) => {
-        if (table.toString() === tableName) return createFluentMock(mockClashes);
-        if (table.toString() === 'bim_models') return createFluentMock([{ id: 'm1' }]);
-        return createFluentMock([]);
-      });
+      mockSupabase.from.mockImplementation(
+        (table: { toString(): string } | string) => {
+          if (table.toString() === tableName)
+            return createFluentMock(mockClashes);
+          if (table.toString() === 'bim_models')
+            return createFluentMock([{ id: 'm1' }]);
+          return createFluentMock([]);
+        },
+      );
 
       const result = await service.generateClashAnalysis('c-1', 'p-1');
       expect(result.totalClashes).toBe(2);

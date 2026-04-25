@@ -30,6 +30,7 @@ const mockRepository = () => ({
 describe('UsersService', () => {
   let service: UsersService;
   let repository: jest.Mocked<Repository<User>>;
+  const companyId = 'company-1';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,16 +47,18 @@ describe('UsersService', () => {
   describe('create', () => {
     it('should create a user', async () => {
       const createDto = {
-        company_id: 'company-1',
         email: 'test@example.com',
         name: 'Test User',
       };
-      const user = createMockUser(createDto);
+      const user = createMockUser({ company_id: companyId, ...createDto });
       repository.create.mockReturnValue(user);
       repository.save.mockResolvedValue(user);
 
-      const result = await service.create(createDto);
-      expect(repository.create).toHaveBeenCalledWith(createDto);
+      const result = await service.create(companyId, createDto);
+      expect(repository.create).toHaveBeenCalledWith({
+        ...createDto,
+        company_id: companyId,
+      });
       expect(repository.save).toHaveBeenCalledWith(user);
       expect(result).toEqual(user);
     });
@@ -63,23 +66,29 @@ describe('UsersService', () => {
 
   describe('findAll', () => {
     it('should return all users', async () => {
-      const users = [createMockUser({ id: '1' }), createMockUser({ id: '2' })];
+      const users = [
+        createMockUser({ id: '1', company_id: companyId }),
+        createMockUser({ id: '2', company_id: companyId }),
+      ];
       repository.find.mockResolvedValue(users);
 
-      const result = await service.findAll();
-      expect(repository.find).toHaveBeenCalledWith({ relations: ['company'] });
+      const result = await service.findAll(companyId);
+      expect(repository.find).toHaveBeenCalledWith({
+        where: { company_id: companyId },
+        relations: ['company'],
+      });
       expect(result).toEqual(users);
     });
   });
 
   describe('findByCompany', () => {
     it('should return users for a company', async () => {
-      const users = [createMockUser()];
+      const users = [createMockUser({ company_id: companyId })];
       repository.find.mockResolvedValue(users);
 
-      const result = await service.findByCompany('company-1');
+      const result = await service.findByCompany(companyId);
       expect(repository.find).toHaveBeenCalledWith({
-        where: { company_id: 'company-1' },
+        where: { company_id: companyId },
       });
       expect(result).toEqual(users);
     });
@@ -87,12 +96,12 @@ describe('UsersService', () => {
 
   describe('findOne', () => {
     it('should return a user by id', async () => {
-      const user = createMockUser();
+      const user = createMockUser({ company_id: companyId });
       repository.findOne.mockResolvedValue(user);
 
-      const result = await service.findOne('test-id');
+      const result = await service.findOne('test-id', companyId);
       expect(repository.findOne).toHaveBeenCalledWith({
-        where: { id: 'test-id' },
+        where: { id: 'test-id', company_id: companyId },
         relations: ['company'],
       });
       expect(result).toEqual(user);
@@ -101,7 +110,7 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
+      await expect(service.findOne('nonexistent', companyId)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -109,7 +118,7 @@ describe('UsersService', () => {
 
   describe('findByEmail', () => {
     it('should return a user by email', async () => {
-      const user = createMockUser();
+      const user = createMockUser({ company_id: companyId });
       repository.findOne.mockResolvedValue(user);
 
       const result = await service.findByEmail('test@example.com');
@@ -130,24 +139,29 @@ describe('UsersService', () => {
 
   describe('update', () => {
     it('should update a user', async () => {
-      const user = createMockUser();
+      const user = createMockUser({ company_id: companyId });
       const updated = { ...user, name: 'Updated Name' };
       repository.findOne.mockResolvedValue(user);
       repository.merge.mockReturnValue(updated);
       repository.save.mockResolvedValue(updated);
 
-      const result = await service.update('test-id', { name: 'Updated Name' });
+      const result = await service.update(
+        'test-id',
+        companyId,
+        { name: 'Updated Name' },
+        'test-id',
+      );
       expect(result.name).toBe('Updated Name');
     });
   });
 
   describe('remove', () => {
     it('should remove a user', async () => {
-      const user = createMockUser();
+      const user = createMockUser({ company_id: companyId });
       repository.findOne.mockResolvedValue(user);
       repository.remove.mockResolvedValue(user);
 
-      const result = await service.remove('test-id');
+      const result = await service.remove('test-id', companyId);
       expect(repository.remove).toHaveBeenCalledWith(user);
       expect(result).toEqual({ deleted: true });
     });

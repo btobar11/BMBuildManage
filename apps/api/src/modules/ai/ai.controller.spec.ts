@@ -8,10 +8,8 @@ import {
 import { AIController } from './ai.controller';
 import { AIService } from './ai.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Mock Factory
-// ─────────────────────────────────────────────────────────────────────────────
+import { FeatureGuard } from '../../common/guards/feature.guard';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 const createMockAiService = () => ({
   processNaturalLanguageQuery: jest.fn(),
@@ -24,6 +22,10 @@ const createMockAiService = () => ({
 
 const createMockAuthGuard = () => ({
   canActivate: jest.fn().mockReturnValue(true),
+});
+
+const createMockSubscriptionsService = () => ({
+  hasFeature: jest.fn().mockResolvedValue(true),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,9 +41,17 @@ describe('AIController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AIController],
-      providers: [{ provide: AIService, useValue: aiService }],
+      providers: [
+        { provide: AIService, useValue: aiService },
+        {
+          provide: SubscriptionsService,
+          useValue: createMockSubscriptionsService(),
+        },
+      ],
     })
       .overrideGuard(SupabaseAuthGuard)
+      .useValue(createMockAuthGuard())
+      .overrideGuard(FeatureGuard)
       .useValue(createMockAuthGuard())
       .compile();
 

@@ -8,6 +8,7 @@ import { Stage } from './stage.entity';
 const mockStage = (overrides = {}): Stage => ({
   id: 'test-id',
   budget_id: 'budget-1',
+  company_id: 'company-1',
   name: 'Stage 1',
   position: 1,
   total_cost: 1000,
@@ -15,6 +16,7 @@ const mockStage = (overrides = {}): Stage => ({
   items: [],
   created_at: new Date(),
   updated_at: new Date(),
+  company: { id: 'company-1', name: 'Company 1' } as any,
   budget: {} as any,
   ...overrides,
 });

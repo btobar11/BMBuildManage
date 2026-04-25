@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { BimClashesService, ClashJob, Clash } from './bim-clashes.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 describe('BimClashesService - 100% Coverage', () => {
   let service: BimClashesService;
@@ -8,6 +10,11 @@ describe('BimClashesService - 100% Coverage', () => {
   const mockSupabase = {
     from: jest.fn(),
     rpc: jest.fn(),
+  };
+
+  const mockQueue = {
+    add: jest.fn(),
+    process: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -27,6 +34,10 @@ describe('BimClashesService - 100% Coverage', () => {
               return null;
             }),
           },
+        },
+        {
+          provide: 'BullQueue_clash-detection',
+          useValue: mockQueue,
         },
       ],
     }).compile();
