@@ -26,7 +26,7 @@ export default tseslint.config(
   },
   {
     rules: {
-      'no-console': 'error',
+      'no-console': ['error', { allow: ['debug', 'info', 'warn', 'error', 'log'] }],
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',

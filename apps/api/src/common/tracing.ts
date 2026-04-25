@@ -11,12 +11,14 @@ import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core'
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { Logger } from '@nestjs/common';
 
 const serviceName = process.env.SERVICE_NAME || 'bm-build-manage-api';
 const jaegerEndpoint =
   process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces';
 
 let tracingSDK: NodeSDK | null = null;
+const logger = new Logger('Tracing');
 
 export function startTracing() {
   if (tracingSDK) return;
@@ -37,14 +39,16 @@ export function startTracing() {
     });
 
     tracingSDK.start();
-    console.log('OpenTelemetry started');
+    logger.debug('OpenTelemetry started');
   } catch (error) {
-    console.error('Failed to start OpenTelemetry:', error);
+    logger.error('Failed to start OpenTelemetry', error);
   }
 }
 
 export function stopTracing() {
-  tracingSDK?.shutdown().catch(console.error);
+  tracingSDK
+    ?.shutdown()
+    .catch((err) => logger.error('Tracing shutdown failed', err));
   tracingSDK = null;
 }
 
@@ -53,5 +57,5 @@ export function addSpanAttribute(_key: string, _value: string): void {
 }
 
 export function recordException(error: Error): void {
-  console.error('[Span] Exception recorded:', error.message);
+  logger.error(`Exception recorded: ${error.message}`);
 }

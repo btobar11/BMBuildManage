@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import { AppModule } from './app.module';
@@ -91,6 +91,7 @@ export default async (req: any, res: any) => {
 
 if (process.env.NODE_ENV !== 'production') {
   const bootstrap = async () => {
+    const logger = new Logger('Bootstrap');
     const app = await NestFactory.create(AppModule);
     app.useGlobalPipes(new ValidationPipe(validationPipeConfig));
     app.enableCors(appCorsConfig);
@@ -109,8 +110,8 @@ if (process.env.NODE_ENV !== 'production') {
 
     const port = process.env.PORT || 3001;
     await app.listen(port);
-    console.log(`🚀 Local API running on http://localhost:${port}/api/v1`);
-    console.log(`📚 Swagger UI available at http://localhost:${port}/api`);
+    logger.debug(`Local API running on http://localhost:${port}/api/v1`);
+    logger.debug(`Swagger UI available at http://localhost:${port}/api`);
   };
   bootstrap();
 }
