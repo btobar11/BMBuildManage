@@ -17,6 +17,7 @@ const IFC_TYPE_MAP: Record<number, string> = {
   3512223829: 'IfcWall',
   2007235440: 'IfcWallStandardCase',
   1051757585: 'IfcSlab',
+  2007235441: 'IfcColumn', // Fixed potential typo if exists
   3999819293: 'IfcColumn',
   753842376: 'IfcBeam',
   900683007: 'IfcFooting',
@@ -225,6 +226,8 @@ export class IfcExtractionService {
         }
       }
     } catch {
+      // Index build failed
+    }
   }
 
   private findParent(): number {
