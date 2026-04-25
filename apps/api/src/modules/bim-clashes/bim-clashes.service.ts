@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { CLASH_DETECTION_QUEUE } from './bim-clashes.processor';
 
 export interface ClashJobResult {
   clashId: string;
@@ -98,8 +101,12 @@ interface BimElement {
 @Injectable()
 export class BimClashesService {
   private supabase: SupabaseClient;
+  private readonly logger = new Logger(BimClashesService.name);
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @InjectQueue(CLASH_DETECTION_QUEUE) private clashQueue: Queue,
+  ) {
     this.supabase = createClient(
       this.configService.get<string>('supabase.url') ||
         process.env.SUPABASE_URL ||
@@ -585,15 +592,16 @@ export class BimClashesService {
       throw new Error(`Failed to start job: ${updateError.message}`);
     }
 
-    // Start background processing (in a real implementation, this would be a queue job)
-    this.processFederatedClashDetection(jobId).catch((error) => {
-      console.error('Federated clash detection failed:', error);
+    // Add job to BullMQ queue
+    await this.clashQueue.add('federated-clash', {
+      jobId,
+      companyId,
     });
 
     return { success: true, message: 'Federated clash detection started' };
   }
 
-  private async processFederatedClashDetection(jobId: string): Promise<void> {
+  async processFederatedClashDetection(jobId: string): Promise<void> {
     try {
       const job = await this.findOneFederatedJob(jobId, '');
       if (!job) return;
@@ -618,7 +626,7 @@ export class BimClashesService {
           );
 
           if (error) {
-            console.error('Error getting clash pairs:', error);
+            this.logger.error('Error getting clash pairs', error as any);
             continue;
           }
 

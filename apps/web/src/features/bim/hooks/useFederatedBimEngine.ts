@@ -191,8 +191,6 @@ export function useFederatedBimEngine(
       options?.onModelLoaded?.(newModel);
 
     } catch (error) {
-      console.error(`Failed to load federated model ${id}:`, error);
-      
       // Update model with error state
       setFederatedState(prev => {
         const failedModel = { ...newModel, isLoaded: false, loadProgress: 0 };
@@ -217,7 +215,7 @@ export function useFederatedBimEngine(
         try {
           if (model.model.dispose) model.model.dispose();
         } catch (e) {
-          console.warn(`Error disposing model ${modelId}:`, e);
+          // Model disposal failed — non-critical
         }
       }
       
@@ -273,7 +271,6 @@ export function useFederatedBimEngine(
    */
   const detectClashes = useCallback(async () => {
     if (federatedState.loadedModels < 2) {
-      console.warn('Need at least 2 loaded models for clash detection');
       return;
     }
 
@@ -332,13 +329,11 @@ export function useFederatedBimEngine(
 
           options?.onClashDetected?.(detectedClashes);
         } else if (type === 'CLASH_DETECTION_ERROR') {
-          console.error('Clash detection failed:', payload.error);
           setFederatedState(prev => ({ ...prev, isDetectingClashes: false }));
         }
       };
 
     } catch (error) {
-      console.error('Failed to start clash detection:', error);
       setFederatedState(prev => ({ ...prev, isDetectingClashes: false }));
     }
   }, [federatedState.models, federatedState.loadedModels, federatedState.clashDetectionSettings, options]);
@@ -368,7 +363,7 @@ export function useFederatedBimEngine(
       }
 
     } catch (error) {
-      console.error('Failed to navigate to clash:', error);
+      // Navigate to clash failed — non-critical
     }
   }, [baseBim.controls]);
 

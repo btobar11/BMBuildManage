@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { ResourcesController } from './resources.controller';
 import { ResourcesService } from './resources.service';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { UsersService } from '../users/users.service';
 
 const mockService = {
   create: jest.fn(),
@@ -10,6 +13,10 @@ const mockService = {
   findHistory: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
+};
+
+const mockAuthGuard = {
+  canActivate: jest.fn().mockReturnValue(true),
 };
 
 describe('ResourcesController', () => {
@@ -23,8 +30,19 @@ describe('ResourcesController', () => {
           provide: ResourcesService,
           useValue: mockService,
         },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('mock-url') },
+        },
+        {
+          provide: UsersService,
+          useValue: { findById: jest.fn() },
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(SupabaseAuthGuard)
+      .useValue(mockAuthGuard)
+      .compile();
 
     controller = module.get<ResourcesController>(ResourcesController);
   });

@@ -10,6 +10,8 @@ import {
 import { IsString, IsOptional, IsNotEmpty, IsUUID } from 'class-validator';
 import { AIService } from './ai.service';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { FeatureGuard } from '../../common/guards/feature.guard';
+import { RequireFeature } from '../../common/decorators/require-feature.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 class NLPQueryDto {
@@ -44,11 +46,12 @@ class AnalyzeBudgetDto {
 }
 
 @Controller('ai')
+@UseGuards(SupabaseAuthGuard, FeatureGuard)
+@RequireFeature('ai_assistant')
 export class AIController {
   constructor(private readonly aiService: AIService) {}
 
   @Post('query')
-  @UseGuards(SupabaseAuthGuard)
   async processQuery(@CurrentUser() user: any, @Body() dto: NLPQueryDto) {
     const companyId = user.company_id;
     return this.aiService.processNaturalLanguageQuery(
@@ -60,7 +63,6 @@ export class AIController {
   }
 
   @Post('recommendations')
-  @UseGuards(SupabaseAuthGuard)
   async getRecommendations(
     @CurrentUser() user: any,
     @Body('projectId') projectId?: string,
@@ -69,7 +71,6 @@ export class AIController {
   }
 
   @Post('predict')
-  @UseGuards(SupabaseAuthGuard)
   async predictOutcome(
     @CurrentUser() user: any,
     @Body('projectId') projectId?: string,
@@ -78,7 +79,6 @@ export class AIController {
   }
 
   @Post('analyze-budget')
-  @UseGuards(SupabaseAuthGuard)
   async analyzeBudget(
     @CurrentUser() user: any,
     @Body('budgetId') budgetId: string,
@@ -98,13 +98,11 @@ export class AIController {
   }
 
   @Post('report')
-  @UseGuards(SupabaseAuthGuard)
   async generateReport(@Body() dto: ReportDto) {
     return this.aiService.generateProjectReport(dto.projectId, dto.type);
   }
 
   @Get('status')
-  @UseGuards(SupabaseAuthGuard)
   getAIStatus() {
     return {
       available: true,
@@ -114,7 +112,6 @@ export class AIController {
   }
 
   @Post('analyze/quality')
-  @UseGuards(SupabaseAuthGuard)
   async analyzeQuality() {
     return {
       data: {
@@ -128,7 +125,6 @@ export class AIController {
   }
 
   @Post('analyze/resources')
-  @UseGuards(SupabaseAuthGuard)
   async analyzeResources() {
     return {
       data: {
@@ -141,7 +137,6 @@ export class AIController {
   }
 
   @Post('analyze/summary')
-  @UseGuards(SupabaseAuthGuard)
   async analyzeSummary() {
     return {
       data: {
@@ -158,7 +153,6 @@ export class AIController {
   }
 
   @Post('analyze/progress')
-  @UseGuards(SupabaseAuthGuard)
   async analyzeProgress() {
     return {
       data: {
@@ -174,7 +168,6 @@ export class AIController {
   }
 
   @Post('analyze/clashes')
-  @UseGuards(SupabaseAuthGuard)
   async analyzeClashes() {
     return {
       data: {
@@ -190,7 +183,6 @@ export class AIController {
   }
 
   @Post('analyze/costs')
-  @UseGuards(SupabaseAuthGuard)
   async analyzeCosts() {
     return { data: [] };
   }

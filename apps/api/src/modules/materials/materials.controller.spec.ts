@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { MaterialsController } from './materials.controller';
 import { MaterialsService } from './materials.service';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { UsersService } from '../users/users.service';
 
 describe('MaterialsController', () => {
   let controller: MaterialsController;
@@ -13,6 +16,10 @@ describe('MaterialsController', () => {
     remove: jest.fn(),
   };
 
+  const mockAuthGuard = {
+    canActivate: jest.fn().mockReturnValue(true),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MaterialsController],
@@ -21,8 +28,19 @@ describe('MaterialsController', () => {
           provide: MaterialsService,
           useValue: mockMaterialsService,
         },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('mock-url') },
+        },
+        {
+          provide: UsersService,
+          useValue: { findById: jest.fn() },
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(SupabaseAuthGuard)
+      .useValue(mockAuthGuard)
+      .compile();
 
     controller = module.get<MaterialsController>(MaterialsController);
     service = module.get<MaterialsService>(MaterialsService);

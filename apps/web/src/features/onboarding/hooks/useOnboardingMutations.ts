@@ -256,7 +256,6 @@ export function useOnboardingSubmit() {
     } catch (error) {
       // Error is already handled by individual mutations
       // Keep data in form (no unmount)
-      console.error('Onboarding step error:', error);
     }
   };
 

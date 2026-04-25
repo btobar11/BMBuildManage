@@ -39,6 +39,10 @@ export interface BimEngineControls {
   highlightLinkedElements: (globalIds: string[]) => Promise<void>;
   goToPlan: (planId: string) => void;
   exitPlan: () => void;
+  toggleMeasurement: (active: boolean) => void;
+  createClippingPlane: () => void;
+  deleteClippingPlanes: () => void;
+  setCategoryVisibility: (category: string, visible: boolean) => void;
 }
 
 // ─── IFC Quantity Extraction (The Quantifier) ──────────────────────────────

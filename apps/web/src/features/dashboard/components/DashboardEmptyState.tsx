@@ -18,7 +18,7 @@ export const DashboardEmptyState = ({ onFileUpload, onCreateProject }: Dashboard
       if (file.name.endsWith('.ifc')) {
         onFileUpload?.(file);
       } else {
-        console.log('Archivo no soportado:', file.name);
+        // Silently ignore unsupported files
       }
     }
   }, [onFileUpload]);

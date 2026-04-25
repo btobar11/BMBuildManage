@@ -2006,4 +2006,40 @@ ${JSON.stringify(budgetSummary, null, 2)}`;
       };
     }
   }
+  /**
+   * Genera una respuesta genérica usando el cliente de Groq
+   */
+  async generateResponse(
+    prompt: string,
+    systemPrompt?: string,
+  ): Promise<string> {
+    if (!this.groqClient) {
+      throw new InternalServerErrorException(
+        'AI Service not available (missing API Key)',
+      );
+    }
+
+    try {
+      const response = await this.groqClient.chat.completions.create({
+        model: 'llama-3.1-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content:
+              systemPrompt || 'Eres un asesor experto en SaaS y construcción.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.3,
+      });
+
+      return response.choices[0].message.content || '';
+    } catch (error) {
+      this.logger.error(`Error in generateResponse: ${error.message}`);
+      throw new InternalServerErrorException('Error processing AI request');
+    }
+  }
 }

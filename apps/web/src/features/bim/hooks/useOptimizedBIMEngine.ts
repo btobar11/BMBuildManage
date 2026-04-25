@@ -91,7 +91,7 @@ export const useOptimizedBIMEngine = (
         throw new Error(`Container with ID "${containerId}" not found`);
       }
 
-      console.log('🚀 Initializing Optimized BIM Engine for Large Models');
+      
 
       // Configure components for high performance
       const components = new OBC.Components();
@@ -156,12 +156,11 @@ export const useOptimizedBIMEngine = (
       setIsInitialized(true);
       setError(null);
 
-      console.log('✅ Optimized BIM Engine initialized successfully');
+      
       
       return components;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      console.error('❌ Error initializing optimized BIM engine:', err);
       setError(errorMessage);
       throw err;
     }
@@ -212,7 +211,6 @@ export const useOptimizedBIMEngine = (
 
         // If approaching memory limit, start aggressive cleanup
         if (usedMB > config.maxMemoryMB * 0.8) {
-          console.warn('⚠️ Memory usage high, starting cleanup');
           performMemoryCleanup();
         }
       }
@@ -237,8 +235,6 @@ export const useOptimizedBIMEngine = (
     if ((window as any).gc) {
       (window as any).gc();
     }
-
-    console.log('🧹 Memory cleanup completed');
   };
 
   // Check if fragment is currently in view
@@ -257,15 +253,11 @@ export const useOptimizedBIMEngine = (
       simplificationRatios: [1.0, 0.5, 0.2], // 100%, 50%, 20% detail
     };
 
-    // Update LOD levels based on camera position
-    const updateLODLevels = () => {
-      const cameraPosition = camera.three.position;
-      lodManagerRef.current.viewerPosition.copy(cameraPosition);
-
-      // This would iterate through all fragments and update their LOD
-      // Implementation would be more complex in practice
-      console.log('📐 Updating LOD levels based on camera position');
-    };
+// Update LOD levels based on camera position
+      const updateLODLevels = () => {
+        const cameraPosition = camera.three.position;
+        lodManagerRef.current.viewerPosition.copy(cameraPosition);
+      };
 
     // Update LOD on camera movement
     camera.controls.addEventListener('change', updateLODLevels);
@@ -278,8 +270,6 @@ export const useOptimizedBIMEngine = (
     
     const updateVisibility = () => {
       // Update visibility of fragments based on camera frustum
-      // This would be implemented with proper occlusion culling algorithms
-      console.log('👁️ Updating occlusion culling');
     };
 
     camera.controls.addEventListener('change', updateVisibility);
@@ -287,7 +277,6 @@ export const useOptimizedBIMEngine = (
 
   // Set up progressive loading system
   const setupProgressiveLoading = (components: OBC.Components) => {
-    console.log('⏳ Progressive loading system initialized');
     // Implementation would handle loading models in chunks
   };
 
@@ -339,8 +328,6 @@ export const useOptimizedBIMEngine = (
     }
 
     try {
-      console.log(`📦 Starting optimized loading of model: ${modelUrl}`);
-      
       setLoadingProgress({
         phase: 'downloading',
         percentage: 0,
@@ -363,7 +350,6 @@ export const useOptimizedBIMEngine = (
         return await loadModelStandard(modelUrl, loader);
       }
     } catch (error) {
-      console.error('❌ Error loading model:', error);
       setError(error instanceof Error ? error.message : 'Failed to load model');
       throw error;
     }
@@ -375,8 +361,6 @@ export const useOptimizedBIMEngine = (
     loader: any,
     options: any
   ) => {
-    console.log('🌊 Loading model with streaming');
-    
     // This would implement actual streaming logic
     // For now, we'll simulate progressive loading
     const response = await fetch(modelUrl);
@@ -440,8 +424,6 @@ export const useOptimizedBIMEngine = (
 
   // Standard model loading
   const loadModelStandard = async (modelUrl: string, loader: any) => {
-    console.log('📥 Loading model with standard method');
-    
     const response = await fetch(modelUrl);
     const modelData = await response.arrayBuffer();
     const modelFile = new File([modelData], 'model.ifc', { type: 'application/octet-stream' });
@@ -451,8 +433,6 @@ export const useOptimizedBIMEngine = (
 
   // Optimized disposal
   const disposeOptimized = useCallback(() => {
-    console.log('🧹 Starting optimized disposal');
-
     // Clear performance monitoring
     if (performanceMonitorRef.current) {
       clearInterval(performanceMonitorRef.current);
@@ -481,7 +461,7 @@ export const useOptimizedBIMEngine = (
         
         components.dispose();
       } catch (error) {
-        console.warn('Warning during disposal:', error);
+        // Disposal failed — non-critical
       }
     }
 
@@ -490,8 +470,6 @@ export const useOptimizedBIMEngine = (
     setLoadingProgress(null);
     setPerformanceMetrics(null);
     setError(null);
-
-    console.log('✅ Optimized disposal completed');
   }, [components]);
 
   // Initialize on mount
@@ -506,8 +484,6 @@ export const useOptimizedBIMEngine = (
   // Performance optimization method
   const optimizeForPerformance = useCallback(() => {
     if (!components) return;
-
-    console.log('⚡ Optimizing for performance');
 
     const renderer = components.get(OBF.PostproductionRenderer);
     
@@ -526,8 +502,6 @@ export const useOptimizedBIMEngine = (
     
     // Force lower LOD levels
     lodManagerRef.current.currentLODLevel = 'medium';
-    
-    console.log('💾 Memory optimization completed');
   }, []);
 
   return {

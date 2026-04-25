@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertCircle, RefreshCcw, Home } from 'lucide-react';
+import { captureException } from '../lib/telemetry';
 
 interface Props {
   children: ReactNode;
@@ -21,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    captureException(error, { componentStack: errorInfo.componentStack });
   }
 
   private handleReset = async () => {
@@ -38,7 +39,7 @@ export class ErrorBoundary extends Component<Props, State> {
           await registration.unregister();
         }
       } catch (e) {
-        console.error('Failed to unregister service workers:', e);
+        captureException(e);
       }
     }
     

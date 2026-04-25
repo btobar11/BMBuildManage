@@ -1,6 +1,7 @@
 /**
  * Utility functions for cleaning up authentication issues
  */
+import { captureException } from '../lib/telemetry';
 
 /**
  * Removes the DEV_TOKEN from localStorage to force real authentication
@@ -10,12 +11,9 @@ export function clearDevToken(): void {
   const devToken = localStorage.getItem('DEV_TOKEN');
   if (devToken) {
     localStorage.removeItem('DEV_TOKEN');
-    console.log('[AUTH_CLEANUP] DEV_TOKEN removed from localStorage');
-    
+
     // Force a page reload to clear any cached authentication
     window.location.reload();
-  } else {
-    console.log('[AUTH_CLEANUP] No DEV_TOKEN found in localStorage');
   }
 }
 
@@ -55,7 +53,7 @@ export async function forceAuthReset(): Promise<void> {
     const { supabase } = await import('../lib/supabase');
     await supabase.auth.signOut();
   } catch (error) {
-    console.error('[AUTH_CLEANUP] Error clearing Supabase session:', error);
+    captureException(error);
   }
   
   // Clear other auth-related localStorage items
@@ -64,8 +62,6 @@ export async function forceAuthReset(): Promise<void> {
   );
   
   keysToRemove.forEach(key => localStorage.removeItem(key));
-  
-  console.log('[AUTH_CLEANUP] All authentication data cleared');
   
   // Reload the page
   window.location.href = '/login';

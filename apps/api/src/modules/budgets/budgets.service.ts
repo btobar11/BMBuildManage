@@ -79,10 +79,23 @@ export class BudgetsService {
   async create(
     createBudgetDto: CreateBudgetDto,
     userId?: string,
+    companyId?: string,
   ): Promise<Budget> {
-    const budget = this.budgetRepository.create(
-      createBudgetDto as Parameters<typeof this.budgetRepository.create>[0],
-    );
+    const project = await this.projectRepository.findOne({
+      where: { id: createBudgetDto.project_id },
+      relations: ['company'],
+    });
+    if (!project) {
+      throw new NotFoundException({
+        code: 'PROJECT_NOT_FOUND',
+        message: `Project ${createBudgetDto.project_id} not found`,
+      });
+    }
+    const company_id = companyId || project.company_id;
+    const budget = this.budgetRepository.create({
+      ...createBudgetDto,
+      company_id,
+    } as Parameters<typeof this.budgetRepository.create>[0]);
     const saved = await this.budgetRepository.save(budget);
 
     const count = await this.budgetRepository.count({
@@ -98,9 +111,9 @@ export class BudgetsService {
 
   // ─── READ ─────────────────────────────────────────────────────────────────
 
-  findAllByProject(projectId: string): Promise<Budget[]> {
+  findAllByProject(projectId: string, companyId?: string): Promise<Budget[]> {
     return this.budgetRepository.find({
-      where: { project_id: projectId },
+      where: { project_id: projectId, company_id: companyId },
       relations: ['stages', 'stages.items'],
       order: { version: 'DESC' },
     });
@@ -146,6 +159,7 @@ export class BudgetsService {
     companyId?: string,
   ): Promise<Budget & { warnings: string[] }> {
     const budget = await this.findOne(id, companyId);
+    const company_id = companyId || budget.company_id;
 
     const { stages, ...scalarFields } = updateBudgetDto as UpdateBudgetDto & {
       stages?: Array<{
@@ -184,12 +198,14 @@ export class BudgetsService {
         const stageEntity = this.stageRepository.create({
           ...(s.id ? { id: s.id } : {}),
           budget_id: id,
+          company_id,
           name: s.name,
           position: s.position ?? 0,
         });
         stageEntity.items = (s.items ?? []).map((i) => {
           return this.itemRepository.create({
             ...(i.id ? { id: i.id } : {}),
+            company_id,
             name: i.name,
             unit: i.unit,
             quantity: Number(i.quantity) || 0,
@@ -308,6 +324,7 @@ export class BudgetsService {
 
     const newBudget = this.budgetRepository.create({
       project_id: original.project_id,
+      company_id: original.company_id,
       status: BudgetStatus.DRAFT,
       is_active: false,
       total_estimated_cost: original.total_estimated_cost,
@@ -320,6 +337,7 @@ export class BudgetsService {
         position: s.position,
         total_cost: s.total_cost,
         total_price: s.total_price,
+        company_id: original.company_id,
         items: s.items.map((i) => ({
           name: i.name,
           type: i.type,
@@ -328,6 +346,7 @@ export class BudgetsService {
           unit_cost: i.unit_cost,
           unit_price: i.unit_price,
           position: i.position,
+          company_id: original.company_id,
           apu_template_id: i.apu_template_id,
           cubication_mode: i.cubication_mode,
           dim_length: i.dim_length,

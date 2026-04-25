@@ -244,16 +244,16 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
               <div 
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm ${
                   currentStep === step 
-                    ? 'bg-indigo-600 text-white ring-4 ring-indigo-600/20' 
+                    ? 'bg-emerald-600 text-white ring-4 ring-emerald-600/20' 
                     : currentStep > step 
-                      ? 'bg-indigo-600/20 text-indigo-600' 
+                      ? 'bg-emerald-600/20 text-emerald-600' 
                       : 'bg-muted text-muted-foreground border border-border'
                 }`}
               >
                 {currentStep > step ? <Check size={16} strokeWidth={3} /> : step}
               </div>
               {idx < 3 && (
-                <div className={`w-8 sm:w-16 h-1 mx-2 rounded-full transition-colors ${currentStep > step ? 'bg-indigo-500/50' : 'bg-border'}`} />
+                <div className={`w-8 sm:w-16 h-1 mx-2 rounded-full transition-colors ${currentStep > step ? 'bg-emerald-500/50' : 'bg-border'}`} />
               )}
             </div>
           ))}
@@ -277,7 +277,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     onBlur={() => handleInputBlur('name')}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     placeholder="Ej. Remodelación Casa Central"
                   />
                   {touched.name && errors.name && (
@@ -297,7 +297,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                   <textarea 
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[100px] resize-y transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[100px] resize-y transition-all"
                     placeholder="Detalles adicionales sobre la obra..."
                   />
                 </div>
@@ -317,7 +317,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     onBlur={() => handleInputBlur('address')}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     placeholder="Freire 123"
                   />
                   {touched.address && errors.address && (
@@ -334,7 +334,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       value={formData.region}
                       onChange={(e) => setFormData({ ...formData, region: e.target.value, commune: '' })}
                       onBlur={() => handleInputBlur('region')}
-                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all appearance-none"
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all appearance-none"
                     >
                       <option value="">Seleccionar región</option>
                       {regionNames.map((region) => (
@@ -355,7 +355,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       value={formData.commune}
                       onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
                       onBlur={() => handleInputBlur('commune')}
-                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all appearance-none"
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all appearance-none"
                     >
                       <option value="">{formData.region ? 'Seleccionar comuna' : 'Seleccione una región'}</option>
                       {communesForRegion.map((commune) => (
@@ -388,8 +388,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                         onClick={() => toggleType(pt.value)}
                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
                           formData.type.includes(pt.value)
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20'
-                            : 'bg-background text-muted-foreground border-border hover:border-indigo-400'
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20'
+                            : 'bg-background text-muted-foreground border-border hover:border-emerald-400'
                         }`}
                       >
                         {pt.label}
@@ -408,8 +408,8 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                         onClick={() => setFormData(prev => ({ ...prev, status: ps.value }))}
                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border ${
                           formData.status === ps.value
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20'
-                            : 'bg-background text-muted-foreground border-border hover:border-indigo-400'
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20'
+                            : 'bg-background text-muted-foreground border-border hover:border-emerald-400'
                         }`}
                       >
                         {ps.label}
@@ -426,7 +426,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       value={formData.start_date}
                       onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                       onBlur={() => handleInputBlur('start_date')}
-                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -437,7 +437,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                       onBlur={() => handleInputBlur('end_date')}
                       min={formData.start_date}
-                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     />
                     {touched.end_date && errors.end_date && (
                       <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
@@ -466,7 +466,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                           onClick={() => setFormData(prev => ({ ...prev, estimated_price_currency: curr.value }))}
                           className={`px-4 py-3 text-sm font-semibold transition-all ${
                             formData.estimated_price_currency === curr.value
-                              ? 'bg-indigo-600 text-white'
+                              ? 'bg-emerald-600 text-white'
                               : 'text-muted-foreground hover:bg-muted'
                           }`}
                         >
@@ -479,13 +479,13 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       value={formData.estimated_price}
                       onChange={(e) => setFormData({ ...formData, estimated_price: e.target.value })}
                       onBlur={() => handleInputBlur('estimated_price')}
-                      className="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                      className="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                       placeholder="Dejar en blanco si se desconoce"
                     />
                   </div>
                   {formData.estimated_price_currency === 'UF' && formData.estimated_price && ufValue && (
                     <div className="flex justify-end pr-2 pt-1">
-                      <p className="text-xs text-indigo-400 font-medium">
+                      <p className="text-xs text-emerald-400 font-medium">
                         ≈ {(Number(formData.estimated_price) * ufValue).toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })} CLP 
                         <span className="text-muted-foreground ml-1">(UF hoy: {ufValue.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })})</span>
                       </p>
@@ -505,7 +505,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                     value={formData.estimated_surface}
                     onChange={(e) => setFormData({ ...formData, estimated_surface: e.target.value })}
                     onBlur={() => handleInputBlur('estimated_surface')}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     placeholder="Ej. 150"
                   />
                   {touched.estimated_surface && errors.estimated_surface && (
@@ -537,7 +537,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
             type="button" 
             onClick={handleNext}
             disabled={createProjectMutation.isPending}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-indigo-600/20"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-600/20"
           >
             {createProjectMutation.isPending && <Loader2 size={16} className="animate-spin" />}
             {currentStep < totalSteps ? (

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Template } from './template.entity';
@@ -12,21 +16,34 @@ export class TemplatesService {
     private readonly templateRepository: Repository<Template>,
   ) {}
 
-  create(createDto: CreateTemplateDto) {
-    const template = this.templateRepository.create(createDto);
+  private requireCompanyId(companyId?: string): string {
+    if (!companyId) {
+      throw new ForbiddenException('Missing company context');
+    }
+    return companyId;
+  }
+
+  create(companyId: string, createDto: CreateTemplateDto) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const template = this.templateRepository.create({
+      ...createDto,
+      company_id: requiredCompanyId,
+    });
     return this.templateRepository.save(template);
   }
 
   findAll(companyId: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     return this.templateRepository.find({
-      where: { company_id: companyId },
+      where: { company_id: requiredCompanyId },
       relations: ['stages', 'stages.items'],
     });
   }
 
   async findOne(id: string, companyId: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const template = await this.templateRepository.findOne({
-      where: { id, company_id: companyId },
+      where: { id, company_id: requiredCompanyId },
       relations: ['stages', 'stages.items'],
     });
     if (!template) {

@@ -26,7 +26,8 @@
     ]
   },
   "dependencies": {
-    "esbuild": "^0.28.0"
+    "esbuild": "^0.28.0",
+    "pg": "^8.20.0"
   },
   "overrides": {
     "typescript": "^5.7.0",

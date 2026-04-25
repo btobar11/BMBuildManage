@@ -299,7 +299,7 @@ export async function updateElementState(
         };
       }
     } catch (error) {
-      console.warn('[BimOffline] Immediate sync failed, queued for later:', error);
+      // Queue for later sync
     }
   }
 

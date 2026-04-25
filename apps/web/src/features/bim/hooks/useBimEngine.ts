@@ -80,7 +80,7 @@ export function useBimEngine(
         let container = containerRef.current;
         let mountRetries = 0;
         while (!container && mountRetries < 20) {
-          console.log(`[BimEngine] Waiting for container mount (attempt ${mountRetries + 1})...`);
+          
           await new Promise(resolve => setTimeout(resolve, 100));
           container = containerRef.current;
           mountRetries++;
@@ -90,14 +90,14 @@ export function useBimEngine(
           throw new Error('Container not mounted after 2s. Aborting 3D init.');
         }
 
-        console.log('[BimEngine] Initializing components (Industrial mode)...');
+        
         const components = new OBC.Components();
         componentsRef.current = components;
 
         // Explicitly initialize engine cores
         await components.init();
 
-        console.log('[BimEngine] 2. Creating World...');
+        
         const worlds = components.get(OBC.Worlds);
         const world = worlds.create<
           OBC.SimpleScene,
@@ -114,11 +114,11 @@ export function useBimEngine(
         world.camera = camera;
 
         // Verify container is still attached before renderer init
-        if (!container.parentElement && mountRetries < 20) {
+        if (!(container as any).parentElement && mountRetries < 20) {
            throw new Error('Container detached during initialization');
         }
 
-        console.log('[BimEngine] 2.1 Initializing Fragments Manager...');
+        
         const fragments = components.get(OBC.FragmentsManager);
         fragmentsRef.current = fragments;
 
@@ -140,7 +140,7 @@ export function useBimEngine(
           throw new Error('Controls synchronization failed. Time out after 3s.');
         }
 
-        console.log('[BimEngine] 3. Configuring Scene...');
+        
         world.scene.setup();
         
         // Elevate visual quality with Post-production
@@ -158,20 +158,14 @@ export function useBimEngine(
         // @ts-ignore
         aoPass.scale = 1.2;
 
-        console.log('[BimEngine] 4. Initializing Components...');
-
-        console.log('[BimEngine] 7. Configuring Visuals...');
+        
         const activeScene = world.scene;
         activeScene.three.background = null; 
         
-        // Initialize raycaster
-        void components.get(OBC.Raycasters).get(world);
+        // Raycaster will be initialized after fragments
         
-        // 5. Initialize Views Tool (Modern floor plan management)
-        const plans = components.get(OBC.Views);
-        plans.world = world;
-        plansRef.current = plans;
-        
+        // We will initialize Views, Clipper, Measurement and Classifier after FragmentsManager
+        // We will initialize Clipper, Measurement and Classifier after FragmentsManager
         try {
           // Resilient Blob-based worker loading
           const fetchedUrl = await fetch(WORKER_URL);
@@ -181,13 +175,12 @@ export function useBimEngine(
           cleanupFunctionsRef.current.push(() => URL.revokeObjectURL(workerUrl));
           
           fragments.init(workerUrl);
-          console.log('[BimEngine] Fragments worker initialized via Blob.');
         } catch (e) {
           console.warn('[BimEngine] Worker fetch/init failed, falling back to direct URL:', e);
           try {
             fragments.init(WORKER_URL);
           } catch (err) {
-            console.error('[BimEngine] Critical Worker Failure:', err);
+            fragments.init(WORKER_URL);
           }
         }
 
@@ -210,6 +203,26 @@ export function useBimEngine(
         // Add grids
         const grids = components.get(OBC.Grids);
         grids.create(world);
+
+        // 5. Initialize Views Tool (Modern floor plan management)
+        const plans = components.get(OBC.Views);
+        plans.world = world;
+        plansRef.current = plans;
+
+        // Initialize Clipper
+        const clipper = components.get(OBC.Clipper);
+        clipper.enabled = true;
+
+        // Initialize Measurement
+        const measurement = components.get(OBF.LengthMeasurement);
+        measurement.world = world;
+        measurement.enabled = true;
+
+        // Initialize Classifier
+        const classifier = components.get(OBC.Classifier);
+
+        // Initialize raycaster
+        void components.get(OBC.Raycasters).get(world);
 
         // Update fragments on camera movement
         const onCameraUpdate = () => {
@@ -237,19 +250,34 @@ export function useBimEngine(
 
           // Build GlobalId index for visual feedback
           (async () => {
-            console.log('[BimEngine] Model loaded. Generating Floor Plans...');
+            
             const plans = plansRef.current;
             if (plans) {
-              try {
+try {
                 const storeys = await plans.createFromIfcStoreys();
                 const planList = storeys.map((view: any) => ({
                   id: view.uuid || (view as any).id,
                   name: view.name || 'Nivel Desconocido',
                 }));
                 setAvailablePlans(planList);
-                console.log(`[BimEngine] Generated ${planList.length} floor plans.`);
               } catch (e) {
-                console.warn('[BimEngine] Error generating storeys:', e);
+                // Floor plan generation failed — non-critical
+              }
+              
+              try {
+                const classifier = components.get(OBC.Classifier);
+                (classifier as any).byEntity(model);
+              } catch (e) {
+                // Classifier failed — non-critical
+              }
+              
+              // Run classifier to allow spatial tree
+              try {
+                const classifier = components.get(OBC.Classifier);
+                (classifier as any).byEntity(model);
+                
+              } catch (e) {
+                console.warn('[BimEngine] Classifier error:', e);
               }
             }
           })();
@@ -320,15 +348,11 @@ export function useBimEngine(
             });
           }
         } catch (e) {
-          console.warn('[BimEngine] Highlighter setup warning:', e);
-          // Continue without highlighter — not critical
+          // Highlighter setup failed — non-critical
         }
 
-        isInitializedRef.current = true;
-        isInitializingRef.current = null;
-        console.log('[BimEngine] Initialized successfully.');
+        
       } catch (error) {
-        console.error('[BimEngine] Failed to initialize:', error);
         isInitializingRef.current = null;
         setViewerState((prev: BimViewerState) => ({
           ...prev,
@@ -435,7 +459,6 @@ export function useBimEngine(
         isModelLoaded: true,
       });
     } catch (error) {
-      console.error('Failed to load IFC:', error);
       setViewerState({
         isLoading: false,
         progress: 0,
@@ -459,7 +482,7 @@ export function useBimEngine(
       return;
     }
 
-    console.log('[BimEngine] Highlighting linked elements:', globalIds.length);
+    
     
     const fragmentIdMap: any = {};
     
@@ -487,7 +510,7 @@ export function useBimEngine(
         }
       }
     } catch (e) {
-      console.warn('[BimEngine] Linked highlight error:', e);
+      // Linked highlight failed — non-critical
     }
   }, []);
 
@@ -529,9 +552,9 @@ export function useBimEngine(
           setActivePlanId(id);
           // Enable white background for better plan visibility
           worldRef.current.scene.three.background = new THREE.Color(0xffffff);
-        } catch (e) {
-          console.error('[BimEngine] Error moving to plan:', e);
-        }
+} catch (e) {
+        // Plan navigation failed — non-critical
+      }
       }
     },
     exitPlan: async () => {
@@ -541,8 +564,41 @@ export function useBimEngine(
           setActivePlanId(null);
           // Restore transparent/themed background
           worldRef.current.scene.three.background = null;
-        } catch (e) {
-          console.error('[BimEngine] Error exiting plan:', e);
+} catch (e) {
+        // Exit plan failed — non-critical
+      }
+      }
+    },
+    toggleMeasurement: (active: boolean) => {
+      if (componentsRef.current) {
+        const measurement = componentsRef.current.get(OBF.LengthMeasurement);
+        measurement.enabled = active;
+      }
+    },
+    createClippingPlane: () => {
+      if (componentsRef.current && worldRef.current) {
+        const clipper = componentsRef.current.get(OBC.Clipper);
+        clipper.create(worldRef.current);
+      }
+    },
+    deleteClippingPlanes: () => {
+      if (componentsRef.current) {
+        const clipper = componentsRef.current.get(OBC.Clipper);
+        clipper.deleteAll();
+      }
+    },
+    setCategoryVisibility: (category: string, visible: boolean) => {
+      if (componentsRef.current) {
+        try {
+          const classifier = componentsRef.current.get(OBC.Classifier);
+          const hider = componentsRef.current.get(OBC.Hider);
+          
+          const found = (classifier.list as any)[category];
+          if (found) {
+            hider.set(visible, found);
+          }
+        } catch(e) {
+          // Category visibility toggle failed — non-critical
         }
       }
     }
@@ -556,13 +612,11 @@ export function useBimEngine(
   useEffect(() => {
     return () => {
       isDisposedRef.current = true;
-      console.log('[BimEngine] Starting strict cleanup...');
 
-      // 1. Dispose all loaded models (geometries, materials, textures)
+      // 1. Dispose all loaded models
       if (loadedModelsRef.current.size > 0) {
         for (const [modelId, model] of loadedModelsRef.current) {
           try {
-            console.log(`[BimEngine] Disposing model: ${modelId}`);
             if (model.dispose) {
               model.dispose();
             }
@@ -578,7 +632,7 @@ export function useBimEngine(
               });
             }
           } catch (e) {
-            console.warn(`[BimEngine] Error disposing model ${modelId}:`, e);
+            // Model disposal failed — non-critical
           }
         }
         loadedModelsRef.current.clear();
@@ -592,7 +646,7 @@ export function useBimEngine(
         try {
           highlighterRef.current.dispose();
         } catch (e) {
-          console.warn('[BimEngine] Error disposing highlighter:', e);
+          // Highlighter disposal failed — non-critical
         }
         highlighterRef.current = null;
       }
@@ -619,7 +673,7 @@ export function useBimEngine(
           
           if (fragments.dispose) fragments.dispose();
         } catch (e) {
-          console.warn('[BimEngine] Error disposing fragments:', e);
+          // Fragments disposal failed — non-critical
         }
         fragmentsRef.current = null;
       }
@@ -665,7 +719,7 @@ export function useBimEngine(
 
           if (world.dispose) world.dispose();
         } catch (e) {
-          console.warn('[BimEngine] Error disposing world:', e);
+          // World disposal failed — non-critical
         }
         worldRef.current = null;
       }
@@ -676,14 +730,14 @@ export function useBimEngine(
           // Dispose all component tools that might have their own dispose methods
           componentsRef.current.dispose();
         } catch (e) {
-          console.warn('[BimEngine] Error disposing components:', e);
+          // Components disposal failed — non-critical
         }
         componentsRef.current = null;
       }
 
       // 7. Clear container content and reference
       if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+        (containerRef.current as any).innerHTML = '';
         // We don't nullify containerRef.current yet as React might still need it 
         // during the final phase of unmounting, but we clear it.
       }
@@ -692,11 +746,8 @@ export function useBimEngine(
       isInitializedRef.current = false;
       isInitializingRef.current = null;
       
-      // Execute cleanup functions
       cleanupFunctionsRef.current.forEach(fn => fn());
       cleanupFunctionsRef.current = [];
-
-      console.log('[BimEngine] Strict cleanup complete.');
     };
   }, [containerRef]);
 

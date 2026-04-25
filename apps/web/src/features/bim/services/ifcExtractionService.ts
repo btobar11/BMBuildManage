@@ -139,11 +139,8 @@ export class IfcExtractionService {
   }
 
   async extract(): Promise<ExtractionResult> {
-    console.log('[IfcExtraction] Starting extraction...');
-    
     // Step 1: Detect units
     this.lengthFactor = await this.detectUnitFactor();
-    console.log(`[IfcExtraction] Unit factor: ${this.lengthFactor}`);
 
     // Step 2: Build spatial index
     await this.buildSpatialIndex();
@@ -151,9 +148,8 @@ export class IfcExtractionService {
     // Step 3: Extract storey map
     await this.buildStoreyMap();
 
-    // Step 4: Extract all elements
+// Step 4: Extract all elements
     const elements = await this.extractAllElements();
-    console.log(`[IfcExtraction] Extracted ${elements.length} elements`);
 
     // Step 5: Build spatial tree
     const spatialTree = await this.buildSpatialTree();
@@ -197,8 +193,8 @@ export class IfcExtractionService {
           return 1;
         }
       }
-    } catch (e) {
-      console.warn('[IfcExtraction] Could not detect units:', e);
+} catch (e) {
+      // Spatial tree build failed — non-critical
     }
     return 1;
   }
@@ -228,9 +224,7 @@ export class IfcExtractionService {
           // Type may not exist in model
         }
       }
-    } catch (e) {
-      console.warn('[IfcExtraction] Error building spatial index:', e);
-    }
+    } catch {
   }
 
   private findParent(): number {
@@ -252,8 +246,8 @@ export class IfcExtractionService {
           }
         }
       }
-    } catch (e) {
-      console.warn('[IfcExtraction] Error building storey map:', e);
+    } catch {
+      // Build failed
     }
   }
 
@@ -300,8 +294,8 @@ export class IfcExtractionService {
             }
           }
         }
-      } catch (e) {
-        console.warn(`[IfcExtraction] Error extracting ${typeName}:`, e);
+      } catch {
+        // Skip this type
       }
     }
 
@@ -347,8 +341,7 @@ export class IfcExtractionService {
         properties,
         boundingBox,
       };
-    } catch (e) {
-      console.warn(`[IfcExtraction] Error extracting element ${expressID}:`, e);
+    } catch {
       return null;
     }
   }
@@ -435,8 +428,8 @@ export class IfcExtractionService {
           }
         }
       }
-    } catch (e) {
-      console.warn(`[IfcExtraction] Error extracting quantities for ${expressID}:`, e);
+    } catch {
+      // Quantity extraction failed
     }
 
     return quantities;
@@ -457,8 +450,8 @@ export class IfcExtractionService {
           if (psetId) relatedPsetIds.push(psetId);
         }
       }
-    } catch (e) {
-      console.warn(`[IfcExtraction] Error finding property relations for ${expressID}:`, e);
+    } catch {
+      // Property relations not found
     }
 
     return relatedPsetIds;
@@ -541,8 +534,8 @@ export class IfcExtractionService {
           }
         }
       }
-    } catch (e) {
-      console.warn(`[IfcExtraction] Error extracting properties for ${expressID}:`, e);
+    } catch {
+      // Properties extraction failed
     }
 
     return properties;
@@ -626,8 +619,8 @@ export class IfcExtractionService {
           root.children.push(buildingNode);
         }
       }
-    } catch (e) {
-      console.warn('[IfcExtraction] Error building spatial tree:', e);
+    } catch {
+      // Spatial tree build failed
     }
 
     return root;

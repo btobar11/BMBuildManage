@@ -1,8 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company, CompanySpecialty, SeismicZone } from './company.entity';
-import { User } from '../users/user.entity';
+import { User, UserRole } from '../users/user.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { SeedCompanyLibraryDto } from './dto/seed-company-library.dto';
@@ -31,13 +35,24 @@ export class CompaniesService {
     private readonly userRepository: Repository<User>,
     private configService: ConfigService,
   ) {
+    const supabaseUrl =
+      this.configService.get<string>('SUPABASE_URL') ||
+      process.env.SUPABASE_URL ||
+      '';
+    const serviceRoleKey =
+      this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      '';
+    const anonKey =
+      this.configService.get<string>('SUPABASE_ANON_KEY') ||
+      process.env.SUPABASE_ANON_KEY ||
+      '';
+
     this.supabase = createClient(
-      this.configService.get<string>('supabase.url') ||
-        process.env.SUPABASE_URL ||
-        '',
-      this.configService.get<string>('supabase.anonKey') ||
-        process.env.SUPABASE_ANON_KEY ||
-        '',
+      supabaseUrl,
+      // Server-side: prefer service role for RPC/maintenance operations.
+      serviceRoleKey || anonKey,
+      { auth: { persistSession: false, autoRefreshToken: false } },
     );
   }
 
@@ -48,14 +63,19 @@ export class CompaniesService {
     if (createdByUserId) {
       await this.userRepository.update(createdByUserId, {
         company_id: savedCompany.id,
+        role: UserRole.ADMIN,
       });
     }
 
     return savedCompany;
   }
 
-  findAll() {
-    return this.companyRepository.find();
+  async findAll(companyId?: string) {
+    if (!companyId) return [];
+    const company = await this.companyRepository.findOne({
+      where: { id: companyId },
+    });
+    return company ? [company] : [];
   }
 
   async findOne(id: string, companyId?: string) {
@@ -80,8 +100,11 @@ export class CompaniesService {
     return this.companyRepository.save(company);
   }
 
-  async remove(id: string) {
-    const company = await this.findOne(id);
+  async remove(id: string, companyId?: string) {
+    if (!companyId || id !== companyId) {
+      throw new ForbiddenException('Not authorized to delete this company');
+    }
+    const company = await this.findOne(id, companyId);
     await this.companyRepository.remove(company);
     return { deleted: true };
   }
@@ -97,6 +120,15 @@ export class CompaniesService {
 
       if (company.library_seeded) {
         throw new Error('Company library already seeded');
+      }
+
+      const hasServiceRole =
+        Boolean(this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')) ||
+        Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+      if (!hasServiceRole) {
+        throw new Error(
+          'SUPABASE_SERVICE_ROLE_KEY is required for library seeding',
+        );
       }
 
       // Call PostgreSQL function to perform seeding
@@ -157,6 +189,13 @@ export class CompaniesService {
     const company = await this.findOne(companyId, requestingCompanyId);
 
     // Get counts from Supabase
+    const hasServiceRole =
+      Boolean(this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')) ||
+      Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    if (!hasServiceRole) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for seeded stats');
+    }
+
     const [resourcesResult, apusResult] = await Promise.all([
       this.supabase
         .from('resources')
@@ -184,6 +223,15 @@ export class CompaniesService {
     force: boolean = false,
     requestingCompanyId?: string,
   ): Promise<SeedingResult> {
+    const hasServiceRole =
+      Boolean(this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')) ||
+      Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    if (!hasServiceRole) {
+      throw new Error(
+        'SUPABASE_SERVICE_ROLE_KEY is required for library reseeding',
+      );
+    }
+
     if (!force) {
       const company = await this.findOne(companyId, requestingCompanyId);
       if (company.library_seeded) {

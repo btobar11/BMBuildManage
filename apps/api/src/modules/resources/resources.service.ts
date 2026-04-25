@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -20,13 +21,25 @@ export class ResourcesService {
     private readonly dataSource: DataSource,
   ) {}
 
-  create(dto: CreateResourceDto) {
-    const resource = this.resourceRepo.create(dto);
+  private requireCompanyId(companyId?: string): string {
+    if (!companyId) {
+      throw new ForbiddenException('Missing company context');
+    }
+    return companyId;
+  }
+
+  create(companyId: string, dto: CreateResourceDto) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const resource = this.resourceRepo.create({
+      ...dto,
+      company_id: requiredCompanyId,
+    });
     return this.resourceRepo.save(resource);
   }
 
   findAll(params: { companyId?: string; tab?: string }) {
     const { companyId, tab } = params;
+    const requiredCompanyId = this.requireCompanyId(companyId);
 
     // tab = 'global' → solo recursos globales (company_id IS NULL)
     // tab = 'personal' → recursos de la empresa + globales
@@ -36,12 +49,9 @@ export class ResourcesService {
     if (tab === 'global') {
       // Solo recursos globales
       where = { company_id: IsNull() };
-    } else if (companyId) {
-      // Recursos de la empresa + globales
-      where = [{ company_id: companyId }, { company_id: IsNull() }];
     } else {
-      // Solo globales si no hay companyId
-      where = { company_id: IsNull() };
+      // Recursos de la empresa + globales
+      where = [{ company_id: requiredCompanyId }, { company_id: IsNull() }];
     }
 
     return this.resourceRepo.find({
@@ -51,17 +61,29 @@ export class ResourcesService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(companyId: string, id: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const resource = await this.resourceRepo.findOne({
-      where: { id },
+      where: [
+        { id, company_id: requiredCompanyId },
+        { id, company_id: IsNull() },
+      ],
       relations: ['price_history', 'unit'],
     });
     if (!resource) throw new NotFoundException(`Resource ${id} not found`);
     return resource;
   }
 
-  async update(id: string, dto: UpdateResourceDto) {
-    const resource = await this.findOne(id);
+  async update(companyId: string, id: string, dto: UpdateResourceDto) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const resource = await this.findOne(requiredCompanyId, id);
+
+    if (resource.company_id === null) {
+      throw new ForbiddenException('Global resources cannot be modified');
+    }
+    if (resource.company_id !== requiredCompanyId) {
+      throw new NotFoundException(`Resource ${id} not found`);
+    }
 
     // If price changed, record it in history
     if (
@@ -79,8 +101,16 @@ export class ResourcesService {
     return this.resourceRepo.save(resource);
   }
 
-  async remove(id: string) {
-    const resource = await this.findOne(id);
+  async remove(companyId: string, id: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const resource = await this.findOne(requiredCompanyId, id);
+
+    if (resource.company_id === null) {
+      throw new ForbiddenException('Global resources cannot be deleted');
+    }
+    if (resource.company_id !== requiredCompanyId) {
+      throw new NotFoundException(`Resource ${id} not found`);
+    }
 
     const isUsed = await this.dataSource.query(
       `SELECT id FROM apu_resources WHERE resource_id = $1 LIMIT 1`,
@@ -96,7 +126,17 @@ export class ResourcesService {
     return { deleted: true };
   }
 
-  findHistory(resourceId: string) {
+  async findHistory(companyId: string, resourceId: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const resource = await this.findOne(requiredCompanyId, resourceId);
+
+    if (resource.company_id === null) {
+      throw new ForbiddenException('Global resource history is not available');
+    }
+    if (resource.company_id !== requiredCompanyId) {
+      throw new NotFoundException(`Resource ${resourceId} not found`);
+    }
+
     return this.historyRepo.find({
       where: { resource_id: resourceId },
       order: { date: 'DESC' },
@@ -104,8 +144,11 @@ export class ResourcesService {
   }
 
   // Bulk import
-  async bulkCreate(items: CreateResourceDto[]) {
-    const resources = this.resourceRepo.create(items);
+  async bulkCreate(companyId: string, items: CreateResourceDto[]) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const resources = this.resourceRepo.create(
+      items.map((item) => ({ ...item, company_id: requiredCompanyId })),
+    );
     return this.resourceRepo.save(resources);
   }
 }

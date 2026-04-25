@@ -5,6 +5,7 @@ import { useCompleteOnboarding } from '../../hooks/useOnboardingMutations';
 import { supabase } from '../../../../lib/supabase';
 import { Loader2, AlertCircle, CheckCircle, Sparkles, LayoutDashboard } from 'lucide-react';
 import { cn } from '../../../../utils/cn';
+import { captureException } from '../../../../lib/telemetry';
 
 export function CompleteStep() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export function CompleteStep() {
         navigate('/dashboard');
       }, 1500);
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      captureException(error);
     }
   };
 
@@ -112,7 +113,7 @@ export function CompleteStep() {
                 {teamData?.invites?.filter(i => i.role === 'admin').length || 0} admins
               </p>
               <p className="text-xs text-muted-foreground">
-                {teamData?.invites?.filter(i => i.role === 'manager').length || 0} managers
+                {teamData?.invites?.filter(i => i.role === 'engineer').length || 0} engineers
               </p>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
@@ -60,6 +60,7 @@ interface SpatialIndex {
 @Injectable()
 export class AdvancedClashDetectionService {
   private supabase: SupabaseClient;
+  private readonly logger = new Logger(AdvancedClashDetectionService.name);
 
   // Default clearance requirements (in mm) between disciplines
   private readonly DEFAULT_CLEARANCES: Record<string, Record<string, number>> =
@@ -162,7 +163,7 @@ export class AdvancedClashDetectionService {
       return [];
     }
 
-    console.log(
+    this.logger.debug(
       `Starting advanced clash detection for ${elements.length} elements`,
     );
 
@@ -183,7 +184,9 @@ export class AdvancedClashDetectionService {
       (a, b) => b.resolution_priority - a.resolution_priority,
     );
 
-    console.log(`Detected ${filteredClashes.length} clashes after filtering`);
+    this.logger.debug(
+      `Detected ${filteredClashes.length} clashes after filtering`,
+    );
 
     return filteredClashes;
   }
@@ -259,7 +262,7 @@ export class AdvancedClashDetectionService {
       cellSize,
     };
 
-    console.log(`Building spatial index with cell size: ${cellSize}mm`);
+    this.logger.debug(`Building spatial index with cell size: ${cellSize}mm`);
 
     elements.forEach((element) => {
       spatialIndex.elements.set(element.id, element);
@@ -278,7 +281,7 @@ export class AdvancedClashDetectionService {
       });
     });
 
-    console.log(
+    this.logger.debug(
       `Spatial index built: ${spatialIndex.grid.size} cells, avg ${
         Array.from(spatialIndex.grid.values()).reduce(
           (sum, set) => sum + set.size,
@@ -388,7 +391,7 @@ export class AdvancedClashDetectionService {
       }
     }
 
-    console.log(
+    this.logger.debug(
       `Clash detection completed: ${totalComparisons} total pairs, ${actualChecks} actual checks, ${clashes.length} clashes found`,
     );
 
@@ -849,7 +852,7 @@ export class AdvancedClashDetectionService {
   ): Promise<void> {
     // This would update the job progress in the database
     // Implementation depends on job tracking system
-    console.log(
+    this.logger.debug(
       `Progress: ${actualChecks}/${totalComparisons} checks completed (${totalElements} elements)`,
     );
   }

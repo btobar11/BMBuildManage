@@ -192,7 +192,6 @@ export class BimDataIngestionService {
         errors: this.errors,
       };
     } catch (error) {
-      console.error('[BimIngestion] Error during ingestion:', error);
       this.errors.push(error instanceof Error ? error.message : 'Unknown error');
 
       // Mark model as error if we got that far
@@ -244,7 +243,6 @@ export class BimDataIngestionService {
       .single();
 
     if (error) {
-      console.error('[BimIngestion] Error creating bim_model:', error);
       return { success: false, error: error.message };
     }
 
@@ -285,7 +283,6 @@ export class BimDataIngestionService {
       .insert(records);
 
     if (error) {
-      console.error('[BimIngestion] Error inserting elements batch:', error);
       return { success: false, count: 0, errors: [error.message] };
     }
 
@@ -334,7 +331,6 @@ export class BimDataIngestionService {
         .insert(batch);
 
       if (error) {
-        console.error('[BimIngestion] Error inserting properties batch:', error);
         errors.push(error.message);
       } else {
         insertedCount += batch.length;
@@ -377,7 +373,6 @@ export async function getBimModel(
     .single();
 
   if (error) {
-    console.error('[BimIngestion] Error fetching bim_model:', error);
     return null;
   }
 
@@ -417,7 +412,6 @@ export async function getBimElements(
   const { data, error } = await query;
 
   if (error) {
-    console.error('[BimIngestion] Error fetching bim_elements:', error);
     return [];
   }
 
@@ -435,9 +429,8 @@ export async function getBimElementByGuid(
     .eq('ifc_guid', ifcGuid)
     .single();
 
-  if (error) {
-    if (error.code === 'PGRST116') return null; // Not found
-    console.error('[BimIngestion] Error fetching bim_element by GUID:', error);
+if (error) {
+    if (error.code === 'PGRST116') return null;
     return null;
   }
 
@@ -453,7 +446,6 @@ export async function getBimElementProperties(
     .eq('element_id', elementId);
 
   if (error) {
-    console.error('[BimIngestion] Error fetching bim_properties:', error);
     return [];
   }
 
@@ -470,7 +462,6 @@ export async function getBimModelsByProject(
     .order('uploaded_at', { ascending: false });
 
   if (error) {
-    console.error('[BimIngestion] Error fetching bim_models by project:', error);
     return [];
   }
 
@@ -484,9 +475,8 @@ export async function deleteBimModel(modelId: string): Promise<boolean> {
     .delete()
     .eq('element_id', modelId);
 
-  if (propsError) {
-    console.error('[BimIngestion] Error deleting bim_properties:', propsError);
-    // Continue anyway - cascade will handle it
+if (propsError) {
+    // Property deletion failed — cascade will handle it
   }
 
   // Delete elements
@@ -495,8 +485,8 @@ export async function deleteBimModel(modelId: string): Promise<boolean> {
     .delete()
     .eq('model_id', modelId);
 
-  if (elementsError) {
-    console.error('[BimIngestion] Error deleting bim_elements:', elementsError);
+if (elementsError) {
+    // Elements deletion failed — non-critical
   }
 
   // Delete model
@@ -506,7 +496,6 @@ export async function deleteBimModel(modelId: string): Promise<boolean> {
     .eq('id', modelId);
 
   if (modelError) {
-    console.error('[BimIngestion] Error deleting bim_model:', modelError);
     return false;
   }
 

@@ -2,13 +2,15 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, IsNull } from 'typeorm';
+import { Repository, DataSource, IsNull, In } from 'typeorm';
 import { ApuTemplate } from './apu-template.entity';
 import { ApuResource } from './apu-resource.entity';
 import { CreateApuTemplateDto } from './dto/create-apu-template.dto';
 import { UpdateApuTemplateDto } from './dto/update-apu-template.dto';
+import { Resource } from '../resources/resource.entity';
 
 @Injectable()
 export class ApuService {
@@ -17,8 +19,43 @@ export class ApuService {
     private readonly apuRepo: Repository<ApuTemplate>,
     @InjectRepository(ApuResource)
     private readonly apuResourceRepo: Repository<ApuResource>,
+    @InjectRepository(Resource)
+    private readonly resourceRepo: Repository<Resource>,
     private readonly dataSource: DataSource,
   ) {}
+
+  private requireCompanyId(companyId?: string): string {
+    if (!companyId) {
+      throw new ForbiddenException('Missing company context');
+    }
+    return companyId;
+  }
+
+  private async assertResourcesAccessible(
+    companyId: string,
+    apuResources?: { resource_id: string }[],
+  ): Promise<void> {
+    if (!apuResources || apuResources.length === 0) return;
+
+    const resourceIds = Array.from(
+      new Set(apuResources.map((r) => r.resource_id).filter(Boolean)),
+    );
+    if (resourceIds.length === 0) return;
+
+    const found = await this.resourceRepo.find({
+      select: ['id'],
+      where: [
+        { id: In(resourceIds), company_id: companyId },
+        { id: In(resourceIds), company_id: IsNull() },
+      ],
+    });
+
+    if (found.length !== resourceIds.length) {
+      throw new BadRequestException(
+        'One or more resources are not accessible for this company',
+      );
+    }
+  }
 
   private calculateUnitCost(template: ApuTemplate): number {
     if (!template.apu_resources) return 0;
@@ -29,10 +66,16 @@ export class ApuService {
     }, 0);
   }
 
-  async create(dto: CreateApuTemplateDto) {
+  async create(companyId: string, dto: CreateApuTemplateDto) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const { apu_resources, ...templateData } = dto;
 
-    const template = this.apuRepo.create(templateData);
+    await this.assertResourcesAccessible(requiredCompanyId, apu_resources);
+
+    const template = this.apuRepo.create({
+      ...templateData,
+      company_id: requiredCompanyId,
+    });
     if (apu_resources) {
       template.apu_resources = apu_resources.map((r) =>
         this.apuResourceRepo.create({ ...r, apu_id: undefined }),
@@ -40,7 +83,7 @@ export class ApuService {
     }
 
     const saved = await this.apuRepo.save(template);
-    return this.findOne(saved.id);
+    return this.findOne(requiredCompanyId, saved.id);
   }
 
   async findAll(
@@ -48,6 +91,7 @@ export class ApuService {
     search?: string,
     tab?: 'personal' | 'global',
   ) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const qb = this.apuRepo
       .createQueryBuilder('apu')
       .leftJoinAndSelect('apu.apu_resources', 'ar')
@@ -57,13 +101,13 @@ export class ApuService {
 
     if (tab === 'global') {
       qb.andWhere('apu.company_id IS NULL');
-    } else if (tab === 'personal' && companyId) {
+    } else if (tab === 'personal' && requiredCompanyId) {
       qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', {
-        companyId,
+        companyId: requiredCompanyId,
       });
-    } else if (companyId) {
+    } else if (requiredCompanyId) {
       qb.andWhere('(apu.company_id = :companyId OR apu.company_id IS NULL)', {
-        companyId,
+        companyId: requiredCompanyId,
       });
     } else {
       qb.andWhere('apu.company_id IS NULL');
@@ -80,18 +124,23 @@ export class ApuService {
     }));
   }
 
-  async findOne(id: string) {
+  async findOne(companyId: string, id: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const template = await this.apuRepo.findOne({
-      where: { id },
+      where: [
+        { id, company_id: requiredCompanyId },
+        { id, company_id: IsNull() },
+      ],
       relations: ['apu_resources', 'apu_resources.resource', 'unit'],
     });
     if (!template) throw new NotFoundException(`APU Template ${id} not found`);
     return { ...template, unit_cost: this.calculateUnitCost(template) };
   }
 
-  async update(id: string, dto: UpdateApuTemplateDto) {
+  async update(companyId: string, id: string, dto: UpdateApuTemplateDto) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const template = await this.apuRepo.findOne({
-      where: { id },
+      where: { id, company_id: requiredCompanyId },
       relations: ['apu_resources'],
     });
     if (!template) throw new NotFoundException(`APU Template ${id} not found`);
@@ -99,6 +148,7 @@ export class ApuService {
     const { apu_resources, ...templateData } = dto;
 
     if (apu_resources !== undefined) {
+      await this.assertResourcesAccessible(requiredCompanyId, apu_resources);
       await this.apuResourceRepo.delete({ apu_id: id });
       template.apu_resources = apu_resources.map((r) =>
         this.apuResourceRepo.create({ ...r, apu_id: id }),
@@ -107,13 +157,13 @@ export class ApuService {
 
     this.apuRepo.merge(template, templateData);
     await this.apuRepo.save(template);
-    return this.findOne(id);
+    return this.findOne(requiredCompanyId, id);
   }
 
-  async duplicate(id: string) {
-    const original = await this.findOne(id);
+  async duplicate(companyId: string, id: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const original = await this.findOne(requiredCompanyId, id);
     const dto: CreateApuTemplateDto = {
-      company_id: original.company_id,
       name: `${original.name} (copia)`,
       unit_id: original.unit_id,
       description: original.description,
@@ -123,10 +173,11 @@ export class ApuService {
         coefficient: Number(r.coefficient),
       })),
     };
-    return this.create(dto);
+    return this.create(requiredCompanyId, dto);
   }
 
   async importGlobalLibrary(companyId: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const globalTemplates = await this.apuRepo.find({
       where: { company_id: IsNull() },
       relations: ['apu_resources'],
@@ -143,7 +194,7 @@ export class ApuService {
     for (const globalTemplate of globalTemplates) {
       const exists = await this.apuRepo.findOne({
         where: {
-          company_id: companyId,
+          company_id: requiredCompanyId,
           name: globalTemplate.name,
         },
       });
@@ -154,7 +205,7 @@ export class ApuService {
           unit_id: globalTemplate.unit_id,
           description: globalTemplate.description,
           category: globalTemplate.category,
-          company_id: companyId,
+          company_id: requiredCompanyId,
         });
         const saved = await this.apuRepo.save(newTemplate);
 
@@ -178,8 +229,11 @@ export class ApuService {
     };
   }
 
-  async remove(id: string) {
-    const template = await this.apuRepo.findOne({ where: { id } });
+  async remove(companyId: string, id: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const template = await this.apuRepo.findOne({
+      where: { id, company_id: requiredCompanyId },
+    });
     if (!template) throw new NotFoundException(`APU Template ${id} not found`);
 
     const isUsed = await this.dataSource.query(

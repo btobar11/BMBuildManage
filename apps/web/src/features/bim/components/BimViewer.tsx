@@ -42,7 +42,7 @@ export function BimViewer({
   const hasLoadedRef = useRef(false);
   const loadingPathRef = useRef<string>('');
 
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? (navigator as unknown as { onLine: boolean }).onLine : true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [elementState, setElementState] = useState<BimElementState | null>(null);
   const [pendingSync, setPendingSync] = useState(false);
@@ -61,12 +61,13 @@ export function BimViewer({
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    const win = window as unknown as EventTarget;
+    win.addEventListener('online', handleOnline);
+    win.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      win.removeEventListener('online', handleOnline);
+      win.removeEventListener('offline', handleOffline);
     };
   }, []);
 
@@ -258,17 +259,36 @@ export function BimViewer({
 
       {/* Model name badge with sync status */}
       {viewerState.isModelLoaded && modelName && (
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-3 px-3 py-1.5 rounded-lg backdrop-blur-xl bg-card/70 border border-border text-xs font-medium text-foreground shadow-lg">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>{modelName}</span>
-          <div className="flex items-center gap-1 ml-1 text-[10px] text-muted-foreground">
-            {isSyncing ? (
-              <Loader2 size={10} className="animate-spin text-emerald-500" />
-            ) : pendingSync ? (
-              <CloudOff size={10} className="text-amber-500" />
-            ) : (
-              <Cloud size={10} className={isOnline ? 'text-emerald-500' : 'text-slate-400'} />
-            )}
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+          <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg backdrop-blur-xl bg-card/70 border border-border text-xs font-medium text-foreground shadow-lg">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>{modelName}</span>
+            <div className="flex items-center gap-1 ml-1 text-[10px] text-muted-foreground">
+              {isSyncing ? (
+                <Loader2 size={10} className="animate-spin text-emerald-500" />
+              ) : pendingSync ? (
+                <CloudOff size={10} className="text-amber-500" />
+              ) : (
+                <Cloud size={10} className={isOnline ? 'text-emerald-500' : 'text-slate-400'} />
+              )}
+            </div>
+          </div>
+          
+          {/* Spatial Tree Mini-Panel */}
+          <div className="flex flex-col gap-1 p-2 rounded-xl backdrop-blur-xl bg-card/70 border border-border shadow-lg">
+            <div className="text-[10px] font-semibold text-muted-foreground mb-1 uppercase tracking-wider px-1">Filtros Disciplinas</div>
+            <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer hover:bg-muted/50 p-1 rounded">
+              <input type="checkbox" defaultChecked className="accent-emerald-500" onChange={(e: React.ChangeEvent<HTMLInputElement>) => controls.setCategoryVisibility('IfcWall', (e.target as any).checked)} />
+              Muros (Arquitectura)
+            </label>
+            <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer hover:bg-muted/50 p-1 rounded">
+              <input type="checkbox" defaultChecked className="accent-emerald-500" onChange={(e: React.ChangeEvent<HTMLInputElement>) => controls.setCategoryVisibility('IfcSlab', (e.target as any).checked)} />
+              Losas (Estructura)
+            </label>
+            <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer hover:bg-muted/50 p-1 rounded">
+              <input type="checkbox" defaultChecked className="accent-emerald-500" onChange={(e: React.ChangeEvent<HTMLInputElement>) => controls.setCategoryVisibility('IfcPipeSegment', (e.target as any).checked)} />
+              Tuberías (MEP)
+            </label>
           </div>
         </div>
       )}

@@ -7,39 +7,74 @@ import {
   Param,
   Delete,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from './user.entity';
+import { CurrentCompany } from '../../common/decorators/current-company.decorator';
+import {
+  CurrentUser,
+  type RequestUser,
+} from '../../common/decorators/current-user.decorator';
 
 @Controller('users')
-@UseGuards(SupabaseAuthGuard)
+@UseGuards(SupabaseAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Roles(UserRole.ADMIN)
+  create(
+    @CurrentCompany() companyId: string,
+    @Body() createUserDto: CreateUserDto,
+  ) {
+    return this.usersService.create(companyId, createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Roles(UserRole.ADMIN)
+  findAll(@CurrentCompany() companyId: string) {
+    return this.usersService.findAll(companyId);
+  }
+
+  @Get('me')
+  findMe(@CurrentUser() user: RequestUser) {
+    return this.usersService.findOne(user.id, user.company_id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @CurrentUser() user: RequestUser,
+    @CurrentCompany() companyId: string,
+  ) {
+    if (user.role !== UserRole.ADMIN && user.id !== id) {
+      throw new ForbiddenException('Not authorized to access this user');
+    }
+    return this.usersService.findOne(id, companyId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() user: RequestUser,
+    @CurrentCompany() companyId: string,
+  ) {
+    if (user.role !== UserRole.ADMIN && user.id !== id) {
+      throw new ForbiddenException('Not authorized to update this user');
+    }
+    return this.usersService.update(id, companyId, updateUserDto, user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @Roles(UserRole.ADMIN)
+  remove(@Param('id') id: string, @CurrentCompany() companyId: string) {
+    return this.usersService.remove(id, companyId);
   }
 }

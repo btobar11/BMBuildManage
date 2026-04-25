@@ -35,7 +35,6 @@ export class FormulaEngine {
       const result = expr.evaluate(cleanParams);
       return isNaN(result) || !isFinite(result) ? 0 : result;
     } catch (error) {
-      console.error(`Error evaluating formula [${formula}]:`, error.message);
       return 0;
     }
   }

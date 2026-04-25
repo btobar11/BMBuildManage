@@ -17,8 +17,9 @@ import { InvoicesPage } from './features/invoices/InvoicesPage';
 import { CompanySettingsPage } from './features/company/CompanySettingsPage';
 import { RfisPage } from './features/rfis/RfisPage';
 import { SubmittalsPage } from './features/submittals/SubmittalsPage';
-import { PunchListPage } from './features/punch-list/PunchListPage';
 import { SchedulePage } from './features/schedule/SchedulePage';
+import { PricingPage } from './features/pricing/PricingPage';
+import { PunchListPage } from './features/punch-list/PunchListPage';
 import { MainLayout } from './components/layout/MainLayout';
 import { ConfigWarning } from './components/ConfigWarning';
 import { Toaster } from 'react-hot-toast';
@@ -30,6 +31,7 @@ import AnalyticsDashboard from './features/bim-analytics/AnalyticsDashboard';
 
 // Lazy load BIM pages (Three.js / ThatOpen are heavy ~2MB)
 const BimLibraryPage = lazy(() => import('./features/bim/BimLibraryPage').then(m => ({ default: m.BimLibraryPage })));
+const BimStandaloneTestPage = lazy(() => import('./features/bim/components/BimStandaloneTestPage').then(m => ({ default: m.BimStandaloneTestPage })));
 
 function LoadingFallback() {
   return (
@@ -147,7 +149,7 @@ function App() {
         <Route 
           path="/bi-dashboard" 
           element={
-            <ProtectedRoute allowedRoles={['admin', 'manager']}>
+            <ProtectedRoute allowedRoles={['admin', 'engineer', 'architect', 'site_supervisor', 'foreman', 'accounting']}>
               <MainLayout><AnalyticsDashboard /></MainLayout>
             </ProtectedRoute>
           } 
@@ -160,6 +162,17 @@ function App() {
         <Route 
           path="/" 
           element={!isAuthenticated ? <LandingPage /> : <Navigate to="/dashboard" />} 
+        />
+        
+        <Route 
+          path="/pricing" 
+          element={<PricingPage />} 
+        />
+        
+        {/* Bypass Route for local BIM testing */}
+        <Route 
+          path="/test-bim" 
+          element={<Suspense fallback={<LoadingFallback />}><BimStandaloneTestPage /></Suspense>} 
         />
       </Routes>
       <VectorAI />

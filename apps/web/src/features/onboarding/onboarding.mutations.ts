@@ -52,7 +52,7 @@ export const useOnboardingSeeding = () => {
       // 3. Refresh session to get JWT with new company_id claim
       const { data: refreshedSession, error: refreshError } = await supabase.auth.refreshSession();
       if (refreshError) {
-        console.warn('Session refresh failed:', refreshError);
+        // Session refresh failed, continue anyway
       }
       
       if (!refreshedSession?.session) {

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Machinery } from './machinery.entity';
@@ -11,20 +15,33 @@ export class MachineryService {
     private readonly machineryRepository: Repository<Machinery>,
   ) {}
 
-  create(createMachineryDto: CreateMachineryDto) {
-    const machinery = this.machineryRepository.create(createMachineryDto);
+  private requireCompanyId(companyId?: string): string {
+    if (!companyId) {
+      throw new ForbiddenException('Missing company context');
+    }
+    return companyId;
+  }
+
+  create(companyId: string, createMachineryDto: CreateMachineryDto) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const machinery = this.machineryRepository.create({
+      ...createMachineryDto,
+      company_id: requiredCompanyId,
+    });
     return this.machineryRepository.save(machinery);
   }
 
   findAllByCompany(companyId: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     return this.machineryRepository.find({
-      where: { company_id: companyId },
+      where: { company_id: requiredCompanyId },
     });
   }
 
-  async findOne(id: string) {
+  async findOne(companyId: string, id: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const machinery = await this.machineryRepository.findOne({
-      where: { id },
+      where: { id, company_id: requiredCompanyId },
     });
     if (!machinery) {
       throw new NotFoundException(`Machinery with ID ${id} not found`);
@@ -32,8 +49,8 @@ export class MachineryService {
     return machinery;
   }
 
-  async remove(id: string) {
-    const machinery = await this.findOne(id);
+  async remove(companyId: string, id: string) {
+    const machinery = await this.findOne(companyId, id);
     await this.machineryRepository.remove(machinery);
     return { deleted: true };
   }

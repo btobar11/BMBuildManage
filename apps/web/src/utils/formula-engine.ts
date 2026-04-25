@@ -1,4 +1,5 @@
 import { Parser } from 'expr-eval';
+import { captureException } from '../lib/telemetry';
 
 export interface CubicationParams {
   largo?: number;
@@ -37,7 +38,7 @@ export const evaluateFormula = (formula: string, params: CubicationParams): numb
     };
     return expr.evaluate(cleanParams);
   } catch (error) {
-    console.error('Error evaluating formula:', error);
+    captureException(error, { formula });
     return 0;
   }
 };

@@ -42,7 +42,6 @@ export function SubcontractorsPage() {
         setSubcontractors([]);
       }
     } catch (error) {
-      console.error('Error fetching subcontractors:', error);
       toast.error('Error al cargar subcontratistas');
     } finally {
       setLoading(false);

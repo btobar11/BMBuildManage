@@ -1,4 +1,5 @@
 import api from '../../../lib/api';
+import { supabase } from '../../../lib/supabase';
 
 /**
  * Export Service - Excel and PDF download handlers
@@ -6,6 +7,17 @@ import api from '../../../lib/api';
  * Handles authenticated exports from BI Dashboard
  */
 class ExportService {
+  private async getAuthToken(): Promise<string> {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    return token;
+  }
+
   /**
    * Download Excel report
    */
@@ -19,13 +31,14 @@ class ExportService {
       ...(projectId && { project_id: projectId }),
     });
 
+    const token = await this.getAuthToken();
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analytics-export/excel?${params}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('sb-access-token') || ''}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ report_type: reportType }),
       }
@@ -52,13 +65,14 @@ class ExportService {
       ...(projectId && { project_id: projectId }),
     });
 
+    const token = await this.getAuthToken();
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analytics-export/pdf?${params}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('sb-access-token') || ''}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ report_type: reportType }),
       }

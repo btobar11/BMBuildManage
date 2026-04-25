@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Stage } from '../stages/stage.entity';
 import { FormulaEngine } from './utils/formula-engine';
+import { Company } from '../companies/company.entity';
 
 export enum CubicationMode {
   MANUAL = 'manual',
@@ -30,9 +31,13 @@ export enum ItemType {
 
 @Entity('items')
 @Index(['stage_id'])
+@Index(['company_id'])
 export class Item {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   stage_id: string;
@@ -40,6 +45,10 @@ export class Item {
   @ManyToOne(() => Stage, (stage) => stage.items)
   @JoinColumn({ name: 'stage_id' })
   stage: Stage;
+
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @Column({ length: 300 })
   name: string;

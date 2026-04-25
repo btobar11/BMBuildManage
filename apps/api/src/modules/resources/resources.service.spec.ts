@@ -108,7 +108,7 @@ describe('ResourcesService', () => {
       const resources = [createMockResource({ id: '1', company_id: undefined })];
       resourceRepo.find.mockResolvedValue(resources);
 
-      const result = await service.findAll({ tab: 'global' });
+      const result = await service.findAll({ companyId: 'some-company', tab: 'global' });
       expect(result).toEqual(resources);
     });
   });

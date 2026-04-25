@@ -46,7 +46,7 @@ function DataTable<T extends Record<string, unknown>>({
     pageIndex: 0,
     pageSize,
   });
-
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,

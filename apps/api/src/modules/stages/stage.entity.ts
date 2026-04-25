@@ -11,12 +11,17 @@ import {
 } from 'typeorm';
 import { Budget } from '../budgets/budget.entity';
 import { Item } from '../items/item.entity';
+import { Company } from '../companies/company.entity';
 
 @Entity('stages')
 @Index(['budget_id'])
+@Index(['company_id'])
 export class Stage {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   budget_id: string;
@@ -24,6 +29,10 @@ export class Stage {
   @ManyToOne(() => Budget, (budget) => budget.stages)
   @JoinColumn({ name: 'budget_id' })
   budget: Budget;
+
+  @ManyToOne(() => Company)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @Column({ length: 300 })
   name: string;

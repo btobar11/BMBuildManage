@@ -10,6 +10,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
 import { UsersService } from '../../modules/users/users.service';
+import { UserRole } from '../../modules/users/user.entity';
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
@@ -36,15 +37,15 @@ export class SupabaseAuthGuard implements CanActivate {
     const token = authHeader.replace('Bearer ', '');
 
     if (
-      (process.env.NODE_ENV !== 'production' ||
-        process.env.ALLOW_DEV_TOKEN === 'true') &&
+      process.env.NODE_ENV !== 'production' &&
+      process.env.ALLOW_DEV_TOKEN === 'true' &&
       token === 'dev-token'
     ) {
       request.user = {
         id: '11111111-1111-1111-1111-111111111111',
         email: 'demo@bmbuild.com',
         company_id: '77777777-7777-7777-7777-777777777777',
-        role: 'admin',
+        role: UserRole.ADMIN,
       };
       return true;
     }
@@ -70,26 +71,41 @@ export class SupabaseAuthGuard implements CanActivate {
     }
 
     const dbUserData = data.user;
-    let role = 'admin';
-    let companyId: string | undefined;
 
-    try {
-      const dbUser = await this.usersService.findOne(dbUserData.id);
-      if (dbUser) {
-        role = dbUser.role || 'admin';
-        companyId = dbUser.company_id;
-      }
-    } catch {
-      // User not yet in DB, use default role
-    }
+    const firstName =
+      (dbUserData.user_metadata?.first_name as string | undefined) || undefined;
+    const lastName =
+      (dbUserData.user_metadata?.last_name as string | undefined) || undefined;
+    const fullName =
+      (dbUserData.user_metadata?.full_name as string | undefined) || undefined;
+    const nameFromMetadata =
+      (firstName && lastName ? `${firstName} ${lastName}` : undefined) ||
+      fullName ||
+      undefined;
 
-    const finalCompanyId =
-      companyId || (dbUserData.user_metadata?.company_id as string | undefined);
+    const dbUser = await this.usersService.ensureUserFromAuth({
+      id: dbUserData.id,
+      email: dbUserData.email || '',
+      name: nameFromMetadata,
+    });
 
+    const finalCompanyId = dbUser.company_id || undefined;
+    const role = dbUser.role || UserRole.ENGINEER;
+
+    const path: string = request.path || request.url || '';
     const isCompanyCreationRequest =
-      request.method === 'POST' && request.path === '/api/v1/companies';
+      request.method === 'POST' && path.endsWith('/companies');
+    const isSpecialtiesRequest =
+      request.method === 'GET' &&
+      path.endsWith('/companies/specialties/available');
+    const isMeRequest = request.method === 'GET' && path.endsWith('/users/me');
 
-    if (!finalCompanyId && !isCompanyCreationRequest) {
+    if (
+      !finalCompanyId &&
+      !isCompanyCreationRequest &&
+      !isSpecialtiesRequest &&
+      !isMeRequest
+    ) {
       throw new ForbiddenException(
         'User does not belong to any company. Please contact administrator.',
       );

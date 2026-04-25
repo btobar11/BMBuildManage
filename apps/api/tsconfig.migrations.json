@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "outDir": "./dist/migrations",
+    "baseUrl": "./",
+    "skipLibCheck": true
+  },
+  "include": ["src/database/migrations/*.{ts,js}"]
+}

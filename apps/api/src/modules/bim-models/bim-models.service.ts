@@ -1,12 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectModel } from './project-model.entity';
 import { createClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
+import * as WebIFC from 'web-ifc';
 
 @Injectable()
 export class BimModelsService {
+  private readonly logger = new Logger(BimModelsService.name);
   private supabase;
 
   constructor(
@@ -153,8 +155,16 @@ export class BimModelsService {
 
       const savedModel = await this.modelRepository.save(model);
 
-      // TODO: Trigger IFC processing pipeline
-      this.processIfcFile(savedModel.id, urlData.publicUrl);
+      // Trigger IFC processing pipeline asynchronously
+      if (file.originalname.toLowerCase().endsWith('.ifc')) {
+        this.processIfcFile(savedModel.id, file.buffer);
+      } else {
+        // Skip processing for IFCXML or other formats currently not supported by web-ifc in this basic setup
+        this.modelRepository.update(savedModel.id, {
+          processing_status: 'completed',
+          updated_at: new Date(),
+        });
+      }
 
       return {
         success: true,
@@ -167,17 +177,42 @@ export class BimModelsService {
     }
   }
 
-  private async processIfcFile(modelId: string, fileUrl: string) {
-    // TODO: Implement IFC processing with IFC.js or similar
-    // For now, just mark as completed after delay
-    setTimeout(() => {
-      this.modelRepository
-        .update(modelId, {
-          processing_status: 'completed',
-          updated_at: new Date(),
-        })
-        .catch(() => {});
-    }, 5000);
+  private async processIfcFile(modelId: string, fileBuffer: Buffer) {
+    try {
+      this.logger.log(
+        `Iniciando procesamiento IFC real para el modelo ${modelId}`,
+      );
+
+      const ifcApi = new WebIFC.IfcAPI();
+      await ifcApi.Init();
+
+      const uint8Array = new Uint8Array(fileBuffer);
+      const ifcModelID = ifcApi.OpenModel(uint8Array);
+
+      const elementsCount = ifcApi.GetMaxExpressID(ifcModelID);
+
+      // Aquí se podría implementar la extracción de cubicaciones, árbol espacial, etc.
+      // Por ahora validamos que el archivo es parseable y registramos su volumen
+      this.logger.log(
+        `Modelo ${modelId} procesado exitosamente. Total elementos IFC: ${elementsCount}`,
+      );
+
+      ifcApi.CloseModel(ifcModelID);
+
+      await this.modelRepository.update(modelId, {
+        processing_status: 'completed',
+        updated_at: new Date(),
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error procesando archivo IFC para el modelo ${modelId}`,
+        error,
+      );
+      await this.modelRepository.update(modelId, {
+        processing_status: 'error',
+        updated_at: new Date(),
+      });
+    }
   }
 
   async deleteModel(modelId: string, companyId: string) {

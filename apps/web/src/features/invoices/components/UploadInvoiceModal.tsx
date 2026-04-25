@@ -89,7 +89,6 @@ export function UploadInvoiceModal({ isOpen, onClose, onSuccess }: UploadInvoice
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error uploading invoice:', error);
       alert('Error al subir la factura. Verifica tu conexión.');
     } finally {
       setLoading(false);

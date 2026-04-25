@@ -66,7 +66,7 @@ export const inviteTeamSchema = z.object({
     .array(
       z.object({
         email: z.string().email('Email inválido'),
-        role: z.enum(['admin', 'manager', 'viewer', 'worker']),
+        role: z.enum(['admin', 'engineer', 'viewer', 'worker']),
         name: z.string().min(2, 'Nombre debe tener al menos 2 caracteres'),
       })
     )

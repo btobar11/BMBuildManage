@@ -9,7 +9,7 @@ import { cn } from '../../../../utils/cn';
 
 const ROLES = [
   { value: 'admin', label: 'Administrador', description: 'Acceso completo' },
-  { value: 'manager', label: 'Gerente', description: 'Gestión de proyectos' },
+  { value: 'engineer', label: 'Ingeniero', description: 'Gestión de proyectos' },
   { value: 'viewer', label: 'Visualizador', description: 'Solo lectura' },
   { value: 'worker', label: 'Trabajador', description: 'Registro de trabajo' },
 ];

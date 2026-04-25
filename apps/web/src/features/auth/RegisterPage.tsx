@@ -124,24 +124,7 @@ export function RegisterPage() {
         throw new Error('No se pudo crear la sesión. Verifica tu correo si requiere confirmación.');
       }
 
-      api.defaults.headers.common['Authorization'] = `Bearer ${authData.session.access_token}`;
-      const companyResponse = await api.post('/companies', { name: companyName });
-      const newCompany = companyResponse.data;
-
-      await supabase.auth.updateUser({ data: { company_id: newCompany.id } });
-      await api.post('/users', {
-        id: authData.user.id, 
-        email, 
-        name: `${firstName} ${lastName}`.trim(), 
-        role: 'admin', 
-        company_id: newCompany.id,
-      });
-      
-      // Refresh session to get updated JWT with company_id
-      const { error: refreshError } = await supabase.auth.refreshSession();
-      if (refreshError) {
-        console.warn('Session refresh failed, continuing anyway:', refreshError);
-      }
+      await api.post('/companies', { name: companyName });
       
       localStorage.removeItem('DEV_TOKEN');
       navigate('/onboarding');

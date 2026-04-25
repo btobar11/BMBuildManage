@@ -18,6 +18,9 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { SeedCompanyLibraryDto } from './dto/seed-company-library.dto';
 import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../users/user.entity';
 
 @Injectable()
 export class IsUUIDValidationPipe implements PipeTransform {
@@ -43,8 +46,8 @@ export class CompaniesController {
   }
 
   @Get()
-  findAll() {
-    return this.companiesService.findAll();
+  findAll(@Req() req: any) {
+    return this.companiesService.findAll(req.user?.company_id);
   }
 
   @Get(':id')
@@ -56,6 +59,8 @@ export class CompaniesController {
   }
 
   @Patch(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   update(
     @Param('id', new IsUUIDValidationPipe()) id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
@@ -69,13 +74,17 @@ export class CompaniesController {
   }
 
   @Delete(':id')
-  remove(@Param('id', new IsUUIDValidationPipe()) id: string) {
-    return this.companiesService.remove(id);
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  remove(@Param('id', new IsUUIDValidationPipe()) id: string, @Req() req: any) {
+    return this.companiesService.remove(id, req.user?.company_id);
   }
 
   // Library Seeding Endpoints
 
   @Post(':id/seed-library')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async seedLibrary(
     @Param('id', new IsUUIDValidationPipe()) id: string,
     @Body() seedDto: SeedCompanyLibraryDto,
@@ -89,6 +98,8 @@ export class CompaniesController {
   }
 
   @Post(':id/reseed-library')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async reseedLibrary(
     @Param('id', new IsUUIDValidationPipe()) id: string,
     @Body() seedDto: SeedCompanyLibraryDto,
@@ -104,6 +115,8 @@ export class CompaniesController {
   }
 
   @Get(':id/library-stats')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async getLibraryStats(
     @Param('id', new IsUUIDValidationPipe()) id: string,
     @Req() req: any,

@@ -22,6 +22,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { compress, decompress } from 'lz-string'
 import { AuthProvider } from './context/AuthContext'
+import { SubscriptionProvider } from './context/SubscriptionContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { NotificationsProvider } from './context/NotificationsContext'
 import { GlobalErrorBoundary } from './components/error-boundary/GlobalErrorBoundary'
@@ -142,15 +143,17 @@ try {
         }}
       >
         <AuthProvider>
-          <ThemeProvider>
-            <NotificationsProvider>
-              <BrowserRouter>
-                <GlobalErrorBoundary>
-                  <App />
-                </GlobalErrorBoundary>
-              </BrowserRouter>
-            </NotificationsProvider>
-          </ThemeProvider>
+          <SubscriptionProvider>
+            <ThemeProvider>
+              <NotificationsProvider>
+                <BrowserRouter>
+                  <GlobalErrorBoundary>
+                    <App />
+                  </GlobalErrorBoundary>
+                </BrowserRouter>
+              </NotificationsProvider>
+            </ThemeProvider>
+          </SubscriptionProvider>
         </AuthProvider>
       </PersistQueryClientProvider>
     </StrictMode>

@@ -50,8 +50,6 @@ export async function uploadModel(
 
     return response.data.model as ProjectModel;
   } catch (error: any) {
-    console.error('API upload error:', error);
-    
     if (error.response?.status === 400) {
       throw new Error(error.response.data.message || 'Error de validación en la subida del archivo');
     }
@@ -72,8 +70,6 @@ export async function getProjectModels(projectId: string): Promise<ProjectModel[
     const response = await api.get(`/bim/models?projectId=${projectId}`);
     return response.data as ProjectModel[];
   } catch (error: any) {
-    console.error('Error fetching project models:', error);
-    
     if (error.response?.status === 404) {
       return []; // No models found, return empty array
     }
@@ -94,8 +90,7 @@ export async function getModelDownloadUrl(storagePath: string): Promise<string> 
     .from(BUCKET_NAME)
     .createSignedUrl(storagePath, 3600); // 1 hour
 
-  if (error) {
-    console.error('Error creating signed URL:', error);
+if (error) {
     throw new Error(`Error al generar URL del modelo: ${error.message}`);
   }
 
@@ -110,8 +105,7 @@ export async function downloadModelBuffer(storagePath: string): Promise<Uint8Arr
     .from(BUCKET_NAME)
     .download(storagePath);
 
-  if (error) {
-    console.error('Error downloading model:', error);
+if (error) {
     throw new Error(`Error al descargar el modelo: ${error.message}`);
   }
 
@@ -123,14 +117,9 @@ export async function downloadModelBuffer(storagePath: string): Promise<Uint8Arr
  * Delete a BIM model (via API endpoint)
  */
 export async function deleteModel(modelId: string, storagePath: string): Promise<void> {
-  console.log(`[bimStorageService] deleteModel called for ID: ${modelId}, Path: ${storagePath}`);
-  
   try {
     await api.delete(`/bim/models/${modelId}`);
-    console.log('[bimStorageService] Deletion completed successfully via API');
   } catch (error: any) {
-    console.error('[bimStorageService] API deletion error:', error);
-    
     if (error.response?.status === 404) {
       throw new Error('El modelo no fue encontrado');
     }

@@ -19,14 +19,7 @@ export async function logBimCubicationUpdate(entry: BimAuditEntry): Promise<void
     `Elemento: ${entry.elementName} (${entry.elementCategory}).`,
     `ID: ${entry.elementGlobalId}.`,
     `Cantidad: ${entry.previousQuantity.toFixed(3)} → ${entry.quantityValue.toFixed(3)} ${entry.unit}.`,
-  ].join(' ');
-
-  // Log to console for debugging
-  console.log(
-    `%c[BIM Audit] %c${description}`,
-    'color: #6366f1; font-weight: bold',
-    'color: inherit'
-  );
+].join(' ');
 
   try {
     await api.post('/audit-logs', {
@@ -34,23 +27,9 @@ export async function logBimCubicationUpdate(entry: BimAuditEntry): Promise<void
       entity_id: entry.targetItemId,
       action: 'UPDATE',
       description,
-      old_value: {
-        quantity: entry.previousQuantity,
-        source: 'manual',
-      },
-      new_value: {
-        quantity: entry.quantityValue,
-        unit: entry.unit,
-        source: 'bim',
-        ifc_global_id: entry.elementGlobalId,
-        ifc_category: entry.elementCategory,
-        ifc_element_name: entry.elementName,
-        quantity_type: entry.quantityType,
-      },
     });
-  } catch (error) {
-    // Non-critical: don't block the UI if audit logging fails
-    console.error('[BIM Audit] Failed to log audit entry:', error);
+  } catch {
+    // Non-critical: audit logging failed — ignore
   }
 }
 

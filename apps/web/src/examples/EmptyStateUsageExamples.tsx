@@ -86,7 +86,7 @@ export const BIMPageExample = () => {
   const isLoading = false;
 
   const handleUpload = () => {
-    console.log('Abrir selector de archivos IFC');
+    // Open IFC file selector
   };
 
   if (isLoading) {

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { BullModule } from '@nestjs/bullmq';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -39,6 +40,11 @@ import { BimModelsModule } from './modules/bim-models/bim-models.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { BimApuLinkModule } from './modules/bim-apu-link/bim-apu-link.module';
 import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { AiSalesModule } from './modules/ai-sales/ai-sales.module';
+import { PlgModule } from './modules/plg/plg.module';
+import { LeadsModule } from './modules/leads/leads.module';
 
 @Module({
   imports: [
@@ -71,9 +77,19 @@ import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.
           logging: isProduction ? false : true,
           ssl: isProduction ? { rejectUnauthorized: false } : false,
           migrationsRun: false,
-          migrations: ['src/database/migrations/*{.ts,.js}'],
         };
       },
+      inject: [ConfigService],
+    }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+          password: configService.get('REDIS_PASSWORD', undefined),
+        },
+      }),
       inject: [ConfigService],
     }),
     ThrottlerModule.forRoot([
@@ -128,6 +144,11 @@ import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.
     AnalyticsModule,
     BimApuLinkModule,
     PurchaseOrdersModule,
+    SubscriptionsModule,
+    BillingModule,
+    AiSalesModule,
+    PlgModule,
+    LeadsModule,
   ],
   controllers: [AppController],
   providers: [

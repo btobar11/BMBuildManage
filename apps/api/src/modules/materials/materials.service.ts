@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { Material } from './material.entity';
@@ -11,26 +15,41 @@ export class MaterialsService {
     private readonly materialRepository: Repository<Material>,
   ) {}
 
-  create(createMaterialDto: CreateMaterialDto) {
-    const material = this.materialRepository.create(createMaterialDto);
+  private requireCompanyId(companyId?: string): string {
+    if (!companyId) {
+      throw new ForbiddenException('Missing company context');
+    }
+    return companyId;
+  }
+
+  create(companyId: string, createMaterialDto: CreateMaterialDto) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
+    const material = this.materialRepository.create({
+      ...createMaterialDto,
+      company_id: requiredCompanyId,
+    });
     return this.materialRepository.save(material);
   }
 
-  findAll(search?: string) {
+  findAll(companyId: string, search?: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     if (search) {
       return this.materialRepository.find({
         where: [
-          { name: Like(`%${search}%`) },
-          { category: Like(`%${search}%`) },
+          { company_id: requiredCompanyId, name: Like(`%${search}%`) },
+          { company_id: requiredCompanyId, category: Like(`%${search}%`) },
         ],
       });
     }
-    return this.materialRepository.find();
+    return this.materialRepository.find({
+      where: { company_id: requiredCompanyId },
+    });
   }
 
-  async findOne(id: string) {
+  async findOne(companyId: string, id: string) {
+    const requiredCompanyId = this.requireCompanyId(companyId);
     const material = await this.materialRepository.findOne({
-      where: { id },
+      where: { id, company_id: requiredCompanyId },
     });
     if (!material) {
       throw new NotFoundException(`Material with ID ${id} not found`);
@@ -38,8 +57,8 @@ export class MaterialsService {
     return material;
   }
 
-  async remove(id: string) {
-    const material = await this.findOne(id);
+  async remove(companyId: string, id: string) {
+    const material = await this.findOne(companyId, id);
     await this.materialRepository.remove(material);
     return { deleted: true };
   }

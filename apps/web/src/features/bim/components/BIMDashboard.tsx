@@ -32,6 +32,8 @@ import {
   Target,
   BarChart3,
 } from 'lucide-react';
+import api from '../../../lib/api';
+import { captureException } from '../../../lib/telemetry';
 
 interface BIMDashboardProps {
   projectId: string;
@@ -144,22 +146,12 @@ export const BIMDashboard: React.FC<BIMDashboardProps> = ({
   // Fetch BIM metrics from API
   const fetchBIMMetrics = async () => {
     try {
-      const response = await fetch(`/api/v1/bim/dashboard/${projectId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setMetrics(data);
+      const res = await api.get(`/bim/dashboard/${projectId}`);
+      setMetrics(res.data);
       setLastUpdateTime(new Date());
       setError(null);
     } catch (err) {
-      console.error('Error fetching BIM metrics:', err);
+      captureException(err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setIsLoading(false);

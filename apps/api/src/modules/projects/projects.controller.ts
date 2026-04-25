@@ -1,28 +1,31 @@
 import {
-  Controller,
-  Get,
-  Post,
+  BadRequestException,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  Request,
-  UseGuards,
+  Get,
   HttpCode,
   HttpStatus,
-  BadRequestException,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { ProjectsService } from './projects.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
+import { ProjectsService } from './projects.service';
 
 @ApiTags('Projects')
 @ApiBearerAuth()
 @Controller('projects')
 @UseGuards(SupabaseAuthGuard)
 export class ProjectsController {
+  private readonly logger = new Logger(ProjectsController.name);
+
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
@@ -36,20 +39,11 @@ export class ProjectsController {
       createProjectDto.company_id = req.user.company_id;
       return await this.projectsService.create(createProjectDto);
     } catch (error) {
-      // Log detallado de errores de validación
-      console.error('[Project Create Error]', JSON.stringify(error, null, 2));
-      if (error.response?.error?.issues) {
-        console.error(
-          '[Validation Error]',
-          JSON.stringify(error.response.error.issues, null, 2),
-        );
-      } else if (error.response?.message) {
-        console.error('[Validation Error]', error.response.message);
-      }
+      const err = error;
+      this.logger.error('Project create failed', err?.stack || err);
       throw new BadRequestException({
-        message: error.message,
-        validationError:
-          error.response?.error?.issues || error.response?.message,
+        message: err?.message,
+        validationError: err?.response?.error?.issues || err?.response?.message,
       });
     }
   }
@@ -59,10 +53,9 @@ export class ProjectsController {
     try {
       return await this.projectsService.findAll(req.user.company_id);
     } catch (error) {
-      throw new BadRequestException({
-        message: error.message,
-        stack: error.stack,
-      });
+      const err = error;
+      this.logger.error('Projects list failed', err?.stack || err);
+      throw new BadRequestException(err?.message);
     }
   }
 
@@ -106,7 +99,6 @@ export class ProjectsController {
     );
   }
 
-  // Payments endpoints
   @Post(':id/payments')
   addPayment(
     @Param('id') projectId: string,

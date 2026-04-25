@@ -1,13 +1,13 @@
-/**
- * BimViewerControls — Floating camera control buttons
- * Positioned over the 3D canvas with glassmorphism styling
- */
+import { useState } from 'react';
 import { 
   ZoomIn, 
   ZoomOut, 
   RotateCcw, 
   Box, 
-  Maximize2 
+  Maximize2,
+  Ruler,
+  Scissors,
+  Trash2
 } from 'lucide-react';
 import type { BimEngineControls } from '../types';
 
@@ -17,7 +17,15 @@ interface BimViewerControlsProps {
 }
 
 export function BimViewerControls({ controls, isModelLoaded }: BimViewerControlsProps) {
+  const [measuring, setMeasuring] = useState(false);
+
   if (!isModelLoaded) return null;
+
+  const toggleMeasure = () => {
+    const newState = !measuring;
+    setMeasuring(newState);
+    controls.toggleMeasurement(newState);
+  };
 
   const buttons = [
     { icon: <ZoomIn size={16} />, label: 'Zoom In', action: controls.zoomIn },
@@ -25,6 +33,16 @@ export function BimViewerControls({ controls, isModelLoaded }: BimViewerControls
     { icon: <RotateCcw size={16} />, label: 'Reset View', action: controls.resetView },
     { icon: <Box size={16} />, label: 'Proyección', action: controls.toggleProjection },
     { icon: <Maximize2 size={16} />, label: 'Ajustar', action: controls.fitToModel },
+    { icon: <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1" />, label: '', action: () => {} },
+    { icon: <Ruler size={16} className={measuring ? 'text-emerald-500' : ''} />, label: 'Medir Distancia', action: toggleMeasure },
+    { icon: <Scissors size={16} />, label: 'Añadir Plano de Corte', action: controls.createClippingPlane },
+    { icon: <Trash2 size={16} />, label: 'Borrar Cortes y Medidas', action: () => {
+        controls.deleteClippingPlanes();
+        // Disabling and re-enabling clears measurements in LengthMeasurement
+        controls.toggleMeasurement(false);
+        setMeasuring(false);
+      } 
+    },
   ];
 
   return (
@@ -37,7 +55,7 @@ export function BimViewerControls({ controls, isModelLoaded }: BimViewerControls
             btn.action();
           }}
           title={btn.label}
-          className="flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all active:scale-90"
+          className={`flex items-center justify-center ${btn.label ? 'w-9 h-9 hover:bg-muted/80 active:scale-90' : 'w-auto cursor-default'} rounded-lg text-muted-foreground hover:text-foreground transition-all`}
         >
           {btn.icon}
         </button>

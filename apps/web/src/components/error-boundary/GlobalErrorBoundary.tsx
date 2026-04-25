@@ -1,6 +1,7 @@
 import { ErrorBoundary, type ErrorBoundaryProps } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { captureException } from '../../lib/telemetry';
 
 /**
  * Fallback component for GlobalErrorBoundary
@@ -76,12 +77,9 @@ export function GlobalErrorBoundary({ children }: { children: React.ReactNode })
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onError={(error, errorInfo) => {
-        console.error('[GlobalErrorBoundary] Uncaught error:', error, errorInfo);
-        // Optionally report to error tracking service
+        captureException(error, { componentStack: errorInfo.componentStack });
       }}
-      onReset={() => {
-        console.log('[GlobalErrorBoundary] Resetting application state');
-      }}
+      onReset={() => {}}
     >
       {children}
     </ErrorBoundary>

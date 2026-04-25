@@ -17,17 +17,17 @@ import { WorkerPayment } from '../worker-payments/worker-payment.entity';
 @Index(['company_id'])
 export class Worker {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column()
-  company_id: string;
+  company_id!: string;
 
   @ManyToOne(() => Company, (company) => company.workers)
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
   @Column({ length: 200 })
-  name: string;
+  name!: string;
 
   @Column({ nullable: true, length: 100 })
   role: string;
@@ -48,14 +48,14 @@ export class Worker {
   notes: string;
 
   @OneToMany(() => WorkerAssignment, (wa) => wa.worker)
-  assignments: WorkerAssignment[];
+  assignments!: WorkerAssignment[];
 
   @OneToMany(() => WorkerPayment, (wp) => wp.worker)
-  payments: WorkerPayment[];
+  payments!: WorkerPayment[];
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at!: Date;
 }

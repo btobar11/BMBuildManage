@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Project } from '../projects/project.entity';
 import { Stage } from '../stages/stage.entity';
+import { Company } from '../companies/company.entity';
 
 export enum BudgetStatus {
   DRAFT = 'draft',
@@ -24,9 +25,13 @@ export enum BudgetStatus {
 
 @Entity('budgets')
 @Index(['project_id'])
+@Index(['company_id'])
 export class Budget {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
+  company_id: string;
 
   @Column()
   project_id: string;
@@ -34,6 +39,10 @@ export class Budget {
   @ManyToOne(() => Project, (project) => project.budgets)
   @JoinColumn({ name: 'project_id' })
   project: Project;
+
+  @ManyToOne(() => Company, (company) => company.budgets)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @VersionColumn()
   version: number;

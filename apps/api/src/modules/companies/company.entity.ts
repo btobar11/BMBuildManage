@@ -11,6 +11,9 @@ import { Client } from '../clients/client.entity';
 import { Project } from '../projects/project.entity';
 import { Worker } from '../workers/worker.entity';
 import { Template } from '../templates/template.entity';
+import { Budget } from '../budgets/budget.entity';
+import { Stage } from '../stages/stage.entity';
+import { Item } from '../items/item.entity';
 
 export enum CompanySpecialty {
   RESIDENTIAL = 'residential',
@@ -126,4 +129,13 @@ export class Company {
 
   @OneToMany(() => Template, (template) => template.company)
   templates: Template[];
+
+  @OneToMany(() => Budget, (budget) => budget.company)
+  budgets: Budget[];
+
+  @OneToMany(() => Stage, (stage) => stage.company)
+  stages: Stage[];
+
+  @OneToMany(() => Item, (item) => item.company)
+  items: Item[];
 }

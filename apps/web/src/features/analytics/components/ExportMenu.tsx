@@ -38,7 +38,7 @@ export function ExportMenu({
     try {
       await onExportExcel();
     } catch (error) {
-      console.error('Excel export failed:', error);
+      // Export failed silently - UI handles error feedback
     }
   };
 
@@ -47,7 +47,7 @@ export function ExportMenu({
     try {
       await onExportPdf();
     } catch (error) {
-      console.error('PDF export failed:', error);
+      // Export failed silently - UI handles error feedback
     }
   };
 

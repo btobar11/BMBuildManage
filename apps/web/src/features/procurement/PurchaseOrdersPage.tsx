@@ -41,7 +41,6 @@ export function PurchaseOrdersPage() {
         setOrders([]);
       }
     } catch (error) {
-      console.error('Error fetching purchase orders:', error);
       toast.error('Error al cargar órdenes de compra');
     } finally {
       setLoading(false);

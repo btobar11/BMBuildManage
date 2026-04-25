@@ -74,8 +74,7 @@ export class BimCameraService {
     const boxA = getBoundingBox(guidA);
     const boxB = getBoundingBox(guidB);
 
-    if (!boxA && !boxB) {
-      console.warn('[BimCamera] No bounding boxes found for clash elements');
+if (!boxA && !boxB) {
       return;
     }
 

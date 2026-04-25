@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SupabaseAuthGuard } from './supabase-auth.guard';
 import { UsersService } from '../../modules/users/users.service';
@@ -14,11 +14,20 @@ jest.mock('@supabase/supabase-js', () => ({
 
 describe('SupabaseAuthGuard', () => {
   let guard: SupabaseAuthGuard;
-  let configService: jest.Mocked<ConfigService>;
   let usersService: jest.Mocked<UsersService>;
 
-  const mockExecutionContext = (headers: Record<string, string> = {}) => {
-    const request = { headers, user: null };
+  const mockExecutionContext = (opts?: {
+    headers?: Record<string, any>;
+    method?: string;
+    path?: string;
+  }) => {
+    const request = {
+      headers: opts?.headers ?? {},
+      method: opts?.method ?? 'GET',
+      path: opts?.path ?? '/api/v1/projects',
+      user: null,
+    };
+
     return {
       switchToHttp: () => ({
         getRequest: () => request,
@@ -39,169 +48,185 @@ describe('SupabaseAuthGuard', () => {
         {
           provide: UsersService,
           useValue: {
-            findOne: jest.fn(),
+            ensureUserFromAuth: jest.fn(),
           },
         },
       ],
     }).compile();
 
-    guard = module.get<SupabaseAuthGuard>(SupabaseAuthGuard);
-    configService = module.get(ConfigService);
+    guard = module.get(SupabaseAuthGuard);
     usersService = module.get(UsersService);
   });
 
-  describe('canActivate', () => {
-    it('should throw UnauthorizedException when no authorization header', async () => {
-      const context = mockExecutionContext({});
+  it('throws UnauthorizedException when no authorization header', async () => {
+    const context = mockExecutionContext();
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        UnauthorizedException,
-      );
+  it('throws UnauthorizedException when authorization header is array', async () => {
+    const context = mockExecutionContext({
+      headers: { authorization: ['Bearer token'] },
+    });
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('throws UnauthorizedException when token does not start with Bearer', async () => {
+    const context = mockExecutionContext({
+      headers: { authorization: 'Basic token' },
+    });
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('returns true with dev-token in development when explicitly enabled', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    const originalDev = process.env.ALLOW_DEV_TOKEN;
+    process.env.NODE_ENV = 'development';
+    process.env.ALLOW_DEV_TOKEN = 'true';
+
+    const context = mockExecutionContext({
+      headers: { authorization: 'Bearer dev-token' },
     });
 
-    it('should throw UnauthorizedException when authorization header is array', async () => {
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => ({
-            headers: { authorization: ['Bearer token'] },
-            user: null,
-          }),
+    const result = await guard.canActivate(context);
+
+    expect(result).toBe(true);
+    expect(context.switchToHttp().getRequest().user).toEqual({
+      id: '11111111-1111-1111-1111-111111111111',
+      email: 'demo@bmbuild.com',
+      company_id: '77777777-7777-7777-7777-777777777777',
+      role: 'admin',
+    });
+
+    process.env.NODE_ENV = originalEnv;
+    process.env.ALLOW_DEV_TOKEN = originalDev;
+  });
+
+  it('verifies Supabase token and attaches user from DB', async () => {
+    const mockSupabase = {
+      auth: {
+        getUser: jest.fn().mockResolvedValue({
+          data: {
+            user: {
+              id: 'user-123',
+              email: 'test@example.com',
+              user_metadata: { company_id: 'evil-company' },
+            },
+          },
+          error: null,
         }),
-      } as any;
+      },
+    };
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createClient } = require('@supabase/supabase-js');
+    (createClient as jest.Mock).mockReturnValue(mockSupabase);
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        UnauthorizedException,
-      );
+    usersService.ensureUserFromAuth.mockResolvedValue({
+      id: 'user-123',
+      email: 'test@example.com',
+      name: 'Test',
+      role: 'engineer',
+      company_id: 'company-456',
+    } as any);
+
+    const context = mockExecutionContext({
+      headers: { authorization: 'Bearer valid-token' },
     });
 
-    it('should throw UnauthorizedException when token does not start with Bearer', async () => {
-      const context = mockExecutionContext({ authorization: 'Basic token' });
+    const result = await guard.canActivate(context);
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        UnauthorizedException,
-      );
+    expect(result).toBe(true);
+    expect(context.switchToHttp().getRequest().user).toEqual({
+      id: 'user-123',
+      email: 'test@example.com',
+      company_id: 'company-456',
+      role: 'engineer',
     });
+  });
 
-    it('should return true with dev-token in development', async () => {
-      const originalEnv = process.env.NODE_ENV;
-      const originalDev = process.env.ALLOW_DEV_TOKEN;
-      process.env.NODE_ENV = 'development';
-      process.env.ALLOW_DEV_TOKEN = 'true';
-
-      const context = mockExecutionContext({
-        authorization: 'Bearer dev-token',
-      });
-
-      const result = await guard.canActivate(context);
-
-      expect(result).toBe(true);
-      expect(context.switchToHttp().getRequest().user).toEqual({
-        id: '11111111-1111-1111-1111-111111111111',
-        email: 'demo@bmbuild.com',
-        company_id: '77777777-7777-7777-7777-777777777777',
-        role: 'admin',
-      });
-
-      process.env.NODE_ENV = originalEnv;
-      process.env.ALLOW_DEV_TOKEN = originalDev;
-    });
-
-    it('should verify Supabase token and extract user data', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: jest.fn().mockResolvedValue({
-            data: {
-              user: {
-                id: 'user-123',
-                email: 'test@example.com',
-                user_metadata: { company_id: 'company-123' },
-              },
+  it('allows onboarding routes without company_id', async () => {
+    const mockSupabase = {
+      auth: {
+        getUser: jest.fn().mockResolvedValue({
+          data: {
+            user: {
+              id: 'new-user',
+              email: 'new@example.com',
+              user_metadata: {},
             },
-            error: null,
-          }),
-        },
-      };
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { createClient } = require('@supabase/supabase-js');
-      (createClient as jest.Mock).mockReturnValue(mockSupabase);
+          },
+          error: null,
+        }),
+      },
+    };
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createClient } = require('@supabase/supabase-js');
+    (createClient as jest.Mock).mockReturnValue(mockSupabase);
 
-      usersService.findOne.mockResolvedValue({
-        id: 'user-123',
-        role: 'user',
-        company_id: 'company-456',
-      } as any);
+    usersService.ensureUserFromAuth.mockResolvedValue({
+      id: 'new-user',
+      email: 'new@example.com',
+      name: 'New',
+      role: 'engineer',
+      company_id: null,
+    } as any);
 
-      const context = mockExecutionContext({
-        authorization: 'Bearer valid-token',
-      });
-
-      const result = await guard.canActivate(context);
-
-      expect(result).toBe(true);
-      expect(context.switchToHttp().getRequest().user).toEqual({
-        id: 'user-123',
-        email: 'test@example.com',
-        company_id: 'company-456',
-        role: 'user',
-      });
+    const context = mockExecutionContext({
+      headers: { authorization: 'Bearer valid-token' },
+      method: 'POST',
+      path: '/api/v1/companies',
     });
 
-    it('should throw UnauthorizedException when token is invalid', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: jest.fn().mockResolvedValue({
-            data: { user: null },
-            error: new Error('Invalid token'),
-          }),
-        },
-      };
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { createClient } = require('@supabase/supabase-js');
-      (createClient as jest.Mock).mockReturnValue(mockSupabase);
-
-      const context = mockExecutionContext({
-        authorization: 'Bearer invalid-token',
-      });
-
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        UnauthorizedException,
-      );
+    const result = await guard.canActivate(context);
+    expect(result).toBe(true);
+    expect(context.switchToHttp().getRequest().user).toEqual({
+      id: 'new-user',
+      email: 'new@example.com',
+      company_id: undefined,
+      role: 'engineer',
     });
+  });
 
-    it('should use default role when user not in database', async () => {
-      const mockSupabase = {
-        auth: {
-          getUser: jest.fn().mockResolvedValue({
-            data: {
-              user: {
-                id: 'new-user',
-                email: 'new@example.com',
-                user_metadata: { company_id: 'company-123' },
-              },
+  it('blocks non-onboarding routes without company_id', async () => {
+    const mockSupabase = {
+      auth: {
+        getUser: jest.fn().mockResolvedValue({
+          data: {
+            user: {
+              id: 'new-user',
+              email: 'new@example.com',
+              user_metadata: {},
             },
-            error: null,
-          }),
-        },
-      };
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { createClient } = require('@supabase/supabase-js');
-      (createClient as jest.Mock).mockReturnValue(mockSupabase);
+          },
+          error: null,
+        }),
+      },
+    };
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createClient } = require('@supabase/supabase-js');
+    (createClient as jest.Mock).mockReturnValue(mockSupabase);
 
-      usersService.findOne.mockRejectedValue(new Error('Not found'));
+    usersService.ensureUserFromAuth.mockResolvedValue({
+      id: 'new-user',
+      email: 'new@example.com',
+      name: 'New',
+      role: 'engineer',
+      company_id: null,
+    } as any);
 
-      const context = mockExecutionContext({
-        authorization: 'Bearer new-user-token',
-      });
-
-      const result = await guard.canActivate(context);
-
-      expect(result).toBe(true);
-      expect(context.switchToHttp().getRequest().user).toEqual({
-        id: 'new-user',
-        email: 'new@example.com',
-        company_id: 'company-123',
-        role: 'admin',
-      });
+    const context = mockExecutionContext({
+      headers: { authorization: 'Bearer valid-token' },
+      method: 'GET',
+      path: '/api/v1/projects',
     });
+
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      ForbiddenException,
+    );
   });
 });

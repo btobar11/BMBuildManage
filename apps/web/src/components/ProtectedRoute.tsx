@@ -96,10 +96,13 @@ function AccessDenied({
 }) {
   const rolesLabels: Record<UserRole, string> = {
     admin: 'Administrador',
-    manager: 'Gerente',
     engineer: 'Ingeniero',
+    architect: 'Arquitecto',
+    site_supervisor: 'Supervisor de Obra',
+    foreman: 'Capataz',
     accounting: 'Contabilidad',
-    user: 'Usuario',
+    viewer: 'Visualizador',
+    worker: 'Trabajador',
   };
 
   return (

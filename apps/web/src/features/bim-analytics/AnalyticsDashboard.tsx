@@ -73,7 +73,6 @@ async function fetchDashboardKPIs(companyId: string): Promise<AnalyticsDashboard
     
     return validated;
   } catch (error) {
-    console.warn('AI analyze/summary unavailable:', error);
     return null;
   }
 }
@@ -126,7 +125,6 @@ const actual = i <= currentMonth
    
    return dataPoints;
   } catch (error) {
-    console.warn('AI analyze/progress unavailable:', error);
     return null;
   }
 }

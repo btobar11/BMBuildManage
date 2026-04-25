@@ -148,7 +148,6 @@ export function CompanySettingsPage() {
       
       alert('Logo actualizado exitosamente');
     } catch (err) {
-      console.error('Error uploading logo:', err);
       alert('Hubo un error subiendo tu logo. Intenta de nuevo.');
     }
   };

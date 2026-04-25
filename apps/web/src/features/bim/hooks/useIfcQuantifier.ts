@@ -104,7 +104,7 @@ export function useIfcQuantifier(_componentsRef: React.RefObject<OBC.Components 
         }
       }
     } catch (e) {
-      console.warn('[IfcQuantifier] Could not detect units, defaulting to meters:', e);
+      // Unit detection failed — non-critical
     }
     return 1;
   }, []);
@@ -170,7 +170,7 @@ export function useIfcQuantifier(_componentsRef: React.RefObject<OBC.Components 
             }
             
             if (relEntries.length > 1000) {
-              console.warn(`[IfcQuantifier] Scanned only 1000 of ${relEntries.length} relations for performance.`);
+              // Scanned only 1000 of N relations for performance
             }
           }
         } catch {
@@ -178,7 +178,7 @@ export function useIfcQuantifier(_componentsRef: React.RefObject<OBC.Components 
         }
       }
     } catch (e) {
-      console.warn('[IfcQuantifier] Error finding property relations:', e);
+      // Property relations lookup failed — non-critical
     }
 
     return relatedPsetIds;
@@ -279,7 +279,7 @@ export function useIfcQuantifier(_componentsRef: React.RefObject<OBC.Components 
         }
       }
     } catch (e) {
-      console.warn('[IfcQuantifier] Error extracting quantities for expressID', expressID, e);
+      // Quantity extraction failed — non-critical
     }
 
     return quantities;
@@ -302,7 +302,6 @@ export function useIfcQuantifier(_componentsRef: React.RefObject<OBC.Components 
       // Get the element's own properties
       const props = await model.getProperties(expressID);
       if (!props) {
-        console.warn('[IfcQuantifier] No properties found for expressID:', expressID);
         return null;
       }
 
@@ -338,14 +337,8 @@ export function useIfcQuantifier(_componentsRef: React.RefObject<OBC.Components 
         quantities,
       };
 
-      console.log(
-        `[IfcQuantifier] ✅ Extracted: ${category} "${name}" (${globalId})`,
-        '\n  quantities:', quantities
-      );
-
       return element;
     } catch (e) {
-      console.error('[IfcQuantifier] Failed to quantify element:', e);
       return null;
     }
   }, [detectUnitFactor, getElementCategory, extractQuantities]);

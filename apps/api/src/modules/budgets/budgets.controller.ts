@@ -44,10 +44,10 @@ interface BulkImportBodyDto {
 // ─── Authenticated request type ────────────────────────────────────────────
 
 interface AuthenticatedRequest extends Request {
-  user?: {
+  user: {
     id: string;
     email: string;
-    company_id?: string;
+    company_id: string;
     role: string;
   };
 }
@@ -103,7 +103,11 @@ export class BudgetsController {
     @Body() createBudgetDto: CreateBudgetDto,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.budgetsService.create(createBudgetDto, req.user?.id);
+    return this.budgetsService.create(
+      createBudgetDto,
+      req.user?.id,
+      req.user?.company_id,
+    );
   }
 
   // ─── ACTIVATE ────────────────────────────────────────────────────────────
@@ -129,8 +133,14 @@ export class BudgetsController {
     UserRole.FOREMAN,
     UserRole.ACCOUNTING,
   )
-  findAll(@Query('project_id') projectId: string) {
-    return this.budgetsService.findAllByProject(projectId);
+  findAll(
+    @Query('project_id') projectId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.budgetsService.findAllByProject(
+      projectId,
+      req.user?.company_id,
+    );
   }
 
   // ─── GET ONE ──────────────────────────────────────────────────────────────
