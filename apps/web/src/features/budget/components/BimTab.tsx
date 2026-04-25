@@ -78,7 +78,6 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
       const response = await api.get(`/bim-clashes?projectId=${projectId}`);
       setClashes(response.data || []);
     } catch (error) {
-      console.warn('[BimTab] Error fetching clashes:', error);
       setClashes([]);
     }
   }, [projectId]);
@@ -108,7 +107,6 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
 
   const handleDelete = useCallback(
     async (model: ProjectModel) => {
-      console.log(`[BimTab] Starting deletion of model: ${model.id}`);
       setIsDeleting(true);
       try {
         if (selectedModelId === model.id) {
@@ -118,7 +116,6 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
         await queryClient.invalidateQueries({ queryKey: ['project-models', projectId] });
         setDeleteConfirmId(null);
       } catch (err) {
-        console.error('[BimTab] Deletion failed:', err);
         alert(err instanceof Error ? err.message : 'Error al eliminar el modelo');
       } finally {
         setIsDeleting(false);
@@ -175,7 +172,6 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
         toast.success('Vínculo BIM guardado correctamente', { id: loadingToast });
         setLinkingElement(null);
       } catch (err) {
-        console.error('[BimTab] Sync error:', err);
         toast.error('Error al persistir vínculo en base de datos', { id: loadingToast });
       }
     },
@@ -203,7 +199,6 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
       toast.success('Detección de colisiones iniciada');
       fetchClashes();
     } catch (err) {
-      console.error('[BimTab] Clash detection error:', err);
       toast.error('Error al iniciar detección de colisiones');
     } finally {
       setClashJobStatus({ running: false, progress: 0 });
@@ -216,7 +211,6 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
       fetchClashes();
       toast.success('Estado del conflicto actualizado');
     } catch (err) {
-      console.error('[BimTab] Error updating clash:', err);
       toast.error('Error al actualizar conflicto');
     }
   }, [fetchClashes]);
@@ -417,8 +411,8 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
                 modelName={activeModel.name}
                 modelId={activeModel.id}
                 showElementPanel={showElementPanel}
-                onElementSelect={(element) => {
-                  console.log('[BimTab] Element selected:', element);
+onElementSelect={(element) => {
+                  setLinkingElement(element);
                 }}
                 onLinkToItem={(element) => {
                   setLinkingElement(element);
@@ -433,7 +427,6 @@ export function BimTab({ projectId, stages, onUpdateItem }: BimTabProps) {
           <BimClashPanel
             clashes={clashes}
             onClashSelect={(clash) => {
-              console.log('[BimTab] Clash selected:', clash);
               setViewMode('viewer');
             }}
             onStatusChange={handleClashStatusChange}

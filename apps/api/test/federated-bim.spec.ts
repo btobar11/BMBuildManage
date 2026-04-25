@@ -354,7 +354,6 @@ describe('Federated BIM System (e2e)', () => {
 
     it('should update clash status', async () => {
       if (!testClashId) {
-        console.log('Skipping clash management tests - no clashes detected');
         return;
       }
 
@@ -576,8 +575,8 @@ describe('Federated BIM System (e2e)', () => {
       // Clean up seeded resources and APUs
       await supabase.from('resources').delete().eq('company_id', companyId);
       await supabase.from('apu_templates').delete().eq('company_id', companyId);
-    } catch (error) {
-      console.warn('Cleanup warning:', error);
+    } catch {
+      // Silent cleanup failure
     }
   }
 });

@@ -1,11 +1,29 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import api from '../lib/api';
 
 /**
  * User Roles - RBAC System
  * Used for route protection and UI conditional rendering
  */
-export type UserRole = 'admin' | 'manager' | 'engineer' | 'accounting' | 'user';
+const USER_ROLES = [
+  'admin',
+  'engineer',
+  'architect',
+  'site_supervisor',
+  'foreman',
+  'accounting',
+  'viewer',
+  'worker',
+] as const;
+
+export type UserRole = (typeof USER_ROLES)[number];
+
+function normalizeRole(raw: unknown): UserRole {
+  return USER_ROLES.includes(raw as UserRole)
+    ? (raw as UserRole)
+    : 'engineer';
+}
 
 interface User {
   id: string;
@@ -28,11 +46,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  console.log('[DEBUG AuthContext] Initializing, isSupabaseConfigured:', isSupabaseConfigured);
-  
   const [user, setUser] = useState<User | null>(() => {
     if (!isSupabaseConfigured) {
-      console.log('[DEBUG AuthContext] Demo mode - user initialized in state');
       return {
         id: 'dev-user-id',
         email: 'demo@bmbuild.com',
@@ -64,13 +79,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
-  console.log('[DEBUG AuthContext] State - user:', !!user, 'token:', !!token, 'isLoading:', isLoading);
+  const fetchMe = async (): Promise<Pick<User, 'role' | 'company_id' | 'name'> | null> => {
+    try {
+      const res = await api.get('/users/me');
+      return {
+        role: normalizeRole(res.data?.role),
+        company_id: res.data?.company_id || undefined,
+        name: res.data?.name || 'Usuario',
+      };
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
-    console.log('[DEBUG AuthContext] useEffect running, isSupabaseConfigured:', isSupabaseConfigured);
-    
     if (!isSupabaseConfigured) {
-      console.log('[DEBUG AuthContext] Demo mode - setting isLoading false immediately');
       setToken('dev-token');
       setUser({
         id: 'dev-user-id',
@@ -85,10 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const checkAuth = async () => {
-      console.log('[DEBUG AuthContext] checkAuth - fetching session');
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('[DEBUG AuthContext] Session:', session ? 'found' : 'none');
         if (session) {
           localStorage.removeItem('DEV_TOKEN');
           setToken(session.access_token);
@@ -108,19 +129,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             displayName = firstName;
           }
           
+          const me = await fetchMe();
+
           setUser({
             id: session.user.id,
             email: session.user.email || '',
-            name: displayName,
-            role: session.user.user_metadata.role || 'manager',
-            company_id: session.user.user_metadata.company_id
+            name: me?.name || displayName,
+            role: me?.role || normalizeRole(session.user.user_metadata.role),
+            company_id: me?.company_id || session.user.user_metadata.company_id
           });
           setIsLoading(false);
           setIsAuthReady(true);
           return;
         }
-      } catch (error) {
-        console.error('Auth error:', error);
+      } catch {
+        // Silent fail
       }
 
       const devToken = localStorage.getItem('DEV_TOKEN');
@@ -134,7 +157,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           company_id: '77777777-7777-7777-7777-777777777777'
         });
       }
-      console.log('[DEBUG AuthContext] Setting isLoading false at end');
       setIsLoading(false);
       setIsAuthReady(true);
     };
@@ -164,13 +186,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           displayName = firstName;
         }
         
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: displayName,
-          role: session.user.user_metadata.role || 'manager',
-          company_id: session.user.user_metadata.company_id
-        });
+        void (async () => {
+          const me = await fetchMe();
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: me?.name || displayName,
+            role: me?.role || normalizeRole(session.user.user_metadata.role),
+            company_id: me?.company_id || session.user.user_metadata.company_id,
+          });
+        })();
       } else {
         setToken(null);
         setUser(null);

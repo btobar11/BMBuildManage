@@ -58,12 +58,9 @@ export default defineConfig({
   },
 
   // SEC-003: Strip console.* from production builds to prevent telemetry leaks
-  esbuild: (() => {
-    if (process.env.NODE_ENV === 'production') {
-      return { drop: ['console', 'debugger'] } as unknown as false;
-    }
-    return false;
-  })(),
+  esbuild: process.env.NODE_ENV === 'production'
+    ? { drop: ['console', 'debugger'] }
+    : undefined,
 
   build: {
     // Disable source maps in production to prevent code exposure
@@ -88,8 +85,11 @@ export default defineConfig({
           if (id.includes('node_modules/lucide-react/') || id.includes('node_modules/clsx/') || id.includes('node_modules/tailwind-merge/')) {
             return 'ui-vendor';
           }
-          if (id.includes('node_modules/three/') || id.includes('node_modules/@thatopen/') || id.includes('node_modules/web-ifc/')) {
-            return 'bim-vendor';
+          if (id.includes('node_modules/three/') && !id.includes('node_modules/three/examples')) {
+            return 'three-core';
+          }
+          if (id.includes('node_modules/@thatopen/') || id.includes('node_modules/web-ifc/')) {
+            return 'thatopen';
           }
           if (id.includes('node_modules/pdfjs-dist/') || id.includes('node_modules/pdfkit/')) {
             return 'pdf-vendor';

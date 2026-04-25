@@ -193,7 +193,6 @@ export default function BudgetEditor() {
       if (!navigator.onLine || err.message === 'Network Error' || err.code === 'ERR_NETWORK') {
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 3000);
-        console.log('Offline: Mutation queued by Service Worker');
         return;
       }
 
@@ -206,8 +205,8 @@ export default function BudgetEditor() {
   const handleSave = async () => {
     try {
       await performSave();
-    } catch (err) {
-      console.error('Error saving budget:', err);
+    } catch {
+      // Silent fail - already handled in performSave
     }
   };
 

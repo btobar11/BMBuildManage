@@ -50,8 +50,8 @@ export function WorkerHistoryModal({ isOpen, onClose, workerId }: WorkerHistoryM
       try {
         const response = await api.get(`/workers/${workerId}`);
         setHistory(response.data);
-      } catch (error) {
-        console.error('Error fetching worker history:', error);
+      } catch {
+        // Silent fail - ignore
       } finally {
         setLoading(false);
       }

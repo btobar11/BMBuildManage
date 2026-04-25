@@ -63,7 +63,6 @@ export const EditWorkerModal = ({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error updating worker:', error);
       alert('Error al actualizar el trabajador');
     } finally {
       setLoading(false);

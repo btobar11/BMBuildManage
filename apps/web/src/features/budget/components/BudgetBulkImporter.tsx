@@ -84,7 +84,6 @@ export function BudgetBulkImporter({ budgetId, stageId, onComplete, onCancel }: 
         setStep('mapping');
       } catch (error) {
         toast.error('Error al leer archivo');
-        console.error(error);
       }
     };
     reader.readAsBinaryString(f);
@@ -178,7 +177,6 @@ export function BudgetBulkImporter({ budgetId, stageId, onComplete, onCancel }: 
       setStep('done');
       onComplete(items.length);
     } catch (error: any) {
-      console.error('Import error:', error);
       if (error.response?.data?.code === '23514') {
         toast.error('Error de validación: valores negativos detectados');
       } else {

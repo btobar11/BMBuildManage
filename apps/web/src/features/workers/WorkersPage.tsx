@@ -50,7 +50,7 @@ export function WorkersPage() {
       const response = await api.get('/workers');
       setWorkers(response.data);
     } catch (error) {
-      console.error('Error fetching workers:', error);
+      toast.error('Error al cargar trabajadores');
     } finally {
       setLoading(false);
     }

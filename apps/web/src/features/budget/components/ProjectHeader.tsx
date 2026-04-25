@@ -159,14 +159,14 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
       </div>
 
       {/* 3. Financial Dashboard */}
-      <div className="bg-gradient-to-br from-slate-900/50 to-slate-950/50 dark:from-black/20 dark:to-black/40 rounded-2xl p-5 border border-slate-800/50 dark:border-white/5 flex flex-col xl:flex-row justify-between gap-6 shadow-inner">
+      <div className="bg-gradient-to-br from-slate-100/80 to-slate-50/80 dark:from-slate-900/50 dark:to-slate-950/50 rounded-2xl p-5 border border-slate-200 dark:border-white/5 flex flex-col xl:flex-row justify-between gap-6 shadow-inner">
         
         {/* Core Metrics */}
         <div className="flex flex-wrap md:flex-nowrap gap-6 md:gap-10">
           <div>
-            <p className="text-[11px] text-slate-400 mb-1 uppercase tracking-wider font-bold flex items-center gap-1.5">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-bold flex items-center gap-1.5">
               Venta (Neto)
-              {isAutoCalculated && <span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-sm">AUTO</span>}
+              {isAutoCalculated && <span className="text-[9px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-sm">AUTO</span>}
             </p>
             {editingPrice ? (
               <input
@@ -175,19 +175,19 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
                 onChange={(e) => setPriceInput(e.target.value)}
                 onBlur={commitPrice}
                 onKeyDown={(e) => e.key === 'Enter' && commitPrice()}
-                className="text-2xl font-black text-indigo-400 bg-transparent border-b border-indigo-500/50 outline-none tabular-nums w-40"
+                className="text-2xl font-black text-indigo-600 dark:text-indigo-400 bg-transparent border-b border-indigo-500/50 outline-none tabular-nums w-40"
               />
             ) : (
               <div className="flex flex-col">
                 <button
                   onClick={() => { setEditingPrice(true); setPriceInput(String(budget.clientPrice)); }}
-                  className="text-2xl font-black text-indigo-400 hover:text-indigo-300 transition-colors tabular-nums text-left"
+                  className="text-2xl font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors tabular-nums text-left"
                   title="Clic para editar precio al cliente"
                 >
                   {budget.currency === 'UF' ? `${Number(budget.clientPrice).toLocaleString('es-CL', { minimumFractionDigits: 2 })} UF` : formatCLP(budget.clientPrice)}
                 </button>
                 {budget.currency === 'UF' && ufValue && (
-                  <span className="text-xs text-indigo-400/80 font-medium">
+                  <span className="text-xs text-indigo-600/80 dark:text-indigo-400/80 font-medium">
                     ≈ {formatCLP(budget.clientPrice * ufValue)}
                   </span>
                 )}
@@ -196,8 +196,8 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
           </div>
 
           <div>
-            <p className="text-[11px] text-slate-400 mb-1 uppercase tracking-wider font-bold">Costo Obra</p>
-            <p className="text-2xl font-black text-slate-200 tabular-nums">{formatCLP(financials.estimatedCost)}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider font-bold">Costo Obra</p>
+            <p className="text-2xl font-black text-slate-800 dark:text-slate-200 tabular-nums">{formatCLP(financials.estimatedCost)}</p>
           </div>
 
           <div className={`px-4 py-2 -my-2 -ml-2 rounded-xl border flex flex-col justify-center transition-all ${
@@ -209,18 +209,18 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
           }`}>
             <div className="flex items-center gap-2 mb-0.5">
               <p className={`text-[11px] uppercase tracking-wider font-bold ${
-                financials.margin < (budget.professionalFeePercentage ?? 10) ? 'text-rose-400' : financials.margin < (budget.professionalFeePercentage ?? 10) + 5 ? 'text-amber-400' : 'text-emerald-500'
+                financials.margin < (budget.professionalFeePercentage ?? 10) ? 'text-rose-600 dark:text-rose-400' : financials.margin < (budget.professionalFeePercentage ?? 10) + 5 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-500'
               }`}>Tu Utilidad</p>
-              {financials.margin < (budget.professionalFeePercentage ?? 10) && <AlertTriangle size={12} className="text-rose-400 animate-pulse" />}
-              {financials.margin >= (budget.professionalFeePercentage ?? 10) + 5 && <TrendingUp size={12} className="text-emerald-500" />}
+              {financials.margin < (budget.professionalFeePercentage ?? 10) && <AlertTriangle size={12} className="text-rose-600 dark:text-rose-400 animate-pulse" />}
+              {financials.margin >= (budget.professionalFeePercentage ?? 10) + 5 && <TrendingUp size={12} className="text-emerald-600 dark:text-emerald-500" />}
             </div>
             <div className="flex items-baseline gap-2">
               <p className={`text-2xl font-black tabular-nums ${
-                financials.margin < (budget.professionalFeePercentage ?? 10) ? 'text-rose-400' : financials.margin < (budget.professionalFeePercentage ?? 10) + 5 ? 'text-amber-400' : 'text-emerald-400'
+                financials.margin < (budget.professionalFeePercentage ?? 10) ? 'text-rose-600 dark:text-rose-400' : financials.margin < (budget.professionalFeePercentage ?? 10) + 5 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
               }`}>
                 {formatCLP(financials.projectedProfit)}
               </p>
-              <span className={`text-sm font-bold ${financials.margin < (budget.professionalFeePercentage ?? 10) ? 'text-rose-500/70' : 'text-emerald-500/70'}`}>
+              <span className={`text-sm font-bold ${financials.margin < (budget.professionalFeePercentage ?? 10) ? 'text-rose-600/70 dark:text-rose-500/70' : 'text-emerald-600/70 dark:text-emerald-500/70'}`}>
                 {financials.margin}%
               </span>
             </div>
@@ -228,33 +228,33 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
         </div>
 
         {/* Configuration Parameters */}
-        <div className="flex gap-4 xl:border-l xl:border-white/10 xl:pl-6">
+        <div className="flex gap-4 xl:border-l xl:border-slate-200 dark:xl:border-white/10 xl:pl-6">
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Honorarios</p>
-            <div className="flex items-center bg-blue-500/10 border border-blue-500/20 rounded-lg px-2 py-1">
-              <input type="number" value={budget.professionalFeePercentage ?? 10} onChange={(e) => onUpdate({ professionalFeePercentage: Number(e.target.value) })} className="text-base font-black text-blue-400 bg-transparent w-10 outline-none text-right" />
-              <span className="text-base font-black text-blue-400/50">%</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">Honorarios</p>
+            <div className="flex items-center bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg px-2 py-1">
+              <input type="number" value={budget.professionalFeePercentage ?? 10} onChange={(e) => onUpdate({ professionalFeePercentage: Number(e.target.value) })} className="text-base font-black text-blue-600 dark:text-blue-400 bg-transparent w-10 outline-none text-right" />
+              <span className="text-base font-black text-blue-600/50 dark:text-blue-400/50">%</span>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Utilidad</p>
-            <div className="flex items-center bg-purple-500/10 border border-purple-500/20 rounded-lg px-2 py-1">
-              <input type="number" value={budget.estimatedUtility ?? 15} onChange={(e) => onUpdate({ estimatedUtility: Number(e.target.value) })} className="text-base font-black text-purple-400 bg-transparent w-10 outline-none text-right" />
-              <span className="text-base font-black text-purple-400/50">%</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">Utilidad</p>
+            <div className="flex items-center bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-lg px-2 py-1">
+              <input type="number" value={budget.estimatedUtility ?? 15} onChange={(e) => onUpdate({ estimatedUtility: Number(e.target.value) })} className="text-base font-black text-purple-600 dark:text-purple-400 bg-transparent w-10 outline-none text-right" />
+              <span className="text-base font-black text-purple-600/50 dark:text-purple-400/50">%</span>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Markup</p>
-            <div className="flex items-center bg-orange-500/10 border border-orange-500/20 rounded-lg px-2 py-1">
-              <input type="number" value={budget.markupPercentage ?? 20} onChange={(e) => onUpdate({ markupPercentage: Number(e.target.value) })} className="text-base font-black text-orange-400 bg-transparent w-10 outline-none text-right" />
-              <span className="text-base font-black text-orange-400/50">%</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">Markup</p>
+            <div className="flex items-center bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 rounded-lg px-2 py-1">
+              <input type="number" value={budget.markupPercentage ?? 20} onChange={(e) => onUpdate({ markupPercentage: Number(e.target.value) })} className="text-base font-black text-orange-600 dark:text-orange-400 bg-transparent w-10 outline-none text-right" />
+              <span className="text-base font-black text-orange-600/50 dark:text-orange-400/50">%</span>
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Margen</p>
-            <div className="flex items-center bg-cyan-500/10 border border-cyan-500/20 rounded-lg px-2 py-1">
-              <input type="number" value={budget.targetMargin ?? 25} onChange={(e) => onUpdate({ targetMargin: Number(e.target.value) })} className="text-base font-black text-cyan-400 bg-transparent w-10 outline-none text-right" />
-              <span className="text-base font-black text-cyan-400/50">%</span>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">Margen</p>
+            <div className="flex items-center bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 rounded-lg px-2 py-1">
+              <input type="number" value={budget.targetMargin ?? 25} onChange={(e) => onUpdate({ targetMargin: Number(e.target.value) })} className="text-base font-black text-cyan-600 dark:text-cyan-400 bg-transparent w-10 outline-none text-right" />
+              <span className="text-base font-black text-cyan-600/50 dark:text-cyan-400/50">%</span>
             </div>
           </div>
         </div>

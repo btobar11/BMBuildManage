@@ -130,7 +130,6 @@ export function useOfflineMutations() {
    */
   const syncAll = useCallback(async () => {
     if (!isOnline) {
-      console.warn('[Offline] Cannot sync while offline');
       return;
     }
 

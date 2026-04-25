@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api';
 import { z } from 'zod';
+import { captureMessage } from '../lib/telemetry';
 
 // =====================================================
 // Zod Schemas - Tipado estricto de respuesta JSON
@@ -133,7 +134,7 @@ export function useAIChat({ companyId, projectId, budgetId }: UseAIChatOptions) 
       // Validar respuesta con Zod
       const result = NLPQueryResultSchema.safeParse(response.data?.data);
       if (!result.success) {
-        console.warn('AI response validation failed:', result.error);
+        captureMessage('AI response validation failed', 'warning');
         // Retornar data cruda si la validación falla
         return response.data?.data as NLPQueryResult;
       }
@@ -161,7 +162,7 @@ export function useAIRecommendations({ companyId, projectId }: Omit<UseAIChatOpt
       
       const result = NLPQueryResultSchema.safeParse(response.data?.data);
       if (!result.success) {
-        console.warn('AI recommendations validation failed:', result.error);
+        captureMessage('AI recommendations validation failed', 'warning');
         return response.data?.data as NLPQueryResult;
       }
       
@@ -184,7 +185,7 @@ export function useAIPrediction({ companyId, projectId }: Omit<UseAIChatOptions,
       
       const result = NLPQueryResultSchema.safeParse(response.data?.data);
       if (!result.success) {
-        console.warn('AI prediction validation failed:', result.error);
+        captureMessage('AI prediction validation failed', 'warning');
         return response.data?.data as NLPQueryResult;
       }
       
@@ -207,7 +208,7 @@ export function useAIBudgetAnalysis() {
       
       const result = BudgetAnalysisResultSchema.safeParse(response.data?.data);
       if (!result.success) {
-        console.warn('Budget analysis validation failed:', result.error);
+        captureMessage('Budget analysis validation failed', 'warning');
         return response.data?.data as BudgetAnalysisResult;
       }
       

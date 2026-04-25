@@ -179,9 +179,9 @@ export const CADViewer: React.FC<CADViewerProps> = ({ dxfString, onSelectGeometr
       });
 
 
-    } catch (err) {
-      console.error('DXF Parse Error', err);
-    }
+    } catch {
+    // Silent fail - ignore CAD errors
+  }
   }, [dxfString, selectedLayer, onSelectGeometry]);
 
   return (

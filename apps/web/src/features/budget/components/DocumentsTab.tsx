@@ -479,7 +479,6 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
         });
 
       } catch (err) {
-        console.error('Upload Error:', err);
         toast.error(`Error al subir "${file.name}". ¿Existe el bucket "documents"?`);
       }
     }
@@ -521,8 +520,8 @@ export function DocumentsTab({ projectId }: DocumentsTabProps) {
           const filePath = pathSegments[1];
           await supabase.storage.from('documents').remove([decodeURI(filePath)]);
         }
-      } catch (e) {
-        console.warn('Could not cleanly delete physical file from storage', e);
+      } catch {
+        // Silent fail - ignore
       }
     },
     onSuccess: () => {

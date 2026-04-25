@@ -362,7 +362,7 @@ const StageSection = memo(function StageSection({
       size: 80,
     }),
   ], [expandedItems, onUpdateItem, onDuplicateItem, onDeleteItem, toggleExpand]);
-
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: stage.items,
     columns,

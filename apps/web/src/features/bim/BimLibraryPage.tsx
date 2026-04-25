@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useNavigate } from 'react-router-dom';
-import { BimViewerTest } from './components/BimViewerTest';
+
+const BimViewerTest = lazy(() => import('./components/BimViewerTest').then(m => ({ default: m.BimViewerTest })));
 
 interface ProjectModel {
   id: string;
@@ -172,7 +173,7 @@ export function BimLibraryPage() {
                 
                 refetch();
               } catch (error) {
-                console.error('Upload error:', error);
+                // Upload error - handled by UI feedback
               } finally {
                 setIsUploading(false);
               }
@@ -207,7 +208,9 @@ export function BimLibraryPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Test del motor de renderizado Three.js + ThatOpen Components
           </p>
-          <BimViewerTest />
+          <Suspense fallback={<div className="h-96 flex items-center justify-center"><Loader2 className="animate-spin" /></div>}>
+            <BimViewerTest />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -28,7 +28,6 @@ export const CreateWorkerModal = ({ isOpen, onClose, onSuccess }: { isOpen: bool
       onSuccess();
       handleClose();
     } catch (error) {
-      console.error('Error creating worker:', error);
       alert('Error al crear el trabajador');
     } finally {
       setLoading(false);
