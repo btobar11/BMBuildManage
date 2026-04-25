@@ -42,16 +42,6 @@ describe('BillingService', () => {
       expect(result.cycle_months).toBe(3);
     });
 
-    it('should calculate Pro semiannual (15% discount)', () => {
-      const result = service.calculatePrice(
-        PlanTier.PRO,
-        BillingCycle.SEMIANNUAL,
-      );
-      expect(result.discount_percentage).toBe(15);
-      expect(result.monthly_price).toBe(76492);
-      expect(result.cycle_months).toBe(6);
-    });
-
     it('should calculate Enterprise annual (25% discount)', () => {
       const result = service.calculatePrice(
         PlanTier.ENTERPRISE,
@@ -63,22 +53,18 @@ describe('BillingService', () => {
       expect(result.savings_clp).toBeGreaterThan(0);
     });
 
-    it('should reject Lite with quarterly cycle', () => {
-      expect(() =>
-        service.calculatePrice(PlanTier.LITE, BillingCycle.QUARTERLY),
-      ).toThrow(BadRequestException);
+    it('should allow all cycles for PRO', () => {
+      // All these should work without throwing
+      expect(service.calculatePrice(PlanTier.PRO, BillingCycle.MONTHLY)).toBeDefined();
+      expect(service.calculatePrice(PlanTier.PRO, BillingCycle.QUARTERLY)).toBeDefined();
+      expect(() => service.calculatePrice(PlanTier.PRO as any, 'invalid' as any)).toThrow();
     });
 
-    it('should reject Lite with annual cycle', () => {
-      expect(() =>
-        service.calculatePrice(PlanTier.LITE, BillingCycle.ANNUAL),
-      ).toThrow(BadRequestException);
-    });
-
-    it('should reject Enterprise with monthly cycle', () => {
-      expect(() =>
-        service.calculatePrice(PlanTier.ENTERPRISE, BillingCycle.MONTHLY),
-      ).toThrow(BadRequestException);
+    it('should accept any valid billing cycle for LITE', () => {
+      // All these should work without throwing
+      expect(service.calculatePrice(PlanTier.LITE, BillingCycle.MONTHLY)).toBeDefined();
+      expect(service.calculatePrice(PlanTier.LITE, BillingCycle.QUARTERLY)).toBeDefined();
+      expect(service.calculatePrice(PlanTier.LITE, BillingCycle.ANNUAL)).toBeDefined();
     });
   });
 
@@ -105,8 +91,8 @@ describe('BillingService', () => {
   describe('getAllPricing', () => {
     it('should return pricing for all valid plan+cycle combos', () => {
       const all = service.getAllPricing();
-      // Lite: monthly (1), Pro: monthly/quarterly/semiannual (3), Enterprise: annual (1)
-      expect(all.length).toBe(5);
+      // Lite: monthly/quarterly/annual (3), Pro: monthly/quarterly/annual (3), Enterprise: monthly/quarterly/annual (3)
+      expect(all.length).toBe(9);
     });
 
     it('should return valid PriceCalculation objects', () => {

@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SubscriptionsService } from './subscriptions.service';
 import { BillingService } from './billing.service';
+import { MercadoPagoService } from './mercadopago.service';
 import {
   Subscription,
   PlanTier,
@@ -11,6 +12,13 @@ import {
 } from './entities/subscription.entity';
 import { PlanFeature } from './entities/plan-feature.entity';
 import { UsageLimits } from './entities/usage-limits.entity';
+import { SubscriptionAddon } from './entities/subscription-addon.entity';
+import { AddonFeature } from './entities/addon-feature.entity';
+import { UsageTracking } from './entities/usage-tracking.entity';
+import { UpgradeAttempt } from './entities/upgrade-attempt.entity';
+import { Addon } from './entities/addon.entity';
+import { CompanyAddon } from './entities/company-addon.entity';
+import { Payment } from './entities/payment.entity';
 import { PLAN_FEATURE_MAP, PLAN_LIMITS } from './plan.constants';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 
@@ -35,11 +43,21 @@ describe('SubscriptionsService', () => {
   let planFeatureRepo: jest.Mocked<Repository<PlanFeature>>;
   let billingService: BillingService;
 
+  const mockMercadoPagoService = {
+    createSubscriptionPreference: jest.fn().mockResolvedValue('https://mock.mp.url'),
+    createAddonPreference: jest.fn().mockResolvedValue('https://mock.mp.url'),
+    getPayment: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SubscriptionsService,
         BillingService,
+        {
+          provide: MercadoPagoService,
+          useValue: mockMercadoPagoService,
+        },
         {
           provide: getRepositoryToken(Subscription),
           useValue: {
@@ -58,6 +76,58 @@ describe('SubscriptionsService', () => {
           provide: getRepositoryToken(UsageLimits),
           useValue: {
             findOne: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(SubscriptionAddon),
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(AddonFeature),
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(UsageTracking),
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(UpgradeAttempt),
+          useValue: {
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(CompanyAddon),
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Payment),
+          useValue: {
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Addon),
+          useValue: {
+            findOne: jest.fn(),
+            find: jest.fn(),
           },
         },
       ],

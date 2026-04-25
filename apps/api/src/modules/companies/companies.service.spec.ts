@@ -44,8 +44,9 @@ const mockUserRepository = () => ({
 const mockConfigService = () => ({
   get: jest.fn((key: string): string | undefined => {
     const config: Record<string, string> = {
-      'supabase.url': 'http://localhost:54321',
-      'supabase.anonKey': 'test-anon-key',
+      'SUPABASE_URL': 'http://localhost:54321',
+      'SUPABASE_ANON_KEY': 'test-anon-key',
+      'SUPABASE_SERVICE_ROLE_KEY': 'test-service-role-key',
     };
     return config[key];
   }),
