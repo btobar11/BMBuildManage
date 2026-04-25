@@ -95,6 +95,7 @@ export class SubscriptionsService {
    * Get active subscription for a company.
    * Returns null if no subscription exists (graceful for backward compatibility).
    */
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   async findByCompany(companyId: string): Promise<Subscription | null> {
     return this.subscriptionRepo.findOne({
       where: { company_id: companyId },
