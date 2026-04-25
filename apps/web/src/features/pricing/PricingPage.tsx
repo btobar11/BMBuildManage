@@ -28,7 +28,7 @@ export function PricingPage() {
       });
       
       if (data.checkout_url) {
-        window.location.href = data.checkout_url;
+        window.location.assign(data.checkout_url);
       }
     } catch (error) {
       console.error('Error creating checkout session', error);
@@ -44,7 +44,7 @@ export function PricingPage() {
       });
       
       if (data.checkout_url) {
-        window.location.href = data.checkout_url;
+        window.location.assign(data.checkout_url);
       }
     } catch (error) {
       console.error('Error creating addon checkout session', error);
