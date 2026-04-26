@@ -13,6 +13,8 @@
       "methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
     }
   ],
-  ]
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
 
