@@ -161,4 +161,25 @@ export class CreateProjectDto {
   @Max(999999, { message: 'La superficie excede el máximo permitido' })
   @Type(() => Number)
   estimated_area?: number;
+
+  @ApiPropertyOptional({ description: 'Número de pisos sobre el nivel del suelo', example: 5 })
+  @IsOptional()
+  @IsNumber({}, { message: 'El número de pisos debe ser un número' })
+  @Min(0)
+  @Type(() => Number)
+  floors?: number;
+
+  @ApiPropertyOptional({ description: 'Número de pisos subterráneos', example: 2 })
+  @IsOptional()
+  @IsNumber({}, { message: 'El número de pisos subterráneos debe ser un número' })
+  @Min(0)
+  @Type(() => Number)
+  underground_floors?: number;
+
+  @ApiPropertyOptional({ description: 'Superficie del terreno en m²', example: 1000 })
+  @IsOptional()
+  @IsNumber({}, { message: 'La superficie del terreno debe ser un número' })
+  @Min(0)
+  @Type(() => Number)
+  land_area?: number;
 }

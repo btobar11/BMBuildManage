@@ -111,8 +111,15 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
       {/* 2. General Information Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="group bg-background/30 hover:bg-background/60 border border-border/50 rounded-xl p-3.5 transition-all">
-          <label className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
-            <Building2 size={12} className="text-primary-400" /> Proyecto
+          <label className="flex items-center justify-between gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
+            <span className="flex items-center gap-1.5">
+              <Building2 size={12} className="text-primary-400" /> Proyecto
+            </span>
+            {budget.code && (
+              <span className="bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded border border-indigo-500/20 lowercase tracking-normal">
+                {budget.code}
+              </span>
+            )}
           </label>
           <input
             value={budget.projectName}

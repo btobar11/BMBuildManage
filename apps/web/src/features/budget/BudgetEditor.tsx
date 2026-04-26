@@ -43,6 +43,7 @@ interface ServerBudget {
   id: string;
   project_id: string;
   status: string;
+  code?: string;
   version: number;
   total_estimated_price: string | number;
   project?: {
@@ -248,6 +249,7 @@ export default function BudgetEditor() {
       budgetCtx.setBudget({
         id: serverBudget.id,
         projectName: serverBudget.project?.name || 'Presupuesto',
+        code: serverBudget.code,
         clientName: serverBudget.project?.client?.name || 'Cliente',
         status: (serverBudget.status as any) || 'editing',
         clientPrice: Number(serverBudget.total_estimated_price) || 0,

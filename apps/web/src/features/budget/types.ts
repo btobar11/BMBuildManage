@@ -89,6 +89,7 @@ export interface Company {
 export interface Budget {
   id: string;
   projectName: string;
+  code?: string;
   clientName: string;
   status: 'draft' | 'editing' | 'sent' | 'approved' | 'rejected' | 'counter_offer';
   clientPrice: number;

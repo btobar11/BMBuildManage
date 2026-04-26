@@ -21,21 +21,7 @@ const server = express();
 
 server.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'blob:'],
-        fontSrc: ["'self'"],
-        connectSrc: [
-          "'self'",
-          'https://sfzkrnfyfwonxyceugya.supabase.co',
-          'https://api.groq.com',
-        ],
-        frameSrc: ["'none'"],
-      },
-    },
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
   }),
 );

@@ -50,6 +50,9 @@ export class Budget {
   @Column({ type: 'enum', enum: BudgetStatus, default: BudgetStatus.DRAFT })
   status: BudgetStatus;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  code: string;
+
   @Column({ default: true })
   is_active: boolean;
 

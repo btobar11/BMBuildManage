@@ -2,6 +2,7 @@ const ALLOWED_ORIGINS = [
   'https://bm-build-manage-web.vercel.app',
   'https://bmbuildmanage.vercel.app',
   'https://bm-build-manage-api.vercel.app',
+  /\.vercel\.app$/, // Permite cualquier subdominio de vercel.app (útil para previews)
   process.env.FRONTEND_URL,
 ];
 

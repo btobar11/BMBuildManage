@@ -95,6 +95,7 @@ export class BudgetsService {
     const budget = this.budgetRepository.create({
       ...createBudgetDto,
       company_id,
+      code: createBudgetDto.code || this.generateBudgetCode(project),
     } as Parameters<typeof this.budgetRepository.create>[0]);
     const saved = await this.budgetRepository.save(budget);
 
@@ -326,6 +327,7 @@ export class BudgetsService {
       project_id: original.project_id,
       company_id: original.company_id,
       status: BudgetStatus.DRAFT,
+      code: original.code ? `${original.code}-REV` : null, // Indicate it's a revision if code exists
       is_active: false,
       total_estimated_cost: original.total_estimated_cost,
       total_estimated_price: original.total_estimated_price,
@@ -489,5 +491,23 @@ export class BudgetsService {
         first_error: null,
       };
     });
+  }
+
+  private generateBudgetCode(project: Project): string {
+    const initials = project.name
+      .split(' ')
+      .filter((word) => word.length > 0)
+      .map(
+        (word) =>
+          word.charAt(0).toUpperCase() + word.substring(1, 2).toLowerCase(),
+      )
+      .join('');
+
+    const commune = (project.commune || 'GENERIC')
+      .toUpperCase()
+      .replace(/\s+/g, '');
+    const year = new Date().getFullYear();
+
+    return `${initials}-${commune}-${year}`;
   }
 }

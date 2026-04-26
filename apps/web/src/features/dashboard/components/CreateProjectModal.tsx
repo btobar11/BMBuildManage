@@ -36,6 +36,10 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     end_date: '',
     client_id: '' as string | null,
     client_name: '',
+    code: '',
+    floors: '',
+    underground_floors: '',
+    land_area: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -106,6 +110,9 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
         client_id: formData.client_id || undefined,
         budget_currency: formData.estimated_price_currency,
         price_currency: formData.estimated_price_currency,
+        floors: formData.floors ? parseInt(formData.floors) : undefined,
+        underground_floors: formData.underground_floors ? parseInt(formData.underground_floors) : undefined,
+        land_area: formData.land_area ? parseFloat(formData.land_area) : undefined,
       };
 
       const projectResponse = await api.post('/projects', projectPayload);
@@ -113,6 +120,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
 
       const budgetResponse = await api.post('/budgets', {
         project_id: newProject.id,
+        code: formData.code || undefined,
         version: 1,
         status: 'draft',
         total_estimated_price: sanitizedBudget || 0,
@@ -129,7 +137,12 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   });
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', region: '', commune: '', type: ['residential'], status: 'draft', estimated_price: '', estimated_price_currency: 'CLP', estimated_surface: '', description: '', start_date: '', end_date: '', client_id: '', client_name: '' });
+    setFormData({ 
+      name: '', address: '', region: '', commune: '', type: ['residential'], status: 'draft', 
+      estimated_price: '', estimated_price_currency: 'CLP', estimated_surface: '', 
+      description: '', start_date: '', end_date: '', client_id: '', client_name: '',
+      code: '', floors: '', underground_floors: '', land_area: ''
+    });
     setErrors({});
     setTouched({});
     setCurrentStep(1);
@@ -223,6 +236,24 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
     setTouched(prev => ({ ...prev, [field]: true }));
   };
 
+  const generateRecommendedCode = () => {
+    if (!formData.name) return;
+    
+    // Get first 2 letters of each word in name (up to 3 words)
+    const initials = formData.name
+      .split(' ')
+      .filter(w => w.length > 0)
+      .slice(0, 3)
+      .map(w => w.substring(0, 2).charAt(0).toUpperCase() + w.substring(1, 2).toLowerCase())
+      .join('');
+    
+    const commune = formData.commune ? `-${formData.commune.toUpperCase()}` : '';
+    const year = `-${new Date().getFullYear()}`;
+    
+    const recommended = `${initials}${commune}${year}`;
+    setFormData(prev => ({ ...prev, code: recommended }));
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -285,6 +316,26 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       <AlertCircle size={12} /><span>{errors.name}</span>
                     </div>
                   )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-muted-foreground">Código de Presupuesto</label>
+                    <button 
+                      type="button"
+                      onClick={generateRecommendedCode}
+                      className="text-[10px] font-bold text-emerald-600 hover:text-emerald-500 uppercase tracking-wider"
+                    >
+                      Sugerir Código
+                    </button>
+                  </div>
+                  <input 
+                    type="text" 
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                    placeholder="Ej. EdPlCe-TALCA-2026"
+                  />
                 </div>
 
                 <ClientAutocomplete
@@ -513,6 +564,40 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       <AlertCircle size={12} /><span>{errors.estimated_surface}</span>
                     </div>
                   )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-muted-foreground">Número de Pisos</label>
+                    <input 
+                      type="number" 
+                      value={formData.floors}
+                      onChange={(e) => setFormData({ ...formData, floors: e.target.value })}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      placeholder="Ej. 5"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-muted-foreground">Pisos Subterráneos</label>
+                    <input 
+                      type="number" 
+                      value={formData.underground_floors}
+                      onChange={(e) => setFormData({ ...formData, underground_floors: e.target.value })}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      placeholder="Ej. 2"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-2">
+                  <label className="text-sm font-medium text-muted-foreground">Superficie Terreno (m²)</label>
+                  <input 
+                    type="number" 
+                    value={formData.land_area}
+                    onChange={(e) => setFormData({ ...formData, land_area: e.target.value })}
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    placeholder="Ej. 500"
+                  />
                 </div>
               </div>
             )}

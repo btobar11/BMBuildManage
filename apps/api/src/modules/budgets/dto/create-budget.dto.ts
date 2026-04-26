@@ -113,6 +113,10 @@ export class CreateBudgetDto {
   notes?: string;
 
   @IsOptional()
+  @IsString()
+  code?: string;
+
+  @IsOptional()
   @IsNumber()
   @Min(0)
   total_estimated_cost?: number;

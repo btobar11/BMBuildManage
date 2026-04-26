@@ -98,6 +98,15 @@ export class Project {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   estimated_area: number;
 
+  @Column({ type: 'int', nullable: true })
+  floors: number;
+
+  @Column({ type: 'int', nullable: true })
+  underground_floors: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  land_area: number;
+
   @OneToMany(() => Budget, (budget) => budget.project)
   budgets: Budget[];
 
