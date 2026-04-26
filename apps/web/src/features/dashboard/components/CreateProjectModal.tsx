@@ -219,6 +219,9 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
   const handleNext = () => {
     if (validateStep(currentStep)) {
       if (currentStep < totalSteps) {
+        if (currentStep === 3 && !formData.code) {
+          generateRecommendedCode();
+        }
         setCurrentStep(prev => prev + 1);
       } else {
         createProjectMutation.mutate();
@@ -316,32 +319,11 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                       <AlertCircle size={12} /><span>{errors.name}</span>
                     </div>
                   )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-muted-foreground">Código de Presupuesto</label>
-                    <button 
-                      type="button"
-                      onClick={generateRecommendedCode}
-                      className="text-[10px] font-bold text-emerald-600 hover:text-emerald-500 uppercase tracking-wider"
-                    >
-                      Sugerir Código
-                    </button>
-                  </div>
-                  <input 
-                    type="text" 
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
-                    placeholder="Ej. EdPlCe-TALCA-2026"
+                  <ClientAutocomplete
+                    value={formData.client_name}
+                    onChange={handleClientChange}
                   />
                 </div>
-
-                <ClientAutocomplete
-                  value={formData.client_name}
-                  onChange={handleClientChange}
-                />
 
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-muted-foreground">Descripción / Notas</label>
@@ -503,8 +485,28 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
             {currentStep === 4 && (
               <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div className="mb-2">
-                  <h3 className="text-lg font-semibold text-foreground">Estimaciones Adicionales</h3>
-                  <p className="text-sm text-muted-foreground">Datos opcionales de presupuesto y tamaño.</p>
+                  <h3 className="text-lg font-semibold text-foreground">Estimaciones y Código</h3>
+                  <p className="text-sm text-muted-foreground">Datos finales y código identificador del proyecto.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-muted-foreground">Código de Presupuesto <span className="text-red-500">*</span></label>
+                    <button 
+                      type="button" 
+                      onClick={generateRecommendedCode}
+                      className="text-[10px] font-bold text-emerald-600 hover:text-emerald-500 uppercase tracking-wider"
+                    >
+                      Regenerar Sugerencia
+                    </button>
+                  </div>
+                  <input 
+                    type="text" 
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
+                    placeholder="Ej. EdMiBi-CONCE-2026"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-muted-foreground">Presupuesto Estimado (Cliente)</label>
