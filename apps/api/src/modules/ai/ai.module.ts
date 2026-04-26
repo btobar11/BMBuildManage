@@ -15,10 +15,12 @@ import { FinancialService } from '../budgets/financial.service';
 import { Expense } from '../expenses/expense.entity';
 import { WorkerAssignment } from '../worker-assignments/worker-assignment.entity';
 import { ProjectContingency } from '../contingencies/project-contingency.entity';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
   imports: [
     ConfigModule,
+    SubscriptionsModule,
     TypeOrmModule.forFeature([
       Project,
       Budget,

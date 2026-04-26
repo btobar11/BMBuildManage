@@ -55,6 +55,8 @@ import { LeadsController } from './leads/leads.controller';
     OnboardingService,
     EngagementService,
     ActivationService,
+    RetentionService,
+    PlgAnalyticsService,
     LeadsService,
   ],
 })
