@@ -235,6 +235,9 @@ describe('ProjectsService', () => {
           createQueryBuilder: jest.fn().mockImplementation(() => {
             throw new Error('Immediate Failure');
           }),
+          getRepository: jest.fn().mockReturnValue({
+            find: jest.fn().mockResolvedValue([]),
+          }),
         },
       };
       (service as any).dataSource.createQueryRunner.mockReturnValue(

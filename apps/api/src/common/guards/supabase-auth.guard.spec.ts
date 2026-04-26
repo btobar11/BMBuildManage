@@ -25,6 +25,7 @@ describe('SupabaseAuthGuard', () => {
       headers: opts?.headers ?? {},
       method: opts?.method ?? 'GET',
       path: opts?.path ?? '/api/v1/projects',
+      query: {},
       user: null,
     };
 
