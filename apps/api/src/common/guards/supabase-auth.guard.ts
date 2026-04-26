@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   Inject,
   forwardRef,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
@@ -14,6 +15,8 @@ import { UserRole } from '../../modules/users/user.entity';
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
+  private readonly logger = new Logger(SupabaseAuthGuard.name);
+
   constructor(
     private configService: ConfigService,
     @Inject(forwardRef(() => UsersService))
