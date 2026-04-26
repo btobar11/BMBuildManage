@@ -269,13 +269,13 @@ export class ProjectsService {
       );
       await this.safeDelete(
         queryRunner,
-        'bim_element_states',
-        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id = :id))',
+        'bim_state_history',
+        'element_state_id IN (SELECT id FROM bim_element_states WHERE element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id = :id)))',
         { id },
       );
       await this.safeDelete(
         queryRunner,
-        'bim_state_history',
+        'bim_element_states',
         'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id = :id))',
         { id },
       );
@@ -379,13 +379,13 @@ export class ProjectsService {
       );
       await this.safeDelete(
         queryRunner,
-        'bim_element_states',
-        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids)))',
+        'bim_state_history',
+        'element_state_id IN (SELECT id FROM bim_element_states WHERE element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids))))',
         { ids },
       );
       await this.safeDelete(
         queryRunner,
-        'bim_state_history',
+        'bim_element_states',
         'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids)))',
         { ids },
       );

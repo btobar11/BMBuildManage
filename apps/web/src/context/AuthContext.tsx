@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { queryClient } from '../main';
 import api from '../lib/api';
 
 /**
@@ -208,6 +209,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     localStorage.removeItem('DEV_TOKEN');
     localStorage.removeItem('sb-user-id');
+    localStorage.removeItem('BM_QUERY_CACHE');
+    
+    // Clear in-memory query cache to prevent cross-account data leaks
+    queryClient.clear();
+    
     if (isSupabaseConfigured) {
       await supabase.auth.signOut();
     }
@@ -216,6 +222,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInDemo = () => {
+    // Clear previous session data before entering demo mode
+    queryClient.clear();
+    localStorage.removeItem('BM_QUERY_CACHE');
+    
     localStorage.setItem('DEV_TOKEN', 'dev-token');
     setToken('dev-token');
     setUser({
@@ -228,7 +238,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, signOut, signInDemo, isLoading, isAuthReady, isConfigured: isSupabaseConfigured }}>
+    <AuthContext.Provider value={{ user, token, signOut, signInDemo, isLoading, iAuthReady, isConfigured: isSupabaseConfigured }}>
       {children}
     </AuthContext.Provider>
   );
