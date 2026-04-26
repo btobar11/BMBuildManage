@@ -258,7 +258,7 @@ export default function BudgetEditor() {
         estimatedUtility: (serverBudget as any).estimated_utility ?? 15,
         markupPercentage: (serverBudget as any).markup_percentage ?? 20,
         targetMargin: 25,
-        location: serverBudget.project?.location || '',
+        location: serverBudget.project?.location || [serverBudget.project?.address, serverBudget.project?.commune, serverBudget.project?.region].filter(Boolean).join(', ') || '',
         start_date: (serverBudget as any).project?.start_date || '',
         end_date: (serverBudget as any).project?.end_date || '',
         stages: (serverBudget.stages || []).map((s) => ({

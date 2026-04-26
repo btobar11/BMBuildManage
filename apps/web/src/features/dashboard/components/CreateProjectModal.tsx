@@ -552,7 +552,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                 </div>
 
                 <div className="space-y-1.5 pt-2">
-                  <label className="text-sm font-medium text-muted-foreground">Superficie Estimada (m²)</label>
+                  <label className="text-sm font-medium text-muted-foreground">Superficie Construida (m²)</label>
                   <input 
                     type="number" 
                     value={formData.estimated_surface}
@@ -592,7 +592,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onSuccess }: { isOpen: boo
                 </div>
 
                 <div className="space-y-1.5 pt-2">
-                  <label className="text-sm font-medium text-muted-foreground">Superficie Terreno (m²)</label>
+                  <label className="text-sm font-medium text-muted-foreground">Superficie del Terreno (m²)</label>
                   <input 
                     type="number" 
                     value={formData.land_area}

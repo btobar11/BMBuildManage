@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { Budget, Stage, LineItem, Expense, Worker } from '../features/budget/types';
 import { calcFinancials, calcLineItem, newStage, newLineItem } from '../features/budget/helpers';
 import { nanoid } from '../features/budget/utils';
+import { useUFValue } from './useUFValue';
 
 const DEFAULT_BUDGET: Budget = {
   id: nanoid(),
@@ -15,9 +16,10 @@ const DEFAULT_BUDGET: Budget = {
 };
 
 export function useBudget(initial?: Partial<Budget>, apiRealExpenses: number = 0, apiWorkerPayments: number = 0, apiContingencies: number = 0) {
+  const { data: ufValue = 0 } = useUFValue();
   const [budget, setBudget] = useState<Budget>(() => ({ ...DEFAULT_BUDGET, ...initial, id: nanoid() }));
 
-  const financials = calcFinancials(budget, apiRealExpenses, apiWorkerPayments, apiContingencies);
+  const financials = calcFinancials(budget, apiRealExpenses, apiWorkerPayments, apiContingencies, ufValue);
 
   // ─ Project header ────────────────────────────────────────────────
   const updateHeader = useCallback((patch: Partial<Pick<Budget, 'projectName' | 'clientName' | 'clientPrice' | 'status' | 'professionalFeePercentage' | 'estimatedUtility'>>) => {

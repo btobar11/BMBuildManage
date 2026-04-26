@@ -130,7 +130,7 @@ export class BudgetsService {
   async findOne(id: string, companyId?: string): Promise<Budget> {
     const budget = await this.budgetRepository.findOne({
       where: { id },
-      relations: ['stages', 'stages.items', 'project', 'project.company'],
+      relations: ['stages', 'stages.items', 'project', 'project.company', 'project.client'],
     });
 
     if (!budget) {

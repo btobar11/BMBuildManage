@@ -15,8 +15,8 @@ export function useUFValue() {
         return 38000;
       }
     },
-    staleTime: 1000 * 60 * 60 * 24,
-    gcTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60, // 1 hour
+    gcTime: 1000 * 60 * 60,
     retry: 1,
   });
 }

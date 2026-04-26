@@ -155,7 +155,8 @@ export function calcFinancials(
   budget: Budget,
   apiRealExpenses: number = 0,
   apiWorkerPayments: number = 0,
-  apiContingencies: number = 0
+  apiContingencies: number = 0,
+  ufValue: number = 0
 ): FinancialSummary {
   const professionalFeePercentage = budget.professionalFeePercentage ?? DEFAULT_PROFESSIONAL_FEE_PERCENTAGE;
   const utilityPercentage = budget.estimatedUtility ?? DEFAULT_UTILITY_PERCENTAGE;
@@ -199,12 +200,18 @@ export function calcFinancials(
   const contingenciesTotal = apiContingencies !== undefined ? apiContingencies : 0;
   
   const totalRealCost = realExpenses + workerPayments + contingenciesTotal;
-  const clientPrice = budget.clientPrice || autoClientPrice;
-  const projectedProfit = clientPrice - estimatedCost;
-  const currentProfit = clientPrice - totalRealCost;
+  const clientPriceRaw = budget.clientPrice || autoClientPrice;
   
-  const margin = clientPrice > 0 ? Math.round((projectedProfit / clientPrice) * 100) : 0;
-  const realMargin = clientPrice > 0 ? Math.round((currentProfit / clientPrice) * 100) : 0;
+  // Convert to CLP for internal calculations if budget is in UF
+  const clientPriceInCLP = (budget.currency === 'UF' && ufValue > 0) 
+    ? clientPriceRaw * ufValue 
+    : clientPriceRaw;
+
+  const projectedProfit = clientPriceInCLP - estimatedCost;
+  const currentProfit = clientPriceInCLP - totalRealCost;
+  
+  const margin = clientPriceInCLP > 0 ? Math.round((projectedProfit / clientPriceInCLP) * 100) : 0;
+  const realMargin = clientPriceInCLP > 0 ? Math.round((currentProfit / clientPriceInCLP) * 100) : 0;
   const variance = estimatedCost - totalRealCost;
 
   return {
