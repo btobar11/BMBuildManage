@@ -7,6 +7,7 @@ import { WorkerAssignment } from './worker-assignment.entity';
 
 const mockAssignment = (overrides = {}): WorkerAssignment => ({
   id: 'test-id',
+  company_id: 'company-1',
   worker_id: 'worker-1',
   project_id: 'project-1',
   daily_rate: 150,

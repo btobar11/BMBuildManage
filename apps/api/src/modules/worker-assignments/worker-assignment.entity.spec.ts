@@ -5,6 +5,7 @@ describe('WorkerAssignment Entity', () => {
     it('should create a worker assignment with custom values', () => {
       const assignment = new WorkerAssignment();
       assignment.id = 'uuid-1';
+      assignment.company_id = 'company-uuid-1';
       assignment.worker_id = 'worker-uuid-1';
       assignment.project_id = 'project-uuid-1';
       assignment.daily_rate = 100;
@@ -43,6 +44,7 @@ describe('WorkerAssignment Entity', () => {
       const assignment = new WorkerAssignment();
       const requiredFields = [
         'id',
+        'company_id',
         'worker_id',
         'project_id',
         'daily_rate',
