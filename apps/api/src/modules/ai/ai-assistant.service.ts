@@ -246,7 +246,15 @@ ESTRUCTURA DE RESPUESTA PARA CONTINGENCIAS:
         throw new Error('No se recibió respuesta del modelo de IA');
       }
 
-      const parsed = JSON.parse(content) as BudgetAnalysisResponse;
+      let parsed;
+      try {
+        parsed = JSON.parse(content) as BudgetAnalysisResponse;
+      } catch (e) {
+        this.logger.error(`Failed to parse AI response: ${content}`);
+        throw new InternalServerErrorException(
+          'La IA devolvió un formato inválido. Por favor intenta de nuevo.',
+        );
+      }
       this.logger.log(`Análisis de presupuesto ${budgetId} completado`);
 
       return {
@@ -612,7 +620,14 @@ Responde en formato JSON estructurado.`;
         throw new Error('No se recibió respuesta de la API de IA');
       }
 
-      return JSON.parse(content);
+      try {
+        return JSON.parse(content);
+      } catch (e) {
+        this.logger.error(`Failed to parse AI response: ${content}`);
+        throw new InternalServerErrorException(
+          'La IA devolvió un formato inválido. Por favor intenta de nuevo.',
+        );
+      }
     } catch (error) {
       if (error instanceof InternalServerErrorException) {
         throw error;

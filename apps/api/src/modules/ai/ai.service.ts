@@ -1152,7 +1152,15 @@ ${JSON.stringify(budgetSummary, null, 2)}`;
         throw new Error('No response from AI');
       }
 
-      const parsed = JSON.parse(content);
+      let parsed;
+      try {
+        parsed = JSON.parse(content);
+      } catch (e) {
+        this.logger.error(`Failed to parse AI response: ${content}`);
+        throw new InternalServerErrorException(
+          'La IA devolvió un formato inválido. Por favor intenta de nuevo.',
+        );
+      }
       this.logger.log(`AI analysis completed for budget ${budgetId}`);
 
       return {
