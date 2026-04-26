@@ -494,7 +494,7 @@ export class BudgetsService {
   }
 
   private generateBudgetCode(project: Project): string {
-    const initials = project.name
+    const initials = (project.name || 'Budget')
       .split(' ')
       .filter((word) => word.length > 0)
       .map(
