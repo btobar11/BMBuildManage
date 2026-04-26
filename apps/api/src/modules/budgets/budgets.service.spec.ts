@@ -36,6 +36,7 @@ const createMockBudget = (overrides?: Partial<Budget>): Budget => {
     company_id: 'company-1',
     version: 1, // Version inicial requerida por @VersionColumn()
     status: BudgetStatus.DRAFT,
+    code: 'B-001',
     is_active: true,
     total_estimated_cost: 100000,
     total_estimated_price: 150000,
