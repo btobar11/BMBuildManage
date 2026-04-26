@@ -2,8 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { BimClashesService } from './bim-clashes.service';
-
-export const CLASH_DETECTION_QUEUE = 'clash-detection';
+import { CLASH_DETECTION_QUEUE } from './constants';
 
 @Processor(CLASH_DETECTION_QUEUE)
 @Injectable()

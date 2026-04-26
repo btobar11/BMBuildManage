@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { CLASH_DETECTION_QUEUE } from './bim-clashes.processor';
+import { CLASH_DETECTION_QUEUE } from './constants';
 
 export interface ClashJobResult {
   clashId: string;

@@ -3,10 +3,8 @@ import { BimClashesService } from './bim-clashes.service';
 import { BimClashesController } from './bim-clashes.controller';
 import { AuthModule } from '../auth/auth.module';
 import { BullModule } from '@nestjs/bullmq';
-import {
-  BimClashesProcessor,
-  CLASH_DETECTION_QUEUE,
-} from './bim-clashes.processor';
+import { BimClashesProcessor } from './bim-clashes.processor';
+import { CLASH_DETECTION_QUEUE } from './constants';
 
 @Module({
   imports: [
