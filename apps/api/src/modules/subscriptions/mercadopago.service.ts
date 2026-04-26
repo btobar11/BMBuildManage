@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
 export interface PaymentMetadata {
@@ -15,10 +16,13 @@ export class MercadoPagoService {
   private readonly logger = new Logger(MercadoPagoService.name);
   private client: MercadoPagoConfig;
 
-  constructor() {
-    const token = process.env.MP_ACCESS_TOKEN;
+  constructor(private readonly configService: ConfigService) {
+    const token = this.configService.get<string>('MP_ACCESS_TOKEN');
     if (!token) {
-      throw new Error('[SEC] MP_ACCESS_TOKEN environment variable is required');
+      this.logger.warn(
+        'MP_ACCESS_TOKEN no configurada - MercadoPago no disponible',
+      );
+      return;
     }
     this.client = new MercadoPagoConfig({
       accessToken: token,
@@ -80,6 +84,11 @@ export class MercadoPagoService {
     price: number,
     metadata: PaymentMetadata,
   ): Promise<string> {
+    if (!this.client) {
+      throw new InternalServerErrorException(
+        'MercadoPago no está configurado. Verifique MP_ACCESS_TOKEN.',
+      );
+    }
     try {
       const preference = new Preference(this.client);
       const frontUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -115,6 +124,11 @@ export class MercadoPagoService {
    * Fetches a payment from MercadoPago by ID.
    */
   async getPayment(paymentId: number) {
+    if (!this.client) {
+      throw new InternalServerErrorException(
+        'MercadoPago no está configurado. Verifique MP_ACCESS_TOKEN.',
+      );
+    }
     try {
       const payment = new Payment(this.client);
       return await payment.get({ id: paymentId });
