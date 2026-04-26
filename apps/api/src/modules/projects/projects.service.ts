@@ -101,6 +101,26 @@ export class ProjectsService {
     return this.projectRepository.save(project);
   }
 
+  private async safeDelete(
+    queryRunner: any,
+    tableName: string,
+    where: string,
+    parameters: any,
+  ) {
+    try {
+      await queryRunner.manager
+        .createQueryBuilder()
+        .delete()
+        .from(tableName)
+        .where(where, parameters)
+        .execute();
+    } catch (error) {
+      this.logger.warn(
+        `Could not delete from table ${tableName} (it might not exist): ${error.message}`,
+      );
+    }
+  }
+
   async remove(id: string, company_id: string): Promise<{ deleted: boolean }> {
     const project = await this.findOne(id, company_id);
     const queryRunner = this.dataSource.createQueryRunner();
@@ -108,157 +128,137 @@ export class ProjectsService {
     await queryRunner.startTransaction();
 
     try {
+      // 1. Get all budget IDs for this project
       const budgets = await queryRunner.manager
         .getRepository(Budget)
         .find({ where: { project_id: id } });
       const budgetIds = budgets.map((b) => b.id);
 
       if (budgetIds.length > 0) {
+        // Get all stage IDs
         const stages = await queryRunner.manager
           .getRepository(Stage)
           .find({ where: { budget_id: In(budgetIds) } });
         const stageIds = stages.map((s) => s.id);
 
         if (stageIds.length > 0) {
-          await queryRunner.manager
-            .createQueryBuilder()
-            .delete()
-            .from('budget_execution_logs')
-            .where(
-              'budget_item_id IN (SELECT id FROM items WHERE stage_id IN (:...stageIds))',
-              { stageIds },
-            )
-            .execute();
-          await queryRunner.manager
-            .createQueryBuilder()
-            .delete()
-            .from('resource_consumption')
-            .where('project_id = :id', { id })
-            .execute();
-          await queryRunner.manager
-            .createQueryBuilder()
-            .delete()
-            .from('items')
-            .where('stage_id IN (:...stageIds)', { stageIds })
-            .execute();
+          // Delete item-level dependencies
+          await this.safeDelete(
+            queryRunner,
+            'budget_execution_log',
+            'budget_item_id IN (SELECT id FROM items WHERE stage_id IN (:...stageIds))',
+            { stageIds },
+          );
+
+          await this.safeDelete(
+            queryRunner,
+            'resource_consumption',
+            'project_id = :id',
+            { id },
+          );
+
+          await this.safeDelete(
+            queryRunner,
+            'items',
+            'stage_id IN (:...stageIds)',
+            { stageIds },
+          );
         }
 
-        await queryRunner.manager
-          .createQueryBuilder()
-          .delete()
-          .from('stages')
-          .where('budget_id IN (:...budgetIds)', { budgetIds })
-          .execute();
+        await this.safeDelete(
+          queryRunner,
+          'stages',
+          'budget_id IN (:...budgetIds)',
+          { budgetIds },
+        );
       }
 
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('budgets')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('project_contingencies')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('worker_assignments')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('project_payments')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('documents')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('invoices')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('expenses')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('worker_payments')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('purchase_orders')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('subcontractors')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('project_models')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('bim_apu_links')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('schedule')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('bim_schedule')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('punch_items')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('submittals')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('rfis')
-        .where('project_id = :id', { id })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('audit_logs')
-        .where('project_id = :id', { id })
-        .execute();
+      // 2. Delete structural project-level dependencies
+      await this.safeDelete(queryRunner, 'budgets', 'project_id = :id', { id });
+      await this.safeDelete(
+        queryRunner,
+        'project_contingencies',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'worker_assignments',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'project_payments',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(queryRunner, 'documents', 'project_id = :id', {
+        id,
+      });
+      await this.safeDelete(queryRunner, 'invoices', 'project_id = :id', { id });
+      await this.safeDelete(queryRunner, 'expenses', 'project_id = :id', { id });
+      await this.safeDelete(
+        queryRunner,
+        'worker_payments',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'purchase_orders',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'subcontractor_contracts',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(queryRunner, 'project_models', 'project_id = :id', {
+        id,
+      });
+      await this.safeDelete(queryRunner, 'bim_apu_links', 'project_id = :id', {
+        id,
+      });
+      await this.safeDelete(queryRunner, 'schedule_tasks', 'project_id = :id', {
+        id,
+      });
+      await this.safeDelete(
+        queryRunner,
+        'schedule_milestones',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'schedule_resources',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_schedule_elements',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_4d_snapshots',
+        'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(queryRunner, 'punch_items', 'project_id = :id', {
+        id,
+      });
+      await this.safeDelete(queryRunner, 'submittals', 'project_id = :id', {
+        id,
+      });
+      await this.safeDelete(queryRunner, 'rfis', 'project_id = :id', { id });
+      await this.safeDelete(queryRunner, 'audit_logs', 'project_id = :id', {
+        id,
+      });
 
       await queryRunner.manager.remove(project);
       await queryRunner.commitTransaction();
@@ -280,103 +280,112 @@ export class ProjectsService {
     await queryRunner.startTransaction();
 
     try {
-      // 1. Delete project-level dependencies that don't depend on structural elements
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('project_contingencies')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('worker_assignments')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('project_payments')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('documents')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('invoices')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('worker_payments')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('purchase_orders')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('subcontractors')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('project_models')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('bim_apu_links')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('schedule')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('bim_schedule')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('punch_items')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('submittals')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('rfis')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('audit_logs')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
+      // 1. Delete project-level dependencies
+      await this.safeDelete(
+        queryRunner,
+        'project_contingencies',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'worker_assignments',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'project_payments',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'documents',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'invoices',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'purchase_orders',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'subcontractor_contracts',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'project_models',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_apu_links',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'schedule_tasks',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'schedule_milestones',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'schedule_resources',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_schedule_elements',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_4d_snapshots',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'punch_items',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'submittals',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(queryRunner, 'rfis', 'project_id IN (:...ids)', {
+        ids,
+      });
+      await this.safeDelete(
+        queryRunner,
+        'audit_logs',
+        'project_id IN (:...ids)',
+        { ids },
+      );
 
       // 2. Get budgets, then stages, then items to handle item-level dependencies
       const budgets = await queryRunner.manager
@@ -391,48 +400,37 @@ export class ProjectsService {
         const stageIds = stages.map((s) => s.id);
 
         if (stageIds.length > 0) {
-          // Delete item-level dependencies (Budget execution logs and Resource consumption)
-          await queryRunner.manager
-            .createQueryBuilder()
-            .delete()
-            .from('budget_execution_logs')
-            .where(
-              'budget_item_id IN (SELECT id FROM items WHERE stage_id IN (:...stageIds))',
-              { stageIds },
-            )
-            .execute();
-          await queryRunner.manager
-            .createQueryBuilder()
-            .delete()
-            .from('resource_consumption')
-            .where('project_id IN (:...ids)', { ids })
-            .execute();
-
-          // Delete Items
-          await queryRunner.manager
-            .createQueryBuilder()
-            .delete()
-            .from('items')
-            .where('stage_id IN (:...stageIds)', { stageIds })
-            .execute();
+          await this.safeDelete(
+            queryRunner,
+            'budget_execution_log',
+            'budget_item_id IN (SELECT id FROM items WHERE stage_id IN (:...stageIds))',
+            { stageIds },
+          );
+          await this.safeDelete(
+            queryRunner,
+            'resource_consumption',
+            'project_id IN (:...ids)',
+            { ids },
+          );
+          await this.safeDelete(
+            queryRunner,
+            'items',
+            'stage_id IN (:...stageIds)',
+            { stageIds },
+          );
         }
 
-        // Delete Stages
-        await queryRunner.manager
-          .createQueryBuilder()
-          .delete()
-          .from('stages')
-          .where('budget_id IN (:...budgetIds)', { budgetIds })
-          .execute();
+        await this.safeDelete(
+          queryRunner,
+          'stages',
+          'budget_id IN (:...budgetIds)',
+          { budgetIds },
+        );
       }
 
-      // 3. Delete structural entities
-      await queryRunner.manager
-        .createQueryBuilder()
-        .delete()
-        .from('budgets')
-        .where('project_id IN (:...ids)', { ids })
-        .execute();
+      await this.safeDelete(queryRunner, 'budgets', 'project_id IN (:...ids)', {
+        ids,
+      });
 
       // 4. Finally delete the projects
       const result = await queryRunner.manager

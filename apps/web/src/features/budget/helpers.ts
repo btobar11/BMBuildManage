@@ -216,7 +216,7 @@ export function calcFinancials(
 
   return {
     estimatedCost,
-    estimatedPrice: clientPrice,
+    estimatedPrice: clientPriceRaw,
     autoCalculatedPrice: autoClientPrice,
     realExpenses,
     workerPayments,

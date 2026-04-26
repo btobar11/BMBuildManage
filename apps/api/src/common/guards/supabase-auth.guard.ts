@@ -107,7 +107,20 @@ export class SupabaseAuthGuard implements CanActivate {
       !isMeRequest
     ) {
       throw new ForbiddenException(
-        'User does not belong to any company. Please contact administrator.',
+        `Acceso denegado: El usuario ${dbUserData.email} (ID: ${dbUserData.id}) no está vinculado a ninguna empresa activa. Contacte a soporte si cree que es un error.`,
+      );
+    }
+
+    if (
+      finalCompanyId &&
+      request.query.company_id &&
+      request.query.company_id !== finalCompanyId
+    ) {
+      this.logger.warn(
+        `Mismatch: User company ${finalCompanyId} vs Query company ${request.query.company_id}`,
+      );
+      throw new ForbiddenException(
+        `Acceso denegado: El ID de empresa no coincide con su perfil de usuario.`,
       );
     }
 

@@ -107,6 +107,16 @@ export interface Budget {
   stages: Stage[];
   expenses: Expense[];
   workers: Worker[];
+  project?: {
+    id: string;
+    name: string;
+    code: string;
+    location: string;
+    client?: {
+      id: string;
+      name: string;
+    };
+  };
 }
 
 export interface FinancialSummary {

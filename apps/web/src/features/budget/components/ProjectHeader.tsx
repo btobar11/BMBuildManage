@@ -114,14 +114,14 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
             <span className="flex items-center gap-1.5">
               <Building2 size={12} className="text-primary-400" /> Proyecto
             </span>
-            {budget.code && (
+            { (budget.code || budget.project?.code) && (
               <span className="bg-indigo-500/10 text-indigo-500 px-1.5 py-0.5 rounded border border-indigo-500/20 lowercase tracking-normal">
-                {budget.code}
+                {budget.code || budget.project?.code}
               </span>
             )}
           </label>
           <input
-            value={budget.projectName}
+            value={budget.projectName || budget.project?.name || ''}
             onChange={(e) => onUpdate({ projectName: e.target.value })}
             className="text-sm font-semibold text-foreground bg-transparent w-full outline-none placeholder:text-muted-foreground/30"
             placeholder="Nombre del proyecto"
@@ -133,7 +133,7 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
             <User size={12} className="text-primary-400" /> Cliente
           </label>
           <input
-            value={budget.clientName}
+            value={budget.clientName || budget.project?.client?.name || ''}
             onChange={(e) => onUpdate({ clientName: e.target.value })}
             className="text-sm font-semibold text-foreground bg-transparent w-full outline-none placeholder:text-muted-foreground/30"
             placeholder="Nombre del cliente"
@@ -145,7 +145,7 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
             <Tag size={12} className="text-primary-400" /> Ubicación
           </label>
           <input
-            value={budget.location || ''}
+            value={budget.location || budget.project?.location || ''}
             onChange={(e) => onUpdate({ location: e.target.value })}
             className="text-sm font-semibold text-foreground bg-transparent w-full outline-none placeholder:text-muted-foreground/30"
             placeholder="Dirección del proyecto"
@@ -270,20 +270,30 @@ export function ProjectHeader({ budget, financials, onUpdate }: Props) {
             { label: 'Utilidad', value: budget.estimatedUtility ?? 15, key: 'estimatedUtility', color: 'purple' },
             { label: 'Markup', value: budget.markupPercentage ?? 20, key: 'markupPercentage', color: 'orange' },
             { label: 'Margen', value: budget.targetMargin ?? 25, key: 'targetMargin', color: 'cyan' },
-          ].map((param) => (
-            <div key={param.key} className="flex flex-col gap-1.5">
-              <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-black">{param.label}</p>
-              <div className={`flex items-center bg-${param.color}-500/5 border border-${param.color}-500/20 rounded-xl px-3 py-2 hover:border-${param.color}-500/40 transition-all`}>
-                <input 
-                  type="number" 
-                  value={param.value} 
-                  onChange={(e) => onUpdate({ [param.key]: Number(e.target.value) })} 
-                  className={`text-lg font-black text-${param.color}-600 dark:text-${param.color}-400 bg-transparent w-full outline-none text-right tabular-nums`} 
-                />
-                <span className={`text-sm font-bold text-${param.color}-600/40 ml-1`}>%</span>
+          ].map((param) => {
+            const colorMap: Record<string, string> = {
+              blue: 'bg-blue-500/5 border-blue-500/20 hover:border-blue-500/40 text-blue-600 dark:text-blue-400 text-blue-600/40',
+              purple: 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40 text-purple-600 dark:text-purple-400 text-purple-600/40',
+              orange: 'bg-orange-500/5 border-orange-500/20 hover:border-orange-500/40 text-orange-600 dark:text-orange-400 text-orange-600/40',
+              cyan: 'bg-cyan-500/5 border-cyan-500/20 hover:border-cyan-500/40 text-cyan-600 dark:text-cyan-400 text-cyan-600/40',
+            };
+            const classes = colorMap[param.color].split(' ');
+            
+            return (
+              <div key={param.key} className="flex flex-col gap-1.5">
+                <p className="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest font-black">{param.label}</p>
+                <div className={`flex items-center rounded-xl px-3 py-2 transition-all border ${classes[0]} ${classes[1]} ${classes[2]}`}>
+                  <input 
+                    type="number" 
+                    value={param.value} 
+                    onChange={(e) => onUpdate({ [param.key]: Number(e.target.value) })} 
+                    className={`text-lg font-black bg-transparent w-full outline-none text-right tabular-nums ${classes[3]} ${classes[4]}`} 
+                  />
+                  <span className={`text-sm font-bold ml-1 ${classes[5]}`}>%</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
