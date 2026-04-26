@@ -29,6 +29,9 @@ export class Rfi {
   id!: string;
 
   @Column()
+  company_id!: string;
+
+  @Column()
   project_id!: string;
 
   @ManyToOne(() => Project)

@@ -12,6 +12,9 @@ export class Lead {
   id: string;
 
   @Column()
+  company_id: string;
+
+  @Column()
   email: string;
 
   @Column()

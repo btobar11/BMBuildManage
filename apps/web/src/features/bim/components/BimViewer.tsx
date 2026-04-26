@@ -159,7 +159,6 @@ export function BimViewer({
   // Sync linked elements highlighting
   useEffect(() => {
     if (viewerState.isModelLoaded) {
-      console.log('[BimViewer] Syncing linked highlights:', linkedIfcIds.length);
       controls.highlightLinkedElements(linkedIfcIds);
     }
   }, [viewerState.isModelLoaded, linkedIfcIds, controls]);

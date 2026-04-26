@@ -18,6 +18,9 @@ export class WorkerAssignment {
   id: string;
 
   @Column()
+  company_id: string;
+
+  @Column()
   worker_id: string;
 
   @ManyToOne(() => Worker, (worker) => worker.assignments)

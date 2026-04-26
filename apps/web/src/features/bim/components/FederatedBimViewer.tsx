@@ -76,15 +76,9 @@ export function FederatedBimViewer({
 
   // Use federated BIM engine
   const federatedBim = useFederatedBimEngine(containerRef, {
-    onElementSelect: (element) => {
-      console.log('Element selected:', element);
-    },
-    onClashDetected: (clashes) => {
-      console.log(`Detected ${clashes.length} clashes`);
-    },
-    onModelLoaded: (model) => {
-      console.log(`Model loaded: ${model.name} (${model.discipline})`);
-    },
+    onElementSelect: () => {},
+    onClashDetected: () => {},
+    onModelLoaded: () => {},
   });
 
   const {
@@ -112,19 +106,8 @@ export function FederatedBimViewer({
     for (const modelData of models) {
       // Convert uploaded model to buffer and add to federation
       try {
-        // This would need to fetch the actual file content
-        // For now, we'll simulate adding the model
-        console.log('Adding model to federation:', modelData);
-        
-        // In a real implementation, you would:
-        // 1. Fetch the uploaded file from Supabase Storage
-        // 2. Convert to Uint8Array
-        // 3. Call addModel with the buffer
-        
-        // await addModel(modelData.id, modelData.name, modelData.discipline, buffer);
-      } catch (error) {
-        console.error('Failed to add model to federation:', error);
-      }
+        } catch (error) {
+        }
     }
     
     setShowUploader(false);

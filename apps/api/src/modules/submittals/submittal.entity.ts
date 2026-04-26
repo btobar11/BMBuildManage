@@ -39,6 +39,9 @@ export class Submittal {
   id!: string;
 
   @Column()
+  company_id!: string;
+
+  @Column()
   project_id!: string;
 
   @ManyToOne(() => Project)

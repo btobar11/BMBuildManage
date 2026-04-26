@@ -26,6 +26,9 @@ export class PunchItem {
   id!: string;
 
   @Column()
+  company_id!: string;
+
+  @Column()
   project_id!: string;
 
   @Column()

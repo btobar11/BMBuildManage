@@ -1,15 +1,15 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { LeadsService } from './leads.service';
+import { CreateLeadDto } from './dto/create-lead.dto';
+import { SupabaseAuthGuard } from '../../common/guards/supabase-auth.guard';
 
 @Controller('leads')
 export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
   @Post()
-  async createLead(@Body() body: { email: string; companyName: string }) {
-    if (!body.email || !body.companyName) {
-      throw new Error('Email and companyName are required');
-    }
-    return this.leadsService.createLead(body.email, body.companyName);
+  @UseGuards(SupabaseAuthGuard)
+  async createLead(@Body() dto: CreateLeadDto, @Req() req: any) {
+    return this.leadsService.createLead(dto, req.user.company_id);
   }
 }

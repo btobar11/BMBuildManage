@@ -56,8 +56,6 @@ export function BimViewerTest() {
 
         setIsInitialized(true);
         setIsLoading(false);
-
-        console.log('✅ BIM Viewer Test initialized successfully');
         
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Error initializing BIM viewer';
