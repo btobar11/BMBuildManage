@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { BimClashesService } from './bim-clashes.service';
 import { CLASH_DETECTION_QUEUE } from './constants';
 
@@ -9,7 +9,10 @@ import { CLASH_DETECTION_QUEUE } from './constants';
 export class BimClashesProcessor extends WorkerHost {
   private readonly logger = new Logger(BimClashesProcessor.name);
 
-  constructor(private readonly bimClashesService: BimClashesService) {
+  constructor(
+    @Inject(forwardRef(() => BimClashesService))
+    private readonly bimClashesService: BimClashesService,
+  ) {
     super();
   }
 
