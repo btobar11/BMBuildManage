@@ -209,8 +209,38 @@ export class ProjectsService {
       );
       await this.safeDelete(
         queryRunner,
+        'receipt_items',
+        'purchase_order_item_id IN (SELECT id FROM purchase_order_items WHERE purchase_order_id IN (SELECT id FROM purchase_orders WHERE project_id = :id))',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'purchase_order_receipts',
+        'purchase_order_id IN (SELECT id FROM purchase_orders WHERE project_id = :id)',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'purchase_order_items',
+        'purchase_order_id IN (SELECT id FROM purchase_orders WHERE project_id = :id)',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
         'purchase_orders',
         'project_id = :id',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'subcontractor_payments',
+        'contract_id IN (SELECT id FROM subcontractor_contracts WHERE project_id = :id)',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'subcontractor_ram',
+        'contract_id IN (SELECT id FROM subcontractor_contracts WHERE project_id = :id)',
         { id },
       );
       await this.safeDelete(
@@ -219,9 +249,54 @@ export class ProjectsService {
         'project_id = :id',
         { id },
       );
+      await this.safeDelete(
+        queryRunner,
+        'bim_clashes',
+        'job_id IN (SELECT id FROM bim_clash_jobs WHERE model_a_id IN (SELECT id FROM project_models WHERE project_id = :id))',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_clash_jobs',
+        'model_a_id IN (SELECT id FROM project_models WHERE project_id = :id)',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_properties',
+        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id = :id))',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_element_states',
+        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id = :id))',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_state_history',
+        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id = :id))',
+        { id },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_elements',
+        'model_id IN (SELECT id FROM project_models WHERE project_id = :id)',
+        { id },
+      );
+      await this.safeDelete(queryRunner, 'bim_models', 'project_id = :id', {
+        id,
+      });
       await this.safeDelete(queryRunner, 'project_models', 'project_id = :id', {
         id,
       });
+      await this.safeDelete(
+        queryRunner,
+        'subcontractor_rams',
+        'project_id = :id',
+        { id },
+      );
       await this.safeDelete(queryRunner, 'bim_apu_links', 'project_id = :id', {
         id,
       });
@@ -286,6 +361,57 @@ export class ProjectsService {
       // 1. Delete project-level dependencies
       await this.safeDelete(
         queryRunner,
+        'bim_clashes',
+        'job_id IN (SELECT id FROM bim_clash_jobs WHERE model_a_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids)))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_clash_jobs',
+        'model_a_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_properties',
+        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids)))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_element_states',
+        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids)))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_state_history',
+        'element_id IN (SELECT id FROM bim_elements WHERE model_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids)))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'bim_elements',
+        'model_id IN (SELECT id FROM project_models WHERE project_id IN (:...ids))',
+        { ids },
+      );
+      await this.safeDelete(queryRunner, 'bim_models', 'project_id IN (:...ids)', {
+        ids,
+      });
+      await this.safeDelete(
+        queryRunner,
+        'project_models',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'subcontractor_rams',
+        'project_id IN (:...ids)',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
         'project_contingencies',
         'project_id IN (:...ids)',
         { ids },
@@ -316,19 +442,43 @@ export class ProjectsService {
       );
       await this.safeDelete(
         queryRunner,
+        'receipt_items',
+        'purchase_order_item_id IN (SELECT id FROM purchase_order_items WHERE purchase_order_id IN (SELECT id FROM purchase_orders WHERE project_id IN (:...ids)))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'purchase_order_receipts',
+        'purchase_order_id IN (SELECT id FROM purchase_orders WHERE project_id IN (:...ids))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'purchase_order_items',
+        'purchase_order_id IN (SELECT id FROM purchase_orders WHERE project_id IN (:...ids))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
         'purchase_orders',
         'project_id IN (:...ids)',
         { ids },
       );
       await this.safeDelete(
         queryRunner,
-        'subcontractor_contracts',
-        'project_id IN (:...ids)',
+        'subcontractor_payments',
+        'contract_id IN (SELECT id FROM subcontractor_contracts WHERE project_id IN (:...ids))',
         { ids },
       );
       await this.safeDelete(
         queryRunner,
-        'project_models',
+        'subcontractor_ram',
+        'contract_id IN (SELECT id FROM subcontractor_contracts WHERE project_id IN (:...ids))',
+        { ids },
+      );
+      await this.safeDelete(
+        queryRunner,
+        'subcontractor_contracts',
         'project_id IN (:...ids)',
         { ids },
       );
