@@ -409,7 +409,7 @@ describe('BudgetsService', () => {
 
       expect(budgetRepo._mockFindOne).toHaveBeenCalledWith({
         where: { id: 'budget-1' },
-        relations: ['stages', 'stages.items', 'project', 'project.company'],
+        relations: ['stages', 'stages.items', 'project', 'project.company', 'project.client'],
       });
       expect(result).toEqual(budget);
     });
