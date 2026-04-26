@@ -7,13 +7,14 @@ import { UsersService } from '../../modules/users/users.service';
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     auth: {
-      getUser: jest.fn(),
+      getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
     },
   })),
 }));
 
 describe('SupabaseAuthGuard', () => {
   let guard: SupabaseAuthGuard;
+  let configService: jest.Mocked<ConfigService>;
   let usersService: jest.Mocked<UsersService>;
 
   const mockExecutionContext = (opts?: {
@@ -56,6 +57,7 @@ describe('SupabaseAuthGuard', () => {
     }).compile();
 
     guard = module.get(SupabaseAuthGuard);
+    configService = module.get(ConfigService);
     usersService = module.get(UsersService);
   });
 
@@ -86,9 +88,8 @@ describe('SupabaseAuthGuard', () => {
 
   it('returns true with dev-token in development when explicitly enabled', async () => {
     const originalEnv = process.env.NODE_ENV;
-    const originalDev = process.env.ALLOW_DEV_TOKEN;
     process.env.NODE_ENV = 'development';
-    process.env.ALLOW_DEV_TOKEN = 'true';
+    configService.get.mockReturnValue('true');
 
     const context = mockExecutionContext({
       headers: { authorization: 'Bearer dev-token' },
@@ -105,7 +106,7 @@ describe('SupabaseAuthGuard', () => {
     });
 
     process.env.NODE_ENV = originalEnv;
-    process.env.ALLOW_DEV_TOKEN = originalDev;
+    configService.get.mockReturnValue(undefined);
   });
 
   it('verifies Supabase token and attaches user from DB', async () => {
